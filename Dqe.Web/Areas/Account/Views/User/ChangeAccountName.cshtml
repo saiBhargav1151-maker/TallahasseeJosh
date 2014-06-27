@@ -1,0 +1,27 @@
+﻿@using Dqe.Web.Areas.Account.Models
+@model ChangeAccountNameViewModel
+@{ ViewBag.Title = "Change Account Name"; }  
+<div class="row">
+    <div class="col-lg-12">
+        <div class="alert alert-danger text-danger">
+            Changing your account name will require you to verify your 
+            new account name via email.  Make sure you have access to the email address of the new account
+            name before proceeding.  This action will automatically end your current session.
+        </div>
+    </div>    
+</div>
+<br/>
+@using (Html.BeginForm("ChangeAccountName", "User", new { Area = "Account" }, FormMethod.Post, new { role="form" }))
+{
+    <div>@Html.LabelFor(i => i.UserEmail)</div>
+    <div class="row form-group">
+        <div class="col-lg-4">@Html.TextBoxFor(i => i.UserEmail, new { placeholder = "e.g. name@example.com", @class="form-control" })</div>
+        <div class="col-lg-8 text-danger">@Html.ValidationMessageFor(i => i.UserEmail)</div>    
+    </div>
+    <div>@Html.LabelFor(i => i.ConfirmUserEmail)</div>
+    <div class="row form-group">
+        <div class="col-lg-4">@Html.TextBoxFor(i => i.ConfirmUserEmail, new { placeholder = "e.g. name@example.com", @class="form-control" })</div>
+        <div class="col-lg-8 text-danger">@Html.ValidationMessageFor(i => i.ConfirmUserEmail)</div>    
+    </div>
+    <div><button type="submit" class="btn btn-primary">Submit</button></div>    
+}    

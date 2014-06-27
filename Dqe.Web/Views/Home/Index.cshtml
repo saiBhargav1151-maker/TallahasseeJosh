@@ -1,0 +1,33 @@
+﻿@using Dqe.Web.Models
+@model HomeViewModel
+@{ ViewBag.Title = "An Onion Architecture"; }
+<div class="row">
+    <div class="col-lg-12">   
+        <div>
+            <img src="~/Content/images/onion.png" alt="onion architecture diagram"/>        
+        </div>
+        <br/>
+        <div class="well well-sm">
+            <h4>Jeffrey Palermo's Four Tenets of an Onion Architecture</h4>    
+        </div>
+        <ul>
+            <li>The application is built around an independent object model</li>
+            <li>Inner layers define interfaces.  Outer layers implement interfaces</li>
+            <li>Direction of coupling is toward the center</li>
+            <li>All application core code can be compiled and run separate from infrastructure</li>
+        </ul>  
+        <br/>  
+        <div class="well well-sm">
+            <h4>Follow SOLID Principles</h4>        
+        </div>
+        <div>
+            <ul>
+                <li>Single Responsibility Principle - An object should have only a single responsibility.</li>
+                <li>Open / Closed Principle - Software components should be open for extension, but closed for modification.</li>
+                <li>Liskov Substitution Principle - Objects should be replaceable with instances of their subtypes without altering correctness.</li>
+                <li>Interface Segregation Principle - Many client specific interfaces are better than one general purpose interface.</li>
+                <li>Dependency Inversion Principle - Objects should depend upon abstractions instead of concretions.</li>
+            </ul>
+        </div>
+    </div>
+</div>

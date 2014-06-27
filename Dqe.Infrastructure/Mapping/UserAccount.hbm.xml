@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="UserAccount">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <natural-id mutable="true">
+      <property name="Email" length="255" not-null="true" />  
+    </natural-id>
+    <property name="AccountPassword" length="25" not-null="true" />
+    <property name="FirstName" length="25" not-null="true" />
+    <property name="LastName" length="35" not-null="true" />
+    <property name="AccountRole" length="15" not-null="true" />
+    <property name="UnverifiedAccountToken" length="22" not-null="false" />
+  </class>
+</hibernate-mapping>

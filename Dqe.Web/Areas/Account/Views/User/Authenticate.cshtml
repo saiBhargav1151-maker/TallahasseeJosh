@@ -1,0 +1,17 @@
+﻿@using Dqe.Web.Areas.Account.Models
+@model AuthenticateViewModel
+@{ ViewBag.Title = "Sign In"; }
+@using (Html.BeginForm("Authenticate", "User", new { Area = "Account" }, FormMethod.Post, new{ role="form" }))
+{
+    <div>@Html.LabelFor(i => i.UserEmail)</div>
+    <div class="row form-group">
+        <div class="col-lg-4">@Html.TextBoxFor(i => i.UserEmail, new { placeholder = "e.g. name@example.com", @class="form-control" })</div>
+        <div class="col-lg-8 text-danger">@Html.ValidationMessageFor(i => i.UserEmail)</div>    
+    </div>
+    <div>@Html.LabelFor(i => i.Password)</div>
+    <div class="row form-group">
+        <div class="col-lg-4">@Html.PasswordFor(i => i.Password, new { @class="form-control" })</div>
+        <div class="col-lg-8 text-danger">@Html.ValidationMessageFor(i => i.Password)</div>    
+    </div>
+    <div><button type="submit" class="btn btn-primary">Sign In</button></div>    
+}

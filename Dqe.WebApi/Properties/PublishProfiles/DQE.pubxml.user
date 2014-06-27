@@ -1,0 +1,411 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Publishes\DQE</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="bin/Antlr3.Runtime.dll">
+      <publishTime>06/04/2014 09:30:13</publishTime>
+    </File>
+    <File Include="bin/Dqe.ApplicationServices.dll">
+      <publishTime>06/27/2014 11:53:00</publishTime>
+    </File>
+    <File Include="bin/Dqe.Domain.dll">
+      <publishTime>06/27/2014 11:53:00</publishTime>
+    </File>
+    <File Include="bin/Dqe.Infrastructure.dll">
+      <publishTime>06/27/2014 11:53:01</publishTime>
+    </File>
+    <File Include="bin/Dqe.Inverter.dll">
+      <publishTime>06/27/2014 11:53:01</publishTime>
+    </File>
+    <File Include="bin/Dqe.WebApi.dll">
+      <publishTime>06/27/2014 11:53:01</publishTime>
+    </File>
+    <File Include="bin/FDOT.Enterprise.ConnectionStrings.Client.dll">
+      <publishTime>06/26/2014 13:20:40</publishTime>
+    </File>
+    <File Include="bin/FDOT.Enterprise.dll">
+      <publishTime>06/26/2014 13:16:16</publishTime>
+    </File>
+    <File Include="bin/FDOT.Enterprise.OrgCodes.Client.dll">
+      <publishTime>06/26/2014 13:20:55</publishTime>
+    </File>
+    <File Include="bin/FDOT.Enterprise.Staff.Client.dll">
+      <publishTime>06/26/2014 13:21:06</publishTime>
+    </File>
+    <File Include="bin/Glimpse.AspNet.dll">
+      <publishTime>06/04/2014 09:30:25</publishTime>
+    </File>
+    <File Include="bin/Glimpse.Core.dll">
+      <publishTime>06/04/2014 09:30:15</publishTime>
+    </File>
+    <File Include="bin/Iesi.Collections.dll">
+      <publishTime>06/04/2014 09:30:25</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Web.Infrastructure.dll">
+      <publishTime>06/04/2014 09:30:29</publishTime>
+    </File>
+    <File Include="bin/Newtonsoft.Json.dll">
+      <publishTime>06/04/2014 09:30:30</publishTime>
+    </File>
+    <File Include="bin/NHibernate.DataAnnotations.dll">
+      <publishTime>06/04/2014 09:30:32</publishTime>
+    </File>
+    <File Include="bin/NHibernate.DependencyInjection.dll">
+      <publishTime>06/04/2014 09:30:32</publishTime>
+    </File>
+    <File Include="bin/NHibernate.dll">
+      <publishTime>06/04/2014 09:30:34</publishTime>
+    </File>
+    <File Include="bin/NHibernate.Glimpse.dll">
+      <publishTime>06/04/2014 09:30:33</publishTime>
+    </File>
+    <File Include="bin/NHibernate.Session.dll">
+      <publishTime>06/04/2014 09:30:33</publishTime>
+    </File>
+    <File Include="bin/Ninject.dll">
+      <publishTime>06/04/2014 09:30:34</publishTime>
+    </File>
+    <File Include="bin/System.Net.Http.Formatting.dll">
+      <publishTime>06/04/2014 09:30:27</publishTime>
+    </File>
+    <File Include="bin/System.Web.Helpers.dll">
+      <publishTime>06/04/2014 09:30:28</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.dll">
+      <publishTime>06/04/2014 09:30:28</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.WebHost.dll">
+      <publishTime>06/04/2014 09:30:28</publishTime>
+    </File>
+    <File Include="bin/System.Web.Mvc.dll">
+      <publishTime>06/04/2014 09:30:26</publishTime>
+    </File>
+    <File Include="bin/System.Web.Optimization.dll">
+      <publishTime>06/04/2014 09:30:27</publishTime>
+    </File>
+    <File Include="bin/System.Web.Razor.dll">
+      <publishTime>06/04/2014 09:30:26</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Deployment.dll">
+      <publishTime>06/04/2014 09:30:29</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.dll">
+      <publishTime>06/04/2014 09:30:29</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Razor.dll">
+      <publishTime>06/04/2014 09:30:29</publishTime>
+    </File>
+    <File Include="bin/WebGrease.dll">
+      <publishTime>06/04/2014 09:30:36</publishTime>
+    </File>
+    <File Include="Content/bootstrap-theme.css">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Content/bootstrap-theme.css.map">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Content/bootstrap-theme.min.css">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Content/bootstrap.css">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Content/bootstrap.css.map">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Content/bootstrap.min.css">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Content/images/NoPhoto.png">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Content/site.css">
+      <publishTime>06/17/2014 10:15:25</publishTime>
+    </File>
+    <File Include="favicon.ico">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.eot">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.svg">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.ttf">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.woff">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="packages.config">
+      <publishTime>06/26/2014 13:23:13</publishTime>
+    </File>
+    <File Include="Scripts/angular-mocks.js">
+      <publishTime>06/23/2014 11:15:31</publishTime>
+    </File>
+    <File Include="Scripts/angular-resource.js">
+      <publishTime>06/04/2014 09:30:13</publishTime>
+    </File>
+    <File Include="Scripts/angular-resource.min.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/angular-resource.min.js.map">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/angular-route.js">
+      <publishTime>06/23/2014 11:15:33</publishTime>
+    </File>
+    <File Include="Scripts/angular-route.min.js">
+      <publishTime>06/23/2014 11:15:33</publishTime>
+    </File>
+    <File Include="Scripts/angular-route.min.js.map">
+      <publishTime>06/23/2014 11:15:33</publishTime>
+    </File>
+    <File Include="Scripts/angular-ui-router.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/angular-ui-router.min.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/angular-ui/ui-bootstrap-tpls.js">
+      <publishTime>06/11/2014 13:34:19</publishTime>
+    </File>
+    <File Include="Scripts/angular-ui/ui-bootstrap-tpls.min.js">
+      <publishTime>06/11/2014 13:34:19</publishTime>
+    </File>
+    <File Include="Scripts/angular-ui/ui-bootstrap.js">
+      <publishTime>06/20/2014 08:49:43</publishTime>
+    </File>
+    <File Include="Scripts/angular-ui/ui-bootstrap.min.js">
+      <publishTime>06/11/2014 13:34:19</publishTime>
+    </File>
+    <File Include="Scripts/angular.js">
+      <publishTime>06/23/2014 11:15:32</publishTime>
+    </File>
+    <File Include="Scripts/angular.min.js">
+      <publishTime>06/23/2014 11:15:32</publishTime>
+    </File>
+    <File Include="Scripts/angular.min.js.map">
+      <publishTime>06/23/2014 11:15:32</publishTime>
+    </File>
+    <File Include="Scripts/app/app.js">
+      <publishTime>06/24/2014 09:18:40</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminCodeValuesController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminController.js">
+      <publishTime>06/16/2014 12:33:24</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminCostBasedTemplatesController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminDefaultValuesController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminPayItemsController.js">
+      <publishTime>06/13/2014 10:27:30</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminPayItemsFactorsController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminPayItemsMaintainController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminPayItemsOpenCopyController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminPayItemsStructureController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/adminSecurityController.js">
+      <publishTime>06/27/2014 09:28:40</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeController.js">
+      <publishTime>06/16/2014 12:33:24</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeGamingController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homePricingController.js">
+      <publishTime>06/16/2014 13:43:05</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homePricingParametersController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homePricingPricesController.js">
+      <publishTime>06/24/2014 11:59:45</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeReportsController.js">
+      <publishTime>06/24/2014 12:01:21</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeSelectionController.js">
+      <publishTime>06/16/2014 12:33:24</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeSelectionLreController.js">
+      <publishTime>06/24/2014 12:01:21</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeSelectionProjectController.js">
+      <publishTime>06/24/2014 10:16:38</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeSelectionProposalController.js">
+      <publishTime>06/24/2014 12:01:21</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeSnapshotsController.js">
+      <publishTime>06/24/2014 12:01:21</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeWorkingEstimateController.js">
+      <publishTime>06/16/2014 12:33:24</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeWorkingEstimateEstimateController.js">
+      <publishTime>06/24/2014 12:02:58</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/homeWorkingEstimateLsdbController.js">
+      <publishTime>06/24/2014 12:02:58</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/layoutController.js">
+      <publishTime>06/26/2014 11:29:56</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/profileController.js">
+      <publishTime>06/24/2014 12:02:58</publishTime>
+    </File>
+    <File Include="Scripts/app/controllers/signinController.js">
+      <publishTime>06/24/2014 12:02:58</publishTime>
+    </File>
+    <File Include="Scripts/app/services/navigationService.js">
+      <publishTime>06/26/2014 11:43:08</publishTime>
+    </File>
+    <File Include="Scripts/app/services/securityService.js">
+      <publishTime>06/23/2014 11:19:51</publishTime>
+    </File>
+    <File Include="Scripts/app/utilities/extensions.js">
+      <publishTime>06/23/2014 09:42:27</publishTime>
+    </File>
+    <File Include="Scripts/bootstrap.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/bootstrap.min.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/jquery-2.1.1.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/jquery-2.1.1.min.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/jquery-2.1.1.min.map">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/modernizr-2.7.2.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/respond.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/respond.matchmedia.addListener.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/respond.matchmedia.addListener.min.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/respond.min.js">
+      <publishTime>06/04/2014 09:30:12</publishTime>
+    </File>
+    <File Include="Scripts/_references.js">
+      <publishTime>06/27/2014 11:51:39</publishTime>
+    </File>
+    <File Include="Views/index.html">
+      <publishTime>06/26/2014 11:41:12</publishTime>
+    </File>
+    <File Include="Views/partials/admin.html">
+      <publishTime>06/13/2014 10:29:46</publishTime>
+    </File>
+    <File Include="Views/partials/admin_codevalues.html">
+      <publishTime>06/13/2014 10:30:20</publishTime>
+    </File>
+    <File Include="Views/partials/admin_costbasedtemplates.html">
+      <publishTime>06/13/2014 10:30:20</publishTime>
+    </File>
+    <File Include="Views/partials/admin_defaultvalues.html">
+      <publishTime>06/13/2014 10:30:20</publishTime>
+    </File>
+    <File Include="Views/partials/admin_payitems.html">
+      <publishTime>06/13/2014 10:30:20</publishTime>
+    </File>
+    <File Include="Views/partials/admin_payitems_factors.html">
+      <publishTime>06/19/2014 10:56:19</publishTime>
+    </File>
+    <File Include="Views/partials/admin_payitems_maintain.html">
+      <publishTime>06/19/2014 12:20:15</publishTime>
+    </File>
+    <File Include="Views/partials/admin_payitems_opencopy.html">
+      <publishTime>06/19/2014 10:56:19</publishTime>
+    </File>
+    <File Include="Views/partials/admin_payitems_structure.html">
+      <publishTime>06/19/2014 10:40:44</publishTime>
+    </File>
+    <File Include="Views/partials/admin_security.html">
+      <publishTime>06/26/2014 14:40:51</publishTime>
+    </File>
+    <File Include="Views/partials/home.html">
+      <publishTime>06/16/2014 12:35:55</publishTime>
+    </File>
+    <File Include="Views/partials/home_gaming.html">
+      <publishTime>06/16/2014 12:04:27</publishTime>
+    </File>
+    <File Include="Views/partials/home_pricing.html">
+      <publishTime>06/16/2014 10:54:49</publishTime>
+    </File>
+    <File Include="Views/partials/home_pricing_parameters.html">
+      <publishTime>06/16/2014 12:50:18</publishTime>
+    </File>
+    <File Include="Views/partials/home_pricing_prices.html">
+      <publishTime>06/16/2014 10:54:26</publishTime>
+    </File>
+    <File Include="Views/partials/home_reports.html">
+      <publishTime>06/16/2014 12:04:17</publishTime>
+    </File>
+    <File Include="Views/partials/home_selection.html">
+      <publishTime>06/16/2014 09:56:56</publishTime>
+    </File>
+    <File Include="Views/partials/home_selection_lre.html">
+      <publishTime>06/16/2014 09:56:44</publishTime>
+    </File>
+    <File Include="Views/partials/home_selection_project.html">
+      <publishTime>06/24/2014 09:10:46</publishTime>
+    </File>
+    <File Include="Views/partials/home_selection_proposal.html">
+      <publishTime>06/16/2014 09:55:30</publishTime>
+    </File>
+    <File Include="Views/partials/home_snapshots.html">
+      <publishTime>06/16/2014 09:29:55</publishTime>
+    </File>
+    <File Include="Views/partials/home_workingestimate.html">
+      <publishTime>06/16/2014 10:18:23</publishTime>
+    </File>
+    <File Include="Views/partials/home_workingestimate_estimate.html">
+      <publishTime>06/16/2014 10:18:23</publishTime>
+    </File>
+    <File Include="Views/partials/home_workingestimate_lsdb.html">
+      <publishTime>06/16/2014 10:18:43</publishTime>
+    </File>
+    <File Include="Views/partials/profile.html">
+      <publishTime>06/04/2014 09:30:13</publishTime>
+    </File>
+    <File Include="Views/partials/signin.html">
+      <publishTime>06/04/2014 09:30:13</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>06/27/2014 11:53:02</publishTime>
+    </File>
+  </ItemGroup>
+</Project>
