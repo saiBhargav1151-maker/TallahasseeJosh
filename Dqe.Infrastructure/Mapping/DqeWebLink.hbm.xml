@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="DqeWebLink" abstract="true" table="DqeWebLink1">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <discriminator column="link_type" not-null="true" length="2" />
+    <property name="Name" not-null="true" length="255"/>
+    <property name="WebLink" not-null="true" length="1000" />
+    <subclass discriminator-value="OR" name="OtherReferenceWebLink">
+      <set name="PayItemStructures" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="PayItemStructureOtherReferenceWebLinks">
+        <key column="OtherReferenceWebLinkId"/>
+        <many-to-many class="PayItemStructure" column="PayItemStructureId"/>
+      </set>
+    </subclass>
+    <subclass discriminator-value="PC" name="PpmChapterWebLink">
+      <set name="PayItemStructures" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="PayItemStructurePpmChapterWebLinks">
+        <key column="PpmChapterWebLinkId"/>
+        <many-to-many class="PayItemStructure" column="PayItemStructureId"/>
+      </set>
+    </subclass>
+    <subclass discriminator-value="PD" name="PrepAndDocChapterWebLink">
+      <set name="PayItemStructures" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="PayItemStructurePrepAndDocChapterWebLinks">
+        <key column="PrepAndDocChapterWebLinkId"/>
+        <many-to-many class="PayItemStructure" column="PayItemStructureId"/>
+      </set>
+    </subclass>
+    <subclass discriminator-value="SP" name="SpecificationWebLink">
+      <set name="PayItemStructures" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="PayItemStructureSpecificationWebLinks">
+        <key column="SpecificationWebLinkId"/>
+        <many-to-many class="PayItemStructure" column="PayItemStructureId"/>
+      </set>
+    </subclass>
+    <subclass discriminator-value="ST" name="SpecTypeWebLink" />
+    <subclass discriminator-value="SD" name="StandardWebLink">
+      <set name="PayItemStructures" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="PayItemStructureStandardWebLinks">
+        <key column="StandardWebLinkId"/>
+        <many-to-many class="PayItemStructure" column="PayItemStructureId"/>
+      </set>
+    </subclass>
+  </class>
+</hibernate-mapping>
