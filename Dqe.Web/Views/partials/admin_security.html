@@ -1,0 +1,89 @@
+﻿<div class="row">
+    <div class="col-lg-4">
+        Grant access to:
+    </div>
+    <div class="col-lg-2" ng-show="thisUser.role == 2">
+        For district:
+    </div>
+    <div class="col-lg-2">
+        With role:
+    </div>
+    <div class="col-lg-4">          
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-4">
+        <input type="text" ng-model="selected" placeholder="Enter a user name" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="user as user.fullName for user in getUsers($viewValue)" typeahead-editable="false" typeahead-on-select="setDistrict()" class="form-control">
+    </div>
+    <div class="col-lg-2" ng-show="thisUser.role == 2">
+        <select class="form-control" ng-model="district">
+            <option>CO</option>
+            <option>D1</option>
+            <option>D2</option>
+            <option>D3</option>
+            <option>D4</option>
+            <option>D5</option>
+            <option>D6</option>
+            <option>D7</option>
+            <option>TP</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <select class="form-control" ng-model="role" ng-options="sysRole.value as sysRole.name for sysRole in sysRoles()"></select>
+    </div>
+    <div class="col-lg-4">
+        <button class="btn btn-primary" ng-click="postUser()" ng-disabled="isSubmitUserDisabled()">Submit</button>
+        <button class="btn btn-default" ng-click="initializeEditForm()">Reset</button>
+    </div>
+</div>    
+<br/>
+<div class="row">
+    <div class="col-lg-4">
+        Search: <input class="form-control" ng-model="query">       
+    </div>
+    <div class="col-lg-4">
+        Sort by:
+        <select class="form-control" ng-model="order">
+            <option value="fullName">User</option>
+            <option value="district">District</option>
+            <option value="roleAsString">Role</option>
+        </select>      
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="col-lg-10">
+        <table class="table table-bordered table-condensed table-striped">
+            <tr>
+                <th style="text-align: center; width: 10%">Select</th>
+                <th style="width: 50%">User</th>
+                <th style="width: 10%">District</th>
+                <th style="width: 30%">Role</th>
+            </tr>
+            <tr ng-repeat="user in users | filter:query | orderBy:order">
+                <td>
+                    <input type="checkbox" ng-model="user.selected" class="form-control">
+                </td>
+                <td>
+                    <a href="" ng-click="editUser(user)">{{user.fullName}}</a>
+                </td>
+                <td>{{user.district}}</td>
+                <td>{{user.roleAsString}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-10">
+        <div class="alert alert-danger" ng-show="showConfirmRemoval">
+            Are you sure you want to remove the selected users?
+            <button class="btn btn-default" ng-click="showConfirmRemoval = false">No</button>
+            <button class="btn btn-danger" ng-click="removeSelectedUsers()">Yes</button>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-10">
+        <button class="btn btn-danger" ng-disabled="isRemoveUserDisabled()" ng-click="showConfirmRemoval = true" ng-hide="showConfirmRemoval">Remove Selected</button>
+    </div>
+</div>

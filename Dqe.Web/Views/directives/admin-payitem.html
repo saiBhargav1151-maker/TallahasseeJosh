@@ -1,0 +1,287 @@
+﻿<div ng-show="payItem.id > 0">
+    <div class="row">
+        <div class="col-lg-3">
+            <strong>
+                <a href="" ng-click="toggleDetail()">{{payItem.payItemId}}</a>    
+            </strong>
+        </div>
+        <div class="col-lg-3" ng-show="payItem.showSummary">
+            {{payItem.unitOfMeasure}}
+        </div>
+        <div class="col-lg-3" ng-show="payItem.showSummary">
+            {{payItem.effectiveDate}}
+        </div>
+        <div class="col-lg-3" ng-show="payItem.showSummary">
+            {{payItem.obsoleteDate}}
+        </div>
+    </div>
+    <div class="row" ng-show="payItem.showSummary">
+        <div class="col-lg-1">
+            <strong>
+                Description:    
+            </strong>
+        </div>
+        <div class="col-lg-10">
+            {{payItem.shortDescription}}
+        </div>
+    </div>
+    <hr/>
+</div>
+<div ng-hide="payItem.showSummary">
+    <br />
+    <div class="row">
+        <div class="col-lg-2">
+            Pay Item Number:
+        </div>
+        <div class="col-lg-2">
+            <div class="input-group">
+                <span class="input-group-addon">{{payItem.prefix}}</span>
+                <input type="text" class="form-control" ng-model="payItem.filteredPayItemId" maxlength="{{12-payItem.prefix}}" />
+            </div>
+        </div>
+        <div class="col-lg-1">
+            Unit of Measure:
+        </div>
+        <div class="col-lg-2">
+            <select class="form-control" ng-model="payItem.primaryUnit">
+                <option value="0">--Select--</option>
+                <option value="1">AC</option>
+                <option value="2">AS</option>
+                <option value="3">CF</option>
+                <option value="4">CY</option>
+                <option value="5">DA</option>
+                <option value="6">DD</option>
+                <option value="7">EA</option>
+                <option value="8">ED</option>
+                <option value="9">GA</option>
+                <option value="10">GM</option>
+                <option value="11">HR</option>
+                <option value="12">LB</option>
+                <option value="13">LF</option>
+                <option value="14">LO</option>
+                <option value="15">LS</option>
+                <option value="16">LU</option>
+                <option value="17">MB</option>
+                <option value="18">MH</option>
+                <option value="19">MI</option>
+                <option value="20">MG</option>
+                <option value="21">MO</option>
+                <option value="22">NM</option>
+                <option value="23">PA</option>
+                <option value="24">PB</option>
+                <option value="25">PI</option>
+                <option value="26">PL</option>
+                <option value="27">PM</option>
+                <option value="28">PS</option>
+                <option value="29">PW</option>
+                <option value="30">SF</option>
+                <option value="31">SY</option>
+                <option value="32">TH</option>
+                <option value="33">TN</option>
+                <option value="34">YD</option>
+            </select>
+        </div>
+        <div class="col-lg-2" ng-show="payItem.primaryUnit == 15">
+            <select class="form-control" ng-model="payItem.secondaryUnit">
+                <option value="0">--Select--</option>
+                <option value="1">AC</option>
+                <option value="2">AS</option>
+                <option value="3">CF</option>
+                <option value="4">CY</option>
+                <option value="5">DA</option>
+                <option value="6">DD</option>
+                <option value="7">EA</option>
+                <option value="8">ED</option>
+                <option value="9">GA</option>
+                <option value="10">GM</option>
+                <option value="11">HR</option>
+                <option value="12">LB</option>
+                <option value="13">LF</option>
+                <option value="14">LO</option>
+                <option value="15">LS</option>
+                <option value="16">LU</option>
+                <option value="17">MB</option>
+                <option value="18">MH</option>
+                <option value="19">MI</option>
+                <option value="20">MG</option>
+                <option value="21">MO</option>
+                <option value="22">NM</option>
+                <option value="23">PA</option>
+                <option value="24">PB</option>
+                <option value="25">PI</option>
+                <option value="26">PL</option>
+                <option value="27">PM</option>
+                <option value="28">PS</option>
+                <option value="29">PW</option>
+                <option value="30">SF</option>
+                <option value="31">SY</option>
+                <option value="32">TH</option>
+                <option value="33">TN</option>
+                <option value="34">YD</option>
+            </select>
+        </div>
+        <div class="col-lg-1">
+            Master File:
+        </div>
+        <div class="col-lg-1" ng-show="payItem.id == 0">
+            <select class="form-control" ng-model="payItem.masterFile" ng-options="masterFile.fileNumber for masterFile in masterFiles">
+                <option value="">--Select--</option>
+            </select>
+        </div>
+        <div class="col-lg-1" ng-show="payItem.id > 0">
+            {{payItem.masterFileId}}
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-lg-2">
+            Short Description:
+        </div>
+        <div class="col-lg-10">
+            <input type="text" class="form-control" ng-model="payItem.shortDescription" maxlength="255" />
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-lg-2">
+            Pay Item Description:
+        </div>
+        <div class="col-lg-10">
+            <input type="text" class="form-control" ng-model="payItem.description" maxlength="255" />
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-2">
+            Supplemental Description Required?
+        </div>
+        <div class="col-lg-1">
+            <select class="form-control" ng-model="payItem.isSupplementalDescriptionRequired">
+                <option value="False">No</option>
+                <option value="True">Yes</option>
+            </select>
+        </div>
+        <div class="col-lg-2">
+            Combine Like Items?
+        </div>
+        <div class="col-lg-1">
+            <select class="form-control" ng-model="payItem.isLikeItemsCombined">
+                <option value="False">No</option>
+                <option value="True">Yes</option>
+            </select>
+        </div>
+        <div class="col-lg-2">
+            Federal Funded?
+        </div>
+        <div class="col-lg-1">
+            <select class="form-control" ng-model="payItem.isFederalFunded">
+                <option value="False">No</option>
+                <option value="True">Yes</option>
+            </select>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-2">
+            LRE Reference Price:
+        </div>
+        <div class="col-lg-2">
+            <input type="text" class="form-control" ng-model="payItem.lreReferencePrice" />
+        </div>
+        <div class="col-lg-2">
+            Concrete Factor:
+        </div>
+        <div class="col-lg-2">
+            <input type="text" class="form-control" ng-model="payItem.concreteFactor" />
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-2">
+            DQE Reference Price:
+        </div>
+        <div class="col-lg-2">
+            <input type="text" class="form-control" ng-model="payItem.dqeReferencePrice" />
+        </div>
+        <div class="col-lg-2">
+            Asphalt Factor:
+        </div>
+        <div class="col-lg-2">
+            <input type="text" class="form-control" ng-model="payItem.asphaltFactor" />
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-lg-6"></div>
+        <div class="col-lg-2">
+            Fuel Factor:
+        </div>
+        <div class="col-lg-2">
+            <input type="text" class="form-control" ng-model="payItem.fuelFactor" />
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    Dates:
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-lg-3">
+                    Effective:
+                </div>
+                <div class="col-lg-9">
+                    <p class="input-group">
+                        <input type="text" class="form-control" datepicker-popup="shortDate" ng-model="payItem.effectiveDate" is-open="effectiveOpened" maxlength="10" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="effectiveOpen($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </p>
+                </div>    
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-lg-3">
+                    Obsolete:
+                </div>
+                <div class="col-lg-9">
+                    <p class="input-group">
+                        <input type="text" class="form-control" datepicker-popup="shortDate" ng-model="payItem.obsoleteDate" is-open="obsoleteOpened" maxlength="10" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="obsoleteOpen($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="col-lg-12">Notes for Concrete and Asphalt Factors: <span class="text-muted">({{5000-payItem.factorNotes.length}} Characters)</span></div>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-lg-12">
+                    <textarea class="form-control" ng-model="payItem.factorNotes" ng-trim="false" ng-maxlength="5000" style="height: 300px;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <button class="btn btn-primary" ng-click="addPayItem()">Submit</button>
+        </div>
+    </div>
+    <br />
+    <hr />
+    <br />
+</div>
