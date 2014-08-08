@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" id="ng-app" ng-app="dqeApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="keywords" content="" />
+    <meta name="author" content="Alltech Consulting &copy;2014" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DQE</title>
+    <link href="./../../Content/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="./../../Content/bootstrap-theme.min.css" rel="stylesheet" media="screen">
+    <link href="./../../Content/site.css" rel="stylesheet" media="screen">
+    <!--
+    <script type="text/javascript" src="./Scripts/jquery-2.1.1.min.js"></script>
+    -->
+    <script type="text/javascript" src="./../../Scripts/angular.min.js"></script>
+    <script type="text/javascript" src="./../../Scripts/angular-ui/ui-bootstrap.min.js"></script>
+    <script type="text/javascript" src="./../../Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
+    <!--utilities-->
+    <script type="text/javascript" src="./../../Scripts/app/utilities/extensions.js"></script>
+    <!--app driver-->
+    <script type="text/javascript" src="./../../Scripts/app/reports/TestReport.js"></script>
+</head>
+<body ng-controller="TestReport">
+    <div class="container-fluid">
+        <div style="margin-top: 10px;">
+            <div class="row">
+                <div>
+                    Test 123 Here is the bound Test Value: {{TestValue}}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
