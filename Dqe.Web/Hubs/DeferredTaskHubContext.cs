@@ -1,0 +1,13 @@
+﻿using Dqe.ApplicationServices;
+using Microsoft.AspNet.SignalR;
+
+namespace Dqe.Web.Hubs
+{
+    public class DeferredTaskHubContext : IDeferredTaskHubContext
+    {
+        public void SendMessage(string message)
+        {
+            GlobalHost.ConnectionManager.GetHubContext<DeferredTaskHub>().Clients.All.showMessage(message);
+        }
+    }
+}

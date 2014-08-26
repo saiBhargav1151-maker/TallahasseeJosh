@@ -1,0 +1,109 @@
+﻿<div class="row">
+    <div class="col-lg-3">
+        <label for="ContractType{{id}}">Contract Type:</label>
+        <div class="radio">
+            <label>
+                <input type="radio" value="1" name="ContractType{{id}}" ng-model="pricingParameter.contractType" />&nbsp;All Contracts        
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" value="2" name="ContractType{{id}}" ng-model="pricingParameter.contractType" />&nbsp;Construction
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" value="3" name="ContractType{{id}}" ng-model="pricingParameter.contractType" />&nbsp;Maintenance
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" value="4" name="ContractType{{id}}" ng-model="pricingParameter.contractType" />&nbsp;Other
+            </label>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <label for="WorkType{{id}}">Work Type:</label>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="1" ng-checked="pricingParameter.workTypes.indexOf(1)>-1" ng-click="toggleSelection(1)" />&nbsp;New Radio Construction        
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="2" ng-checked="pricingParameter.workTypes.indexOf(2)>-1" ng-click="toggleSelection(2)" />&nbsp;Widening And Resurfacing
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="3" ng-checked="pricingParameter.workTypes.indexOf(3)>-1" ng-click="toggleSelection(3)" />&nbsp;Resurfacing
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="4" ng-checked="pricingParameter.workTypes.indexOf(4)>-1" ng-click="toggleSelection(4)" />&nbsp;Bridge Construction
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="5" ng-checked="pricingParameter.workTypes.indexOf(5)>-1" ng-click="toggleSelection(5)" />&nbsp;Bridge Widening
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="6" ng-checked="pricingParameter.workTypes.indexOf(6)>-1" ng-click="toggleSelection(6)" />&nbsp;Traffic Operations
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="7" ng-checked="pricingParameter.workTypes.indexOf(7)>-1" ng-click="toggleSelection(7)" />&nbsp;Miscellaneous
+            </label>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <label for="Quantities{{id}}">Quantities:</label>
+        <div class="radio">
+            <label>
+                <input type="radio" value="1" name="Quantities{{id}}" ng-model="pricingParameter.quantities" />&nbsp;By Project
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" value="2" name="Quantities{{id}}" ng-model="pricingParameter.quantities" />&nbsp;By Bid Proposal (Rolled Up)
+            </label>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <label for="PricingModel{{id}}">Pricing Model:</label>
+        <div class="radio">
+            <label>
+                <input type="radio" value="1" name="PricingModel{{id}}" ng-model="pricingParameter.pricingModel" />&nbsp;Straight Average
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" value="2" name="PricingModel{{id}}" ng-model="pricingParameter.pricingModel" />&nbsp;Weighted Average
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" value="3" name="PricingModel{{id}}" ng-model="pricingParameter.pricingModel" />&nbsp;DQE Formula
+            </label>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-3">
+        <label for="Bidders{{id}}">Bidders:</label>
+        <div class="radio">
+            <label>
+                <input type="radio" value="1" name="Bidders{{id}}" ng-model="pricingParameter.bidders" />&nbsp;All
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" value="2" name="Bidders{{id}}" ng-model="pricingParameter.bidders" />&nbsp;Awarded / Low Only
+            </label>
+        </div>
+    </div>
+</div>
