@@ -1,0 +1,492 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Dqe.Domain.Model.DqeUser">
+    <Position X="20.25" Y="5" Width="2.25" />
+    <Members>
+      <Field Name="_dqeUserRepository" Hidden="true" />
+      <Field Name="_staffService" Hidden="true" />
+    </Members>
+    <AssociationLine Name="MyRecentProject" Type="Dqe.Domain.Model.Project" FixedFromPoint="true">
+      <Path>
+        <Point X="20.25" Y="6.5" />
+        <Point X="18.25" Y="6.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.397" Y="-0.103" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAQAAAEAAAAAAEAIAAgQAAAAQAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Model\DqeUser.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Role" />
+      <Property Name="MyRecentProject" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.PayItemStructure">
+    <Position X="0.5" Y="7.25" Width="2.25" />
+    <Members>
+      <Field Name="_otherReferences" Hidden="true" />
+      <Field Name="_payItems" Hidden="true" />
+      <Field Name="_payItemStructureRepository" Hidden="true" />
+      <Field Name="_ppmChapters" Hidden="true" />
+      <Field Name="_prepAndDocChapters" Hidden="true" />
+      <Field Name="_specifications" Hidden="true" />
+      <Field Name="_standards" Hidden="true" />
+    </Members>
+    <AssociationLine Name="MyCostBasedTemplate" Type="Dqe.Domain.Model.CostBasedTemplate">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.954" Y="-0.43" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="PayItems" Type="Dqe.Domain.Model.PayItem" FixedToPoint="true">
+      <Path>
+        <Point X="2.75" Y="8.148" />
+        <Point X="10.5" Y="8.148" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="3.135" Y="-0.079" Height="0.182" Width="0.903" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Standards" Type="Dqe.Domain.Model.StandardWebLink" FixedToPoint="true">
+      <Path>
+        <Point X="2.75" Y="12.812" />
+        <Point X="5" Y="12.812" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.596" Y="-0.079" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="PpmChapters" Type="Dqe.Domain.Model.PpmChapterWebLink">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.416" Y="-0.065" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Specifications" Type="Dqe.Domain.Model.SpecificationWebLink">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.624" Y="-0.079" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="PrepAndDocChapters" Type="Dqe.Domain.Model.PrepAndDocChapterWebLink">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.277" Y="-0.065" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="OtherReferences" Type="Dqe.Domain.Model.OtherReferenceWebLink">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.374" Y="-0.079" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AgCyGgIQUMiBCEAIAKQKgAUAMIABSKgUMBAACEAGxIA=</HashCode>
+      <FileName>Model\PayItemStructure.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MyCostBasedTemplate" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItems" />
+      <Property Name="Standards" />
+      <Property Name="PpmChapters" />
+      <Property Name="Specifications" />
+      <Property Name="PrepAndDocChapters" />
+      <Property Name="OtherReferences" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.PayItem">
+    <Position X="10.5" Y="7.5" Width="3" />
+    <Members>
+      <Field Name="_payItemLrePickLists" Hidden="true" />
+      <Field Name="_payItemRepository" Hidden="true" />
+      <Field Name="_projectItems" Hidden="true" />
+    </Members>
+    <AssociationLine Name="MyPayItemStructure" Type="Dqe.Domain.Model.PayItemStructure" FixedFromPoint="true">
+      <Path>
+        <Point X="10.5" Y="7.716" />
+        <Point X="2.75" Y="7.716" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="1.075" Y="-0.096" Height="0.182" Width="1.481" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="MyMasterFile" Type="Dqe.Domain.Model.MasterFile">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.083" Y="0.395" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="MyCostBasedTemplate" Type="Dqe.Domain.Model.CostBasedTemplate" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="11.5" Y="13.415" />
+        <Point X="11.5" Y="20.458" />
+        <Point X="8.25" Y="20.458" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="PayItemLrePickLists" Type="Dqe.Domain.Model.PayItemLrePickList">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.244" Y="0.553" Height="0.182" Width="1.371" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="ProjectItems" Type="Dqe.Domain.Model.ProjectItem" FixedFromPoint="true">
+      <Path>
+        <Point X="13.5" Y="12.938" />
+        <Point X="16.25" Y="12.938" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.459" Y="-0.098" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>RACGCBCAQEjkgAAIACAAAAUBAAIAAIEEAwAAAIAAFAA=</HashCode>
+      <FileName>Model\PayItem.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MyPayItemStructure" />
+      <Property Name="MyMasterFile" />
+      <Property Name="MyCostBasedTemplate" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItemLrePickLists" />
+      <Property Name="ProjectItems" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.DqeCode">
+    <Position X="8.5" Y="16.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAEAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\DqeCode.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Dqe.Domain.Model.DqeWebLink">
+    <Position X="8" Y="11" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>Model\DqeWebLink.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Dqe.Domain.Model.PayItemLrePickList">
+    <Position X="12.25" Y="15" Width="2" />
+    <AssociationLine Name="PickList" Type="Dqe.Domain.Model.LrePickListType">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.176" Y="0.443" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="MyPayItem" Type="Dqe.Domain.Model.PayItem">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.604" Y="0.26" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>CACAAAAAAAAAAAAAAIAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\PayItemLrePickList.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="PickList" />
+      <Property Name="MyPayItem" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.OtherReferenceWebLink">
+    <Position X="5" Y="13.5" Width="2.25" />
+    <Members>
+      <Field Name="_payItemStructures" Hidden="true" />
+    </Members>
+    <InheritanceLine Type="Dqe.Domain.Model.DqeWebLink" FixedToPoint="true">
+      <Path>
+        <Point X="8.875" Y="12.877" />
+        <Point X="8.875" Y="14.222" />
+        <Point X="7.25" Y="14.222" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="PayItemStructures" Type="Dqe.Domain.Model.PayItemStructure">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.444" Y="-0.106" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAEA=</HashCode>
+      <FileName>Model\OtherReferenceWebLink.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItemStructures" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.PpmChapterWebLink">
+    <Position X="5" Y="9" Width="2.25" />
+    <Members>
+      <Field Name="_payItemStructures" Hidden="true" />
+    </Members>
+    <InheritanceLine Type="Dqe.Domain.Model.DqeWebLink" ManuallyRouted="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.875" Y="11" />
+        <Point X="8.875" Y="9.867" />
+        <Point X="7.25" Y="9.867" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="PayItemStructures" Type="Dqe.Domain.Model.PayItemStructure">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.388" Y="-0.079" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAEA=</HashCode>
+      <FileName>Model\PpmChapterWebLink.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItemStructures" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.PrepAndDocChapterWebLink">
+    <Position X="5" Y="10.5" Width="2.25" />
+    <Members>
+      <Field Name="_payItemStructures" Hidden="true" />
+    </Members>
+    <InheritanceLine Type="Dqe.Domain.Model.DqeWebLink" FixedToPoint="true">
+      <Path>
+        <Point X="8" Y="11.44" />
+        <Point X="7.25" Y="11.44" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="PayItemStructures" Type="Dqe.Domain.Model.PayItemStructure">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.443" Y="-0.079" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAEA=</HashCode>
+      <FileName>Model\PrepAndDocChapterWebLink.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItemStructures" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.SpecificationWebLink">
+    <Position X="5" Y="15" Width="2.25" />
+    <Members>
+      <Field Name="_payItemStructures" Hidden="true" />
+    </Members>
+    <AssociationLine Name="PayItemStructures" Type="Dqe.Domain.Model.PayItemStructure">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.589" Y="-0.044" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAEA=</HashCode>
+      <FileName>Model\SpecificationWebLink.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItemStructures" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.StandardWebLink">
+    <Position X="5" Y="12" Width="2.25" />
+    <Members>
+      <Field Name="_payItemStructures" Hidden="true" />
+    </Members>
+    <AssociationLine Name="PayItemStructures" Type="Dqe.Domain.Model.PayItemStructure">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.471" Y="-0.093" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAEA=</HashCode>
+      <FileName>Model\StandardWebLink.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItemStructures" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.MasterFile">
+    <Position X="10.75" Y="4" Width="2.25" />
+    <Members>
+      <Field Name="_masterFileRepository" Hidden="true" />
+      <Field Name="_payItems" Hidden="true" />
+      <Field Name="_projects" Hidden="true" />
+    </Members>
+    <AssociationLine Name="PayItems" Type="Dqe.Domain.Model.PayItem">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.558" Y="0.443" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Projects" Type="Dqe.Domain.Model.Project" FixedToPoint="true">
+      <Path>
+        <Point X="13" Y="5.75" />
+        <Point X="16" Y="5.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="1.035" Y="-0.084" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAqAAAAAACAAAAQAAAABAAAAAAAAAAABBQA=</HashCode>
+      <FileName>Model\MasterFile.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItems" />
+      <Property Name="Projects" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.CostBasedTemplate">
+    <Position X="5.5" Y="18.75" Width="2.75" />
+    <Members>
+      <Field Name="_documentVersions" Hidden="true" />
+      <Field Name="_payItems" Hidden="true" />
+      <Field Name="_payItemStructures" Hidden="true" />
+    </Members>
+    <AssociationLine Name="PayItemStructures" Type="Dqe.Domain.Model.PayItemStructure" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.5" Y="19.802" />
+        <Point X="2.312" Y="19.802" />
+        <Point X="2.312" Y="17.011" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.792" Y="2.905" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="PayItems" Type="Dqe.Domain.Model.PayItem" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.25" Y="19.75" />
+        <Point X="10.875" Y="19.75" />
+        <Point X="10.875" Y="13.415" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.098" Y="0.592" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAAAIoAiAAAEAAABABAQAAAABAgAAAAAAAAgAAkA=</HashCode>
+      <FileName>Model\CostBasedTemplate.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="PayItemStructures" />
+      <Property Name="PayItems" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.Proposal">
+    <Position X="15.75" Y="1.5" Width="2.25" />
+    <Members>
+      <Field Name="_projects" Hidden="true" />
+    </Members>
+    <AssociationLine Name="Projects" Type="Dqe.Domain.Model.Project" FixedFromPoint="true">
+      <Path>
+        <Point X="16.562" Y="3.117" />
+        <Point X="16.562" Y="4.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.191" Y="0.986" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAACAAAAQAAAAAAAAAAAAAAAAAAQA=</HashCode>
+      <FileName>Model\Proposal.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Projects" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.Project">
+    <Position X="16" Y="4.75" Width="2.25" />
+    <Members>
+      <Field Name="_estimateGroups" Hidden="true" />
+    </Members>
+    <AssociationLine Name="MyProposal" Type="Dqe.Domain.Model.Proposal" FixedFromPoint="true">
+      <Path>
+        <Point X="17.25" Y="4.75" />
+        <Point X="17.25" Y="3.117" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.645" Y="0.92" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="MyMasterFile" Type="Dqe.Domain.Model.MasterFile" FixedFromPoint="true">
+      <Path>
+        <Point X="16" Y="5.188" />
+        <Point X="13" Y="5.188" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="1.024" Y="-0.095" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="EstimateGroups" Type="Dqe.Domain.Model.EstimateGroup">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.321" Y="0.58" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAAQACQABgAAAAgAAAAAQAAAMAAEAAAAIAAAAAAAA=</HashCode>
+      <FileName>Model\Project.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MyProposal" />
+      <Property Name="MyMasterFile" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="EstimateGroups" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.ProjectItem">
+    <Position X="16.25" Y="12.25" Width="2" />
+    <AssociationLine Name="MyPayItem" Type="Dqe.Domain.Model.PayItem" FixedToPoint="true">
+      <Path>
+        <Point X="16.25" Y="12.562" />
+        <Point X="13.5" Y="12.562" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.363" Y="-0.114" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="MyEstimateGroup" Type="Dqe.Domain.Model.EstimateGroup">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.88" Y="0.534" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>CACAAAgAAQAAAAAAAAAAAAQAAAAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>Model\ProjectItem.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MyPayItem" />
+      <Property Name="MyEstimateGroup" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Dqe.Domain.Model.EstimateGroup">
+    <Position X="16.25" Y="9" Width="2.25" />
+    <Members>
+      <Field Name="_projectItems" Hidden="true" />
+    </Members>
+    <AssociationLine Name="MyProject" Type="Dqe.Domain.Model.Project">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.663" Y="0.499" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="ProjectItems" Type="Dqe.Domain.Model.ProjectItem">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.254" Y="0.813" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AACAABAAAAAgAAAAAAAAAAQAAgAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\EstimateGroup.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MyProject" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="ProjectItems" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Enum Name="Dqe.Domain.Model.DqeRole">
+    <Position X="23.75" Y="5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAIAAAAAAAAIEAAAAAAAAIAAEAAAA=</HashCode>
+      <FileName>Model\DqeRole.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Dqe.Domain.Model.LrePickListType">
+    <Position X="12.5" Y="17.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAEAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Model\LrePickListType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

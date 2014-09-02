@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="5682aaa4-8181-4bd2-a28a-44ddeb2d5cd2" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" Protocol="mex" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="06.wsdl" MetadataType="Wsdl" ID="61cb954f-0bcf-47b5-a8c8-9a6579d638f7" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="service.wsdl" MetadataType="Wsdl" ID="5570cdaf-1c30-4c6b-ac13-0a0bb6171522" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="06.xsd" MetadataType="Schema" ID="9e27032d-cf3c-472a-a904-22e984838c55" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="service.xsd" MetadataType="Schema" ID="5f8759d3-3854-4ed0-860c-6edcc7912be1" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="061.xsd" MetadataType="Schema" ID="9bb6a63c-81d8-47cc-9fdb-3fd8775c4996" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="Muhimbi.DocumentConverter.WebService.Data.xsd" MetadataType="Schema" ID="0c4154d5-939d-435f-82b0-20d13ef8a746" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="062.xsd" MetadataType="Schema" ID="cab9ec6f-87dd-4480-a322-b074a577d50f" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="17.xsd" MetadataType="Schema" ID="55f6d4cd-5efe-4b1d-ae0d-97788a1de992" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="Muhimbi.DocumentConverter.WebService.Data.Graphics.xsd" MetadataType="Schema" ID="4b71e527-1948-428a-b5e0-c0d3c648d323" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="22.xsd" MetadataType="Schema" ID="0d2d74ff-e5b4-477a-bbd8-d0af41cf6323" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="01.xsd" MetadataType="Schema" ID="8facd95b-e94f-407e-9c47-f137a0fa101f" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="16.xsd" MetadataType="Schema" ID="dea6cb1e-341d-4572-88c2-a63f7e35e431" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="14.xsd" MetadataType="Schema" ID="7372ed87-99c3-47fc-a295-d2b781bd66e2" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+    <MetadataFile FileName="Arrays.xsd" MetadataType="Schema" ID="536e4d24-8dcb-4417-9829-9b98e910c065" SourceId="1" SourceUrl="http://localhost:41734/Muhimbi.DocumentConverter.Webservice/mex" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

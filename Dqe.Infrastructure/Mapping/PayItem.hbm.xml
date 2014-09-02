@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="PayItem" table="PayItem4">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <natural-id mutable="true">
+      <many-to-one name="MyMasterFile" column="MasterFileId" not-null="true"/>
+      <property name="PayItemId" not-null="true" length="12" />
+    </natural-id>
+    <many-to-one name="MyPayItemStructure" column="PayItemStructureId" not-null="true"/>
+    <many-to-one name="MyCostBasedTemplate" column="CostBasedTemplateId" not-null="false"/>
+    <property name="Description" not-null="false" length="255" />
+    <property name="ShortDescription" not-null="false" length="255"/>
+    <property name="PrimaryUnit" not-null="true" />
+    <property name="SecondaryUnit" not-null="false" />
+    <property name="DqeReferencePrice" not-null="true"/>
+    <property name="LreReferencePrice" not-null="true"/>
+    <property name="ConcreteFactor" not-null="true"/>
+    <property name="AsphaltFactor" not-null="true"/>
+    <property name="FactorNotes" not-null="false" length="5000"/>
+    <property name="IsLikeItemsCombined" not-null="true"/>
+    <property name="IsSupplementalDescriptionRequired" not-null="true"/>
+    <property name="IsFederalFunded" not-null="true"/>
+    <property name="EffectiveDate" not-null="false"/>
+    <property name="ObsoleteDate" not-null="false"/>
+    <property name="SrsId" not-null="true"/>
+    <set name="ProjectItems" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="PayItemId"/>
+      <one-to-many class="ProjectItem"/>
+    </set>
+  </class>
+</hibernate-mapping>

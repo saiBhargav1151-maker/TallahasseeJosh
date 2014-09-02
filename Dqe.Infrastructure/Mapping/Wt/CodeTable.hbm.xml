@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hibernate-mapping schema="transport" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Wt" xmlns="urn:nhibernate-mapping-2.2">
+  <class name="CodeTable" table="CODETABLE" schema="trnsport">
+    <id name="Id" type="Int64">
+      <column name="CODETABLE_ID" not-null="true" precision="19" scale="0" sql-type="bigint" />
+      <generator class="identity" />
+    </id>
+    <property name="CodeTableName" type="String">
+      <column name="CODETABLE_NM" not-null="true" length="20" sql-type="varchar" unique="true" />
+    </property>
+    <property name="Description" type="String">
+      <column name="DESCR" not-null="true" length="256" sql-type="varchar" />
+    </property>
+    <property name="RecordSource" type="String">
+      <column name="RECORDSOURCE" not-null="false" length="20" sql-type="varchar" />
+    </property>
+    <property name="CreatedDate" type="DateTime">
+      <column name="CREATED_DT" not-null="false" sql-type="datetime2" />
+    </property>
+    <property name="CreatedBy" type="String">
+      <column name="CREATEDBY" not-null="false" length="256" sql-type="varchar" />
+    </property>
+    <property name="LastUpdatedDate" type="DateTime">
+      <column name="LASTUPDATED_DT" not-null="false" sql-type="datetime2" />
+    </property>
+    <property name="LastUpdatedBy" type="String">
+      <column name="LASTUPDATEDBY" not-null="false" length="256" sql-type="varchar" />
+    </property>
+    <set name="CodeValues" inverse="true" cascade="all-delete-orphan" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="CODETABLE_ID"/>
+      </key>
+      <one-to-many class="CodeValue"/>
+    </set>
+  </class>
+</hibernate-mapping>
