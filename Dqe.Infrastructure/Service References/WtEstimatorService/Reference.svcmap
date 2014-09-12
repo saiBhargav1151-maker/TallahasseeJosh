@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="e9576eb9-1263-4feb-9138-f083ee3a83ac" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="	http://dotscowtrnsu02.co.dot.state.fl.us:7000/APIHOST/estimator.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="estimator.xsd" MetadataType="Schema" ID="67b828d6-4e74-41ad-9436-3481bd05490c" SourceId="1" SourceUrl="http://dotscowtrnsu02.co.dot.state.fl.us:7000/ApiHost/estimator.svc?xsd=xsd2" />
+    <MetadataFile FileName="estimator1.xsd" MetadataType="Schema" ID="3f721705-d05f-415a-b636-1fd179bd9014" SourceId="1" SourceUrl="http://dotscowtrnsu02.co.dot.state.fl.us:7000/ApiHost/estimator.svc?xsd=xsd4" />
+    <MetadataFile FileName="estimator2.xsd" MetadataType="Schema" ID="fb81e242-cc49-4396-a7fe-5018882f1eb0" SourceId="1" SourceUrl="http://dotscowtrnsu02.co.dot.state.fl.us:7000/ApiHost/estimator.svc?xsd=xsd1" />
+    <MetadataFile FileName="estimator.disco" MetadataType="Disco" ID="bedf9cf0-dbde-476e-b6fe-a80abe3b5c72" SourceId="1" SourceUrl="http://dotscowtrnsu02.co.dot.state.fl.us:7000/ApiHost/estimator.svc?disco" />
+    <MetadataFile FileName="estimator3.xsd" MetadataType="Schema" ID="5c452a62-44c3-414a-afbd-be95ee874874" SourceId="1" SourceUrl="http://dotscowtrnsu02.co.dot.state.fl.us:7000/ApiHost/estimator.svc?xsd=xsd3" />
+    <MetadataFile FileName="EstimatorService.wsdl" MetadataType="Wsdl" ID="43cab7cd-1752-477f-b984-48f99387f246" SourceId="1" SourceUrl="http://dotscowtrnsu02.co.dot.state.fl.us:7000/ApiHost/estimator.svc?wsdl" />
+    <MetadataFile FileName="estimator4.xsd" MetadataType="Schema" ID="1c64171e-709b-4953-bd22-ba90b049f373" SourceId="1" SourceUrl="http://dotscowtrnsu02.co.dot.state.fl.us:7000/ApiHost/estimator.svc?xsd=xsd0" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

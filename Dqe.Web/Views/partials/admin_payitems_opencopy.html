@@ -1,0 +1,37 @@
+﻿<div ng-show="copyMasterFileInProcess;">
+    Master File is currently being copied.  Please wait...
+</div>
+<div ng-hide="copyMasterFileInProcess;">
+    <div class="row">
+        <div class="col-lg-3">
+            Select Master File to copy from
+        </div>
+        <div class="col-lg-3" ng-show="fileNumberCopy > ''">
+            New Master File Effective Date
+        </div>
+        <div class="col-lg-3">
+            Specify new Master File
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3">
+            <select class="form-control" ng-model="fileNumberCopy" ng-options="masterFile.fileNumber for masterFile in masterFiles">
+                <option value="">--Select--</option>
+            </select>
+        </div>
+        <div class="col-lg-3" ng-show="fileNumberCopy > ''">
+            <p class="input-group">
+                <input type="text" class="form-control" datepicker-popup="MM/dd/yyyy" ng-model="masterFileffectiveDate" is-open="effectiveOpened" maxlength="10" />
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="effectiveOpen($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                </span>
+            </p>
+        </div>
+        <div class="col-lg-3">
+            <input type="number" class="form-control" ng-model="fileNumberNew" />
+        </div>
+        <div class="col-lg-3">
+            <button class="btn btn-primary" ng-click="addMasterFile()">Submit</button>
+        </div>
+    </div>
+</div>

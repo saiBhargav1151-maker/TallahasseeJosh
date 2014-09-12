@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="Project" table="Project5">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <natural-id mutable="true">
+      <property name="ProjectNumber" not-null="true" length="11" />
+      <property name="Version" not-null="true"/>
+      <many-to-one name="Owner" class="DqeUser" column="OwnerId" not-null="true"/>
+    </natural-id>
+    <many-to-one name="MyMasterFile" class="MasterFile" column="MasterFileId" not-null="true"/>
+    <many-to-one name="MySourceProject" class="Project" column="SourceProjectId" not-null="false"/>
+    <property name="Description" not-null="false" length="256" />
+    <property name="LoadedFromWtOn" not-null="false" />
+    <property name="District" not-null="false" length="256" />
+    <property name="County" not-null="false" length="256" />
+    <property name="LettingDate" not-null="false" />
+    <property name="DesignerSrsId" not-null="false" />
+    <property name="PseeContactSrsId" not-null="false" />
+    <property name="LastUpdated" not-null="true" />
+    <property name="Created" not-null="true" />
+    <property name="Snapshot" not-null="true" />
+    <set name="EstimateGroups" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="ProjectId"/>
+      <one-to-many class="EstimateGroup"/>
+    </set>
+  </class>
+</hibernate-mapping>

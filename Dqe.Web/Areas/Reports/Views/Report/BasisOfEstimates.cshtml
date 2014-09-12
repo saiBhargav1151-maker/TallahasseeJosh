@@ -1,0 +1,268 @@
+﻿@model Dqe.Web.Areas.Reports.Models.Report.BoeViewModel
+@{
+    ViewBag.Title = "BOE";
+}
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="keywords" content="" />
+    <meta name="author" content="Alltech Consulting &copy;2014" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DQE</title>
+    <link href="./../../Content/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="./../../Content/bootstrap-theme.min.css" rel="stylesheet" media="screen">
+    <link href="./../../Content/site.css" rel="stylesheet" media="screen">
+</head>
+<body>
+    <div class="container" style="width: 612px;">
+        @foreach (var structure in Model.PayItemStructures)
+        {
+            <div style="margin-top: 10px;" ng-repeat="item in payItems">
+                <div class="row">
+                    <div class="col-sm-3">
+                        Notes Details
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                Unit
+                            </div>
+                            <div class="col-sm-2">
+                                @structure.Unit
+                            </div>
+                            <div class="col-sm-2">
+                                Accuracy
+                            </div>
+                            <div class="col-sm-2">
+                                @structure.Accuracy
+                            </div>
+                            <div class="col-sm-2">
+                                PlanQuantity
+                            </div>
+                            <div class="col-sm-2">
+                                @structure.PlanQuantity
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                @structure.Notes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        Related Items
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                Required
+                            </div>
+                            <div class="col-sm-3">
+                                @structure.RelatedItemsRequired
+                            </div>
+                            <div class="col-sm-3">
+                                Recommended
+                            </div>
+                            <div class="col-sm-3">
+                                @structure.RelatedItemsRecommended
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <hr />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        Plan Summary Box
+                    </div>
+                    <div class="col-sm-9">
+                        @structure.PlanSummaryBox
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <hr />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        Design Forms and Documentation
+                    </div>
+                    <div class="col-sm-9">
+                        @structure.DesignFormsAndDocumentation
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <hr />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        Construction Forms and Documentation
+                    </div>
+                    <div class="col-sm-9">
+                        @structure.ConstructionFormsAndDocumentation
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <hr />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        References
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                PPM Chapter
+                            </div>
+                            <div class="col-sm-9">
+                                @structure.ReferencesPpmChapter
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                Trns-port
+                            </div>
+                            <div class="col-sm-9">
+                                @structure.ReferencesTrnsport
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                Other
+                            </div>
+                            <div class="col-sm-9">
+                                @structure.ReferencesOther
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                Standards
+                            </div>
+                            <div class="col-sm-9">
+                                @structure.ReferencesStandards
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                Specifications
+                            </div>
+                            <div class="col-sm-9">
+                                @structure.ReferencesSpecifications
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                Prep & Doc Manual Chapter(s)
+                            </div>
+                            <div class="col-sm-9">
+                                @structure.ReferencesPrepDocManualChapters
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <hr />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        TRNS*PORT Category (DRAFT FIELD):
+                    </div>
+                    <div class="col-sm-4">
+                        @structure.TransportCategory
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        Struct.
+                    </div>
+                    <div class="col-sm-3">
+                        @structure.PayItemStructureId
+                    </div>
+                    <div class="col-sm-3">
+                        @structure.Description
+                    </div>
+                    <div class="col-sm-3">
+                        @structure.Notes
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        Notes
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <hr />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        The following items were open, as of the publication date. Refer to the Master Pay Item list for current items. Additional items may be opened upon request.
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        Item
+                    </div>
+                    <div class="col-sm-3">
+                        Description
+                    </div>
+                    <div class="col-sm-1">
+                        Unit
+                    </div>
+                    <div class="col-sm-2">
+                        TSP/Detail
+                    </div>
+                    <div class="col-sm-2">
+                        Valid Date
+                    </div>
+                    <div class="col-sm-2">
+                        Obsolete Date
+                    </div>
+                </div>
+                @foreach (var item in structure.PayItems)
+                {
+                    <div class="row">
+                        <div class="col-sm-2">
+                            @item.PayItemId
+                        </div>
+                        <div class="col-sm-3">
+                            @item.Description
+                        </div>
+                        <div class="col-sm-1">
+                            @item.Unit
+                        </div>
+                        <div class="col-sm-2">
+                            @item.Tsp
+                        </div>
+                        <div class="col-sm-2">
+                            @item.ValidDate
+                        </div>
+                        <div class="col-sm-2">
+                            @item.ObsoleteDate
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</body>
+</html>

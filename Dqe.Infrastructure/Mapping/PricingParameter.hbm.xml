@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="PricingParameter" abstract="true" table="PricingParameter5">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <discriminator column="type" not-null="true" length="2" />
+    <property name="Months" />
+    <property name="ContractType"  />
+    <property name="Quantities"/>
+    <property name="PricingModel"/>
+    <property name="Bidders"/>
+    <set name="WorkTypes" lazy="false" access="field.camelcase-underscore" table="PricingParametersWorkTypes">
+      <key column="WorkTypeId"/>
+      <element column="Value" type="Int32"></element>
+    </set>
+    <subclass discriminator-value="SD" name="StatewidePricingParameter">
+    </subclass>
+    <subclass discriminator-value="DD" name="DistrictPricingParameter">
+      <property name="District"></property>
+    </subclass>
+    <subclass discriminator-value="ED" name="EstimatorPricingParameter">
+      <many-to-one name="User" column="UserId" />
+    </subclass>
+  </class>
+</hibernate-mapping>

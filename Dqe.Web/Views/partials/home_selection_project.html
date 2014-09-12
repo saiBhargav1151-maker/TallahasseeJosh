@@ -1,0 +1,203 @@
+﻿<div class="row">
+    <div class="col-lg-12">
+        <h3>Project Selection</h3>
+    </div>
+</div>
+<br/>
+<div ng-show="copyMasterFileInProcess;">
+    Master File is currently being copied.  Please wait...
+</div>
+<div ng-hide="copyMasterFileInProcess;">
+    <div class="row">
+        <div class="col-lg-1">
+            <label for="projectNumber">Project Number:</label>
+        </div>
+        <div class="col-lg-2">
+            <input id="projectNumber" type="text" ng-model="selectedProject" placeholder="123456-1-52-01" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="project as project.number for project in getProjects($viewValue)" typeahead-editable="false" typeahead-on-select="loadProject()" class="form-control">
+        </div>
+    </div>
+</div>
+<br />
+<div ng-show="wtProject != undefined && wtProject != null">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="row">
+                <div class="col-lg-4">
+                    Project:
+                </div>
+                <div class="col-lg-8">
+                    {{wtProject.number}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    District:
+                </div>
+                <div class="col-lg-8">
+                    {{wtProject.district}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    County:
+                </div>
+                <div class="col-lg-8">
+                    {{wtProject.county}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    Letting Date:
+                </div>
+                <div class="col-lg-8">
+                    {{wtProject.lettingDate}}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="row">
+                <div class="col-lg-2">
+                    Description:
+                </div>
+                <div class="col-lg-10">
+                    {{wtProject.description}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <hr/>
+    <div ng-show="workingVersion != undefined && workingVersion != null && workingVersion.version > 0">
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Working Estimate</h3>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-lg-1">
+                Version:
+            </div>
+            <div class="col-lg-11">
+                {{workingVersion.version}}
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-lg-1">
+                Source:
+            </div>
+            <div class="col-lg-11">
+                {{workingVersion.source}}
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-lg-1">
+                Created:
+            </div>
+            <div class="col-lg-11">
+                {{workingVersion.created}}
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-lg-1">
+                Last Updated:
+            </div>
+            <div class="col-lg-11">
+                {{workingVersion.lastUpdated}}
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-lg-1">
+                Estimate:
+            </div>
+            <div class="col-lg-11">
+                {{workingVersion.estimate | currency}}
+            </div>
+        </div>
+        <div class="row" ng-show="snapshot == 1 || snapshot == 2">
+            <div class="col-lg-2">
+                <br />
+                <button class="btn btn-success" ng-click="takeSnapshot(workingVersion)">Take {{snapshot == 1 ? 'Phase II' : 'Phase III'}} Snapshot</button>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-lg-2">
+            <button class="btn btn-primary" ng-click="copyWtProject()">Create Project Version from Web Transport</button>
+        </div>
+        <div class="col-lg-2" ng-show="workingVersion != undefined && workingVersion != null && workingVersion.id > 0">
+            <button class="btn btn-primary" ng-click="copyProjectVersion(workingVersion)">Create Project Version from Working Estimate</button>
+        </div>
+    </div>
+    <br />
+    <div class="row" ng-show="userVersions != undefined && userVersions != null && userVersions.length > 0">
+        <div class="col-lg-12">
+            Your Versions:
+            <table class="table table-bordered table-condensed table-hover table-striped">
+                <thead>
+                    <tr>
+                        <td width="5%"></td>
+                        <td width="50%">Source</td>
+                        <td width="5%">Version</td>
+                        <td width="10%">Created</td>
+                        <td width="10%">Last Updated</td>
+                        <td width="10%">Estimate</td>
+                        <td width="10%">Snapshot</td>
+                    </tr>
+                </thead>
+                <tbody ng-repeat="userVersion in userVersions">
+                    <tr>
+                        <td>
+                            <a href="" ng-click="copyProjectVersion(userVersion)">Copy</a>
+                        </td>
+                        <td>{{userVersion.source}}</td>
+                        <td>{{userVersion.version}}</td>
+                        <td>{{userVersion.created}}</td>
+                        <td>{{userVersion.lastUpdated}}</td>
+                        <td>{{userVersion.estimate | currency}}</td>
+                        <td>{{userVersion.snapshot}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <br />
+    <div class="row" ng-show="otherVersions != undefined && otherVersions != null && otherVersions.length > 0">
+        <div class="col-lg-12">
+            Other Estimator's Versions:
+            <table class="table table-bordered table-condensed table-hover table-striped">
+                <thead>
+                    <tr>
+                        <td width="5%"></td>
+                        <td width="20%">Owner</td>
+                        <td width="30%">Source</td>
+                        <td width="5%">Version</td>
+                        <td width="10%">Created</td>
+                        <td width="10%">Last Updated</td>
+                        <td width="10%">Estimate</td>
+                        <td width="10%">Snapshot</td>
+                    </tr>
+                </thead>
+                <tbody ng-repeat="otherVersion in otherVersions">
+                    <tr>
+                        <td>
+                            <a href="" ng-click="copyProjectVersion(otherVersion)">Copy</a>
+                        </td>
+                        <td>{{otherVersion.owner}}</td>
+                        <td>{{otherVersion.source}}</td>
+                        <td>{{otherVersion.version}}</td>
+                        <td>{{otherVersion.created}}</td>
+                        <td>{{otherVersion.lastUpdated}}</td>
+                        <td>{{otherVersion.estimate | currency}}</td>
+                        <td>{{otherVersion.snapshot}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
