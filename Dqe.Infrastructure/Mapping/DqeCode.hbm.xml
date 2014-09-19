@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="DqeCode" abstract="true" table="DqeCode6">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <discriminator column="code_type" not-null="true" length="2" />
+    <property name="Name" not-null="true" length="255"/>
+    <property name="IsActive" not-null="true" />
+    <subclass discriminator-value="CG" name="CostGroup">
+    </subclass>
+    <subclass discriminator-value="CS" name="CaddSummary">
+    </subclass>
+  </class>
+</hibernate-mapping>
