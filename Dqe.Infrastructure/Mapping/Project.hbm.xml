@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="Project" table="Project7">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <natural-id>
+      <property name="ProjectNumber" not-null="true" length="15" />
+    </natural-id>
+    <many-to-one name="MyMasterFile" class="MasterFile" column="MasterFileId" not-null="true"/>
+    <many-to-one name="CustodyOwner" class="DqeUser" column="CustodyOwnerId" not-null="false"/>
+    <many-to-one name="MyCounty" class="County" column="CountyId" not-null="true"/>
+    <property name="Description" not-null="false" length="256" />
+    <property name="District" not-null="false" length="256" />
+    <property name="LettingDate" not-null="false" />
+    <property name="DesignerName" not-null="false" length="256" />
+    <property name="PseeContactSrsId" not-null="false" />
+    <set name="ProjectVersions" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="ProjectId"/>
+      <one-to-many class="ProjectVersion"/>
+    </set>
+  </class>
+</hibernate-mapping>
