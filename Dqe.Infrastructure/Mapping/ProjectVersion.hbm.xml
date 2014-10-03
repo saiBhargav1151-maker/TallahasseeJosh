@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="ProjectVersion" table="ProjectVersion8">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <natural-id>
+      <many-to-one name="MyProject" class="Project" column="ProjectId" not-null="true"/>
+      <property name="Version" not-null="true"/>
+    </natural-id>
+    <many-to-one name="EstimateSource" class="ProjectEstimate" column="SourceProjectId" not-null="false"/>
+    <many-to-one name="VersionOwner" class="DqeUser" column="VersionOwnerId" not-null="true"/>
+    <many-to-one name="MyProposal" class="Proposal" column="ProposalId" not-null="false"/>
+    <property name="ProjectSource" not-null="true"/>
+    <set name="ProjectEstimates" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="ProjectVersionId"/>
+      <one-to-many class="ProjectEstimate"/>
+    </set>
+  </class>
+</hibernate-mapping>

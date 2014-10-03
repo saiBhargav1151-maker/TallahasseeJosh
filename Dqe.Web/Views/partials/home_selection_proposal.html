@@ -1,0 +1,20 @@
+﻿<div class="row">
+    <div class="col-lg-12">
+        <h3>Proposal Selection</h3>
+    </div>
+</div>
+<br />
+<div ng-show="copyMasterFileInProcess;">
+    Master File is currently being copied.  Please wait...
+</div>
+<div ng-hide="copyMasterFileInProcess;">
+    <div class="row">
+        <div class="col-lg-1">
+            <label for="proposalNumber">Proposal Number:</label>
+        </div>
+        <div class="col-lg-2">
+            <input id="proposalNumber" type="text" ng-model="selectedProposal" placeholder="123451" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="proposal as proposal.number for proposal in getProposals($viewValue)" typeahead-editable="false" typeahead-on-select="loadProposal()" class="form-control">
+        </div>
+    </div>
+</div>
+<br />
