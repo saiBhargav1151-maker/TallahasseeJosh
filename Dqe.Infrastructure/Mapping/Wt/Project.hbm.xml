@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hibernate-mapping schema="transport" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Wt" xmlns="urn:nhibernate-mapping-2.2">
+  <class name="Project" table="PROJECT" schema="trnsport">
+    <id name="Id" type="Int64">
+      <column name="PROJECT_ID" not-null="true" sql-type="bigint" />
+      <generator class="identity" />
+    </id>
+    <many-to-one name="MyProposal" column="PROPOSAL_ID" class="Proposal" not-null="false"/>
+    <property name="ProjectNumber" type="String">
+      <column name="PROJECT_NM" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <property name="SpecBook" type="String">
+      <column name="SPECBOOK" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <property name="Description" type="String">
+      <column name="DESCR" not-null="true" length="256" sql-type="varchar" />
+    </property>
+    <property name="Designer" type="String">
+      <column name="DESIGNER" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <set name="Categories" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="PROJECT_ID"/>
+      </key>
+      <one-to-many class="Category"/>
+    </set>
+    <set name="Counties" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="PROJECT_ID"/>
+      </key>
+      <one-to-many class="County"/>
+    </set>
+    <set name="Districts" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="PROJECT_ID"/>
+      </key>
+      <one-to-many class="District"/>
+    </set>
+  </class>
+</hibernate-mapping>
