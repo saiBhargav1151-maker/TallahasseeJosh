@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hibernate-mapping schema="transport" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Wt" xmlns="urn:nhibernate-mapping-2.2">
+  <class name="Category" table="CATEGORY" schema="trnsport">
+    <id name="Id" type="Int64">
+      <column name="CATEGORY_ID" not-null="true" sql-type="bigint" />
+      <generator class="identity" />
+    </id>
+    <many-to-one name="MyProject" column="PROJECT_ID" class="Project" not-null="false"/>
+    <many-to-one name="MyCategoryAlternate" column="CATEGORYALTERNATESET_ID" class="CategoryAlternate" not-null="false"/>
+    <property name="Name" type="String">
+      <column name="CATEGORY_NM" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <property name="FederalConstructionClass" type="String">
+      <column name="FEDCONSTRUCTIONCLASS" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <property name="AlternateMember" type="String">
+      <column name="CATEGORYALTERNATEMEMBER_NM" not-null="false" length="20" sql-type="varchar" />
+    </property>
+    <property name="Description" type="String">
+      <column name="DESCR" not-null="true" length="256" sql-type="varchar" />
+    </property>
+    <property name="CombineLikeItems">
+      <column name="COMBINELIKECATEGORIES" not-null="true" sql-type="bit" />
+    </property>
+    <set name="ProjectItems" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="CATEGORY_ID"/>
+      </key>
+      <one-to-many class="ProjectItem"/>
+    </set>
+  </class>
+</hibernate-mapping>

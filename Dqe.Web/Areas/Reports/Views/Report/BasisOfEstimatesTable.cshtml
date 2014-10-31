@@ -1,0 +1,297 @@
+﻿@model Dqe.Web.Areas.Reports.Models.Report.BoeViewModel
+@{
+    ViewBag.Title = "BOE";
+}
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta name="keywords" content="" />
+        <meta name="author" content="Alltech Consulting &copy;2014" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DQE</title>
+        <style>
+            hr{ border-top:1px dotted #000;width: 90%}
+            .label {
+                font-weight: bold;
+                color: #480d7f;
+            }
+        </style>
+    </head>
+
+<body>
+    <div style="width: 675px;">
+        @foreach (var structure in Model.PayItemStructures)
+        {
+            <table style="margin-top: 10px;width: 100%">
+                <tr style="background-color: grey">
+                    <td>@structure.PayItemStructureId</td>
+                    <td>@structure.Description</td>
+                </tr>
+                <tr>
+                    <td style="width: 100px;" class="label">
+                        Notes Details
+                    </td>
+                    <td>
+                        <table style="width:100%">
+                            <tr>
+                                <td class="label">
+                                    Unit
+                                </td>
+                                <td>
+                                    @structure.Unit
+                                </td>
+                                <td class="label">
+                                    Accuracy
+                                </td>
+                                <td>
+                                    @structure.Accuracy
+                                </td>
+                                <td class="label">
+                                    PlanQuantity
+                                </td>
+                                <td>
+                                    @structure.PlanQuantity
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="6">
+                                    @structure.Notes
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        Related Items
+                    </td>
+                    <td>
+                        <table style="width:100%">
+                            <tr>
+
+                                <td class="label">
+                                    Required
+                                </td>
+                                <td>
+                                    @structure.RelatedItemsRequired
+                                </td>
+                                <td class="label">
+                                    Recommended
+                                </td>
+                                <td>
+                                    @structure.RelatedItemsRecommended
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <hr />
+                    </td>
+                </tr>
+                <tr>
+
+                    <td class="label">Plan Summary Box</td>
+                    <td>@structure.PlanSummaryBox</td>
+
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <hr />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        Design Forms and Documentation
+                    </td>
+                    <td>
+                        @structure.DesignFormsAndDocumentation
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <hr />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        Construction Forms and Documentation
+                    </td>
+                    <td>
+                        @structure.ConstructionFormsAndDocumentation
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <hr />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        References
+                    </td>
+                    <td>
+                        <table style="width:100%">
+                            <tr>
+                                <td class="label">
+                                    PPM Chapter
+                                </td>
+                                <td>
+                                    @structure.ReferencesPpmChapter
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">
+                                    Trns-port
+                                </td>
+                                <td>
+                                    @structure.ReferencesTrnsport
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">
+                                    Other
+                                </td>
+                                <td>
+                                    @structure.ReferencesOther
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">
+                                    Standards
+                                </td>
+                                <td>
+                                    @structure.ReferencesStandards
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">
+                                    Specifications
+                                </td>
+                                <td>
+                                    @structure.ReferencesSpecifications
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">
+                                    Prep & Doc Manual Chapter(s)
+                                </td>
+                                <td>
+                                    @structure.ReferencesPrepDocManualChapters
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <hr />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table style="width:100%">
+                            <tr>
+                                <td class="label">
+                                    TRNS*PORT Category (DRAFT FIELD):
+                                </td>
+                                <td>
+                                    @structure.TransportCategory
+                                </td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td class="label">
+                        Struct.
+                    </td>
+                    <td>
+                        <table style="width:100%">
+                            <tr>
+                                <td>
+                                    @structure.PayItemStructureId
+                                </td>
+                                <td>@structure.Description</td>
+                                <td>@structure.Notes</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="label">
+                        Notes
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <hr />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="label" style="font-style: italic;font-weight: normal;">
+                        The following items were open, as of the publication date. Refer to the Master Pay Item list for current items. Additional items may be opened upon request.
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table style="width:100%">
+                            <tr>
+                                <td>
+                                    Item
+                                </td>
+                                <td>
+                                    Description
+                                </td>
+                                <td class="col-sm-1">
+                                    Unit
+                                </td>
+                                <td>
+                                    TSP/Detail
+                                </td>
+                                <td>
+                                    Valid Date
+                                </td>
+                                <td>
+                                    Obsolete Date
+                                </td>
+                            </tr>
+                            @foreach (var item in structure.PayItems)
+                            {
+                                <tr>
+                                    <td>
+                                        @item.PayItemId
+                                    </td>
+                                    <td>
+                                        @item.Description
+                                    </td>
+                                    <td class="col-sm-1">
+                                        @item.Unit
+                                    </td>
+                                    <td>
+                                        @item.Tsp
+                                    </td>
+                                    <td>
+                                        @item.ValidDate
+                                    </td>
+                                    <td>
+                                        @item.ObsoleteDate
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </td>
+
+                </tr>
+
+            </table>
+        }
+    </div>
+</body>
+</html>
