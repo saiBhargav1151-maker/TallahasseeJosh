@@ -1,0 +1,165 @@
+﻿<div ng-show="estimate != undefined && estimate != null">
+    <div class="row" ng-if="!estimate.canEstimate">
+        <div class="col-lg-12">
+            <div class="alert alert-danger">
+                To price a Proposal, you must have security authorization, custody, and a synchronized working estimate for each project.
+            </div>
+        </div>
+    </div>
+    <div ng-if="estimate.canEstimate">
+        <div class="row">
+            <div class="col-lg-10">
+                <h3>
+                    Proposal:&nbsp;{{estimate.proposal.number}}
+                </h3>
+            </div>
+            <div class="col-lg-2">
+                <h4>
+                    Estimate Total: &nbsp;{{estimate.total.Total | currency}}
+                </h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <td style="width: 40%">Included in Estimate</td>
+                            <td style="width: 10%">Category Set</td>
+                            <td style="width: 10%">Category Member</td>
+                            <td style="width: 10%">Item Set</td>
+                            <td style="width: 10%">Item Member</td>
+                            <td style="width: 20%">Total</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in estimateSummary | orderBy:['categorySet', 'categoryMember', 'itemSet', 'itemMember']" ng-class="item.included ? 'alert-warning' : ''">
+                            <td>
+                                <span class="text-success glyphicon glyphicon-ok" ng-show="item.included"></span>
+                            </td>
+                            <td>{{item.categorySet}}</td>
+                            <td>{{item.categoryMember}}</td>
+                            <td>{{item.itemSet}}</td>
+                            <td>{{item.itemMember}}</td>
+                            <td>{{item.total | currency}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="text-right">
+                    <button class="btn btn-primary" ng-click="saveProposalEstimate()">Save Estimate</button>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-lg-12">
+                <table class="table table-bordered table-condensed table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <td></td>
+                            <td>Category</td>
+                            <td>Project</td>
+                            <td>Item</td>
+                            <td>Combine Categories</td>
+                            <td>Combine Items</td>
+                            <td>Category Alternate Set</td>
+                            <td>Category Alternate Member</td>
+                            <td>Item Alternate Set</td>
+                            <td>Item Alternate Member</td>
+                            <td>Item Description</td>
+                            <td>Supplemental Description</td>
+                            <td>Fund</td>
+                            <td>Unit of Measure</td>
+                            <td>Quantity</td>
+                            <td>Price</td>
+                            <td>Price Type</td>
+                            <td>Total</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="16">Filters:</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><input class="form-control" ng-model="federalConstructionClass"></td>
+                            <td><input class="form-control" ng-model="projectNumber"></td>
+                            <td><input class="form-control" ng-model="itemNumber"></td>
+                            <td><input class="form-control" ng-model="combineCategories"></td>
+                            <td><input class="form-control" ng-model="combineItems"></td>
+                            <td><input class="form-control" ng-model="categoryAlternateSet"></td>
+                            <td><input class="form-control" ng-model="categoryAlternateMember"></td>
+                            <td><input class="form-control" ng-model="itemAlternateSet"></td>
+                            <td><input class="form-control" ng-model="itemAlternateMember"></td>
+                            <td></td>
+                            <td><input class="form-control" ng-model="supplementalDescription"></td>
+                            <td><input class="form-control" ng-model="fund"></td>
+                            <td><input class="form-control" ng-model="unit"></td>
+                            <td></td>
+                            <td></td>
+                            <td><input class="form-control" ng-model="priceType"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="16">Items:</td>
+                        </tr>
+                        <tr ng-repeat="itemGroup in estimate.itemGroups | filter:{federalConstructionClass:federalConstructionClass, projectNumber:projectNumber, itemNumber:itemNumber, combineCategories:combineCategories, combineItems:combineItems, categoryAlternateSet:categoryAlternateSet, categoryAlternateMember:categoryAlternateMember, itemAlternateSet:itemAlternateSet, itemAlternateMember:itemAlternateMember, fund:fund, supplementalDescription:supplementalDescription, unit:unit, priceType:priceType}" ng-show="itemGroup.group || (!itemGroup.group && itemGroup.isExpanded)">
+                            <td rowspan="{{itemGroup.rowSpan}}" ng-show="!itemGroup.group && itemGroup.isFirst"></td>
+                            <td ng-show="itemGroup.group">
+                                <a href="" ng-show="itemGroup.canExpand" ng-click="toggleGroup(itemGroup)">
+                                    <span ng-show="!itemGroup.isExpanded" class="glyphicon glyphicon-plus"></span>
+                                    <span ng-show="itemGroup.isExpanded" class="glyphicon glyphicon-minus"></span>
+                                </a>
+                            </td>
+                            <td ng-show="itemGroup.group">{{itemGroup.federalConstructionClass}}&nbsp;{{itemGroup.categoryDescription}}</td>
+                            <td ng-show="!itemGroup.group">{{itemGroup.itemCategory}}</td>
+
+                            <td>
+                                {{itemGroup.itemProjectNumber}}
+                            </td>
+                            
+                            <td ng-show="!itemGroup.group" colspan="9"></td>
+                            <td ng-show="itemGroup.group">
+                                <pre>{{itemGroup.itemNumber}}</pre>
+                            </td>
+                            <td ng-show="itemGroup.group">{{itemGroup.combineCategories}}</td>
+                            <td ng-show="itemGroup.group">{{itemGroup.combineItems}}</td>
+                            <td ng-show="itemGroup.group">{{itemGroup.categoryAlternateSet}}</td>
+                            <td ng-show="itemGroup.group">{{itemGroup.categoryAlternateMember}}</td>
+                            <td ng-show="itemGroup.group">{{itemGroup.itemAlternateSet}}</td>
+                            <td ng-show="itemGroup.group">{{itemGroup.itemAlternateMember}}</td>
+                            <td ng-show="itemGroup.group">{{itemGroup.itemDescription}}</td>
+                            <td ng-show="itemGroup.group">{{itemGroup.supplementalDescription}}</td>
+
+                            <td ng-show="itemGroup.group">{{itemGroup.fund}}</td>
+                            <td ng-show="!itemGroup.group">{{itemGroup.itemFund}}</td>
+
+                            <td ng-show="itemGroup.group">{{itemGroup.unit}}</td>
+                            <td ng-show="!itemGroup.group"></td>
+
+                            <td>{{itemGroup.quantity}}</td>
+                            <td ng-show="!itemGroup.group">{{itemGroup.price | currency}}</td>
+                            <td ng-show="itemGroup.group">
+                                <input type="text" class="form-control" ng-model="itemGroup.price" ng-change="calculateTotals(itemGroup)" />
+                            </td>
+                            <td>{{itemGroup.priceType}}</td>
+                            <td>{{itemGroup.price * itemGroup.quantity | currency}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="text-right">
+                    <button class="btn btn-primary" ng-click="saveProposalEstimate()">Save Estimate</button>
+                </div>
+            </div>
+        </div>
+        <br />
+    </div>
+</div>

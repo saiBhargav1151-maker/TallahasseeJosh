@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" id="ng-app" ng-app="dqeApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="keywords" content="" />
+    <meta name="author" content="Alltech Consulting &copy;2014" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DQE</title>
+    <link href="./Content/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="./Content/bootstrap-theme.min.css" rel="stylesheet" media="screen">
+    <link href="./Content/site.css" rel="stylesheet" media="screen">
+    <link href="./Scripts/angular-block-ui/angular-block-ui.min.css" rel="stylesheet" media="screen" />
+    <link href="./Content/angular-growl.min.css" rel="stylesheet" media="screen">
+    <script type="text/javascript" src="./Scripts/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="./Scripts/jquery.signalR-2.1.1.min.js"></script>    
+    <script type="text/javascript" src="./signalr/hubs"></script>
+    <script type="text/javascript" src="./Scripts/angular.min.js"></script>
+    <script type="text/javascript" src="./Scripts/angular-route.min.js"></script>
+    <script type="text/javascript" src="./Scripts/angular-cookies.min.js"></script>
+    <script type="text/javascript" src="./Scripts/angular-ui/ui-utils.min.js"></script>
+    <script type="text/javascript" src="./Scripts/angular-ui/ui-bootstrap.min.js"></script>
+    <script type="text/javascript" src="./Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
+    <script type="text/javascript" src="./Scripts/angular-growl.min.js"></script>
+    <script type="text/javascript" src="./Scripts/angular-file-upload.min.js"></script>
+    <script type="text/javascript" src="./Scripts/angular-block-ui/angular-block-ui.min.js"></script>
+    <!--utilities-->
+    <script type="text/javascript" src="./Scripts/app/utilities/extensions.js"></script>
+    <!--app driver-->
+    <script type="text/javascript" src="./Scripts/app/app.js"></script>
+    <!--services-->
+    <script type="text/javascript" src="./Scripts/app/services/securityService.js"></script>
+    <script type="text/javascript" src="./Scripts/app/services/navigationService.js"></script>
+    <!--controllers-->
+    <script type="text/javascript" src="./Scripts/app/controllers/layoutController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminCodeValuesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminCostBasedTemplatesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/defaultValuesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminDefaultValuesMarketAreasController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminPayItemsFactorsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminPayItemsMaintainController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminPayItemsOpenCopyController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminSecurityController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminWebLinksController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeGamingController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homePricingParametersController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeProjectPricesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeProposalPricesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homePricingPricesMockController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeReportsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionLreController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionProjectController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionProjectMockController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionProposalController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionProposalMockController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSnapshotsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeWorkingEstimateEstimateController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeWorkingEstimateLsdbController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/profileController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/signinController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/fileUpload.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/pricingParameter.js"></script>
+</head>
+    <body ng-controller="LayoutController">
+        <div growl></div>
+        <div class="container-fluid">
+            <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="" ng-click="navigate('/home_project')">Design Quantities and Estimates</a>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'" ng-click="navCollapsed=true">
+                    <ul class="nav navbar-nav">
+                        <li class="item {{nav.active}}" ng-repeat="nav in navs">
+                            <a href="" ng-click="navigate(nav.url)">{{nav.title}}</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right" ng-show="currentUser.isAuthenticated">
+                        <li class="item">
+                            <a href="" ng-click="signout()">Sign out</a>
+                        </li>
+                    </ul>
+                    <span class="navbar-text navbar-right" ng-show="currentUser.isAuthenticated">{{currentUser.userNameAndRole}}</span>
+                </div>
+            </nav>
+            <div style="margin-top: 70px;"></div>
+            <div ng-show="showStatusMessage == true;">
+                <div class="row">
+                    <div class="col-lg-11">
+                        Task Messages:
+                    </div>
+                    <div class="col-lg-1">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-warning" ng-click="hideStatusMessage();">&times;</button>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-lg-12">
+                        <pre>{{statusMessageText}}</pre>
+                    </div>
+                </div>
+                <hr />
+            </div>
+            <div ng-show="topTabs.length > 0">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <ul class="nav nav-tabs">
+                            <li ng-repeat="topTab in topTabs" ng-class="topTab.active ? 'active' : ''">
+                                <a href="" ng-click="navigate(topTab.url)">{{topTab.title}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <div class="row" ng-show="subTabs.length > 0">
+                    <div class="col-lg-12">
+                        <ul class="nav nav-pills">
+                            <li ng-repeat="subTab in subTabs" ng-class="subTab.active ? 'active' : ''">
+                                <a href="" ng-click="navigate(subTab.url)">{{subTab.title}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div ng-show="subTabs.length > 0">
+                    <hr />
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div ng-view></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+</html>
