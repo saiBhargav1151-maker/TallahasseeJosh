@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="MarketArea" table="MarketArea10">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <natural-id>
+      <property name="Name" not-null="true" length="256" />
+    </natural-id>
+    <set name="Counties" lazy="true" inverse="true" cascade="save-update" access="field.camelcase-underscore" >
+      <key column="MarketAreaId"/>
+      <one-to-many class="County"/>
+    </set>
+    <set name="MarketAreaAveragePrices" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="MarketAreaId"/>
+      <one-to-many class="MarketAreaAveragePrice"/>
+    </set>
+  </class>
+</hibernate-mapping>

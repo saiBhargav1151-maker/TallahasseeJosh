@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hibernate-mapping schema="transport" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Wt" xmlns="urn:nhibernate-mapping-2.2">
+  <class name="Section" table="PROPOSALSECTION" schema="trnsport" mutable="false">
+    <id name="Id" type="Int64">
+      <column name="PROPOSALSECTION_ID" not-null="true" sql-type="bigint" />
+      <generator class="identity" />
+    </id>
+    <many-to-one name="MyProposal" column="PROPOSAL_ID" class="Proposal" not-null="false"/>
+    <property name="Name" type="String">
+      <column name="PROPOSALSECTION_NM" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <property name="Description" type="String">
+      <column name="DESCR" not-null="true" length="256" sql-type="varchar" />
+    </property>
+    <property name="AlternateSet" type="String">
+      <column name="CATEGORYALTERNATESET_NM" not-null="false" length="20" sql-type="varchar" />
+    </property>
+    <property name="AlternateMember" type="String">
+      <column name="CATEGORYALTERNATEMEMBER_NM" not-null="false" length="20" sql-type="varchar" />
+    </property>
+    <set name="ProposalItems" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="PROPOSALSECTION_ID"/>
+      </key>
+      <one-to-many class="ProposalItem"/>
+    </set>
+  </class>
+</hibernate-mapping>

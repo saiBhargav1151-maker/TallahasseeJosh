@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="PayItemMaster" table="PayItemMaster10">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <natural-id mutable="true">
+      <property name="RefItemName" not-null="true" length="20" />
+      <property name="SpecBook" not-null="true" length="20" />
+    </natural-id>
+    <property name="Description" not-null="true" length="256" />
+    <property name="Unit" not-null="true" length="20" />
+    <property name="CalculatedUnit" not-null="false" length="280" />
+    <property name="UnitSystem" not-null="true" length="20" />
+    <property name="LumpSum" not-null="true" />
+    <property name="BidAsLumpSum" not-null="true" />
+    <property name="SuppDescriptionRequired" not-null="true" />
+    <property name="CombineWithLikeItems" not-null="true" />
+    <property name="MajorItem" not-null="true" />
+    <property name="NonBid" not-null="true" />
+    <property name="DbeInterest" not-null="true" />
+    <property name="RefPrice" not-null="false" />
+    <property name="ObsoleteDate" not-null="false" />
+    <property name="CommonUnit" not-null="false" length="20" />
+    <property name="ItemType" not-null="false" length="20" />
+    <property name="ItemClass" not-null="false" length="20" />
+    <property name="ContractClass" not-null="false" length="20" />
+    <property name="ShortDescription" not-null="false" length="256" />
+    <property name="ConversionFactorToCommonUnit" not-null="false" />
+    <property name="DbePercentToApply" not-null="false" />
+    <property name="RecordSource" not-null="false" length="20" />
+    <property name="BidRequirementCode" not-null="false" length="20" />
+    <property name="Administrative" not-null="true" />
+    <property name="ExemptFromMaa" not-null="true" />
+    <property name="PayPlan" not-null="true" />
+    <property name="AutoPaidPercentSchedule" not-null="true" />
+    <property name="CoApprovalRequired" not-null="true" />
+    <property name="PercentScheduleItem" not-null="true" />
+    <property name="FuelAdjustment" not-null="true" />
+    <property name="CreatedDate" not-null="false" />
+    <property name="CreatedBy" not-null="false" length="256"/>
+    <property name="LastUpdatedDate" not-null="false" />
+    <property name="LastUpdatedBy" not-null="false" length="256"/>
+    <property name="SpecialtyItem" not-null="true" />
+    <property name="ExemptFromRetainage" not-null="true" />
+    <property name="RegressionInclusion" not-null="true" />
+    <property name="AlternateItemName" not-null="false" length="20" />
+    <property name="FuelAdjustmentType" not-null="false" length="20" />
+    <property name="Ildt1" not-null="false" />
+    <property name="Ildt2" not-null="false" />
+    <property name="Ildt3" not-null="false" />
+    <property name="Ilflg1" not-null="false" />
+    <property name="Ilnum1" not-null="false" />
+    <property name="Ilsst1" not-null="false" length="256" />
+    <property name="Illst1" not-null="false" length="256" />
+    <property name="Itmqtyprecsn" not-null="false" length="1" />
+    <property name="StateReferencePrice" not-null="false"/>
+    <set name="CountyAveragePrices" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="PayItemMasterId"/>
+      <one-to-many class="CountyAveragePrice"/>
+    </set>
+    <set name="MarketAreaAveragePrices" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="PayItemMasterId"/>
+      <one-to-many class="MarketAreaAveragePrice"/>
+    </set>
+  </class>
+</hibernate-mapping>

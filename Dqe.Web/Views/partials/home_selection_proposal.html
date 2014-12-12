@@ -1,0 +1,148 @@
+﻿<!--
+    
+-->
+<div class="row">
+    <div class="col-lg-12">
+        <h3>Proposal Selection</h3>
+    </div>
+</div>
+<br />
+<div ng-show="copyMasterFileInProcess == true">
+    Master File is currently being copied.  Please wait...
+</div>
+<div ng-hide="copyMasterFileInProcess == true">
+    <div class="row">
+        <div class="col-lg-1">
+            <label for="proposalNumber">Proposal Number:</label>
+        </div>
+        <div class="col-lg-2">
+            <input id="proposalNumber" type="text" ng-model="selectedProposal" placeholder="123451" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="proposal as proposal.number for proposal in getProposals($viewValue)" typeahead-editable="false" typeahead-on-select="loadProposal()" class="form-control">
+        </div>
+    </div>
+</div>
+<hr />
+<div ng-show="proposal != undefined && proposal != null">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3>Selected Proposal</h3>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-lg-2">
+            Proposal:
+        </div>
+        <div class="col-lg-10">
+            {{proposal.number}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            Description:
+        </div>
+        <div class="col-lg-10">
+            {{proposal.description}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            District:
+        </div>
+        <div class="col-lg-10">
+            {{proposal.district}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            County:
+        </div>
+        <div class="col-lg-10">
+            {{proposal.county}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            Letting Date:
+        </div>
+        <div class="col-lg-10">
+            {{proposal.lettingDate}}
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-lg-2">
+            <h3>
+                Estimate Total:    
+            </h3>
+        </div>
+        <div class="col-lg-10">
+            <h3>
+                {{total.Total | currency}}    
+            </h3>
+        </div>
+    </div>
+    <br/>
+    <div ng-if="canSnapshotProposal()">
+        <div class="row" ng-show="proposal.nextEstimate != undefined && proposal.nextEstimate != null && proposal.nextEstimate != ''">
+            <div class="col-lg-12">
+                <div class="checkbox">
+                    <label>
+                        <strong>Apply {{proposal.nextEstimate}} Label to Current Working Estimate?</strong>
+                        <input type="checkbox" ng-model="proposal.takeLabeledSnapshot">
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <button class="btn btn-success" ng-click="snapshotWorkingEstimate(proposal)">Snapshot Working Estimate</button>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-lg-12">
+            <h4>
+                Projects:
+            </h4>        
+        </div>
+    </div>
+    <div class="row" ng-show="projects != 'undefined' && projects != null && projects.length > 0">
+        <div class="col-lg-12">
+            <table class="table table-bordered table-condensed table-hover table-striped">
+                <thead>
+                    <tr>
+                        <td>Project</td>
+                        <td>Owner</td>
+                        <td>Custody</td>
+                        <td>Working Estimate</td>
+                        <td>Current Label</td>
+                        <td>Synchronized with Web Trns*Port</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="project in projects">
+                        <td>
+                            <a href="#/home_project/{{project.number}}">{{project.number}}</a>
+                        </td>
+                        <td>{{project.owner}}</td>
+                        <td>
+                            <span class="text-success glyphicon glyphicon-ok" ng-show="project.hasCustody"></span>
+                            <span class="text-danger glyphicon glyphicon-remove" ng-show="!project.hasCustody"></span>
+                        </td>
+                        <td>
+                            <span class="text-success glyphicon glyphicon-ok" ng-show="project.hasWorkingEstimate"></span>
+                            <span class="text-danger glyphicon glyphicon-remove" ng-show="!project.hasWorkingEstimate"></span>
+                        </td>
+                        <td>{{project.label}}</td>
+                        <td>
+                            <span ng-show="project.isSynced == null">Pending...</span>
+                            <span class="text-success glyphicon glyphicon-ok" ng-show="project.isSynced == true"></span>
+                            <span class="text-danger glyphicon glyphicon-remove" ng-show="project.isSynced == false"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

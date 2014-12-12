@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{52D23793-A0ED-483A-B329-250F8C28538D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Dqe.Domain</RootNamespace>
+    <AssemblyName>Dqe.Domain</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ClosedXML">
+      <HintPath>..\packages\ClosedXML.0.73.0\lib\net40-client\ClosedXML.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DataAnnotationsExtensions">
+      <HintPath>..\packages\DataAnnotationsExtensions.1.1.0.0\lib\NETFramework40\DataAnnotationsExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Fdot\ILreService.cs" />
+    <Compile Include="Fdot\IWebTransportService.cs" />
+    <Compile Include="Messaging\IMessage.cs" />
+    <Compile Include="Messaging\IMessenger.cs" />
+    <Compile Include="Model\AveragePrice.cs" />
+    <Compile Include="Model\BiddersType.cs" />
+    <Compile Include="Model\BidHistory.cs" />
+    <Compile Include="Model\CategorySet.cs" />
+    <Compile Include="Model\ContractType.cs" />
+    <Compile Include="Model\CostBasedTemplate.cs" />
+    <Compile Include="Model\County.cs" />
+    <Compile Include="Model\CountyAveragePrice.cs" />
+    <Compile Include="Model\DistrictType.cs" />
+    <Compile Include="Model\DistrictPricingParameter.cs" />
+    <Compile Include="Model\Document.cs" />
+    <Compile Include="Model\DqeCode.cs" />
+    <Compile Include="Model\DqeRole.cs" />
+    <Compile Include="Model\DqeUser.cs" />
+    <Compile Include="Model\DqeWebLink.cs" />
+    <Compile Include="Model\Entity.cs" />
+    <Compile Include="Model\EstimateGroup.cs" />
+    <Compile Include="Model\EstimateTotal.cs" />
+    <Compile Include="Model\EstimatorPricingParameter.cs" />
+    <Compile Include="Model\ItemGroup.cs" />
+    <Compile Include="Model\ItemSet.cs" />
+    <Compile Include="Model\LrePickListType.cs" />
+    <Compile Include="Model\MarketArea.cs" />
+    <Compile Include="Model\MarketAreaAveragePrice.cs" />
+    <Compile Include="Model\OtherReferenceWebLink.cs" />
+    <Compile Include="Model\PayItem.cs" />
+    <Compile Include="Model\PayItemLrePickList.cs" />
+    <Compile Include="Model\PayItemMaster.cs" />
+    <Compile Include="Model\PayItemStructure.cs" />
+    <Compile Include="Model\PpmChapterWebLink.cs" />
+    <Compile Include="Model\PrepAndDocChapterWebLink.cs" />
+    <Compile Include="Model\PriceSetType.cs" />
+    <Compile Include="Model\PricingModelType.cs" />
+    <Compile Include="Model\PricingParameter.cs" />
+    <Compile Include="Model\CostGroup.cs" />
+    <Compile Include="Model\PrimaryUnitType.cs" />
+    <Compile Include="Model\Project.cs" />
+    <Compile Include="Model\ProjectItem.cs" />
+    <Compile Include="Model\ProjectEstimate.cs" />
+    <Compile Include="Model\ProjectSourceType.cs" />
+    <Compile Include="Model\ProjectVersion.cs" />
+    <Compile Include="Model\Proposal.cs" />
+    <Compile Include="Model\ProposalHistory.cs" />
+    <Compile Include="Model\ProposalItem.cs" />
+    <Compile Include="Model\ProposalSourceType.cs" />
+    <Compile Include="Model\QuantitiesType.cs" />
+    <Compile Include="Model\CaddSummary.cs" />
+    <Compile Include="Model\SecondaryUnitType.cs" />
+    <Compile Include="Model\SectionGroup.cs" />
+    <Compile Include="Model\SnapshotLabel.cs" />
+    <Compile Include="Model\SpecificationWebLink.cs" />
+    <Compile Include="Model\MasterFile.cs" />
+    <Compile Include="Model\StandardWebLink.cs" />
+    <Compile Include="Model\StatewidePricingParameter.cs" />
+    <Compile Include="Model\SystemTask.cs" />
+    <Compile Include="Model\WorkType.cs" />
+    <Compile Include="Model\Wt\Alternate.cs" />
+    <Compile Include="Model\Wt\Bid.cs" />
+    <Compile Include="Model\Wt\Category.cs" />
+    <Compile Include="Model\Wt\CategoryAlternate.cs" />
+    <Compile Include="Model\Wt\CodeTable.cs" />
+    <Compile Include="Model\Wt\CodeValue.cs" />
+    <Compile Include="Model\Wt\County.cs" />
+    <Compile Include="Model\Wt\District.cs" />
+    <Compile Include="Model\Wt\Estimate.cs" />
+    <Compile Include="Model\Wt\FundPackage.cs" />
+    <Compile Include="Model\Wt\Letting.cs" />
+    <Compile Include="Model\Wt\Project.cs" />
+    <Compile Include="Model\Wt\ProjectItem.cs" />
+    <Compile Include="Model\Wt\Proposal.cs" />
+    <Compile Include="Model\Wt\ProposalItem.cs" />
+    <Compile Include="Model\Wt\ProposalVendor.cs" />
+    <Compile Include="Model\Wt\RefCounty.cs" />
+    <Compile Include="Model\Wt\RefDistrict.cs" />
+    <Compile Include="Model\Wt\RefItem.cs" />
+    <Compile Include="Model\Wt\Section.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\Custom\ICostBasedTemplateRepository.cs" />
+    <Compile Include="Repositories\Custom\IDqeCodeRepository.cs" />
+    <Compile Include="Repositories\Custom\IDqeUserRepository.cs" />
+    <Compile Include="Repositories\Custom\IDqeWebLinkRepository.cs" />
+    <Compile Include="Repositories\Custom\IMarketAreaRepository.cs" />
+    <Compile Include="Repositories\Custom\IMasterFileRepository.cs" />
+    <Compile Include="Repositories\Custom\IPayItemMasterRepository.cs" />
+    <Compile Include="Repositories\Custom\IPayItemRepository.cs" />
+    <Compile Include="Repositories\Custom\IPayItemStructureRepository.cs" />
+    <Compile Include="Repositories\Custom\IPricingParameterRepository.cs" />
+    <Compile Include="Repositories\Custom\IProjectRepository.cs" />
+    <Compile Include="Repositories\Custom\IProposalRepository.cs" />
+    <Compile Include="Repositories\Custom\ISystemTaskRepository.cs" />
+    <Compile Include="Repositories\ICommandRepository.cs" />
+    <Compile Include="Services\IDocumentService.cs" />
+    <Compile Include="Services\IStaffService.cs" />
+    <Compile Include="Transformers\AveragePrice.cs" />
+    <Compile Include="Transformers\BidHistory.cs" />
+    <Compile Include="Transformers\County.cs" />
+    <Compile Include="Transformers\Document.cs" />
+    <Compile Include="Transformers\CostBasedTemplate.cs" />
+    <Compile Include="Transformers\DqeCode.cs" />
+    <Compile Include="Transformers\DqeUser.cs" />
+    <Compile Include="Transformers\DqeWebLink.cs" />
+    <Compile Include="Transformers\EstimateGroup.cs" />
+    <Compile Include="Transformers\MarketArea.cs" />
+    <Compile Include="Transformers\PayItem.cs" />
+    <Compile Include="Transformers\PayItemLrePickList.cs" />
+    <Compile Include="Transformers\PayItemMaster.cs" />
+    <Compile Include="Transformers\PayItemStructure.cs" />
+    <Compile Include="Transformers\PpmChapterWebLink.cs" />
+    <Compile Include="Transformers\PrepAndDocChapterWebLink.cs" />
+    <Compile Include="Transformers\PricingParameter.cs" />
+    <Compile Include="Transformers\CostGroup.cs" />
+    <Compile Include="Transformers\CaddSummary.cs" />
+    <Compile Include="Transformers\Project.cs" />
+    <Compile Include="Transformers\ProjectItem.cs" />
+    <Compile Include="Transformers\ProjectEstimate.cs" />
+    <Compile Include="Transformers\ProjectVersion.cs" />
+    <Compile Include="Transformers\Proposal.cs" />
+    <Compile Include="Transformers\ProposalHistory.cs" />
+    <Compile Include="Transformers\ProposalItem.cs" />
+    <Compile Include="Transformers\SectionGroup.cs" />
+    <Compile Include="Transformers\SpecificationWebLink.cs" />
+    <Compile Include="Transformers\OtherReferenceWebLink.cs" />
+    <Compile Include="Transformers\MasterFile.cs" />
+    <Compile Include="Transformers\Staff.cs" />
+    <Compile Include="Transformers\StandardWebLink.cs" />
+    <Compile Include="Transformers\Transformer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Interactions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Model\Model.cd" />
+    <None Include="Model\Wt\WtModel.cd" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
