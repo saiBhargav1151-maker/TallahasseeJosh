@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Reports">
+	<class name="ReportCategory" table="ReportCategory">
+		<id name="Id">
+			<generator class="identity" />
+		</id>
+		<property name="Description" not-null="true"/>
+		<property name="AlternateDescription" not-null="true" />
+		<property name="CategoryAlternateSet" not-null="true" />
+		<property name="CategoryAlternateMember" not-null="true"/>
+		<property name="IsLowCost" not-null="true" />
+		<!--<property name="Total" not-null="true" />-->
+
+		<many-to-one name="MyReportProject" class="ReportProject" column="ReportProjectId" not-null="true"/>
+
+		<set name="ReportProjectItems" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+			<key column="ReportCategoryId"/>
+			<one-to-many class="ReportProjectItem"/>
+		</set>
+
+	</class>
+</hibernate-mapping>

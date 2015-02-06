@@ -1,0 +1,37 @@
+﻿<div class="col-lg-6">
+    <form method="POST" id="ViewProposalSummaryReport" autocomplete="off">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Proposal Summary</h4>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-3">
+                        Estimate Type
+                    </div>
+                    <div class="col-lg-2">
+                        <select name="estimateType" class="form-control" ng-model="order" ng-change="estimateTypeChange()">
+                            <option value="5">Preliminary</option>
+                            <option value="6">Official</option>
+                        </select>
+                    </div>
+                </div>
+                <div ng-show="order != undefined && order != null" class="row">
+                    <div class="col-lg-3">
+                        Enter Proposal
+                    </div>
+                    <div class="col-lg-2">
+                        <input name="proposalNumber" id="proposalNumber" type="text" ng-model="selectedProposal" placeholder="123451" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="proposal as proposal.number for proposal in getProposals($viewValue)" typeahead-editable="false" class="form-control" autocomplete="off">
+                    </div>
+                </div>
+                <div ng-show="selectedProposal != undefined && selectedProposal != null" class="row">
+                    <div class="col-lg-3">
+                    </div>
+                    <div class="col-lg-2">
+                        <button class="btn btn-primary" ng-click="viewProposalSummary()">View Proposal Summary</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RptDataSource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="Trns">
+  <ConnectionProperties>
+    <Extension>SQL</Extension>
+    <ConnectString>DATA SOURCE=DCS-DOT-DB08.DOT.DCS.SDC.STATE.FL.US\USERDEVSQL;INITIAL CATALOG=WTPSQL1;USER ID=DBC_DQEWT;CONNECTION LIFETIME=30;PASSWORD=dqewt0811</ConnectString>
+  </ConnectionProperties>
+  <DataSourceID>c4c36a1c-167e-4478-a662-dc099fd5bf63</DataSourceID>
+</RptDataSource>

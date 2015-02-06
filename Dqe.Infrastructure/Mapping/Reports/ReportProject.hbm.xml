@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Reports">
+	<class name="ReportProject" table="ReportProject">
+		<id name="Id">
+			<generator class="identity" />
+		</id>
+		<natural-id>
+			<property name="ProjectNumber" not-null="true"/>
+		</natural-id>
+		<property name="Description" not-null="true"/>
+		<property name="LettingDate" not-null="false" />
+		<!--<property name="Total" not-null="true" />-->
+
+		<many-to-one name="MyReportProposal" class="ReportProposal" column="ReportProposalId" not-null="true"/>
+
+		<set name="ReportCategories" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+			<key column="ReportProjectId"/>
+			<one-to-many class="ReportCategory"/>
+		</set>
+	</class>
+</hibernate-mapping>

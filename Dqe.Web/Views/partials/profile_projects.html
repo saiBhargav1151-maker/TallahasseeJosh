@@ -1,0 +1,24 @@
+﻿<div class="row">
+    <div class="col-lg-3">
+        <table class="table table-bordered table-condensed">
+            <thead>
+                <tr>
+                    <td>Project</td>
+                    <td>Owner</td>
+                    <td>Proposal</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="project in projects">
+                    <td>
+                        <a href="#/home_project/{{project.number}}">{{project.number}}</a>
+                    </td>
+                    <td>{{project.owner}}</td>
+                    <td>
+                        <a href="#/home_proposal/{{project.proposal}}">{{project.proposal}}</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

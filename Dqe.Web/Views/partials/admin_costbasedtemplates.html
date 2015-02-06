@@ -1,0 +1,50 @@
+﻿<div class="row">
+    <div class="col-lg-4">
+        Excel File:
+    </div>
+    <div class="col-lg-2">
+        Result Cell:
+    </div>
+    <div class="col-lg-2">
+        Template Name:
+    </div>
+    <div class="col-lg-4">
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-4">
+        <form novalidate id="CostTemplateForm">
+            <input type="file" file-model="currentTemplate.file" id="test" />
+        </form>
+    </div>
+    <div class="col-lg-2">
+        <input type="text" class="form-control" ng-model="currentTemplate.resultCell" />
+    </div>
+    <div class="col-lg-2">
+        <input type="text" class="form-control" ng-model="currentTemplate.name" />
+    </div>
+    <div class="col-lg-4">
+        <button class="btn btn-primary" ng-click="upload()" ng-disabled="isSubmitUserDisabled()">Submit</button>
+        <button class="btn btn-default" ng-click="resetForm()">Reset</button>
+    </div>
+
+</div>
+<br />
+<div class="row">
+    <div class="col-lg-12">
+        <table class="table table-bordered table-condensed">
+            <tr>
+                <th style="width: 60%">Name</th>
+                <th style="width: 20%">Cell</th>
+                <th style="width: 20%">Download</th>
+            </tr>
+            <tr ng-repeat="template in templates">
+                <td>
+                    <a href="" ng-click="editTemplate(template)">{{template.name}}</a>
+                </td>
+                <td>{{template.resultCell}}</td>
+                <td><a ng-href="{{downloadUrl(template)}}" target="_blank"><i class="glyphicon glyphicon-download-alt"></i></a></td>
+            </tr>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hibernate-mapping schema="transport" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Wt" xmlns="urn:nhibernate-mapping-2.2">
+  <class name="ProposalVendor" table="PROPOSALVENDOR" schema="trnsport" mutable="false">
+    <id name="Id" type="Int64">
+      <column name="PROPOSALVENDOR_ID" not-null="true" sql-type="bigint" />
+      <generator class="identity" />
+    </id>
+    <many-to-one name="MyProposal" column="PROPOSAL_ID" class="Proposal" not-null="false"/>
+    <property name="BidType" type="String">
+      <column name="BIDTYPE" not-null="false" length="20" sql-type="varchar" />
+    </property>
+    <property name="BidStatus" type="String">
+      <column name="BIDSTATUS" not-null="false" length="20" sql-type="varchar" />
+    </property>
+    <property name="Awarded">
+      <column name="AWARDED" not-null="true" sql-type="bit" />
+    </property>
+    <property name="BidTotal">
+      <column name="VENDORTOTALBID" not-null="false" precision="13" scale="2" sql-type="numeric" />
+    </property>
+    <set name="Bids" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="PROPOSALVENDOR_ID"/>
+      </key>
+      <one-to-many class="Bid"/>
+    </set>
+  </class>
+</hibernate-mapping>

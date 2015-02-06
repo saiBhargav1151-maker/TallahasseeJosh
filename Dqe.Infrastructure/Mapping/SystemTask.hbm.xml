@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="SystemTask" table="SystemTask">
+    <id name="Id">
+      <generator class="identity" />
+    </id>
+    <property name="TaskId" length="256" not-null="true" />  
+  </class>
+</hibernate-mapping>

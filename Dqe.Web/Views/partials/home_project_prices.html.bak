@@ -1,0 +1,437 @@
+﻿<div ng-show="estimate != undefined && estimate != null">
+    <div class="row" ng-if="!estimate.canEstimate">
+        <div class="col-lg-12">
+            <div class="alert alert-danger">
+                To price a project, you must have security authorization, custody, and a working estimate.
+            </div>
+        </div>
+    </div>
+    <div ng-if="estimate.canEstimate">
+        <div class="row">
+            <div class="col-lg-10">
+                <h3>
+                    Project:&nbsp;{{estimate.project.number}}
+                </h3>
+            </div>
+            <div class="col-lg-2">
+                <h4>
+                    Estimate Total: &nbsp;{{estimate.total.Total | currency}}
+                </h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <td style="width: 40%">Included in Estimate</td>
+                            <td style="width: 10%">Category Set</td>
+                            <td style="width: 10%">Category Member</td>
+                            <td style="width: 10%">Item Set</td>
+                            <td style="width: 10%">Item Member</td>
+                            <td style="width: 20%">Total</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in estimateSummary | orderBy:['categorySet', 'categoryMember', 'itemSet', 'itemMember']" ng-class="item.included ? 'alert-warning' : ''">
+                            <td>
+                                <span class="text-success glyphicon glyphicon-ok" ng-show="item.included"></span>
+                            </td>
+                            <td>{{item.categorySet}}</td>
+                            <td>{{item.categoryMember}}</td>
+                            <td>{{item.itemSet}}</td>
+                            <td>{{item.itemMember}}</td>
+                            <td>{{item.total | currency}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div ng-if="estimate.project.isLsDb">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h4>
+                        Lump Sum / Design Build Summary
+                    </h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <td>Category</td>
+                                <td>Item</td>
+                                <td>Combine Categories</td>
+                                <td>Combine Items</td>
+                                <td>Category Alternate Set</td>
+                                <td>Category Alternate Member</td>
+                                <td>Item Alternate Set</td>
+                                <td>Item Alternate Member</td>
+                                <td>Item Description</td>
+                                <td>Supplemental Description</td>
+                                <td>Fund</td>
+                                <td>Unit of Measure</td>
+                                <td>Quantity</td>
+                                <td>Price</td>
+                                <td>Total</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in estimate.lsDbItems">
+                                <td>{{item.itemCategory}}</td>
+                                <td><pre>{{item.itemNumber}}</pre></td>
+                                <td>{{item.combineCategories}}</td>
+                                <td>{{item.combineItems}}</td>
+                                <td>{{item.categoryAlternateSet}}</td>
+                                <td>{{item.categoryAlternateMember}}</td>
+                                <td>{{item.itemAlternateSet}}</td>
+                                <td>{{item.itemAlternateMember}}</td>
+                                <td>{{item.itemDescription}}</td>
+                                <td>{{item.supplementalDescription}}</td>
+                                <td>{{item.fund}}</td>
+                                <td>{{item.unit}}</td>
+                                <td>{{item.quantity}}</td>
+                                <td>{{item.price | currency}}</td>
+                                <td>{{item.price * item.quantity | currency}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="text-right">
+                    <button class="btn btn-primary" ng-disabled="!canSaveEstimate" ng-click="saveEstimate()">Save Estimate</button>    
+                </div>
+            </div>
+        </div> 
+        <div class="row">
+            <div class="col-lg-12" style="font-size: 8pt;">
+                <div>
+                    <button class="btn btn-default" ng-click="setBestPrices()">Set Default Prices</button>
+                    <br/>
+                    <br/>
+                    <a href="" ng-click="showOtherParms = !showOtherParms">{{showOtherParms ? 'Hide' : 'Show'}}&nbsp;Project Pricing Parameters</a>
+                </div>
+                <br />
+                <div ng-show="showOtherParms">
+                    <div style="width: 250px; float: left;">
+                        <div>Contract Type</div>
+                        <br />
+                        <div>
+                            <label>
+                                <input type="radio" ng-model="contractType" value="all" /> All
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                <input type="radio" ng-model="contractType" value="construction" /> Construction Only
+                            </label>
+                        </div>
+                    </div>
+                    <div style="width: 250px; float: left;">
+                        <div>Work Type</div>
+                        <br />
+                        <div ng-repeat="workType in workTypes">
+                            <label>
+                                <input type="checkbox" ng-model="workType.include" /> {{workType.name}}&nbsp;({{workType.code}})
+                            </label>
+                        </div>
+                    </div>
+                    <div style="width: 250px; float: left;">
+                        <div>Geographical Location</div>
+                        <br />
+                        <div ng-repeat="marketArea in marketAreas.marketAreas">
+                            <label>
+                                <input type="checkbox" ng-model="marketArea.include" ng-change="selectMarketArea(marketArea, null)"> <a href="" ng-click="marketArea.showCounties = !marketArea.showCounties">{{marketArea.name}}</a>
+                            </label>
+                            <div ng-show="marketArea.showCounties">
+                                <div ng-repeat="county in marketArea.counties">
+                                    &nbsp;&nbsp;&nbsp;
+                                    <label>
+                                        <input type="checkbox" ng-change="setMarketAreaSelection(marketArea, null)" ng-model="county.include"> {{county.name}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="clear: both;"></div>
+                    <div>
+                        <button class="btn btn-primary" ng-click="generateParameterPrices()">Set Parameter Prices</button>    
+                    </div>
+                </div>
+            </div>
+        </div>  
+        <br/>
+        <div class="row">
+            <div class="col-lg-12">
+                Current Page: {{currentPage + 1}}
+                <br/><br/>
+                <button class="btn btn-sm btn-default" ng-repeat="i in getNumberAsArray(numberOfPages()) track by $index" ng-click="setCurrentPage($index)">
+                    {{$index + 1}}
+                </button>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-lg-12">
+                <div style="overflow-x: auto; width:100%">
+                    <table class="table table-bordered table-condensed table-hover table-striped" style="font-size: 8pt;">
+                        <thead>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td><a href="" ng-click="sortItems('federalConstructionClass')">Category</a></td>
+                                <td><a href="" ng-click="sortItems('itemNumber')">Item</a></td>
+                                <td><a href="" ng-click="sortItems('combineCategories')">Combine Categories</a></td>
+                                <td><a href="" ng-click="sortItems('combineItems')">Combine Items</a></td>
+                                <td><a href="" ng-click="sortItems('categoryAlternateSet')">Category Alternate Set</a></td>
+                                <td><a href="" ng-click="sortItems('categoryAlternateMember')">Category Alternate Member</a></td>
+                                <td><a href="" ng-click="sortItems('itemAlternateSet')">Item Alternate Set</a></td>
+                                <td><a href="" ng-click="sortItems('itemAlternateMember')">Item Alternate Member</a></td>
+                                <td><a href="" ng-click="sortItems('itemDescription')">Item Description</a></td>
+                                <td><a href="" ng-click="sortItems('supplementalDescription')">Supplemental Description</a></td>
+                                <td><a href="" ng-click="sortItems('fund')">Fund</a></td>
+                                <td><a href="" ng-click="sortItems('unit')">Unit of Measure</a></td>
+                                <td><a href="" ng-click="sortItems('quantity')">Quantity</a></td>
+                                <td><a href="" ng-click="sortItems('price')">Price</a></td>
+                                <td><a href="" ng-click="sortItems('priceType')">Price Type</a></td>
+                                <td><a href="" ng-click="sortItems('price * quantity')">Total</a></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="18">Filters:</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="" ng-click="selectItems()">Select</a>
+                                    <br/>
+                                    <br/>
+                                    <a href="" ng-click="deselectItems()">Deselect</a>
+                                </td>
+                                <td></td>
+                                <td><input class="form-control" ng-model="filter.federalConstructionClass" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.itemNumber" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.combineCategories" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.combineItems" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.categoryAlternateSet" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.categoryAlternateMember" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.itemAlternateSet" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.itemAlternateMember" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.itemDescription" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.supplementalDescription" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.fund" ng-change="filterItems()"></td>
+                                <td><input class="form-control" ng-model="filter.unit" ng-change="filterItems()"></td>
+                                <td></td>
+                                <td style="width: 150px;"></td>
+                                <td><input class="form-control" ng-model="filter.priceType" ng-change="filterItems()"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="18">Items:</td>
+                            </tr>
+                            <tr ng-repeat-start="itemGroup in filteredItems | startFrom: currentPage * pageSize  | limitTo:pageSize" ng-show="itemGroup.group || (!itemGroup.group && itemGroup.isExpanded)">
+                                <td colspan="2" ng-show="!itemGroup.group"></td>
+
+                                <td ng-show="itemGroup.group">
+                                    <label>
+                                        <input type="checkbox" ng-model="itemGroup.selected">
+                                    </label>
+                                </td>
+                                <td ng-show="itemGroup.group">
+                                    <a href="" ng-show="itemGroup.canExpand" ng-click="toggleGroup(itemGroup)">
+                                        <span ng-show="!itemGroup.isExpanded" class="glyphicon glyphicon-plus"></span>
+                                        <span ng-show="itemGroup.isExpanded" class="glyphicon glyphicon-minus"></span>
+                                    </a>
+                                </td>
+                                <td ng-show="itemGroup.group">{{itemGroup.federalConstructionClass}}&nbsp;{{itemGroup.categoryDescription}}</td>
+                                <td ng-show="!itemGroup.group">{{itemGroup.itemCategory}}</td>
+                                <td ng-show="!itemGroup.group" colspan="9"></td>
+                                <td ng-show="itemGroup.group">
+                                    <pre>{{itemGroup.itemNumber}}</pre>
+                                </td>
+                                <td ng-show="itemGroup.group">{{itemGroup.combineCategories}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.combineItems}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.categoryAlternateSet}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.categoryAlternateMember}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.itemAlternateSet}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.itemAlternateMember}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.itemDescription}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.supplementalDescription}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.fund}}</td>
+                                <td ng-show="!itemGroup.group">{{itemGroup.itemFund}}</td>
+                                <td ng-show="itemGroup.group">{{itemGroup.unit}}</td>
+                                <td ng-show="!itemGroup.group"></td>
+                                <td>{{itemGroup.quantity}}</td>
+                                <td ng-show="!itemGroup.group">{{itemGroup.price | currency}}</td>
+                                <td ng-show="itemGroup.group">
+                                    <div class="input-group" ng-show="!itemGroup.isFixedPrice">
+                                        <input type="text" class="form-control" style="width:120px;" ng-readonly="itemGroup.asyncPricing" ng-model="itemGroup.price" ng-change="calculateTotals(itemGroup, 'O')" select-on-click />
+                                        <div class="input-group-btn">
+                                            <button type="button" class="btn btn-default dropdown-toggle" ng-click="showPriceOptions(itemGroup)"><span class="caret"></span></button>
+                                            <ul class="price-dropdown-menu dropdown-menu-right price-combo text-right" role="menu" ng-show="itemGroup.showPriceOptions">
+                                                <li><a href="" ng-show="!itemGroup.isFixedPrice" ng-click="setStatewidePrice(itemGroup)">{{itemGroup.statewidePrice | currency}} <strong>S</strong></a></li>
+                                                <li><a href="" ng-show="!itemGroup.isFixedPrice" ng-click="setMarketAreaPrice(itemGroup)">{{itemGroup.marketAreaPrice | currency}} <strong>M</strong></a></li>
+                                                <li><a href="" ng-show="!itemGroup.isFixedPrice" ng-click="setCountyPrice(itemGroup)">{{itemGroup.countyPrice | currency}} <strong>C</strong></a></li>
+                                                <li><a href="" ng-show="!itemGroup.isFixedPrice && itemGroup.statewidePrice == 0 && itemGroup.marketAreaPrice == 0 && itemGroup.countyPrice == 0" ng-click="setReferencePrice(itemGroup)">{{itemGroup.referencePrice | currency}} <strong>R</strong></a></li>
+                                                <li><a href="" ng-click="setParameterPrice(itemGroup)">{{itemGroup.parameterPrice | currency}} <strong>P</strong></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div ng-show="itemGroup.isFixedPrice">
+                                        {{itemGroup.price}}
+                                    </div>
+                                    <br />
+                                    <div ng-show="!itemGroup.isFixedPrice">
+                                        <a href="" ng-show="!itemGroup.showPricingParameters" ng-click="showPricingParameters(itemGroup, estimate.project.county)">Open Bid History</a>
+                                        <a href="" ng-show="itemGroup.showPricingParameters" ng-click="closePricingParameters(itemGroup)">Close Bid History</a>
+                                    </div>
+                                </td>
+                                <td>{{itemGroup.priceType}}</td>
+                                <td>{{itemGroup.price * itemGroup.quantity | currency}}</td>
+                            </tr>
+                            <tr ng-if="itemGroup.group" ng-show="itemGroup.showPricingParameters" ng-repeat-end>
+                                <td colspan="18">
+                                    <div style="overflow: auto; max-height: 600px;">
+                                        <div class="bg-warning" style="text-align: right; font-size: 12pt;">
+                                            Current History Price: {{itemGroup.history.average | currency}}
+                                            &nbsp;&nbsp;
+                                            <button class="btn btn-primary" ng-click="applyParameterPrice(itemGroup)">Save Parameter Price</button>
+                                            &nbsp;&nbsp;
+                                        </div>
+                                        <br/>
+                                        <div>
+                                            <a href="" ng-click="itemGroup.history.showOtherParms = !itemGroup.history.showOtherParms">{{itemGroup.history.showOtherParms ? 'Hide' : 'Show'}}&nbsp;Parameters</a>
+                                            &nbsp;&nbsp;
+                                            <a href="" ng-click="selectAll(itemGroup.history)">Select All Bids</a>
+                                        </div>
+                                        <br/>
+                                        <div ng-show="itemGroup.history.showOtherParms">
+                                            <div style="width: 250px; float: left;">
+                                                <div>Contract Type</div>
+                                                <br />
+                                                <div>
+                                                    <label>
+                                                        <input type="radio" ng-model="itemGroup.history.contractType" value="all" ng-change="applyFilters(itemGroup.history)" /> All
+                                                    </label>
+                                                </div>
+                                                <div>
+                                                    <label>
+                                                        <input type="radio" ng-model="itemGroup.history.contractType" value="construction" ng-change="applyFilters(itemGroup.history)" /> Construction Only
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div style="width: 250px; float: left;">
+                                                <div>Work Type</div>
+                                                <br />
+                                                <div ng-repeat="workType in itemGroup.history.workTypes">
+                                                    <label>
+                                                        <input type="checkbox" ng-change="applyFilters(itemGroup.history)" ng-model="workType.include" /> {{workType.name}}&nbsp;({{workType.code}})
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div style="width: 250px; float: left;">
+                                                <div>Geographical Location</div>
+                                                <br />
+                                                <div ng-repeat="marketArea in itemGroup.history.marketAreas">
+                                                    <label>
+                                                        <input type="checkbox" ng-model="marketArea.include" ng-change="selectMarketArea(marketArea, itemGroup.history)"> <a href="" ng-click="marketArea.showCounties = !marketArea.showCounties">{{marketArea.name}}</a>
+                                                    </label>
+                                                    <div ng-show="marketArea.showCounties">
+                                                        <div ng-repeat="county in marketArea.counties">
+                                                            &nbsp;&nbsp;&nbsp;
+                                                            <label>
+                                                                <input type="checkbox" ng-change="setMarketAreaSelection(marketArea, itemGroup.history)" ng-model="county.include"> {{county.name}}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="clear: both;"></div>
+                                        </div>
+                                        <br/>
+                                        <div style="text-align: right;">
+                                            <label>
+                                                <input type="checkbox" ng-model="itemGroup.history.omitOutliers"> Omit Outliers on Recalculation
+                                            </label>
+                                            &nbsp;&nbsp;
+                                            <button class="btn btn-default" ng-click="updateBidHistory(itemGroup, estimate.project.county)">Recalculate Bid Price</button>
+                                            &nbsp;&nbsp;
+                                        </div>
+                                        <br />
+                                        <div ng-show="itemGroup.history.maxBiddersProposal != null && itemGroup.history.maxBiddersProposal != undefined">
+                                            <table class="table table-bordered table-condensed table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <td rowspan="2">
+                                                            <a href="" ng-click="sortHistory(itemGroup.history, 'proposal')">Proposal</a>
+                                                        </td>
+                                                        <td rowspan="2">Letting Date</td>
+                                                        <td rowspan="2">
+                                                            <a href="" ng-click="sortHistory(itemGroup.history, 'county')">County</a>
+                                                        </td>
+                                                        <td rowspan="2">
+                                                            <a href="" ng-click="sortHistory(itemGroup.history, 'quantity')">Quantity</a>
+                                                        </td>
+                                                        <td colspan="3">Rank</td>
+                                                        <td rowspan="2" ng-repeat="bidder in itemGroup.history.maxBiddersProposal.bids">
+                                                            <a href="" ng-click="omitOrIncludeBidder(itemGroup.history, bidder)">{{bidder.number == 1 ? 'Awarded' : 'Bidder ' + (bidder.number - 1).toString()}}</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <a href="" ng-click="sortHistory(itemGroup.history, 'quantityWeight')">Quantity</a>
+                                                        </td>
+                                                        <td>
+                                                            <a href="" ng-click="sortHistory(itemGroup.history, 'timeWeight')">Letting</a>
+                                                        </td>
+                                                        <td>
+                                                            <a href="" ng-click="sortHistory(itemGroup.history, 'locationWeight')">Location</a>
+                                                        </td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="proposal in itemGroup.history.proposals | orderBy:itemGroup.history.sort:itemGroup.history.sortReverse">
+                                                        <td>
+                                                            <a href="" ng-click="omitOrIncludeProposal(itemGroup.history, proposal)">{{proposal.proposal}}</a>
+                                                        </td>
+                                                        <td>{{proposal.letting}}</td>
+                                                        <td>{{proposal.county}}</td>
+                                                        <td>{{proposal.quantity}}</td>
+                                                        <td>{{proposal.quantityWeight == 9999999 ? '' : proposal.quantityWeight}}</td>
+                                                        <td>{{proposal.timeWeight == 9999999 ? '' : proposal.timeWeight}}</td>
+                                                        <td>{{proposal.locationWeight == 9999999 ? '' : proposal.locationWeight}}</td>
+                                                        <td ng-repeat="bid in proposal.bids">
+                                                            <div>
+                                                                <label ng-if="!bid.blank">
+                                                                    <input type="checkbox" ng-model="bid.include"> {{bid.price | currency}}
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="text-right">
+                    <button class="btn btn-primary" ng-click="saveEstimate()">Save Estimate</button>    
+                </div>
+            </div>
+        </div> 
+    </div>
+</div>
+<br />
+<br />
+<br/>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hibernate-mapping schema="transport" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Wt" xmlns="urn:nhibernate-mapping-2.2">
+  <class name="ProposalItem" table="PROPOSALITEM" schema="trnsport" mutable="false">
+    <id name="Id" type="Int64">
+      <column name="PROPOSALITEM_ID" not-null="true" sql-type="bigint" />
+      <generator class="identity" />
+    </id>
+    <many-to-one name="MyRefItem" column="REFITEM_ID" class="RefItem" not-null="false"/>
+    <many-to-one name="MySection" column="PROPOSALSECTION_ID" class="Section" not-null="false"/>
+    <property name="Quantity" >
+      <column name="QTY" not-null="true" precision="12" scale="3" sql-type="numeric" />
+    </property>
+    <property name="AlternateSet" type="String" >
+      <column name="ALTERNATESET_NM" not-null="false" length="20" sql-type="varchar" />
+    </property>
+    <property name="AlternateMember" type="String" >
+      <column name="ALTERNATEMEMBER_NM" not-null="false" length="20" sql-type="varchar" />
+    </property>
+    <property name="SupplementalDescription" >
+      <column name="SUPPDESCR" not-null="true" length="256" sql-type="varchar"/>
+    </property>
+    <!-- Pricing -->
+    <property name="IsLowCost" >
+      <column name="LOWCOSTFLAG" not-null="true" sql-type="bit" />
+    </property>
+    <property name="Price" >
+      <column name="UNITPRICE" not-null="true" precision="16" scale="5" sql-type="numeric" />
+    </property>
+    <property name="ExtendedAmount" >
+      <column name="EXTENDEDAMOUNT" not-null="false" precision="16" scale="2" sql-type="numeric" />
+    </property>
+    <property name="EstimateType" >
+      <column name="ESTIMATIONTYPE" length="40" not-null="false" sql-type="varchar" />
+    </property>
+    <property name="PricingComments" >
+      <column name="PRICINGCOMMENTS" length="256" not-null="false" sql-type="varchar" />
+    </property>
+    <property name="LastUpdatedDate" >
+      <column name="LASTUPDATED_DT" not-null="false" sql-type="datetime2" />
+    </property>
+    <property name="LastUpdatedBy" >
+      <column name="LASTUPDATEDBY" length="256" not-null="false" sql-type="varchar" />
+    </property>
+    <!-- End Pricing-->
+    <set name="ProjectItems" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="PROPOSALITEM_ID"/>
+      </key>
+      <one-to-many class="ProjectItem"/>
+    </set>
+    <set name="Bids" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="PROPOSALITEM_ID"/>
+      </key>
+      <one-to-many class="Bid"/>
+    </set>
+  </class>
+</hibernate-mapping>
