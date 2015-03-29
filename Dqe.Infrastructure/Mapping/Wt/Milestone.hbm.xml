@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<hibernate-mapping schema="transport" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Wt" xmlns="urn:nhibernate-mapping-2.2">
+	<class name="Milestone" table="Milestone" schema="trnsport" mutable="false">
+		<id name="Id" type="Int64">
+			<column name="MILESTONE_ID" not-null="true" sql-type="bigint" />
+			<generator class="identity" />
+		</id>
+		<many-to-one name="MyProposal" column="PROPOSAL_ID" class="Proposal" not-null="false"/>
+		<property name="Main" >
+			<column name="MAIN" not-null="true" sql-type="bit" />
+		</property>
+		<property name="NumberOfUnits">
+			<column name="NUMOFUNIT" not-null="false" sql-type="bigint" />
+		</property>
+		<property name="Unit" type="String">
+			<column name="UNIT" not-null="false" length="20" sql-type="varchar" />
+		</property>
+		<property name="RoadCostPerTimeUnit" type="Decimal">
+			<column name="ROADCOSTPERTIMEUNIT" not-null="false" precision="12" scale="2" sql-type="numeric" />
+		</property>
+		<property name="Description" type ="String">
+			<column name="DESCR" not-null ="true" sql-type="varchar" />
+		</property>
+	</class>
+</hibernate-mapping>

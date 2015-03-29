@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hibernate-mapping schema="transport" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Wt" xmlns="urn:nhibernate-mapping-2.2">
+  <class name="Project" table="PROJECT" schema="trnsport" mutable="false">
+    <id name="Id" type="Int64">
+      <column name="PROJECT_ID" not-null="true" sql-type="bigint" />
+      <generator class="identity" />
+    </id>
+    <many-to-one name="MyProposal" column="PROPOSAL_ID" class="Proposal" not-null="false"/>
+    <property name="ProjectNumber" type="String" >
+      <column name="PROJECT_NM" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <property name="SpecBook" type="String" >
+      <column name="SPECBOOK" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <property name="Description" type="String" >
+      <column name="DESCR" not-null="true" length="256" sql-type="varchar" />
+    </property>
+    <property name="Designer" type="String" >
+      <column name="DESIGNER" not-null="true" length="20" sql-type="varchar" />
+    </property>
+    <property name="IsValid" type="String" >
+      <column name="PJFLG3" not-null="true" length="1" sql-type="varchar" />
+    </property>
+    <property name="IsLatestVersion" >
+      <column name="IS_LATEST_VERSION" not-null="true" sql-type="bit" />
+    </property>
+    <!-- Pricing -->
+    <property name="EstimatedDate" >
+      <column name="ESTIMATED_DT" not-null="false" sql-type="datetime2" />
+    </property>
+    <property name="ProjectItemTotal" >
+      <column name="PROJECTITEMTOTAL" not-null="false" precision="14" scale="2" sql-type="numeric" />
+    </property>
+    <property name="LastUpdatedDate" >
+      <column name="LASTUPDATED_DT" not-null="false" sql-type="datetime2" />
+    </property>
+    <property name="LastUpdatedBy" >
+      <column name="LASTUPDATEDBY" length="256" not-null="false" sql-type="varchar" />
+    </property>
+    <property name="PricedBy" >
+      <column name="PRICEDBY" length="20" not-null="false" sql-type="varchar" />
+    </property>
+    <property name="PricedDate" >
+      <column name="PRICED_DT" not-null="false" sql-type="datetime2" />
+    </property>
+    <property name="LettingDate" >
+      <column name="PJDT1" not-null="true" sql-type="datetime2" />
+    </property>
+    <!-- End Pricing-->
+    <set name="Categories" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore" >
+      <key>
+        <column name="PROJECT_ID"/>
+      </key>
+      <one-to-many class="Category"/>
+    </set>
+    <set name="Counties" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore" >
+      <key>
+        <column name="PROJECT_ID"/>
+      </key>
+      <one-to-many class="County"/>
+    </set>
+    <set name="Districts" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
+      <key>
+        <column name="PROJECT_ID"/>
+      </key>
+      <one-to-many class="District"/>
+    </set>
+  </class>
+</hibernate-mapping>

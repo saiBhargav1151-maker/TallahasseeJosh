@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Reports">
+	<class name="ReportProjectSummary" table="DQET035_RPT_PRJ_SM">
+		<id name="Id" column="RPT_PROJ_SUM_SQ">
+      <generator class="sequence">
+        <param name="sequence">DQEQ035_RPT_PRJ_SM</param>
+      </generator>
+		</id>
+    <many-to-one name="MyReportProject" class="ReportProject" column="RPT_PROJ_SQ" not-null="true"/>
+    <property name="AlternateDescription" type="AnsiString">
+      <column name="ALT_DS" sql-type="varchar(256)" not-null="true"/>
+    </property>
+		<property name="CategoryAlternateSet" type="AnsiString">
+      <column name="CAT_ALT_SET_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+		<property name="CategoryAlternateMember" type="AnsiString">
+      <column name="CAT_ALT_MBR_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+		<property name="ItemAlternateSet" type="AnsiString">
+      <column name="ITM_ALT_SET_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+		<property name="ItemAlternateMember" type="AnsiString">
+      <column name="ITM_ALT_MBR_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+		<property name="IsLowCost" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="LOW_CST_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+		<property name="Total">
+      <column name="TOT_NUM" sql-type="decimal(14, 2)" not-null="true"/>
+    </property>
+	</class>
+</hibernate-mapping>

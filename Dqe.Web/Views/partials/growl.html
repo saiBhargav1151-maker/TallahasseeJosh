@@ -1,0 +1,19 @@
+﻿<div class="growl">
+    <div class="growl-item alert" ng-class="messages.length > 0 ? computeClasses(messages[0]) : ''" ng-hide="messages == undefined || messages.length == 0">
+        <button title="Click to close the message" type="button" class="close" ng-click="deleteMessages()">&times;</button>
+        <div style="float: left; width: 50px;" ng-show="messages[0].severity == 'error'">
+            <div>
+                <strong>Error:</strong>
+            </div>
+        </div>
+        <div style="float: left;" ng-show="messages.length > 1">
+            <ul>
+                <li ng-repeat="message in messages">{{message.text}}</li>
+            </ul>    
+        </div>
+        <div style="float: left;" ng-show="messages.length == 1">
+            {{messages[0].text}}
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+﻿<br/>
+Code Type
+<div class="row">
+    <div class="col-lg-2">
+        <select class="form-control" ng-model="codeType" ng-change="getCodes()">
+            <option value="--" selected>--Select a code to manage--</option>
+            <option value="CG">Cost Groups</option>
+            <option value="CS">CADD Summaries</option>
+        </select>
+    </div>
+</div>
+<br/>
+<div class="row" ng-show="codeType != '--'">
+    <div class="col-lg-4">
+        <table class="table table-bordered table-condensed">
+            <thead>
+                <tr>
+                    <td>Code</td>
+                    <td class="text-center">Active</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="code in codes">
+                    <td>
+                        <input type="text" ng-model="code.name" class="form-control" />
+                    </td>
+                    <td>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" ng-model="code.isActive">
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" ng-model="newCode.name" class="form-control" />
+                    </td>
+                    <td>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" ng-model="newCode.isActive">
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>        
+    </div>    
+</div>
+<br/>
+<div class="row" ng-show="codeType != '--'">
+    <div class="col-lg-4">
+        <button class="btn btn-primary" title="Click to update the codes" ng-disabled="newCode.name == '' && codes.length == 0" ng-click="updateCodes()">Submit</button>
+    </div>
+</div>    
