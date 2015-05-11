@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="PayItemMaster" table="DQET008_PAY_ITM">
+    <id name="Id" column="PAY_ITM_SQ">
+      <generator class="sequence">
+        <param name="sequence">DQEQ008_PAY_ITM</param>
+      </generator>
+    </id>
+    <natural-id mutable="true">
+      <many-to-one name="MyMasterFile" column="MSTR_FILE_SQ" not-null="true"/>
+      <property name="RefItemName" type="AnsiString">
+        <column name="PAY_ITM_NM" sql-type="varchar(20)" not-null="true"/>
+      </property>
+    </natural-id>
+    <many-to-one name="MyPayItemStructure" column="PAY_ITM_STRCT_SQ" not-null="false"/>
+    <many-to-one name="MyCostBasedTemplate" column="CST_TMPLT_SQ" not-null="false"/>
+    <property name="Description" type="AnsiString">
+      <column name="PAY_ITM_DS" sql-type="varchar(256)" not-null="true"/>
+    </property>
+    <property name="Unit" type="AnsiString">
+      <column name="UNIT_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+    <property name="CalculatedUnit" type="AnsiString">
+      <column name="UNIT_DS" sql-type="varchar(200)" not-null="false"/>
+    </property>
+    <property name="UnitSystem" type="AnsiString">
+      <column name="UNIT_SYS_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+    <property name="LumpSum" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="LUMP_SUM_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="BidAsLumpSum" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="LUMP_SUM_BID_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="SuppDescriptionRequired" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="SPLMNT_RQIR_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="CombineWithLikeItems" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="CMB_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="IsFixedPrice" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="FIX_PRCE_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="MajorItem" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="MAJ_ITM_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="NonBid" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="NON_BID_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="DbeInterest" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="INTST_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="RefPrice">
+      <column name="REF_PRCE_NUM" sql-type="decimal(16, 5)" not-null="false"/>
+    </property>
+    <property name="ObsoleteDate">
+      <column name="OBSLT_DT" sql-type="datetime2" not-null="false"/>
+    </property>
+    <property name="CommonUnit" type="AnsiString">
+      <column name="CMN_UNIT_TXT" sql-type="varchar(20)" not-null="false"/>
+    </property>
+    <property name="ItemType">
+      <column name="ITM_TYP_TXT" sql-type="varchar(20)" not-null="false"/>
+    </property>
+    <property name="ItemClass">
+      <column name="ITM_CLSF_TXT" sql-type="varchar(20)" not-null="false"/>
+    </property>
+    <property name="ContractClass">
+      <column name="CNTRT_CLSF_TXT" sql-type="varchar(20)" not-null="false"/>
+    </property>
+    <property name="ShortDescription" type="AnsiString">
+      <column name="SHRT_DS" sql-type="varchar(256)" not-null="false"/>
+    </property>
+    <property name="ConversionFactorToCommonUnit">
+      <column name="CNVT_FCTR_NUM" sql-type="decimal(9, 4)" not-null="false"/>
+    </property>
+    <property name="DbePercentToApply">
+      <column name="APPL_PCT_NUM" sql-type="decimal(5, 2)" not-null="false"/>
+    </property>
+    <property name="RecordSource" type="AnsiString">
+      <column name="REC_SRCE_TXT" sql-type="varchar(20)" not-null="false"/>
+    </property>
+    <property name="BidRequirementCode" type="AnsiString">
+      <column name="BID_RQIR_TXT" sql-type="varchar(20)" not-null="false"/>
+    </property>
+    <property name="Administrative" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="ADM_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="IsFrontLoadedItem" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="FRNT_LOAD_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="ExemptFromMaa" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="EXMPT_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="PayPlan" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="PAY_PLN_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="AutoPaidPercentSchedule" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="AUTO_PD_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="CoApprovalRequired" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="APRV_RQIR_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="PercentScheduleItem" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="PCT_SCH_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="FuelAdjustment" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="FUEL_ADJ_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="CreatedDate">
+      <column name="CREA_TMS" sql-type="datetime2" not-null="false"/>
+    </property>
+    <property name="CreatedBy" type="AnsiString">
+      <column name="CREA_USER_TXT" sql-type="varchar(256)" not-null="false"/>
+    </property>
+    <property name="LastUpdatedDate">
+      <column name="LAST_UPDT_TMS" sql-type="datetime2" not-null="false"/>
+    </property>
+    <property name="LastUpdatedBy" type="AnsiString">
+      <column name="LAST_UPDT_USER_TXT" sql-type="varchar(256)" not-null="false"/>
+    </property>
+    <property name="SpecialtyItem" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="SPCL_ITM_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="ExemptFromRetainage" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="EXMPT_RTNG_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="RegressionInclusion" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="INCLD_RGRS_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="AlternateItemName" type="AnsiString">
+      <column name="ALT_NM" sql-type="varchar(20)" not-null="false"/>
+    </property>
+    <property name="FuelAdjustmentType" type="AnsiString">
+      <column name="FUEL_ADJ_TXT" sql-type="varchar(20)" not-null="false"/>
+    </property>
+    <property name="Ildt2">
+      <column name="EXT_DT" sql-type="datetime2" not-null="false"/>
+    </property>
+    <property name="OpenedDate">
+      <column name="OPEN_DT" sql-type="datetime2" not-null="false"/>
+    </property>
+    <property name="Ilflg1">
+      <column name="EXT_FLG_CD" sql-type="char(1)" not-null="false"/>
+    </property>
+    <property name="Ilnum1">
+      <column name="EXT_NUM" sql-type="decimal(13, 2)" not-null="false"/>
+    </property>
+    <property name="Ilsst1" type="AnsiString">
+      <column name="EXT_TXT" sql-type="varchar(256)" not-null="false"/>
+    </property>
+    <property name="Illst1" type="AnsiString">
+      <column name="EXT_LIST_TXT" sql-type="varchar(256)" not-null="false"/>
+    </property>
+    <property name="Itmqtyprecsn">
+      <column name="QTY_PRCIS_CD" sql-type="char(1)" not-null="false"/>
+    </property>
+    <property name="StateReferencePrice">
+      <column name="ST_AVG_PRCE_NUM" sql-type="decimal(14, 2)" not-null="false"/>
+    </property>
+    <property name="SrsId">
+      <column name="STAF_MBR_CNCT_SQ" not-null="true"/>
+    </property>
+    <property name="EffectiveDate">
+      <column name="EFFCT_DT" sql-type="datetime2" not-null="false"/>
+    </property>
+    <property name="ConcreteFactor">
+      <column name="CNCRT_FCTR_NUM" sql-type="decimal(14, 5)" not-null="true"/>
+    </property>
+    <property name="AsphaltFactor">
+      <column name="ASPH_FCTR_NUM" sql-type="decimal(14, 5)" not-null="true"/>
+    </property>
+    <property name="FactorNotes" type="AnsiString">
+      <column name="FCTR_NOTE_TXT" sql-type="varchar(5000)" not-null="false"/>
+    </property>
+    <property name="IsFederalFunded" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="FED_FND_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <set name="CountyAveragePrices" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="PAY_ITM_SQ"/>
+      <one-to-many class="CountyAveragePrice"/>
+    </set>
+    <set name="MarketAreaAveragePrices" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="PAY_ITM_SQ"/>
+      <one-to-many class="MarketAreaAveragePrice"/>
+    </set>
+    <set name="ProposalHistories" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore">
+      <key column="PAY_ITM_SQ"/>
+      <one-to-many class="ProposalHistory"/>
+    </set>
+    <set name="CostGroups" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="PAY_ITM_SQ"/>
+      <one-to-many class="CostGroupPayItem"/>
+    </set>
+  </class>
+</hibernate-mapping>

@@ -1,0 +1,160 @@
+﻿<div class="row" ng-show="!showNewStructure">
+    <div class="col-lg-12">
+        <a href="" title="Click to open the form to add a new pay item structure" ng-click="addNewStructure()">New Structure</a>
+    </div>
+</div>
+<div class="row" ng-show="showNewStructure">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">Add a new Pay Item Structure</div>
+            <div class="panel-body">
+                <pay-item-structure 
+                    structure="newStructure" 
+                    cancel-callback="cancelAddNewStructure" 
+                    insert-structure-callback="addStructureToList" >
+                </pay-item-structure>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                BOE Chapter Index
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 000- 199" ng-click="listItems(' 0')">
+                            <pre> 000- 199</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 200- 299" ng-click="listItems(' 2')">
+                            <pre> 200- 299</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 300- 399" ng-click="listItems(' 3')">
+                            <pre> 300- 399</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 400- 499" ng-click="listItems(' 4')">
+                            <pre> 400- 499</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 500- 599" ng-click="listItems(' 5')">
+                            <pre> 500- 599</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 600- 699" ng-click="listItems(' 6')">
+                            <pre> 600- 699</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 700- 799" ng-click="listItems(' 7')">
+                            <pre> 700- 799</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 800- 899" ng-click="listItems(' 8')">
+                            <pre> 800- 899</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 900- 999" ng-click="listItems(' 9')">
+                            <pre> 900- 999</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1">
+                        <a href="" title="Click to view pay item structures 1000-1999" ng-click="listItems('1')">
+                            <pre>1000-1999</pre>
+                        </a>
+                    </div>
+                    <div class="col-lg-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">Options</div>
+            <div class="panel-body">
+                <label>
+                    <input type="checkbox" ng-model="showCurrentItems" ng-change="resetStructures()"/> Show Current Items Only
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <table class="table table-condensed table-bordered">
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>Structure ID</td>
+                    <td>Title</td>
+                    <td>Unit</td>
+                </tr>
+                <tr>
+                    <td>
+                        Filters:&nbsp;&nbsp;
+                        <a href="" title="Click to apply the current filters" ng-click="filterItems()">Apply</a>&nbsp;&nbsp;
+                        <a href="" title="Click to clear the current filters" ng-click="clearAllFilters()">Clear</a>
+                    </td>
+                    <td><input class="form-control" ng-model="filter.name"></td>
+                    <td><input class="form-control" ng-model="filter.title"></td>
+                    <td><input class="form-control" ng-model="filter.unit"></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat-start="structure in filteredItems | orderBy : 'name'">
+                    <td>
+                        <a href="" title="Click to expand/collapse the pay item structure details" ng-click="toggleStructureDetail(structure)">
+                            <span ng-show="!structure.showDetail" class="glyphicon glyphicon-plus"></span>
+                            <span ng-show="structure.showDetail" class="glyphicon glyphicon-minus"></span>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" title="filter this structure number" ng-click="filterStructure(structure.name)">
+                            <pre>{{structure.name}}</pre>
+                        </a>
+                    </td>
+                    <td>{{structure.title}}</td>
+                    <td>{{structure.unit}}</td>
+                </tr>
+                <tr ng-repeat-end ng-if="structure.showDetail">
+                    <td colspan="4">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">Pay Item Structure</div>
+                            <div class="panel-body">
+                                <pay-item-structure structure="structure"
+                                                    remove-structure-callback="removeStructureFromList"
+                                                    unlinked-items="unlinkedItems"
+                                                    load-items="getItemsForStructure"
+                                                    primary-units="primaryUnits"
+                                                    hybrid-units="hybridUnits"
+                                                    item-types="itemTypes"
+                                                    cost-based-templates="costBasedTemplates"
+                                                    item-classifications="itemClassifications"
+                                                    contract-classifications="contractClassifications"
+                                                    fuel-types="fuelTypes"
+                                                    precision-codes="precisionCodes"
+                                                    show-current="showCurrentItems">
+                                </pay-item-structure>        
+                            </div>
+                        </div>
+                    </td>
+                </tr>    
+            </tbody>
+        </table>
+    </div>
+</div>
