@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="PayItemStructure" table="DQET002_ITM_STRCT">
+    <id name="Id" column="PAY_ITM_STRCT_SQ">
+      <generator class="sequence">
+        <param name="sequence">DQEQ002_ITM_STRCT</param>
+      </generator>
+    </id>
+    <natural-id mutable="true">
+      <property name="StructureId" type="AnsiString">
+        <column name="STRCT_NM" sql-type="varchar(25)" not-null="true"/>
+      </property>  
+    </natural-id>
+    <!--<many-to-one name="MyCostBasedTemplate" column="CostBasedTemplateId" not-null="false"/>-->
+    <property name="Title" type="AnsiString">
+      <column name="TTL_TXT" sql-type="varchar(500)" not-null="true"/>
+    </property>
+    <property name="IsPlanQuantity" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="PLN_QTY_CD" sql-type="char(1)" not-null="false"/>
+    </property>
+    <property name="Notes" type="AnsiString">
+      <column name="NOTE_TXT" sql-type="varchar(500)" not-null="false"/>
+    </property>
+    <property name="Details" type="AnsiString">
+      <column name="DET_TXT" sql-type="varchar(8000)" not-null="false"/>
+    </property>
+    <property name="PlanSummary" type="AnsiString">
+      <column name="PLN_SUM_TXT" sql-type="varchar(5000)" not-null="false"/>
+    </property>
+    <property name="DesignFormsText" type="AnsiString">
+      <column name="DSGN_FORM_TXT" sql-type="varchar(500)" not-null="false"/>
+    </property>
+    <property name="ConstructionFormsText" type="AnsiString">
+      <column name="CNST_FORM_TXT" sql-type="varchar(500)" not-null="false"/>
+    </property>
+    <property name="PpmChapterText" type="AnsiString">
+      <column name="CHPTR_TXT" sql-type="varchar(500)" not-null="false"/>
+    </property>
+    <property name="TrnsportText" type="AnsiString">
+      <column name="TRNSP_TXT" sql-type="varchar(500)" not-null="false"/>
+    </property>
+    <property name="OtherText" type="AnsiString">
+      <column name="OTH_TXT" sql-type="varchar(500)" not-null="false"/>
+    </property>
+    <property name="StandardsText" type="AnsiString">
+      <column name="STND_TXT" sql-type="varchar(500)" not-null="false"/>
+    </property>
+    <property name="SpecificationsText" type="AnsiString">
+      <column name="SPEC_TXT" sql-type="varchar(500)" not-null="false"/>
+    </property>
+    <property name="StructureDescription" type="AnsiString">
+      <column name="STRCT_DS" sql-type="varchar(5000)" not-null="false"/>
+    </property>
+    <!--<property name="SrsId">
+      <column name="SrsId" not-null="true"/>
+    </property>-->
+    <property name="IsMonitored" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="MNTR_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="SrsId">
+      <column name="STAF_MBR_CNCT_SQ" not-null="false"/>
+    </property>
+    <property name="PendingInformation" type="AnsiString">
+      <column name="PEND_INFO_TXT" sql-type="varchar(5000)" not-null="false"/>
+    </property>
+    <property name="EssHistory" type="AnsiString">
+      <column name="HST_TXT" sql-type="varchar(8000)" not-null="false"/>
+    </property>
+    <property name="BoeRecentChangeDate">
+      <column name="RCNT_CHNG_DT" sql-type="datetime2" not-null="false"/>
+    </property>
+    <property name="BoeRecentChangeDescription" type="AnsiString">
+      <column name="RCNT_CHNG_TXT" sql-type="varchar(1000)" not-null="false"/>
+    </property>
+
+    <property name="RequiredItems" type="AnsiString">
+      <column name="RQIR_ITM_TXT" sql-type="varchar(2000)" not-null="false"/>
+    </property>
+    <property name="RecommendedItems" type="AnsiString">
+      <column name="RCM_ITM_TXT" sql-type="varchar(2000)" not-null="false"/>
+    </property>
+    
+    <set name="OtherReferences" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="DQET006_OTH_LNK">
+      <key column="PAY_ITM_STRCT_SQ"/>
+      <many-to-many class="OtherReferenceWebLink" column="WEB_LNK_SQ"/>
+    </set>
+    <set name="Standards" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="DQET004_STND_LNK">
+      <key column="PAY_ITM_STRCT_SQ"/>
+      <many-to-many class="StandardWebLink" column="WEB_LNK_SQ"/>
+    </set>
+    <set name="PpmChapters" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="DQET003_PPM_LNK">
+      <key column="PAY_ITM_STRCT_SQ"/>
+      <many-to-many class="PpmChapterWebLink" column="WEB_LNK_SQ"/>
+    </set>
+    <set name="Specifications" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="DQET007_SPEC_LNK">
+      <key column="PAY_ITM_STRCT_SQ"/>
+      <many-to-many class="SpecificationWebLink" column="WEB_LNK_SQ"/>
+    </set>
+    <set name="PrepAndDocChapters" lazy="true" inverse="false" cascade="save-update" access="field.camelcase-underscore" table="DQET005_TRNSP_LNK">
+      <key column="PAY_ITM_STRCT_SQ"/>
+      <many-to-many class="PrepAndDocChapterWebLink" column="WEB_LNK_SQ"/>
+    </set>
+    <set name="PayItemMasters" lazy="true" inverse="true" cascade="save-update" access="field.camelcase-underscore" >
+      <key column="PAY_ITM_STRCT_SQ"/>
+      <one-to-many class="PayItemMaster"/>
+    </set>
+  </class>
+</hibernate-mapping>

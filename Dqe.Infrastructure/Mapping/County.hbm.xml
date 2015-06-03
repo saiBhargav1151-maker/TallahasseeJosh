@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="County" table="DQET017_CNTY">
+    <id name="Id" column="CNTY_SQ">
+      <generator class="sequence">
+        <param name="sequence">DQEQ017_CNTY</param>
+      </generator>
+    </id>
+    <natural-id mutable="true">
+      <property name="Name" type="AnsiString">
+        <column name="CNTY_NM" sql-type="varchar(100)" not-null="true"/>
+      </property>
+    </natural-id>
+    <many-to-one name="MyMarketArea" column="MKT_AREA_SQ" not-null="false"/>
+    <property name="Code">
+      <column name="CNTY_CD" sql-type="varchar(2)" not-null="true" unique="true"/>
+    </property>
+    <set name="Projects" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="CNTY_SQ"/>
+      <one-to-many class="Project"/>
+    </set>
+    <set name="CountyAveragePrices" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="CNTY_SQ"/>
+      <one-to-many class="CountyAveragePrice"/>
+    </set>
+  </class>
+</hibernate-mapping>

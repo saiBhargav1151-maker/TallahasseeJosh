@@ -1,0 +1,145 @@
+﻿<form method="POST" id="ViewMasterFileReport">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Options</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-1">Select Master File:</div>
+                        <div class="col-lg-2">
+                            <select name="masterFile" title="Master file" class="form-control" ng-model="searchPayItems.masterFile" ng-options="book.name for book in specBooks" ng-change="getPayItems(searchPayItems.masterFile.name)"></select>
+                        </div>
+                        <div class="col-lg-7"></div>
+                        <div class="col-lg-1" style="text-align: right">
+                            Output Format
+                        </div>
+                        <div class="col-lg-1">
+                            <input type="radio" name="reportFormat" ng-model="reportFormat.type" value="PDF"> PDF
+                            <input type="radio" name="reportFormat" ng-model="reportFormat.type" value="EXCELOPENXML"> Excel
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <input name="structure" type="checkbox" title="Filter items without structures" ng-model="searchPayItems.structure" ng-change="filterStructures()"/> Has Structure
+                        </div>
+                        <div class="col-lg-4">
+                        </div>
+                        <div class="col-lg-1">
+                            <button type="button" class="btn btn-primary" title="Click to download the report - file type: PDF file size: unknown"
+                                    ng-click="viewMasterFileReport()">
+                                View Report
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <input name="current" type="checkbox" title="Show current items only" ng-model="searchPayItems.showCurrentItems" ng-change="filterCurrent()"/> Show Current Items Only
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="hiddenMasterFile" name="hiddenMasterFile" value="">
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col-lg-12">
+        Current Page: {{currentPage + 1}}
+        <br />
+        <button type="button" title="Click to go to page {{$index + 1}}" class="btn btn-sm btn-default" style="width: 40px; margin-bottom: 5px; margin-right: 2px;" ng-repeat="i in getNumberAsArray(numberOfPages()) track by $index" ng-click="setCurrentPage($index)">
+            {{$index + 1}}
+        </button>
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col-lg-12">
+        <table class="table table-condensed table-bordered">
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>Item</td>
+                    <td>Description</td>
+                    <td>Unit</td>
+                    <td>Item Class</td>
+                    <td>Spec Type</td>
+                    <td>Comb Flag</td>
+                    <td>Obsolete Flag</td>
+                    <td>Opened Date</td>
+                    <td>Obsolete Date</td>
+                    <td>Reference Price</td>
+                </tr>
+                <tr>
+                    <td>
+                        Filters:&nbsp;&nbsp;
+                        <a href="" title="Click to apply the current filters" ng-click="filterItems()">Apply</a>&nbsp;&nbsp;
+                        <a href="" title="Click to clear the current filters" ng-click="clearAllFilters()">Clear</a>
+                    </td>
+                    <td><input class="form-control" title="filter item name" ng-model="filter.name" ng-trim="false" /></td>
+                    <td><input class="form-control" title="filter item description" ng-model="filter.description" /></td>
+                    <td><input class="form-control" title="filter item unit" ng-model="filter.unit" /></td>
+                    <td><input class="form-control" title="filter item itemClass" ng-model="filter.itemClass" /></td>
+                    <td><input class="form-control" title="filter item specTech" ng-model="filter.specTech" /></td>
+                    <td><input class="form-control" title="filter item combFlag" ng-model="filter.combFlag" /></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat-start="payItem in filteredItems | startFrom: currentPage * pageSize  | limitTo:pageSize | orderBy:'name'">
+                    <td>
+                        <a href="" ng-if="security.isAuthorized" title="Click to show/hide the pay item bid history" ng-click="showPricingParameters(payItem)">
+                            <span ng-show="!payItem.showPricingParameters" class="glyphicon glyphicon-plus"></span>
+                            <span ng-show="payItem.showPricingParameters" class="glyphicon glyphicon-minus"></span>
+                        </a>
+                    </td>
+                    <td><pre>{{payItem.name}}</pre></td>
+                    <td>{{payItem.description}}</td>
+                    <td>{{payItem.unit}}</td>
+                    <td>{{payItem.itemClass}}</td>
+                    <td>{{payItem.specTech}}</td>
+                    <td>{{payItem.combFlag}}</td>
+                    <td>{{payItem.obsoleteFlag}}</td>
+                    <td>{{payItem.openedDate}}</td>
+                    <td>{{payItem.obsoleteDate}}</td>
+                    <td style="text-align: right">{{payItem.referencePrice}}</td>
+                </tr>
+                <tr ng-repeat-end ng-if="security.isAuthorized" ng-show="payItem.showPricingParameters">
+                    <td colspan="11">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div style="overflow-x: auto; width:100%">
+                                    <table class="table table-bordered table-condensed table-hover" style="font-size: 8pt;">
+                                        <thead>
+                                            <tr>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td style="max-width: 800px; overflow-x: auto;">
+                                                    <bid-history close-pricing-parameters="closePricingParameters" is-pricing-interface="false" item-group="payItem"></bid-history>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        Current Page: {{currentPage + 1}}
+        <br />
+        <button type="button" title="Click to go to page {{$index + 1}}" class="btn btn-sm btn-default" style="width: 40px; margin-bottom: 5px; margin-right: 2px;" ng-repeat="i in getNumberAsArray(numberOfPages()) track by $index" ng-click="setCurrentPage($index)">
+            {{$index + 1}}
+        </button>
+    </div>
+</div>

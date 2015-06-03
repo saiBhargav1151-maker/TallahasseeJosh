@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<codesets>
+  <codeset name="DOR_UC">
+    <code name="0000" description="VACANT RESIDENTIAL" />
+    <code name="5200" description="CROPLAND SOIL CAPABILITY CLASS 2" />
+    <code name="0002" description="VACANT CO-OP W/NO MOBILE HOME" />
+    <code name="5201" description="CROPLAND SOIL CAPABILITY CLASS 2 WITH IMPROVEMENTS" />
+    <code name="0004" description="VACANT CONDOMINIA" />
+    <code name="5300" description="CROPLAND SOIL CAPABILITY CLASS 3" />
+    <code name="0005" description="VACANT CO-OP W/MOBILE HOME ON PERSONAL PROPERTY" />
+    <code name="5301" description="CROPLAND SOIL CAPABILITY CLASS 3 WITH IMPROVEMENTS" />
+    <code name="0100" description="SINGLE FAMILY" />
+    <code name="5400" description="TIMBERLAND - SITE INDEX 90 AND ABOVE" />
+    <code name="0104" description="SINGLE FAMILY HOMES/CONDOMINIA" />
+    <code name="5401" description="TIMBERLAND - SITE INDEX 90 AND ABOVE WITH IMPROVEMENTS" />
+    <code name="0108" description="1/2 OF A DUPLEX" />
+    <code name="5500" description="TIMBERLAND - SITE INDEX 80 TO 89" />
+    <code name="0200" description="MOBILE HOMES" />
+    <code name="5501" description="TIMBERLAND - SITE INDEX 80 TO 89 WITH IMPROVEMENTS" />
+    <code name="0204" description="MOBILE HOMES/ CONDOMINIA" />
+    <code name="5600" description="TIMBERLAND - SITE INDEX 70 TO 79" />
+    <code name="0300" description="MULTI FAMILY - 10 UNITS OR MORE" />
+    <code name="5601" description="TIMBERLAND - SITE INDEX 70 TO 79 WITH IMPROVEMENTS" />
+    <code name="0400" description="CONDOMINIA IMPROVED" />
+    <code name="5700" description="TIMBERLAND - SITE INDEX 60 TO 69" />
+    <code name="0500" description="COPPERATIVES" />
+    <code name="5701" description="TIMBERLAND - SITE INDEX 60 TO 69 WITH IMPROVEMENTS" />
+    <code name="0600" description="RETIREMENT HOMES NOT ELIGIBLE UNDER 196.192" />
+    <code name="5800" description="TIMBERLAND - SITE INDEX 50 TO 59" />
+    <code name="0700" description="MISCELLANEOUS RESIDENTIAL - MIGRANT CAMPS, ETC." />
+    <code name="5801" description="TIMBERLAND - SITE INDEX 50 TO 59 WITH IMPROVEMENTS" />
+    <code name="0800" description="DUPLEX" />
+    <code name="5900" description="TIMBERLAND AND NOT CLASSIFIED BY SITE INDEX TO PINES" />
+    <code name="0801" description="TWO OR MORE HOUSES" />
+    <code name="5901" description="TIMBERLAND AND NOT CLASSIFIED BY SITE INDEX TO PINES WITH IMPROVEMENTS" />
+    <code name="0803" description="MULTI-FAMILY MORE THAN 2, LESS THAN 10 UNITS" />
+    <code name="6000" description="GRAZING LAND SOIL CAPABILITY CLASS 1" />
+    <code name="0805" description="HOUSE PLUS A DUPLEX" />
+    <code name="6001" description="GRAZING LAND SOIL CAPABILITY CLASS 1 WITH IMPROVEMENTS" />
+    <code name="0900" description="UNDEFINED - RESERVED FOR D.O.R." />
+    <code name="6100" description="GRAZING LAND SOIL CAPABILITY CLASS 2" />
+    <code name="1000" description="VACANT COMMERCIAL" />
+    <code name="6101" description="GRAZING LAND SOIL CAPABILITY CLASS 2 WITH IMPROVEMENTS" />
+    <code name="1100" description="STORES, ONE-STORY" />
+    <code name="6200" description="GRAZING LAND SOIL CAPABILITY CLASS 3" />
+    <code name="1200" description="MIXED USE- STORE &amp; OFFICE, STORE &amp; RESENDENTIAL COMBINATIONS, ETC." />
+    <code name="6201" description="GRAZING LAND SOIL CAPABILITY CLASS 3 WITH IMPROVEMENTS" />
+    <code name="1300" description="DEPARTMENT STORE" />
+    <code name="6300" description="GRAZING LAND SOIL CAPABILITY CLASS 4" />
+    <code name="1400" description="SUPERMARKETS" />
+    <code name="6301" description="GRAZING LAND SOIL CAPABILITY CLASS 4 WITH IMPROVEMENTS" />
+    <code name="1500" description="REGIONAL SHOPPING CENTERS" />
+    <code name="6400" description="GRAZING LAND SOIL CAPABILITY CLASS 5" />
+    <code name="1600" description="COMMUNITY SHOPPING CENTERS" />
+    <code name="6401" description="GRAZING LAND SOIL CAPABILITY CLASS 5 WITH IMPROVEMENTS" />
+    <code name="1604" description="COMMUNITY SHOPPING CENTERS CONDOMIUM" />
+    <code name="6500" description="GRAZING LAND SOIL CAPABILITY CLASS 6" />
+    <code name="1700" description="OFFICE BUILDINGS, NON-PROFESSIONAL, ONE-STORY" />
+    <code name="6501" description="GRAZING LAND SOIL CAPABILITY CLASS 6 WITH IMPROVEMENTS" />
+    <code name="1704" description="OFFICE CONDOMINIA" />
+    <code name="6600" description="ORCHADS GROVE, CITRUS, ETC" />
+    <code name="1800" description="OFFICE BUILDINGS, NON-PROFESSIONAL, MULTI-STORY" />
+    <code name="6601" description="ORCHADS GROVE, CITRUS, ETC WITH IMPROVEMENTS" />
+    <code name="1900" description="PROFESSIONAL SERVICE BUILDINGS AND MEDICAL OFFICES" />
+    <code name="6700" description="POULTRY, BEES, TROPICAL FISH, RABBITS, ETC." />
+    <code name="1904" description="OFFICE, CONDOMINIA, MEDICAL" />
+    <code name="6701" description="POULTRY, BEES, TROPICAL FISH, RABBITS, ETC. WITH IMPROVEMENTS" />
+    <code name="2000" description="AIRPORTS, BUS AND MARINE TERMINALS, PIERS, MARINAS" />
+    <code name="6800" description="DAIRIES, FEED LOTS" />
+    <code name="2100" description="RESTAURANTS, CAFETERIAS" />
+    <code name="6801" description="DAIRIES, FEED LOTS WITH IMPROVEMENTS" />
+    <code name="2200" description="DRIVE-IN RESTAURANTS" />
+    <code name="6900" description="ORNAMENTAL, MISCELLANEOUS AGRICULTURAL" />
+    <code name="2300" description="FINANCIAL INSTUTIONS" />
+    <code name="6901" description="ORNAMENTAL, MISCELLANEOUS AGRICULTURAL WITH IMPROVEMENTS" />
+    <code name="2400" description="INSURANCE COMPANIES" />
+    <code name="7000" description="VACANT INSTITUTIONAL" />
+    <code name="2500" description="REPAIR SERVICE SHOPS" />
+    <code name="7100" description="CHURCHES" />
+    <code name="2600" description="SERVICE STATIONS" />
+    <code name="7200" description="PRIVATE SCHOOLS AND COLLEGES" />
+    <code name="2700" description="AUTO SALES, REPAIR, DEALER, AND RELATED" />
+    <code name="7300" description="PRIVATELY OWNED COLLEGES" />
+    <code name="2800" description="PARKING LOTS - COMMERCIAL AND PATRON" />
+    <code name="7400" description="HOME FOR THE AGED" />
+    <code name="2802" description="MOBILE HOME PARKS" />
+    <code name="7500" description="ORPHANGES, OTHER NON-PROFIT/ CHARITABLE SERVICES" />
+    <code name="2900" description="WHOLESALE &amp; MANUFACTURING OUTLETS, PRODUCE &amp; COMMERCIAL FISH HOUSES" />
+    <code name="7600" description="MORTUARIES, CEMENTARIES, CREMATORIUMS" />
+    <code name="3000" description="FLORIST, GREENHOUSES" />
+    <code name="7700" description="CLUBS, LODGES, UNION HALLS" />
+    <code name="3100" description="DRIVE - IN THEATERS, ENCLOSED AUDITORIUMS" />
+    <code name="7800" description="SANITARIUMS, CONVALESCENT AND REST HOMES" />
+    <code name="3300" description="NIGHTCLUBS, COCKTAIL LOUNGES, BARS" />
+    <code name="7900" description="CULTURAL ORGANIZATIONS, FACILITIES" />
+    <code name="3400" description="BOWLING ALLEYS, SKATING RINK, POOL HALL, ENCLOSED ARENA" />
+    <code name="8000" description="UNDEFINED - RESERVED FOR FUTURE USE" />
+    <code name="3500" description="TOURIST ATTRACTION, PERMANENT EXHIBITS, OTHER PRIVATELY OWNED ENTERTAINMENT FACILITIES" />
+    <code name="8100" description="MILITARY" />
+    <code name="3600" description="CAMPS" />
+    <code name="8200" description="FOREST, PARKS, RECREATION AREAS" />
+    <code name="3700" description="RACE TRACKS, HORSE, AUTO, DOG" />
+    <code name="8300" description="PUBLIC COUNTY SCHOOLS" />
+    <code name="3800" description="GOLF COURSES, DRIVING RANGES" />
+    <code name="8400" description="COLLEGES" />
+    <code name="3900" description="HOTELS, MOTELS" />
+    <code name="8500" description="HOSIPTALS" />
+    <code name="4000" description="VACANT INDUSTRIAL" />
+    <code name="8600" description="COUNTY OTHER THAN PREVIOUSLY COVERED" />
+    <code name="4100" description="LIGHT INDUSTRIAL, SM EQUIP MFG, SM MACH SHOP, PRINTING PLANTS" />
+    <code name="8700" description="STATE OTHER THAN PREVIOUSLY COVERED" />
+    <code name="4104" description="LIGHT INDUSTRIAL, CONDOMINIA, SM EQUIP MFG, SM MACH SHOP, PRINTING PLANTS CONDO" />
+    <code name="8800" description="FEDERAL OTHER THAN PREVIOUSLY COVERED" />
+    <code name="4200" description="HEAVY INDUSTRIAL, HVY EQUIP MFG, LG MACH SHOPS, FOUNDRIES" />
+    <code name="8900" description="MUNICIPAL OTHER THAN PREVIOUSLY COVERED" />
+    <code name="4300" description="LUMBER YARDS, SAWMILLS, PLANING MILLS" />
+    <code name="9000" description="LEASEHOLD INTERESTS -GOVERNMENT OWNED/LEASED TO NON-GOVERNMENTAL LESSEE" />
+    <code name="4400" description="PACKING, FRUIT &amp; VEGETABLES, MEAT PACKING PLANTS" />
+    <code name="9100" description="UTILITY - GAS, ELECTRIC, TELEPHONE, ETC." />
+    <code name="4500" description="CANNERIES, FRUIT &amp; VEGETABLES, BOTTLES &amp; BREWERS" />
+    <code name="9200" description="MINING, PETROLEUM OR GAS LANDS" />
+    <code name="4600" description="OTHER FOOD PROCESSING, CANDY FACTORIES, BAKERY" />
+    <code name="9300" description="SUBSURFACE RIGHTS" />
+    <code name="4700" description="MINERAL PROCESSING, PHOSPHATE PROCESS, CEMENT PLANTS" />
+    <code name="9400" description="RIGHT-OF-WAYS, STREETS, ROADS, DITCH, ETC." />
+    <code name="4800" description="WAREHOUSING, DISTRIBUTION TERMINALS, VANS &amp; STORAGE WAREHOUSING" />
+    <code name="9500" description="RIVERS, LAKES, SUBMERGED LANDS" />
+    <code name="4801" description="MINI STORAGE WAREHOUSE" />
+    <code name="9600" description="SEWAGE DISPOSAL, SOLID WASTE, BORROW PITS, ETC." />
+    <code name="4804" description="WAREHOUSING CONDOMINIA, DIST TERMINALS, VANS &amp; STORAGE WAREHOUSING CONDOMINIA" />
+    <code name="9700" description="OUTDOOR RECREATIONAL OR PARK LAND SUBJECT TO CLASSIFIED ASSESSMENT" />
+    <code name="4900" description="OPEN STORAGE, NEW &amp; USED BLDG, SUPPLIES, JUNK YARDS, AUTO WRECKING" />
+    <code name="9800" description="CENTRALLY ASSESSED - RAILROADS" />
+    <code name="5000" description="IMPROVED AGRICULTURAL, STABLES" />
+    <code name="9900" description="VACANT ACREAGE NOT ZONED AGRICULTURAL" />
+    <code name="5001" description="IMPROVED AGRICULTURAL, STABLES -WITH IMPROVEMENTS" />
+    <code name="9901" description="VACANT ACREAGE NOT ZONED AGRICULTURAL -IMPROVED" />
+    <code name="5100" description="CROPLAND SOIL CAPABILITY CLASS 1" />
+    <code name="9902" description="VACANT ACREAGE NOT ZONED AGRICULTURAL - WITH MOBILE HOME - CODE NOY USED AS OF 10/8" />
+    <code name="5101" description="CROPLAND SOIL CAPABILITY CLASS 1 WITH IMPROVEMENTS" />
+  </codeset>
+</codesets>

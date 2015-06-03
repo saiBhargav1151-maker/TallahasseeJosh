@@ -1,0 +1,211 @@
+﻿<div class="row" ng-show="!showNewCostGroup">
+    <div class="col-lg-12">
+        <a href="" title="Click to open the form to add a new cost group" ng-click="addNewCostGroup()">New Cost Group</a>
+    </div>
+</div>
+<div class="row" ng-show="showNewCostGroup">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">Add a new Cost Group</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-1">
+                        <strong>Name</strong>
+                    </div>
+                    <div class="col-lg-5">
+                        <input type="text" title="Cost group name" style="text-transform: uppercase" maxlength="20" class="form-control" ng-model="costGroup.name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1">
+                        <strong>Description</strong>
+                    </div>
+                    <div class="col-lg-5">
+                        <input type="text" title="Cost group description" style="text-transform: uppercase" maxlength="256" class="form-control" ng-model="costGroup.description" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1">
+                        <strong>Unit</strong>
+                    </div>
+                    <div class="col-lg-5">
+                        <select class="form-control" title="Cost group unit" ng-options="item.name as item.name + ' - ' + item.description for item in primaryUnits" ng-model="costGroup.unit"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="text-right">
+                        <button type="button" class="btn btn-primary" title="Click to save cost group"
+                                ng-disabled="costGroup.name == undefined || costGroup.name == null || costGroup.name == '' ||
+                                             costGroup.description == undefined || costGroup.description == null || costGroup.description == '' ||
+                                             costGroup.unit == undefined || costGroup.unit == null || costGroup.unit == ''"
+                                ng-click="saveCostGroup(costGroup)">
+                            Save
+                        </button>
+                        <button type="button" title="Click to cancel new cost group" class="btn btn-default" ng-click="cancelCostGroup()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <table class="table table-condensed table-bordered">
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>Group Name</td>
+                    <td>Description</td>
+                    <td>Unit</td>
+                </tr>
+                <tr>
+                    <td>
+                        Filters:&nbsp;&nbsp;
+                        <a href="" title="Click to apply the current filters" ng-click="filterItems()">Apply</a>&nbsp;&nbsp;
+                        <a href="" title="Click to clear the current filters" ng-click="clearAllFilters()">Clear</a>
+                    </td>
+                    <td><input class="form-control" title="Filter cost group name" ng-model="filter.name" /></td>
+                    <td><input class="form-control" title="Filter cost group description" ng-model="filter.description" /></td>
+                    <td><input class="form-control" title="Filter cost group unit" ng-model="filter.unit" /></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat-start="costGroup in filteredItems | orderBy: 'name'">
+                    <td>
+                        <a href="" title="Click to expand/collapse the cost group details" ng-click="toggleGroupDetail(costGroup)">
+                            <span ng-show="!costGroup.showDetail" class="glyphicon glyphicon-plus"></span>
+                            <span ng-show="costGroup.showDetail" class="glyphicon glyphicon-minus"></span>
+                        </a>
+                    </td>
+                    <td style="text-transform: uppercase">{{costGroup.name}}</td>
+                    <td style="text-transform: uppercase">{{costGroup.description}}</td>
+                    <td>{{costGroup.unit}}</td>
+                </tr>
+                <tr ng-repeat-end ng-if="costGroup.showDetail">
+                    <td colspan="4">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">Edit Cost Group</div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-lg-1">
+                                        <strong>Name</strong>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <input type="text" title="Cost group name" style="text-transform: uppercase" maxlength="20" class="form-control" ng-model="costGroup.name" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-1">
+                                        <strong>Description</strong>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <textarea title="Cost group description" style="text-transform: uppercase; height: 75px;" maxlength="256" class="form-control" ng-model="costGroup.description"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-1">
+                                        <strong>Unit</strong>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <select class="form-control" title="Cost group unit" ng-options="item.name as item.name + ' - ' + item.description for item in primaryUnits" ng-model="costGroup.unit"></select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="text-right">
+                                            <button type="button" class="btn btn-warning" title="Delete cost group" ng-show="!confirmRemoveCostGroup" focus-me="confirmRemoveCostGroupReset" ng-click="confirmRemoveCostGroup = true; confirmRemoveCostGroupReset = false;">Delete</button>
+                                            <div class="alert alert-warning" ng-show="confirmRemoveCostGroup">
+                                                Click 'Yes' to remove the cost group or 'No' to cancel&nbsp;&nbsp;
+                                                <button type="button" class="btn btn-default" title="Cancel removal of cost group" focus-me="confirmRemoveCostGroup" ng-click="confirmRemoveCostGroup = false; confirmRemoveCostGroupReset = true;">No</button>
+                                                <button type="button" class="btn btn-default" title="Confirm removal of cost group" ng-click="removeCostGroup(costGroup); confirmRemoveCostGroupReset = true;">Yes</button>
+                                            </div>
+                                            <button type="button" class="btn btn-primary" title="Save edit of cost group" ng-click="editCostGroup(costGroup)">Save</button>
+                                            <button type="button" class="btn btn-default" title="Cancel edit of cost group" ng-click="cancelEdit(costGroup)">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div ng-show="costGroup.showPayItems">
+                                    <strong>Pay Items</strong>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <table class="table table-condensed table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td>Spec Book</td>
+                                                        <td>Item</td>
+                                                        <td>Description</td>
+                                                        <td>Unit</td>
+                                                        <td>Conversion Factor</td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="payItem in costGroup.payItems">
+                                                        <td>
+                                                            <a href="" title="Click to remove cost group pay item" ng-show="!confirmRemoveItem" ng-click="confirmRemoveItem = true">Remove</a>
+                                                            <div ng-show="confirmRemoveItem">
+                                                                <div>Confirm?</div>
+                                                                <div>
+                                                                    <a href="" title="Confirm removal of cost group pay item" ng-click="removeItem(costGroup, payItem)">Yes</a>&nbsp;&nbsp;
+                                                                    <a href="" title="Cancel removal of cost group pay item" ng-click="confirmRemoveItem = false">No</a>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>{{payItem.specBook}}</td>
+                                                        <td>{{payItem.payItem}}</td>
+                                                        <td>{{payItem.payItemDescription}}</td>
+                                                        <td>{{payItem.payItemUnit}}</td>
+                                                        <td>{{payItem.conversionFactor}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-lg-1">
+                                            <strong>Add Pay Item</strong>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-lg-1">
+                                            Item Search:
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <input type="text" title="Item search" ng-model="newItem.linkItem" placeholder="" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="link as link.specBook + ': ' + link.payItemName for link in getPayItems(costGroup, $viewValue)" typeahead-editable="false" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-1">
+                                            Conversion Factor:
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <input type="text" title="Conversion factor" class="form-control" ng-model="newItem.conversionFactor" ng-disabled="newItem.linkItem == undefined || newItem.linkItem == null || newItem.linkItem == ''" ng-change="checkConversionFactorNumeric(newItem)" maxlength="15" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-1"></div>
+                                        <div class="col-lg-2">
+                                            <button type="button" class="btn btn-primary" title="Click to save the cost group pay item"
+                                                    ng-click="saveCostGroupPayItem(costGroup, newItem)"
+                                                    ng-disabled="newItem.linkItem == undefined || newItem.linkItem == null || newItem.linkItem == '' ||
+                                                             newItem.conversionFactor == undefined || newItem.conversionFactor == null || newItem.conversionFactor == ''">
+                                                Add Pay Item
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

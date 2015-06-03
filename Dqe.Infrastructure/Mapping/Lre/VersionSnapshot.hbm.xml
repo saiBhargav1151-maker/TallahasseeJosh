@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Lre">
+  <class name="VersionSnapshot" table="LRET086_VER_SNAP">
+    <composite-id name="Id" class="VersionSnapshotId">
+      <key-property name="ProjectSnapshotId" column="ESTM_PROJ_SQ" />
+      <key-property name="SnapshotDateTime" column="SNPSHOT_TMS" />
+    </composite-id>
+    <many-to-one name="MyProjectSnapshot" class="ProjectSnapshot" column="ESTM_PROJ_SQ" not-null="true"/>
+    <property name="Amount" column="PROJ_VER_AMT" not-null="true"/>
+    <property name="LabelCode" column="SNPSHOT_PHAS_CD" not-null="true"/>
+  </class>
+</hibernate-mapping>
