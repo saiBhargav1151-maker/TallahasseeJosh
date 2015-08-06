@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Reports">
+	<class name="ReportMilestoneBid" table="DQET043_RPT_MS_BID">
+		<id name="Id" column="RPT_MLSTN_BID_SQ">
+			<generator class="sequence">
+				<param name="sequence">DQEQ043_RPT_MS_BID</param>
+			</generator>
+		</id>
+		<many-to-one name="MyReportProposalVendor" class="ReportProposalVendor" column="RPT_PRPOS_VEND_SQ" not-null="true"/>
+		<many-to-one name="MyReportProposalMilestone" class="ReportProposalMilestone" column="RPT_MLSTN_SQ" not-null="true"/>
+		<property name="BidPrice">
+			<column name="BID_PRCE_AMT" sql-type="decimal(16, 5)" not-null="true"/>
+		</property>
+		<property name="NumberOfDaysBid">
+			<column name="DY_BID_NUM" not-null="true"/>
+		</property>
+		<property name="Tolerance" type="AnsiString">
+			<column name="TLRAT_TXT" sql-type="varchar(20)" not-null="false"/>
+		</property>
+		<property name="LowCost" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+			<column name="LOW_CST_CD" sql-type="char(1)" not-null="true"/>
+		</property>
+	</class>
+</hibernate-mapping>

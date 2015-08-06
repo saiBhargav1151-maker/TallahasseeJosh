@@ -1,0 +1,108 @@
+﻿<div class="row">
+    <div class="col-lg-4">
+        Grant access to:
+    </div>
+    <div class="col-lg-2" ng-show="thisUser.role == 'A'">
+        For district:
+    </div>
+    <div class="col-lg-2">
+        With role:
+    </div>
+    <div class="col-lg-2" ng-show="thisUser.role == 'A'">
+        Price Trends Authorization:
+    </div>
+    <div class="col-lg-2">          
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-4">
+        <input type="text" title="User name" ng-model="selected" placeholder="Enter a user name" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="user as user.fullName for user in getUsers($viewValue)" typeahead-editable="false" typeahead-on-select="setDistrict()" class="form-control">
+    </div>
+    <div class="col-lg-2" ng-show="thisUser.role == 'A'">
+        <select class="form-control" title="District" ng-model="district">
+            <option>CO</option>
+            <option>D1</option>
+            <option>D2</option>
+            <option>D3</option>
+            <option>D4</option>
+            <option>D5</option>
+            <option>D6</option>
+            <option>D7</option>
+            <option>TP</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <select class="form-control" title="Role" ng-model="role" ng-options="sysRole.value as sysRole.name for sysRole in sysRoles()"></select>
+    </div>
+    <div class="col-lg-2" ng-show="thisUser.role == 'A'">
+        <select class="form-control" title="Price trends authorization" ng-model="costGroupAuthorization">
+            <option>N</option>
+            <option>R</option>
+            <option>U</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <button type="button" class="btn btn-primary" title="Click to save the user" ng-click="postUser()" ng-disabled="isSubmitUserDisabled()">Submit</button>
+        <button type="button" class="btn btn-default" title="Click to reset the form" ng-click="initializeEditForm()">Reset</button>
+    </div>
+</div>    
+<br/>
+<div class="row">
+    <div class="col-lg-2">
+        Filter User: <input class="form-control" title="Filter user" ng-model="query">
+    </div>
+    <div class="col-lg-2">
+        Filter District: <input class="form-control" title="Filter district" ng-model="queryDistrict">
+    </div>
+    <div class="col-lg-2">
+        Sort by:
+        <select class="form-control" title="Order by" ng-model="order">
+            <option value="fullName">User</option>
+            <option value="district">District</option>
+            <option value="roleAsString">Role</option>
+        </select>      
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="col-lg-10">
+        <table class="table table-bordered table-condensed">
+            <tr>
+                <th style="text-align: center; width: 10%">Select</th>
+                <th style="width: 30%">User</th>
+                <th style="width: 10%">District</th>
+                <th style="width: 20%">Role</th>
+                <th style="width: 30%">Cost Group Authorization</th>
+            </tr>
+            <tr ng-repeat="user in users | filter:{fullName:query, district:queryDistrict} | orderBy:order">
+                <td>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" title="Select user" ng-model="user.selected">
+                        </label>
+                    </div>
+                </td>
+                <td>
+                    <a href="" title="Click to edit user {{user.fullName}}" ng-click="editUser(user)">{{user.fullName}}</a>
+                </td>
+                <td>{{user.district}}</td>
+                <td>{{user.roleAsString}}</td>
+                <td>{{user.costGroupAuthorization}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-10">
+        <div class="alert alert-warning" ng-show="showConfirmRemoval">
+            Are you sure you want to remove the selected users?
+            <button type="button" title="Click to confirm the removal of the user" focus-me="showConfirmRemoval" class="btn btn-default" ng-click="showConfirmRemoval = false; showConfirmRemovalReset = true;">No</button>
+            <button type="button" title="Click to cancel the removal of the user" class="btn btn-warning" ng-click="removeSelectedUsers(); showConfirmRemovalReset = true;">Yes</button>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-10">
+        <button type="button" class="btn btn-warning" title="Click to remove the user" ng-disabled="isRemoveUserDisabled()" focus-me="showConfirmRemovalReset" ng-click="showConfirmRemoval = true; showConfirmRemovalReset = false;" ng-hide="showConfirmRemoval">Remove Selected</button>
+    </div>
+</div>

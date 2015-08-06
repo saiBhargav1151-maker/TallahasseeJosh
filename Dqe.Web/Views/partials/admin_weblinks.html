@@ -1,0 +1,76 @@
+﻿<br/>
+Web Link Type
+<div class="row">
+    <div class="col-lg-2">
+        <select class="form-control" title="Link type" ng-model="linkType" ng-change="getLinks()">
+            <option value="--" selected>--Select a web link to manage--</option>
+            <option value="OR">Other References</option>
+            <option value="PC">PPM Chapters</option>
+            <option value="PD">CPAM Chapters</option>
+            <option value="SP">Specifications</option>
+            <option value="SD">Standards</option>
+        </select>
+    </div>
+</div>
+<br/>
+<div class="row" ng-show="linkType != '--'">
+    <div class="col-lg-2">
+        Search: <input class="form-control" title="Filter link name" ng-model="query">
+    </div>
+</div>
+<br/>
+<div class="row" ng-show="linkType != '--'">
+    <div class="col-lg-6">
+        <table class="table table-bordered table-condensed">
+            <thead>
+                <tr>
+                    <td style="text-align: center; width: 10%">Select</td>
+                    <td style="width: 30%">Name</td>
+                    <td style="width: 60%">Web Link</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="link in links | filter:query">
+                    <td>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" title="Select link" ng-model="link.selected">
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <input type="text" title="Name" ng-model="link.name" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="text" title="URL" ng-model="link.webLink" class="form-control">
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input type="text" title="Name" ng-model="newLink.name" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="text" title="URL" ng-model="newLink.webLink" class="form-control">
+                    </td>
+                </tr>
+            </tbody>
+        </table>        
+    </div>    
+</div>
+<br/>
+<div class="row" ng-show="linkType != '--' && showConfirmRemoval">
+    <div class="col-lg-10">
+        <div class="alert alert-warning">
+            Are you sure you want to remove the selected web links?
+            <button type="button" title="Click to cancel the removal of the links" class="btn btn-default" focus-me="showConfirmRemoval" ng-click="showConfirmRemoval = false; showConfirmRemovalReset = true;">No</button>
+            <button type="button" title="Click to confirm the removal of the links" class="btn btn-warning" ng-click="removeSelectedLinks(); showConfirmRemovalReset = true;">Yes</button>
+        </div>
+    </div>
+</div>
+<div class="row" ng-show="linkType != '--' && !showConfirmRemoval">
+    <div class="col-lg-10">
+        <button type="button" class="btn btn-primary" title="Click to save the updates to the links" ng-disabled="(newLink.name == '' || newLink.webLink == '') && codes.length == 0" ng-click="updateLinks()">Submit</button>&nbsp;
+        <button type="button" class="btn btn-warning" title="Click to remove the selected links" ng-disabled="isRemoveLinkDisabled()" ng-click="showConfirmRemoval = true; showConfirmRemovalReset = false;" focus-me="showConfirmRemovalReset" ng-hide="showConfirmRemoval">Remove Selected</button>
+    </div>
+</div>    

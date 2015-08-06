@@ -1,0 +1,58 @@
+﻿<div class="row">
+    <div class="col-lg-12">
+        <form method="POST" id="ViewProposalSummaryReport" autocomplete="off">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Proposal Estimate</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-3">
+                            Estimate Type
+                        </div>
+                        <div class="col-lg-3">
+                            <input type="radio" name="estimateType" title="Estimate type" ng-model="estimateType.type" ng-change="estimateTypeChange()" value="A"> Authorization
+                            <br />
+                            <input type="radio" name="estimateType" title="Estimate type" ng-model="estimateType.type" ng-change="estimateTypeChange()" value="O"> Official
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-lg-3">
+                            Enter Proposal
+                        </div>
+                        <div class="col-lg-3">
+                            <input name="proposalNumber" id="proposalNumber" type="text" title="Proposal number"
+                                   ng-model="selectedProposal" placeholder="123451" typeahead-min-length="3" typeahead-wait-ms="500"
+                                   typeahead="proposal as proposal.number for proposal in getProposals($viewValue)"
+                                   typeahead-editable="false" class="form-control" autocomplete="off">
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-lg-3">
+                            Output Format
+                        </div>
+                        <div class="col-lg-3">
+                            <input type="radio" name="reportFormat" ng-model="reportFormat.type" value="PDF"> PDF
+                            <input type="radio" name="reportFormat" ng-model="reportFormat.type" value="EXCELOPENXML"> Excel
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-lg-3">
+                        </div>
+                        <div class="col-lg-2">
+                            <button type="button" class="btn btn-primary" title="Click to download the report - file type: PDF file size: unknown"
+                                    ng-disabled="selectedProposal == undefined || selectedProposal == null || selectedProposal == ''"
+                                    ng-click="viewProposalSummary()">
+                                View Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

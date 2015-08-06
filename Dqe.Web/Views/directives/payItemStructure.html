@@ -1,0 +1,470 @@
+﻿<div class="row">
+    <div class="col-lg-1">
+        <strong>Structure ID</strong>
+    </div>
+    <div class="col-lg-11">
+        <strong>Title</strong>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <input type="text" title="Structure ID" class="form-control" maxlength="25" ng-model="structure.name" ng-trim="false" />
+    </div>
+    <div class="col-lg-11">
+        <input type="text" title="Title" class="form-control" maxlength="500" ng-model="structure.title" />
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Obsolete</strong>
+    </div>
+    <div class="col-lg-2">
+        <strong>Unit</strong>
+    </div>
+    <div class="col-lg-3">
+        <strong>Plan Quantity?</strong>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <input type="checkbox" title="Obsolete structure" ng-model="structure.isObsolete" />
+    </div>
+    <div class="col-lg-2">
+        {{structure.unit}}    
+    </div>
+    <div class="col-lg-3">
+        <select class="form-control" title="Plan quantity" ng-model="structure.planQuantity">
+            <option value="Yes/No">Yes/No</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Notes</strong>
+    </div>
+    <div class="col-lg-11">
+        <input type="text" title="Notes" maxlength="500" class="form-control" ng-model="structure.notes" />
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Details</strong>
+        <div class="text-muted">({{8000-structure.details.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <textarea ng-model="structure.details" title="Details" my-maxlength="8000" class="form-control" style="height: 75px;"></textarea>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Plan Summary Box</strong>
+        <div class="text-muted">({{5000-structure.planSummary.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <textarea ng-model="structure.planSummary" title="Plan summary" my-maxlength="5000" class="form-control" style="height: 75px;"></textarea>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-lg-1">
+        <strong>References</strong>
+    </div>
+    <div class="col-lg-11">
+        <div class="row">
+            <div class="col-lg-1">
+                <strong>PPM Chapter</strong>
+                <div class="text-muted">({{500-structure.ppmChapterText.length}} Characters)</div>
+            </div>
+            <div class="col-lg-11">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <textarea ng-model="structure.ppmChapterText" title="PPM chapter text" my-maxlength="500" class="form-control" style="height: 75px;"></textarea>        
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.ppmChapters != undefined && structure.ppmChapters.length > 0">
+                    <div class="col-lg-12">
+                        <strong>Reference Links</strong>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.ppmChapters != undefined && structure.ppmChapters.length > 0">
+                    <div class="col-lg-12">
+                        <div ng-repeat="ppmChapter in structure.ppmChapters">
+                            [<a href="" title="Remove link" ng-click="removeLink(ppmChapter, structure.ppmChapters)">Remove</a>]&nbsp;<a href="{{ppmChapter.webLink}}" title="go to {{ppmChapter.name}} - opens a new browser window" target="_blank">{{ppmChapter.name}}: {{ppmChapter.webLink}}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <strong>Add Reference Link</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <input type="text" title="Add reference link" ng-model="newLink" typeahead-on-select="addLink(newLink, structure.ppmChapters); newLink = '';" placeholder="" typeahead-min-length="1" typeahead-wait-ms="500" typeahead="link as link.name + ': ' + link.webLink for link in getLinks($viewValue, 'PC', structure.ppmChapters)" typeahead-editable="false" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-1">
+                <strong>CPAM Chapters</strong>
+                <div class="text-muted">({{500-structure.trnsportText.length}} Characters)</div>
+            </div>
+            <div class="col-lg-11">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <textarea ng-model="structure.trnsportText" title="CPAM chapter text" my-maxlength="500" class="form-control" style="height: 75px;"></textarea>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.prepAndDocChapters != undefined && structure.prepAndDocChapters.length > 0">
+                    <div class="col-lg-12">
+                        <strong>Reference Links</strong>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.prepAndDocChapters != undefined && structure.prepAndDocChapters.length > 0">
+                    <div class="col-lg-12">
+                        <div ng-repeat="prepAndDocChapter in structure.prepAndDocChapters">
+                            [<a href="" title="Remove link" ng-click="removeLink(prepAndDocChapter, structure.prepAndDocChapters)">Remove</a>]&nbsp;<a href="{{prepAndDocChapter.webLink}}" title="go to {{prepAndDocChapter.name}} - opens a new browser window" target="_blank">{{prepAndDocChapter.name}}: {{prepAndDocChapter.webLink}}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <strong>Add Reference Link</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <input type="text" title="Add reference link" ng-model="newLink" typeahead-on-select="addLink(newLink, structure.prepAndDocChapters); newLink = '';" placeholder="" typeahead-min-length="1" typeahead-wait-ms="500" typeahead="link as link.name + ': ' + link.webLink for link in getLinks($viewValue, 'PD', structure.prepAndDocChapters)" typeahead-editable="false" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-1">
+                <strong>Other</strong>
+                <div class="text-muted">({{500-structure.otherText.length}} Characters)</div>
+            </div>
+            <div class="col-lg-11">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <textarea ng-model="structure.otherText" title="Other reference text" my-maxlength="500" class="form-control" style="height: 75px;"></textarea>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.otherReferences != undefined && structure.otherReferences.length > 0">
+                    <div class="col-lg-12">
+                        <strong>Reference Links</strong>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.otherReferences != undefined && structure.otherReferences.length > 0">
+                    <div class="col-lg-12">
+                        <div ng-repeat="otherReference in structure.otherReferences">
+                            [<a href="" title="Remove link" ng-click="removeLink(otherReference, structure.otherReferences)">Remove</a>]&nbsp;<a href="{{otherReference.webLink}}" title="go to {{otherReference.name}} - opens a new browser window" target="_blank">{{otherReference.name}}: {{otherReference.webLink}}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <strong>Add Reference Link</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <input type="text" title="Add reference link" ng-model="newLink" typeahead-on-select="addLink(newLink, structure.otherReferences); newLink = '';" placeholder="" typeahead-min-length="1" typeahead-wait-ms="500" typeahead="link as link.name + ': ' + link.webLink for link in getLinks($viewValue, 'OR', structure.otherReferences)" typeahead-editable="false" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-1">
+                <strong>Standards</strong>
+                <div class="text-muted">({{500-structure.standardsText.length}} Characters)</div>
+            </div>
+            <div class="col-lg-11">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <textarea ng-model="structure.standardsText" title="Standards text" my-maxlength="500" class="form-control" style="height: 75px;"></textarea>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.standards != undefined && structure.standards.length > 0">
+                    <div class="col-lg-12">
+                        <strong>Reference Links</strong>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.standards != undefined && structure.standards.length > 0">
+                    <div class="col-lg-12">
+                        <div ng-repeat="standard in structure.standards">
+                            [<a href="" title="Remove Link" ng-click="removeLink(standard, structure.standards)">Remove</a>]&nbsp;<a href="{{standard.webLink}}" title="go to {{standard.name}} - opens a new browser window" target="_blank">{{standard.name}}: {{standard.webLink}}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <strong>Add Reference Link</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <input type="text" title="Add reference link" ng-model="newLink" typeahead-on-select="addLink(newLink, structure.standards); newLink = '';" placeholder="" typeahead-min-length="1" typeahead-wait-ms="500" typeahead="link as link.name + ': ' + link.webLink for link in getLinks($viewValue, 'SD', structure.standards)" typeahead-editable="false" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-1">
+                <strong>Specifications</strong>
+                <div class="text-muted">({{500-structure.specificationsText.length}} Characters)</div>
+            </div>
+            <div class="col-lg-11">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <textarea ng-model="structure.specificationsText" title="Specification text" my-maxlength="500" class="form-control" style="height: 75px;"></textarea>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.specifications != undefined && structure.specifications.length > 0">
+                    <div class="col-lg-12">
+                        <strong>Reference Links</strong>
+                    </div>
+                </div>
+                <div class="row" ng-show="structure.specifications != undefined && structure.specifications.length > 0">
+                    <div class="col-lg-12">
+                        <div ng-repeat="specification in structure.specifications">
+                            [<a href="" title="Remove link" ng-click="removeLink(specification, structure.specifications)">Remove</a>]&nbsp;<a href="{{specification.webLink}}" title="go to {{specification.name}} - opens a new browser window" target="_blank">{{specification.name}}: {{specification.webLink}}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <strong>Add Reference Link</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <input type="text" title="Add reference link" ng-model="newLink" typeahead-on-select="addLink(newLink, structure.specifications); newLink = '';" placeholder="" typeahead-min-length="1" typeahead-wait-ms="500" typeahead="link as link.name + ': ' + link.webLink for link in getLinks($viewValue, 'SP', structure.specifications)" typeahead-editable="false" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr />
+
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Monitor</strong>
+    </div>
+    <div class="col-lg-11">
+        <div class="row">
+            <div class="col-lg-4" ng-show="structure.srsId == 0">
+                <input type="text" title="Add monitor" ng-model="structure.monitor" typeahead-on-select="setStructureMonitor(structure)" placeholder="Enter a user name" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="user as user.fullName for user in getUsers($viewValue)" typeahead-editable="false" class="form-control">
+            </div>
+            <div class="col-lg-1" ng-show="structure.srsId != 0">
+                [<a href="" title="Remove monitor" ng-click="structure.srsId = 0; structure.monitor = ''">Remove</a>]
+            </div>
+            <div class="col-lg-3" ng-show="structure.srsId != 0">
+                {{structure.monitor.fullName}}
+                <br />
+                {{structure.monitor.email}}
+                <br />
+                {{structure.monitor.phoneNumber}}
+            </div>        
+        </div>
+    </div>
+</div>
+<hr/>
+
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Struct.</strong>
+        <div class="text-muted">({{5000-structure.structureDetails.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <textarea ng-model="structure.structureDetails" title="Details" my-maxlength="5000" class="form-control" style="height: 200px;"></textarea>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Pending Information</strong>
+        <div class="text-muted">({{5000-structure.pendingInformation.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <textarea ng-model="structure.pendingInformation" title="Pending information" my-maxlength="5000" class="form-control" style="height: 75px;"></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <strong>BOE Recent Change</strong>
+        <div class="text-muted">({{1000-structure.boeRecentChangeDescription.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <div class="row">
+            <div class="col-lg-2">
+                <p class="input-group">
+                    <input type="text" title="BOE recent change date" class="form-control" datepicker-popup="MM/dd/yyyy" ng-model="structure.boeRecentChangeDate" is-open="structure.boeRecentChangeDateOpened" maxlength="10" />
+                    <span class="input-group-btn">
+                        <button type="button" title="Click to open date picker" class="btn btn-default" ng-click="boeRecentChangeDateOpen($event, structure)"><i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </p>        
+            </div>    
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <textarea ng-model="structure.boeRecentChangeDescription" title="Recent change description" my-maxlength="1000" class="form-control" style="height: 75px;"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <strong>ESS History</strong>
+        <div class="text-muted">({{8000-structure.essHistory.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <textarea ng-model="structure.essHistory" title="ESS history" my-maxlength="8000" class="form-control" style="height: 75px;"></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Required Items</strong>
+        <div class="text-muted">({{2000-structure.requiredItems.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <textarea ng-model="structure.requiredItems" title="Required Items" my-maxlength="2000" class="form-control" style="height: 75px;"></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Recomended Items</strong>
+        <div class="text-muted">({{2000-structure.recommendedItems.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <textarea ng-model="structure.recommendedItems" title="Recomended Items" my-maxlength="2000" class="form-control" style="height: 75px;"></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <strong>Replacement Items</strong>
+        <div class="text-muted">({{2000-structure.replacementItems.length}} Characters)</div>
+    </div>
+    <div class="col-lg-11">
+        <textarea ng-model="structure.replacementItems" title="Replacement Items" my-maxlength="2000" class="form-control" style="height: 75px;"></textarea>
+    </div>
+</div>
+<hr/>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="text-right">
+            <button type="button" class="btn btn-warning" title="Click to delete the pay item structure" focus-me="confirmRemoveStructureReset" ng-show="structure.id > 0 && !confirmRemoveStructure" ng-disabled="structure.items.length > 0" ng-click="confirmRemoveStructure = true; confirmRemoveStructureReset = false;">Delete</button>
+            <div class="alert alert-warning" ng-show="confirmRemoveStructure">
+                Click 'Yes' to remove the structure or 'No' to cancel&nbsp;&nbsp;
+                <button type="button" class="btn btn-default" title="Click to cancel the deletion of the pay item structure" focus-me="confirmRemoveStructure" ng-click="confirmRemoveStructure = false; confirmRemoveStructureReset = true;">No</button>
+                <button type="button" class="btn btn-default" title="Click to confirm the deletion of the pay item structure" ng-click="removeStructure(structure); confirmRemoveStructureReset = true;">Yes</button>
+            </div>
+            <button type="button" class="btn btn-primary" title="Click to save the changes to the pay item structure" ng-click="saveStructure(structure)">Save</button>
+            <button type="button" ng-show="cancelCallback != undefined && cancelCallback != null" class="btn btn-default" title="Click to cancel the unsaved changes to the pay item structure" ng-click="cancel()">Cancel</button>
+        </div>
+    </div>
+</div>
+<div ng-if="structure.id > 0">
+    <hr />
+    <strong>Pay Items</strong>&nbsp;&nbsp;(Changes to the Structure / Pay Item relationship are immediate)
+    <div class="row">
+        <div class="col-lg-12">
+            <br/>
+            <a href="" ng-show="!addNewPayItem" title="Click to show the form to add a new pay item" ng-click="addItem()">New Pay Item</a>
+            <div ng-show="addNewPayItem">
+                <pay-item item="newItem"
+                          structure="structure"
+                          primary-units="primaryUnits"
+                          hybrid-units="hybridUnits"
+                          item-types="itemTypes"
+                          cost-based-templates="costBasedTemplates"
+                          item-classifications="itemClassifications"
+                          contract-classifications="contractClassifications"
+                          fuel-types="fuelTypes"
+                          precision-codes="precisionCodes"
+                          cancel="cancelAddItem"
+                          show-current="showCurrent">
+                </pay-item>    
+            </div>
+            <br/>
+            <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td style="text-align: center;">Spec Book</td>
+                        <td style="text-align: center;">Item</td>
+                        <td style="text-align: center;">Description</td>
+                        <td style="text-align: center;">Unit</td>
+                        <td style="text-align: center;">Spec Type</td>
+                        <td style="text-align: center;">Effective Date</td>
+                        <td style="text-align: center;">Obsolete Date</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat-start="item in structure.items | orderBy : ['specBook', 'name']">
+                        <td>
+                            <a href="" focus-me="item.showDetail" title="Click to show/hide the pay item details" ng-click="toggleItemDetail(structure, item)">
+                                <span ng-class="!item.showDetail ? 'glyphicon glyphicon-plus' : 'glyphicon glyphicon-minus'"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="" title="Copy the pay item details to a new pay item" ng-click="copyItemDetail(structure, item)">
+                                Copy
+                            </a>
+                        </td>
+                        <td>
+                            <a href="" title="Click to remove the pay item from the structure - this action does not delete the pay item" ng-show="!confirmRemoveItem" ng-click="confirmRemoveItem = true">Remove</a>
+                            <div ng-show="confirmRemoveItem">
+                                <div>Confirm?</div>
+                                <div>
+                                    <a href="" title="confirm the removal of the pay item" ng-click="removeItem(structure, item)">Yes</a>&nbsp;&nbsp;
+                                    <a href="" title="cancel the removal of the pay item" ng-click="confirmRemoveItem = false">No</a>    
+                                </div>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">{{item.specBook}}</td>
+                        <td><pre>{{item.name}}</pre></td>
+                        <td>{{item.description}}</td>
+                        <td style="text-align: center;">{{item.unit}}</td>
+                        <td style="text-align: center;">{{item.specType}}</td>
+                        <td style="text-align: center;">{{item.validDate | date:'MM/dd/yyyy'}}</td>
+                        <td style="text-align: center;">{{item.obsoleteDate | date:'MM/dd/yyyy'}}</td>
+                    </tr>
+                    <tr ng-repeat-end ng-if="item.showDetail">
+                        <td colspan="10">
+                            <pay-item item="item"
+                                      structure="structure"
+                                      primary-units="primaryUnits"
+                                      hybrid-units="hybridUnits"
+                                      item-types="itemTypes"
+                                      cost-based-templates="costBasedTemplates"
+                                      item-classifications="itemClassifications"
+                                      contract-classifications="contractClassifications"
+                                      fuel-types="fuelTypes"
+                                      precision-codes="precisionCodes">
+                            </pay-item>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            Link Unlinked Item to Structure
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            <input type="text" title="Add unlinked pay item" ng-model="linkItem" typeahead-on-select="addUnlinkedItem(linkItem, structure); linkItem = '';" placeholder="" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="link as link.specBook + ': ' + link.name for link in getUnlinkedItems($viewValue)" typeahead-editable="false" class="form-control">
+        </div>
+    </div>
+</div>
