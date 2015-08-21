@@ -1,0 +1,276 @@
+﻿<div style="padding-left: 5px; width: 200px; float: left;">
+    <pre>{{itemGroup.itemNumber}}</pre>
+</div>
+<div style="float: right; width: 400px;">
+    <div style="text-align: right; padding-left: 5px; padding-right: 5px;" ng-if="isPricingInterface">
+        <button type="button" class="btn btn-primary" title="Click to save the current parameter based price for the item" ng-click="applyParameterPrice(itemGroup)">Save Parameter Price: {{itemGroup.history.average | currency}}</button>
+    </div>
+    <div style="text-align: right; padding-left: 5px; padding-right: 5px;" ng-if="!isPricingInterface">
+        Current History Price: {{itemGroup.history.average | currency}}
+    </div>    
+</div>
+<div style="clear: both"></div>
+<br/>
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Item Pricing</strong>
+    </div>
+    <div class="panel-body">
+        <div style="font-size: 8pt; width: 33%; float: left;">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="" title="show/hide basic parameters" ng-click="itemGroup.history.showBasicParameters = undefined ? itemGroup.history.showBasicParameters = true : itemGroup.history.showBasicParameters = !itemGroup.history.showBasicParameters">
+                        <strong>
+                            <i class="glyphicon glyphicon-plus" ng-show="!itemGroup.history.showBasicParameters"></i>
+                            <i class="glyphicon glyphicon-minus" ng-show="itemGroup.history.showBasicParameters"></i>
+                            Basic Parameters
+                        </strong>
+                    </a>
+                </div>
+                <div class="panel-body" ng-show="itemGroup.history.showBasicParameters">
+                    <div>
+                        <label>
+                            <input title="Construction only" type="radio" ng-model="itemGroup.history.contractType" value="construction" ng-change="applyFilters(itemGroup.history)" /> Construction Only Contracts
+                        </label>
+                        &nbsp;&nbsp;
+                        <label>
+                            <input title="All" type="radio" ng-model="itemGroup.history.contractType" value="all" ng-change="applyFilters(itemGroup.history)" /> All Contract Types
+                        </label>
+                    </div>
+                    <hr />
+                    <div>
+                        <div>
+                            <strong>Months of Bid History</strong>
+                        </div>
+                        <div style="width: 110px;">
+                            <select class="form-control" style="width: 100px;" ng-model='itemGroup.history.bidMonths' ng-options='n as n for n in monthRange' ng-change="setHistoryRange(itemGroup.history)">{{n}}</select>
+                        </div>
+                    </div>
+                    <hr />
+                    <div>
+                        <label>
+                            <input title="Include LS/DB Estimates" type="checkbox" ng-model="itemGroup.history.includeEstimates" ng-change="toggleIncludeEstimates(itemGroup.history)"> Include LS/DB Estimates
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <input title="Use Straight Average" type="checkbox" ng-model="itemGroup.history.useStraightAverage"> Use Straight Average
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="font-size: 8pt; width: 33%; float: left; margin-left: 5px;">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="" title="show/hide work type parameters" ng-click="itemGroup.history.showWorkTypeParameters = undefined ? itemGroup.history.showWorkTypeParameters = true : itemGroup.history.showWorkTypeParameters = !itemGroup.history.showWorkTypeParameters">
+                        <strong>
+                            <i class="glyphicon glyphicon-plus" ng-show="!itemGroup.history.showWorkTypeParameters"></i>
+                            <i class="glyphicon glyphicon-minus" ng-show="itemGroup.history.showWorkTypeParameters"></i>
+                            Work Type Parameters
+                        </strong>
+                    </a>
+                </div>
+                <div class="panel-body" ng-show="itemGroup.history.showWorkTypeParameters">
+                    <div ng-repeat="workType in itemGroup.history.workTypes | orderBy: 'code'">
+                        <label>
+                            <input title="({{workType.code}}) {{workType.name}}" type="checkbox" ng-model="workType.include" ng-change="applyFilters(itemGroup.history)" /> ({{workType.code}})&nbsp;{{workType.name}}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="font-size: 8pt; width: 33%; float: left; margin-left: 5px;">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="" title="show/hide market area parameters" ng-click="itemGroup.history.showMarketAreaParameters = undefined ? itemGroup.history.showMarketAreaParameters = true : itemGroup.history.showMarketAreaParameters = !itemGroup.history.showMarketAreaParameters">
+                        <strong>
+                            <i class="glyphicon glyphicon-plus" ng-show="!itemGroup.history.showMarketAreaParameters"></i>
+                            <i class="glyphicon glyphicon-minus" ng-show="itemGroup.history.showMarketAreaParameters"></i>
+                            Market Area Parameters
+                        </strong>
+                    </a>
+                </div>
+                <div class="panel-body" ng-show="itemGroup.history.showMarketAreaParameters">
+                    <div ng-repeat="marketArea in itemGroup.history.marketAreas">
+                        <label>
+                            <input type="checkbox" title="{{marketArea.name}}" ng-model="marketArea.include" ng-change="selectMarketArea(marketArea, itemGroup.history)">
+                            <a href="" title="Show/hide the counties associated to the market area" ng-click="marketArea.showCounties = !marketArea.showCounties">{{marketArea.name}}{{partialMarketAreaSelected(marketArea) ? ' - (Partial)' : ''}}</a>
+                        </label>
+                        <br />
+                        <span ng-show="marketArea.showCounties">
+                            <span style="margin-left: 10px;" ng-repeat="county in marketArea.counties">
+                                <label>
+                                    <input type="checkbox" title="{{county.name}}" ng-change="setMarketAreaSelection(marketArea, itemGroup.history)" ng-model="county.include"> {{county.name}}
+                                </label>
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="clear:both;"></div>
+        <div style="text-align: right;">
+            <!--<label>
+                    <input title="Use Straight Average" type="checkbox" ng-model="itemGroup.history.useStraightAverage"> Use Straight Average
+                </label>
+                &nbsp;&nbsp;-->
+            <!--<label>
+                    <input title="Use official estimate when bid data is not available" type="checkbox" ng-model="itemGroup.history.includeOfficialEstimate"> Use Official Estimate when Bid Data is not Available
+                </label>
+                &nbsp;&nbsp;-->
+            <label>
+                <input title="Omit outliers on recalculation" type="checkbox" ng-model="itemGroup.history.omitOutliers"> Omit Outliers on Recalculation
+            </label>
+            &nbsp;&nbsp;
+            <button type="button" ng-if="pricingLevel == 'project' && isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, estimate.project.county)">Recalculate Bid Price</button>
+            <button type="button" ng-if="pricingLevel == 'proposal' && isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, estimate.proposal.county)">Recalculate Bid Price</button>
+            <button type="button" ng-if="!isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, '')">Recalculate Bid Price</button>
+            &nbsp;&nbsp;
+        </div>
+    </div>
+</div>
+
+
+<div>
+    Current Page: {{currentPage + 1}}
+    <br />
+    <button type="button" title="Click to go to page {{$index + 1}}" class="btn btn-sm btn-default" style="width: 40px; margin-bottom: 5px; margin-right: 2px;" ng-repeat="i in getNumberAsArray(numberOfPages()) track by $index" ng-click="setCurrentPage($index)">
+        {{$index + 1}}
+    </button>
+</div>
+<a href="" title="Click to select all bids for the item" ng-click="selectAll(itemGroup.history)">Select All Bids</a>
+<!--<div style="padding-left: 5px;" ng-show="itemGroup.history.showOtherParms">
+    
+    
+
+    <div style="width: 250px; float: left;">
+        <div>Contract Type</div>
+        <br />
+        <div>
+            <label>
+                <input title="All" type="radio" ng-model="itemGroup.history.contractType" value="all" ng-change="applyFilters(itemGroup.history)" /> All
+            </label>
+        </div>
+        <div>
+            <label>
+                <input title="Construction only" type="radio" ng-model="itemGroup.history.contractType" value="construction" ng-change="applyFilters(itemGroup.history)" /> Construction Only
+            </label>
+        </div>
+    </div>
+    <div style="width: 250px; float: left;">
+        <div>Work Type</div>
+        <br />
+        <div ng-repeat="workType in itemGroup.history.workTypes">
+            <label>
+                <input title="{{workType.name}} ({{workType.code}})" type="checkbox" ng-change="applyFilters(itemGroup.history)" ng-model="workType.include" /> {{workType.name}}&nbsp;({{workType.code}})
+            </label>
+        </div>
+    </div>
+    <div style="width: 250px; float: left;">
+        <div>Geographical Location</div>
+        <br />
+        <div ng-repeat="marketArea in itemGroup.history.marketAreas">
+            <label>
+                <input title="{{marketArea.name}}" type="checkbox" ng-model="marketArea.include" ng-change="selectMarketArea(marketArea, itemGroup.history)">
+                <a href="" title="Click to show/hide counties for the market area" ng-click="marketArea.showCounties = !marketArea.showCounties">{{marketArea.name}}{{partialMarketAreaSelected(marketArea) ? ' - (Partial)' : ''}}</a>
+            </label>
+            <div ng-show="marketArea.showCounties">
+                <div ng-repeat="county in marketArea.counties">
+                    &nbsp;&nbsp;&nbsp;
+                    <label>
+                        <input title="{{county.name}}" type="checkbox" ng-change="setMarketAreaSelection(marketArea, itemGroup.history)" ng-model="county.include"> {{county.name}}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="width: 250px; float: left;">
+        <div>Months of Bid History to Use:</div>
+        <br/>
+        <select class="form-control" ng-model="itemGroup.history.bidMonths" ng-change="setHistoryRange(itemGroup.history)">
+            <option ng-repeat="n in monthRange" ng-selected="n == 36" value="{{n}}">{{n}}</option>
+        </select>
+    </div>
+    <div style="clear: both;"></div>
+</div>-->
+<div ng-show="itemGroup.history.maxBiddersProposal != null && itemGroup.history.maxBiddersProposal != undefined" style="overflow-y: auto; max-height: 600px; background-color: white; color: #1a2c3f;">
+    <table class="table table-bordered table-condensed table-striped">
+        <thead>
+            <tr>
+                <td rowspan="2">
+                    <a href="" title="Sort ascending/descending by proposal" ng-click="sortHistory(itemGroup.history, 'proposal')">Proposal</a>
+                </td>
+                <td rowspan="2">
+                    <a href="" title="Sort ascending/descending by duration" ng-click="sortHistory(itemGroup.history, 'duration')">Duration</a>
+                </td>
+                <td rowspan="2">
+                    <a href="" title="Sort ascending/descending by contract type" ng-click="sortHistory(itemGroup.history, 'contractType')">Contract Type</a>
+                </td>
+                <td rowspan="2">
+                    <a href="" title="Sort ascending/descending by work type" ng-click="sortHistory(itemGroup.history, 'workType')">Work Type</a>
+                </td>
+                <td rowspan="2">Letting Date</td>
+                <td rowspan="2">
+                    <a href="" title="Sort ascending/descending by county" ng-click="sortHistory(itemGroup.history, 'county')">County</a>
+                </td>
+                <td rowspan="2">
+                    <a href="" title="Sort ascending/descending by Quantity" ng-click="sortHistory(itemGroup.history, 'quantity')">Quantity</a>
+                </td>
+                <td colspan="3" style="text-align: center;">Rank</td>
+                
+                <td rowspan="2">
+                    <a href="" title="Sort ascending/descending by Official Estimate" ng-click="sortHistory(itemGroup.history, 'estimate')">Official Estimate</a>
+                </td>
+
+                <td rowspan="2" colspan="2" ng-repeat="bidder in itemGroup.history.maxBiddersProposal.bids">
+                    <a href="" title="Click to deselect bids to the right of this bid" ng-click="omitOrIncludeBidder(itemGroup.history, bidder)">{{bidder.number == 1 ? 'Awarded - LS/DB Estimate' : 'Bidder ' + (bidder.number - 1).toString()}}</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="" title="Sort ascending/descending by quantity" ng-click="sortHistory(itemGroup.history, 'quantityWeight')">Quantity</a>
+                </td>
+                <td>
+                    <a href="" title="Sort ascending/descending by letting" ng-click="sortHistory(itemGroup.history, 'timeWeight')">Letting</a>
+                </td>
+                <td>
+                    <a href="" title="Sort ascending/descending by location" ng-click="sortHistory(itemGroup.history, 'locationWeight')">Location</a>
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="proposal in itemGroup.history.proposals | orderBy:itemGroup.history.sort:itemGroup.history.sortReverse | startFrom: currentPage * pageSize  | limitTo:pageSize">
+                <td>
+                    <a href="" title="Click to deselect proposals below this proposal" ng-click="omitOrIncludeProposal(itemGroup.history, proposal)">{{proposal.proposal}}</a>
+                </td>
+                <td style="text-align: right;">{{proposal.duration}}</td>
+                <td>{{proposal.contractType}}</td>
+                <td>{{proposal.workType}}</td>
+                <td>{{proposal.letting}}</td>
+                <td>{{proposal.county}}</td>
+                <td style="text-align: right;">{{proposal.quantity}}</td>
+                <td style="text-align: right;">{{proposal.quantityWeight == 9999999 ? '' : proposal.quantityWeight}}</td>
+                <td style="text-align: right;">{{proposal.timeWeight == 9999999 ? '' : proposal.timeWeight}}</td>
+                <td style="text-align: right;">{{proposal.locationWeight == 9999999 ? '' : proposal.locationWeight}}</td>
+
+                <td style="text-align: right;">{{proposal.estimate | currency}}</td>
+
+                <td style="text-align: right; border-right-style: none;" ng-repeat-start="bid in proposal.bids">
+                    <div ng-if="!bid.blank">
+                        <label for="{{bid.id}}">
+                            {{bid.price | currency}}
+                        </label>
+                    </div>
+                </td>
+                <td ng-repeat-end style="border-left-style: none;">
+                    <div ng-if="!bid.blank">
+                        <input id="{{bid.id}}" title="Include bid" type="checkbox" ng-model="bid.include">
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

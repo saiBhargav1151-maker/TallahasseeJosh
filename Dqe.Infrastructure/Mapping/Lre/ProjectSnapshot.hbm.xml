@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Lre">
+  <class name="ProjectSnapshot" table="LRET085_PROJ_SNAP">
+    <id name="Id" column="ESTM_PROJ_SQ">
+      <generator class="assigned"/>
+    </id>
+    <property name="ProjectName" column="ESTM_PROJ_ID" not-null="true"/>
+    <set name="Versions" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore">
+      <key>
+        <column name="ESTM_PROJ_SQ"/>
+      </key>
+      <one-to-many class="VersionSnapshot"/>
+    </set>
+  </class>
+</hibernate-mapping>
