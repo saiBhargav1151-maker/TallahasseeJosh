@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="EstimateGroup" table="DQET027_CAT">
+    <id name="Id" column="CAT_SQ">
+      <generator class="sequence">
+        <param name="sequence">DQEQ027_CAT</param>
+      </generator>
+    </id>
+    <many-to-one name="MyProjectEstimate" column="PROJ_ESTM_SQ" not-null="true"/>
+    <property name="WtId">
+      <column name="TRNSP_SYS_NUM" not-null="true"/>
+    </property>
+    <property name="Name" type="AnsiString">
+      <column name="CAT_NM" sql-type="varchar(20)" not-null="true"/>
+    </property>
+    <property name="Description" type="AnsiString">
+      <column name="CAT_DS" sql-type="varchar(256)" not-null="true"/>
+    </property>
+    <property name="AlternateSet" type="AnsiString">
+      <column name="ALT_SET_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+    <property name="AlternateMember" type="AnsiString">
+      <column name="ALT_MBR_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+    <property name="IsLsDbSummary" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="DSGN_BLD_SUM_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="FederalConstructionClass" type="AnsiString">
+      <column name="FED_CNST_TXT" sql-type="varchar(20)" not-null="true"/>
+    </property>
+    <property name="CombineWithLikeItems" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="CMB_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <set name="ProjectItems" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="CAT_SQ"/>
+      <one-to-many class="ProjectItem"/>
+    </set>
+  </class>
+</hibernate-mapping>
