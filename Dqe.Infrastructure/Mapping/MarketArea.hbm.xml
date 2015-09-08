@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="MarketArea" table="DQET016_MKT_AREA">
+    <id name="Id" column="MKT_AREA_SQ">
+      <generator class="sequence">
+        <param name="sequence">DQEQ016_MKT_AREA</param>
+      </generator>
+    </id>
+    <natural-id>
+      <property name="Name" type="AnsiString">
+        <column name="MKT_AREA_NM" sql-type="varchar(256)" not-null="true"/>
+      </property>
+    </natural-id>
+    <set name="Counties" lazy="true" inverse="true" cascade="save-update" access="field.camelcase-underscore" >
+      <key column="MKT_AREA_SQ"/>
+      <one-to-many class="County"/>
+    </set>
+    <set name="MarketAreaAveragePrices" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+      <key column="MKT_AREA_SQ"/>
+      <one-to-many class="MarketAreaAveragePrice"/>
+    </set>
+  </class>
+</hibernate-mapping>

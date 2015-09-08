@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Lre">
+  <class name="PayItemGroup" table="LRET020_PAY_ITM_GP">
+    <id name="Id" column="PAY_ITM_GRP_CD">
+      <generator class="assigned"/>
+    </id>
+    <property name="GroupDescription" column="PAY_ITM_GRP_DS" not-null="true"/>
+    <property name="GroupTypeCode" column="PAY_ITM_GRP_TYP_CD" not-null="true"/>
+    <set name="PayItemPayItemGroups" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore">
+      <key>
+        <column name="PAY_ITM_GRP_CD"/>
+      </key>
+      <one-to-many class="PayItemPayItemGroup"/>
+    </set>
+  </class>
+</hibernate-mapping>
