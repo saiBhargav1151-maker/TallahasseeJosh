@@ -1,1 +1,0 @@
-﻿<%@ ServiceHost Language="C#" Debug="true" Service="FDOT.GIS.Web.Services.LoggingService" CodeBehind="LoggingService.svc.cs" %>
