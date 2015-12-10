@@ -1,0 +1,100 @@
+﻿<div class="row">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-4">
+        <div class="alert alert-info">
+            By logging on to a FDOT system, you acknowledge your responsibility to comply with all laws, rules, directives, policies, and procedures related to the use and security of information technology resources. Unauthorized use is strictly prohibited. You are hereby on notice that you should have no expectation of privacy as to your use of Department information technology resources as all data is potentially subject to Florida's public records law.
+        </div>
+    </div>
+</div>
+<hr/>
+<div class="row" ng-if="impersonate">
+    <div class="col-lg-4">
+        <input type="text" ng-model="impersonateUser.selected" placeholder="Enter a user name" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="user as user.fullName for user in getUsers($viewValue)" typeahead-editable="false" typeahead-on-select="setDistrict()" class="form-control">
+    </div>
+    <div class="col-lg-2">
+        <select class="form-control" ng-model="impersonateUser.district">
+            <option>CO</option>
+            <option>D1</option>
+            <option>D2</option>
+            <option>D3</option>
+            <option>D4</option>
+            <option>D5</option>
+            <option>D6</option>
+            <option>D7</option>
+            <option>TP</option>
+        </select>
+    </div>
+    <div class="col-lg-2" ng-show="impersonateUser.district == 'CO'">
+        <select class="form-control" ng-model="impersonateUser.role">
+            <option value="A">System Administrator</option>
+            <option value="P">Pay Item Administrator</option>
+            <option value="T">Cost-Based Template Administrator</option>
+            <option value="E">Estimator</option>
+        </select>
+    </div>
+    <div class="col-lg-2" ng-show="impersonateUser.district.startsWith('D') || impersonateUser.district == 'TP'">
+        <select class="form-control" ng-model="impersonateUser.role">
+            <option value="D">District Administrator</option>
+            <option value="E">Estimator</option>
+        </select>
+    </div>
+    <div class="col-lg-4">
+        <button type="button" class="btn btn-primary" ng-click="postUser()" ng-disabled="isSubmitUserDisabled()">Submit</button>
+        <button type="button" class="btn btn-default" ng-click="initializeEditForm()">Reset</button>
+    </div>
+</div>
+<div ng-if="!impersonate">
+    <form>
+        <div class="row">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-1">User Name:</div>
+            <div class="col-lg-2">
+                <input ng-model="userName" title="enter your RACF ID" class="form-control" />
+            </div>
+            <div class="col-lg-5"></div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-1">Password:</div>
+            <div class="col-lg-2">
+                <input ng-model="password" title="enter your RACF password" class="form-control" type="password" />
+            </div>
+            <div class="col-lg-5"></div>
+        </div>
+        <div class="row" ng-show="isChangePassword">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-1">New Password:</div>
+            <div class="col-lg-2">
+                <input ng-model="newPassword" title="enter your new RACF password" class="form-control" type="password" />
+            </div>
+            <div class="col-lg-5"></div>
+        </div>
+        <div class="row" ng-show="isChangePassword">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-1">Confirm Password:</div>
+            <div class="col-lg-2">
+                <input ng-model="confirmPassword" title="confirm your new RACF password" class="form-control" type="password" />
+            </div>
+            <div class="col-lg-5"></div>
+        </div>
+        <div class="row">
+            <div class="col-lg-5"></div>
+            <div class="col-lg-1">
+                <button type="submit" class="btn btn-primary" ng-click="login(userName, password, isChangePassword, newPassword, confirmPassword)" ng-disabled="!canAttemptLogin(userName, password)">Login</button>
+            </div>
+            <div class="col-lg-1" style="text-align: right;" ng-show="!isChangePassword">
+                <a href="" title="change password" ng-click="isChangePassword = true;">Change Password</a>
+            </div>
+            <div class="col-lg-1" style="text-align: right;" ng-show="isChangePassword">
+                <a href="" title="cancel change password" ng-click="isChangePassword = false;">Cancel</a>
+            </div>
+            <div class="col-lg-5"></div>
+        </div>
+    </form>
+</div>
+<div ng-if="canImpersonate && !impersonate">
+    <a href="" ng-click="showImpersonation()">Impersonate Security</a>
+</div>
+<div ng-if="impersonate">
+    <a href="" ng-click="showLogin()">RACF Login</a>
+</div>
