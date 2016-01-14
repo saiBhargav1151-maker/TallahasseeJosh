@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/Validation" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/Validation" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://dotscowtrnsu02.co.dot.state.fl.us:7000/ApiHost/estimator.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:complexType name="OperationFault">
+    <xs:sequence>
+      <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="ExceptionMessages" nillable="true" type="q1:ArrayOfstring" />
+      <xs:element minOccurs="0" name="Messages" nillable="true" type="tns:ArrayOfOperationMessage" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="OperationFault" nillable="true" type="tns:OperationFault" />
+  <xs:complexType name="ArrayOfOperationMessage">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="OperationMessage" nillable="true" type="tns:OperationMessage" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfOperationMessage" nillable="true" type="tns:ArrayOfOperationMessage" />
+  <xs:complexType name="OperationMessage">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="HasBeenLogged" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Key" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MessageLevel" type="tns:OperationMessage.MessageLevels" />
+      <xs:element minOccurs="0" name="MessageType" type="tns:OperationMessage.MessageTypes" />
+      <xs:element minOccurs="0" name="ModelId" type="xs:long" />
+      <xs:element minOccurs="0" name="ModelName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ShortMessage" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="OperationMessage" nillable="true" type="tns:OperationMessage" />
+  <xs:simpleType name="OperationMessage.MessageLevels">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Error" />
+      <xs:enumeration value="Warning" />
+      <xs:enumeration value="Information" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="OperationMessage.MessageLevels" nillable="true" type="tns:OperationMessage.MessageLevels" />
+  <xs:simpleType name="OperationMessage.MessageTypes">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Concurrency" />
+      <xs:enumeration value="General" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="OperationMessage.MessageTypes" nillable="true" type="tns:OperationMessage.MessageTypes" />
+</xs:schema>

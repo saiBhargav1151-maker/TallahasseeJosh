@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model.Reports">
+	<class name="ReportProposal" table="DQET036_RPT_PROPOS">
+		<id name="Id" column="RPT_PRPOS_SQ">
+			<generator class="sequence">
+        <param name="sequence">DQEQ036_RPT_PROPOS</param>
+      </generator>
+		</id>
+		<natural-id>
+      <property name="ProposalNumber" type="AnsiString">
+        <column name="PRPOS_NM" sql-type="varchar(20)" not-null="true"/>
+      </property>
+			<property name="ProposalLevel" type="NHibernate.Type.EnumCharType`1[Dqe.Domain.Model.Reports.ReportProposalLevel, Dqe.Domain], NHibernate">
+        <column name="PRPOS_LVL_CD" not-null="true"/>
+      </property>
+		</natural-id>
+    <many-to-one name="MyReportLetting" class="ReportLetting" column="RPT_LET_SQ" not-null="false"/>
+    <property name="ConstructionDays">
+      <column name="CNST_DY_NUM" not-null="true"/>
+    </property>
+		<property name="CostPerDay">
+      <column name="DY_CST_AMT" sql-type="decimal(14, 2)" not-null="true"/>
+    </property>
+		<property name="Description" type="AnsiString">
+      <column name="PRPOS_DS" sql-type="varchar(256)" not-null="true"/>
+    </property>
+		<property name="WorkType" type="AnsiString">
+      <column name="WRK_TYP_TXT" sql-type="varchar(300)" not-null="true"/>
+    </property>
+		<property name="County" type="AnsiString">
+      <column name="CNTY_TXT" sql-type="varchar(100)" not-null="true"/>
+    </property>
+		<property name="District" type="AnsiString">
+			<column name="MNG_DIST_CD " sql-type="char(2)" not-null="true"/>
+		</property>
+		<property name="HasOversight" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="OVST_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+		<property name="InvalidEstimate" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+			<column name="MGRT_CD" sql-type="char(1)" not-null="true"/>
+		</property>
+		<property name="LastUpdatedUser" type="AnsiString">
+	  <column name="LAST_UPDT_USER_NM" sql-type="varchar(100)" not-null="true"/>
+	</property>
+		<property name="Total">
+      <column name="TOT_AMT" sql-type="decimal(14, 2)" not-null="true"/>
+    </property>
+		<set name="ReportProposalSummaries" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+			<key column="RPT_PRPOS_SQ"/>
+			<one-to-many class="ReportProposalSummary"/>
+		</set>
+		<set name="ReportProposalItems" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+			<key column="RPT_PRPOS_SQ"/>
+			<one-to-many class="ReportProposalItem"/>
+		</set>
+		<set name="ReportProjects" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+			<key column="RPT_PRPOS_SQ"/>
+			<one-to-many class="ReportProject"/>
+		</set>
+		<set name="ReportProposalMilestones" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+			<key column="RPT_PRPOS_SQ"/>
+			<one-to-many class="ReportProposalMilestone"/>
+		</set>
+		<set name="ReportProposalVendors" lazy="true" inverse="true" cascade="all-delete-orphan" access="field.camelcase-underscore" >
+			<key column="RPT_PRPOS_SQ"/>
+			<one-to-many class="ReportProposalVendor"/>
+		</set>
+	</class>
+</hibernate-mapping>

@@ -1,0 +1,169 @@
+﻿<div class="row">
+    <div class="col-lg-1">
+        <h4>Search:</h4>
+    </div>
+    <div class="col-lg-2">
+        <input id="proposalNumber" title="Proposal number" type="text" ng-model="selectedProposal" placeholder="123451" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="proposal as proposal.number for proposal in getProposals($viewValue)" typeahead-editable="false" typeahead-on-select="loadProposal()" class="form-control">
+    </div>
+</div>
+<div ng-show="proposal != undefined && proposal != null">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h5>Proposal: <strong>{{proposal.number}}</strong></h5>
+                        </div>
+                        <div class="col-lg-6" ng-show="proposal.authorizationTotal != 0 && proposal.authorizationTotal != undefined">
+                            <div style="text-align: right;">
+                                <h4>
+                                    Authorization Total: &nbsp;{{proposal.authorizationTotal | currency}}
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" ng-show="proposal.officialTotal != 0 && proposal.officialTotal != undefined">
+                            <div style="text-align: right;">
+                                <h4>
+                                    Official Total: &nbsp;{{proposal.officialTotal | currency}}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-1">
+                            <strong>District:</strong> {{proposal.district}}
+                        </div>
+                        
+                        <div class="col-lg-3">
+                            <strong>County:</strong> {{proposal.county}}
+                        </div>
+                        
+                        <div class="col-lg-2">
+                            <strong>Letting Date:</strong> {{proposal.lettingDate}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-1">
+                            <strong>Description:</strong>
+                        </div>
+                        <div class="col-lg-11">
+                            {{proposal.description}}
+                        </div>
+                    </div>
+                    <br />
+                    <div ng-if="canSnapshotProposal()">
+                        <div class="row" ng-show="!proposal.isOfficial">
+                            <div class="col-lg-12">
+                                <div class="text-muted">({{2000-proposal.comment.length}} Characters)</div>
+                                <textarea class="form-control" title="Notes" ng-model="proposal.comment" ng-trim="false" my-maxlength="2000" style="height: 100px;"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12" style="text-align: right;">
+                                <span ng-show="proposal.nextEstimate != undefined && proposal.nextEstimate != null && proposal.nextEstimate != ''">
+                                    <label>
+                                        <strong>Apply {{proposal.nextEstimate}} Label</strong>
+                                        <input type="checkbox" title="Take labeled snapshot" ng-model="proposal.takeLabeledSnapshot">
+                                    </label>
+                                </span>
+                                &nbsp;&nbsp;
+                                <button type="button" title="Click to snapshot the working estimates for the proposal's projects" class="btn btn-primary" ng-show="!confirmSnapshotWorkingEstimate && !proposal.isOfficial" focus-me="confirmSnapshotWorkingEstimateReset" ng-click="confirmSnapshotWorkingEstimate = true; confirmSnapshotWorkingEstimateReset = false;">Snapshot Working Estimate</button>
+                                <span class="alert alert-warning" ng-show="confirmSnapshotWorkingEstimate">
+                                    Click 'Yes' to snapshot your working estimate or 'No' to cancel&nbsp;&nbsp;
+                                    <button type="button" title="Click to cancel the snapshot of the working estimates for the proposal's projects" focus-me="confirmSnapshotWorkingEstimate" class="btn btn-default" ng-click="confirmSnapshotWorkingEstimate = false; confirmSnapshotWorkingEstimateReset = true;">No</button>
+                                    <button type="button" title="Click to confirm the snapshot of the working estimates for the proposal's projects" class="btn btn-default" ng-click="snapshotWorkingEstimate(proposal); confirmSnapshotWorkingEstimate = false; confirmSnapshotWorkingEstimateReset = true;">Yes</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="security.isSystemAdmin">
+        <div class="col-lg-5">
+            <button type="button" title="Click to remove the proposal and the proposal's projects from DQE" ng-click="confirmDeleteProposal = true; confirmDeleteProposalReset = false;" focus-me="confirmDeleteProposalReset" ng-show="!confirmDeleteProposal && !confirmDeleteSnapshot" class="btn btn-danger">Delete Proposal</button>
+            &nbsp;&nbsp;
+            <button type="button" title="Click to remove the latest proposal snapshot from DQE" ng-click="confirmDeleteSnapshot = true; confirmDeleteSnapshotReset = false;" focus-me="confirmDeleteSnapshotReset" ng-show="!confirmDeleteSnapshot && !confirmDeleteProposal" class="btn btn-danger">Delete Current Snapshot Label</button>
+            <span class="alert alert-warning" ng-show="confirmDeleteProposal">
+                Click 'Yes' to remove this Proposal and all related Projects from DQE or 'No' to cancel&nbsp;&nbsp;
+                <button type="button" title="Click to cancel the removal of the proposal and proposal's projects from DQE" focus-me="confirmDeleteProposal" class="btn btn-default" ng-click="confirmDeleteProposal = false; confirmDeleteProposalReset = true;">No</button>
+                <button type="button" title="Click to confirm the removal of the proposal and proposal's projects from DQE" class="btn btn-default" ng-click="deleteProposal(proposal); confirmDeleteProposal = false; confirmDeleteProposalReset = true;">Yes</button>
+            </span>
+                <div class="alert alert-warning" ng-show="confirmDeleteSnapshot">
+                    Click 'Yes' to remove the latest Proposal snapshot label from DQE or 'No' to cancel <br/>
+                    Comment:
+                    <textarea class="form-control" title="Notes" ng-model="proposal.removeLabelComment" ng-trim="false" my-maxlength="500" style="height: 75px;" focus-me="confirmDeleteSnapshot"></textarea>
+                    <button type="button" title="Click to cancel the removal of the proposal snapshot from DQE" class="btn btn-default" ng-click="confirmDeleteSnapshot = false; confirmDeleteSnapshotReset = true;">No</button>
+                    <button type="button" title="Click to confirm the removal of the proposal snapshot from DQE" class="btn btn-default" ng-click="deleteSnapshot(proposal); confirmDeleteSnapshot = false; confirmDeleteSnapshotReset = true;">Yes</button>
+                </div>
+            <br /><br />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h5>Projects</h5>
+                </div>
+                <div class="panel-body">
+                    <div class="row" ng-show="projects != 'undefined' && projects != null && projects.length > 0">
+                        <div class="col-lg-12">
+                            <table class="table table-bordered table-condensed table-hover">
+                                <thead>
+                                    <tr>
+                                        <td>Project</td>
+                                        <td>Owner</td>
+                                        <td>Custody</td>
+                                        <td>Working Estimate</td>
+                                        <td>Current Label</td>
+                                        <td>
+                                            <button type="button" title="Click to check the synchronization status the proposal's projects - this will enable the proposal snapshot function" class="btn btn-default" ng-click="checkProjectSync()" ng-disabled="isSyncCheckInProgress || !hasCustodyAndEstimate">Check Synchronization</button>
+                                        </td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="project in projects">
+                                        <td>
+                                            <a href="#/home_project/{{project.number}}" title="Click to view the project {{project.number}}">{{project.number}}</a>
+                                        </td>
+                                        <td>{{project.owner}}</td>
+                                        <td>
+                                            <span class="text-success" ng-show="project.hasCustody">
+                                                <i class="glyphicon glyphicon-ok"></i> - Yes
+                                            </span>
+                                            <span class="text-warning" ng-show="!project.hasCustody">
+                                                <i class="glyphicon glyphicon-remove"></i> - No
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-success" ng-show="project.hasWorkingEstimate">
+                                                <i class="glyphicon glyphicon-ok"></i> - Yes
+                                            </span>
+                                            <span class="text-warning" ng-show="!project.hasWorkingEstimate">
+                                                <i class="glyphicon glyphicon-remove"></i> - No
+                                            </span>
+                                        </td>
+                                        <td>{{project.label}}</td>
+                                        <td>
+                                            <span ng-show="project.isSynced == null">{{isSyncCheckInProgress ? 'Pending...' : ''}}</span>
+                                            <span class="text-success" ng-show="project.isSynced == true">
+                                                <i class="glyphicon glyphicon-ok"></i> - Yes
+                                            </span>
+                                            <span class="text-warning" ng-show="project.isSynced == false">
+                                                <i class="glyphicon glyphicon-remove"></i> - No
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

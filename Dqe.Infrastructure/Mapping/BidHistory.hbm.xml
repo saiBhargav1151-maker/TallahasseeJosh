@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- MAKE SURE THIS FILE IS AN EMBEDDED RESOURCE -->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Dqe.Domain" namespace="Dqe.Domain.Model">
+  <class name="BidHistory" table="DQET012_BID_HST">
+    <id name="Id" column="BID_HST_SQ">
+      <generator class="sequence">
+        <param name="sequence">DQEQ012_BID_HST</param>
+      </generator>
+    </id>
+    <many-to-one name="MyProposalHistory" column="PRPOS_HST_SQ" not-null="true"/>
+    <property name="Price">
+      <column name="PRCE_AMT" sql-type="decimal(16, 5)" not-null="true"/>
+    </property>
+    <property name="IsAwarded" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="AWRD_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="IsLowCost" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="LOW_CST_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="IsEstimate" type="Dqe.Infrastructure.Types.BoolType, Dqe.Infrastructure">
+      <column name="ESTM_CD" sql-type="char(1)" not-null="true"/>
+    </property>
+    <property name="BidTotal">
+      <column name="BID_TOT_AMT" sql-type="decimal(16, 5)" not-null="true"/>
+    </property>
+  </class>
+</hibernate-mapping>

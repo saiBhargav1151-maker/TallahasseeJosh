@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://types.muhimbi.com/2010/11/22" elementFormDefault="qualified" targetNamespace="http://types.muhimbi.com/2010/11/22" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import namespace="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" />
+  <xs:complexType name="ConverterSpecificSettings">
+    <xs:sequence />
+  </xs:complexType>
+  <xs:element name="ConverterSpecificSettings" nillable="true" type="tns:ConverterSpecificSettings" />
+  <xs:complexType name="ConverterSpecificSettings_InfoPath">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ConverterSpecificSettings">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="StripDotNETCode" type="xs:boolean" />
+          <xs:element minOccurs="0" name="StripDataObjects" type="xs:boolean" />
+          <xs:element minOccurs="0" name="ConvertAttachments" type="xs:boolean" />
+          <xs:element minOccurs="0" name="ConversionViews" nillable="true" type="tns:ArrayOfInfoPathView" />
+          <xs:element minOccurs="0" name="AutoTrustForms" type="xs:boolean" />
+          <xs:element minOccurs="0" name="ProcessFullTrustForms" type="xs:boolean" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ConverterSpecificSettings_InfoPath" nillable="true" type="tns:ConverterSpecificSettings_InfoPath" />
+  <xs:complexType name="ArrayOfInfoPathView">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="InfoPathView" nillable="true" type="tns:InfoPathView" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfInfoPathView" nillable="true" type="tns:ArrayOfInfoPathView" />
+  <xs:complexType name="InfoPathView">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="InfoPathView" nillable="true" type="tns:InfoPathView" />
+  <xs:complexType name="ConverterSpecificSettings_WordProcessing">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ConverterSpecificSettings">
+        <xs:sequence>
+          <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="RevisionsAndCommentsMarkupMode" type="q1:RevisionsAndCommentsMarkupMode" />
+          <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="RevisionsAndCommentsDisplayMode" type="q2:RevisionsAndCommentsDisplayMode" />
+          <xs:element minOccurs="0" name="ProcessDocumentTemplate" type="xs:boolean" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ConverterSpecificSettings_WordProcessing" nillable="true" type="tns:ConverterSpecificSettings_WordProcessing" />
+  <xs:complexType name="ConverterSpecificSettings_Presentations">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ConverterSpecificSettings">
+        <xs:sequence>
+          <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="PrintOutputType" type="q3:PresentationsPrintOutputType" />
+          <xs:element minOccurs="0" name="FrameSlides" type="xs:boolean" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ConverterSpecificSettings_Presentations" nillable="true" type="tns:ConverterSpecificSettings_Presentations" />
+  <xs:complexType name="ConverterSpecificSettings_HTML">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ConverterSpecificSettings">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="PaperSize" nillable="true" type="xs:string" />
+          <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="ScaleMode" type="q4:HTMLScaleMode" />
+          <xs:element minOccurs="0" name="PageMargins" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ConversionDelay" type="xs:int" />
+          <xs:element minOccurs="0" name="ClearBrowserCache" type="xs:boolean" />
+          <xs:element minOccurs="0" name="SplitImages" type="xs:boolean" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ConverterSpecificSettings_HTML" nillable="true" type="tns:ConverterSpecificSettings_HTML" />
+  <xs:complexType name="ConverterSpecificSettings_Cad">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ConverterSpecificSettings">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="PaperSize" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="BackgroundColor" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ForegroundColor" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CadConversionElements" nillable="true" type="tns:ArrayOfCadConversionElement" />
+          <xs:element minOccurs="0" name="PageMargins" nillable="true" type="xs:string" />
+          <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="EmptyLayoutDetectionMode" type="q5:CadEmptyLayoutDetectionMode" />
+          <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="LayoutSortOrder" type="q6:CadLayoutSortOrder" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ConverterSpecificSettings_Cad" nillable="true" type="tns:ConverterSpecificSettings_Cad" />
+  <xs:complexType name="ArrayOfCadConversionElement">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="CadConversionElement" nillable="true" type="tns:CadConversionElement" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfCadConversionElement" nillable="true" type="tns:ArrayOfCadConversionElement" />
+  <xs:complexType name="CadConversionElement">
+    <xs:sequence>
+      <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="Type" type="q7:CadConversionElementType" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CadConversionElement" nillable="true" type="tns:CadConversionElement" />
+  <xs:complexType name="ConverterSpecificSettings_MSG">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ConverterSpecificSettings">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="ConvertAttachments" type="xs:boolean" />
+          <xs:element minOccurs="0" name="PaperSize" nillable="true" type="xs:string" />
+          <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="HTMLScaleMode" type="q8:HTMLScaleMode" />
+          <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="PlainTextLineBreaks" type="q9:MSGPlainTextLineBreaks" />
+          <xs:element xmlns:q10="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="BestBodyMode" type="q10:MSGBestBodyMode" />
+          <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="EmailAddressDisplayMode" type="q11:MSGEmailAddressDisplayMode" />
+          <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="FromEmailAddressDisplayMode" type="q12:MSGEmailAddressDisplayMode" />
+          <xs:element minOccurs="0" name="DisplayAttachmentSummary" type="xs:boolean" />
+          <xs:element minOccurs="0" name="BreakOnUnsupportedAttachment" type="xs:boolean" />
+          <xs:element minOccurs="0" name="BreakOnUnsupportedEmbeddedObject" type="xs:boolean" />
+          <xs:element xmlns:q13="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="EmbeddedObjectDisplayMode" type="q13:MSGEmbeddedObjectDisplayMode" />
+          <xs:element xmlns:q14="http://schemas.datacontract.org/2004/07/Muhimbi.DocumentConverter.WebService.Data" minOccurs="0" name="EmbeddedObjectIconDisplayMode" type="q14:MSGEmbeddedObjectIconDisplayMode" />
+          <xs:element minOccurs="0" name="EmbeddedObjectScalePercentage" type="xs:decimal" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ConverterSpecificSettings_MSG" nillable="true" type="tns:ConverterSpecificSettings_MSG" />
+  <xs:complexType name="ConverterSpecificSettings_CommandLineConverter">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ConverterSpecificSettings">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Parameter1" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter2" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter3" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter4" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter5" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter6" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter7" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter8" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter9" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Parameter10" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="ConverterSpecificSettings_CommandLineConverter" nillable="true" type="tns:ConverterSpecificSettings_CommandLineConverter" />
+</xs:schema>

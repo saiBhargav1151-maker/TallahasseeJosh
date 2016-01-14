@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <appSettings>
+	  <add key="SendPostEmails" value="false" xdt:Transform="Insert"/>
+    <add key="SendUsageEmails" value="false" xdt:Transform="Insert"/>
+	  <add key="LogUsageToMessageBus" value="true" xdt:Transform="Insert" />
+    <add key="LogPostsToMessageBus" value="true" xdt:Transform="Insert"/>
+  	<add key="SendPostEmailsToAddresses" value="" xdt:Transform="Insert"/>
+    <add key="SendUsageEmailsToAddresses" value="" xdt:Transform="Insert"/>
+	  <add key="ApplicationAcronym" value="" xdt:Transform="Insert"/>
+    <add key="Microsoft.ServiceBus.ConnectionString" value="Endpoint=sb://alltech.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=AYBn0V2xdLa2QPNZgOF8AQzd5Vh2ccNuAVEHFcTD93I=" xdt:Transform="Insert"/>
+    <add key="ClientSideExceptionLoggingEnabled" value="true" xdt:Transform="Insert"/>
+    <add key="SendClientSideExceptionEmails" value="false" xdt:Transform="Insert"/>
+    <add key="AddClientSideExceptionsToMessageBus" value="true" xdt:Transform="Insert"/>
+    <add key="SendClientSideExceptionEmailsToAddresses" value="" xdt:Transform="Insert"/>
+  </appSettings>
+  <system.net xdt:Transform="Insert">
+    <defaultProxy >
+      <proxy usesystemdefault="true" proxyaddress="http://proxy.dot.state.fl.us" />
+    </defaultProxy>
+  </system.net>
+  <system.web>
+    <httpModules>
+      <!-- Pre IIS 7 or IIS 7 in Classic Mode -->
+      <add name="ExceptionHandlerModule" type="Alltech.Logging.ExceptionHandlerModule, Alltech.Logging" xdt:Transform="Insert"/>
+    </httpModules>
+  </system.web>
+  <system.webServer>
+    <modules>
+      <!-- IIS 7 in Integrated Mode -->
+      <add name="ExceptionHandlerModule" type="Alltech.Logging.ExceptionHandlerModule, Alltech.Logging" xdt:Transform="Insert"/>
+    </modules>
+  </system.webServer>
+</configuration>
