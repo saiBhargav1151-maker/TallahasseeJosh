@@ -1,0 +1,149 @@
+﻿.nav, .pagination, .carousel, .panel-title a, .dropdown-menu{
+     cursor: pointer;
+}
+.price-combo {
+    min-width: 440px;
+}
+input::-ms-clear {
+  width : 0;
+  height: 0;
+}
+.price-dropdown-menu {
+position: absolute;
+top: 100%;
+right: 0;
+z-index: 1000;
+float: left;
+min-width: 160px;
+padding: 5px 0;
+margin: 2px 0 0;
+list-style: none;
+font-size: 14px;
+background-color: #fff;
+border: 1px solid #ccc;
+border: 1px solid rgba(0,0,0,.15);
+border-radius: 4px;
+-webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+box-shadow: 0 6px 12px rgba(0,0,0,.175);
+background-clip: padding-box;
+}
+.price-dropdown-menu>li>a {
+display: block;
+padding: 3px 20px;
+clear: both;
+font-weight: 400;
+line-height: 1.42857143;
+color: #333;
+white-space: nowrap;
+}
+
+body {
+    padding-top: 0px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+.row {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+td {
+    vertical-align: middle !important;
+}
+
+body {
+    background-color: white;
+    font-size: 10pt;
+}
+
+.container {
+    background-color: #EAEEF2
+}
+
+.overflow {
+  position:absolute;
+  top:0;
+  left:0;
+  display: block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-top: 0;
+  color:#ccc;
+  max-width:90%;
+}
+
+.navbar-link {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-right: 15px;
+    color: #eaeef2;
+    position: relative;
+    display: block;
+}
+
+.panel-body {
+    padding: 8px;
+}
+
+.dqe-footer {
+    color: #1A2C3F;
+    background-color: #D2D7E1;
+    margin-bottom: 0;
+}
+
+.dqe-brand-acronym {
+    font-size: 38px;
+}
+
+.fine-print {
+    font-size: 10pt;
+}
+
+input[type="checkbox"].large {
+    height: 35px;
+    width: 35px;
+}
+
+.nopadding {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+pre {
+    /*white-space: pre-wrap;       /* CSS 3 */
+    /*white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    /*white-space: -pre-wrap;      /* Opera 4-6 */
+    /*white-space: -o-pre-wrap;    /* Opera 7 */
+    /*word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+.screenReaderOnly {
+    position:absolute;
+    left:-10000px;
+    top:auto;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+}
+.dqeSmallFont {
+    font-size: 8pt !important;
+}
+.dqeMediumFont {
+    font-size: 10pt !important;
+}
+.dqeLargeFont {
+    font-size: 12pt !important;
+}
+ 
