@@ -1397,7 +1397,7 @@ namespace Dqe.Infrastructure.Fdot
                                             .SetParameter("lastUpdatedBy", "DQE")
                                             .SetParameter("id", estimateGroup.WtId)
                                             .ExecuteUpdate();
-                                        if (records == 0) throw new InvalidOperationException("Updated unexpected category");
+                                        if (records == 0 && estimateGroup.ProjectItems.Any()) throw new InvalidOperationException("Updated unexpected category");
                                     }
                                 }
                                 //state furnished items
