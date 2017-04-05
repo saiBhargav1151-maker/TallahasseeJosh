@@ -342,7 +342,7 @@ namespace Dqe.Infrastructure.Repositories.Custom
                 var reportMilestoneBid = new ReportMilestoneBid
                 {
                     NumberOfDaysBid = bid.NumberOfUnits,
-                    BidPrice = bid.CalculatedPrice / bid.NumberOfUnits
+                    BidPrice = bid.NumberOfUnits > 0 ? bid.CalculatedPrice / bid.NumberOfUnits : bid.CalculatedPrice
                 };
 
                 reportProposalVendor.AddReportMilestoneBid(reportMilestoneBid);
