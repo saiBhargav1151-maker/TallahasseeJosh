@@ -11,6 +11,7 @@ namespace Dqe.ApplicationServices
         public bool Included { get; set; }
         public decimal Quantity { get; set; }
         public decimal EstimateAmount { get; set; }
+        public decimal ExtendedAmount { get; set; }
         public DateTime Letting { get; set; }
         public string ProposalType { get; set; }
         public string ContractType { get; set; }

@@ -119,7 +119,7 @@ namespace Dqe.Automation.PayItemProcessing
                         {
                             foreach (var proposal in bidHistory.Proposals)
                             {
-                                proposal.EstimateAmount = proposal.EstimateAmount / proposal.Quantity;
+                                proposal.EstimateAmount = proposal.ExtendedAmount / proposal.Quantity;
                                 foreach (var bid in proposal.Bids)
                                 {
                                     bid.Price = bid.Price / bid.Quantity;

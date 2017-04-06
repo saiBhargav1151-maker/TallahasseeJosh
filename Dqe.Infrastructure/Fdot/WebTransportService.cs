@@ -1549,6 +1549,7 @@ namespace Dqe.Infrastructure.Fdot
                         Projections.Property(() => proposalItem.Id).As("Id"),
                         Projections.Property(() => proposalItem.Quantity).As("Quantity"),
                         Projections.Property(() => proposalItem.Price).As("Estimate"),
+                        Projections.Property(() => proposalItem.ExtendedAmount).As("ExtendedAmount"),
                         Projections.Property(() => proposal.ProposalNumber).As("ProposalNumber"),
                         Projections.Property(() => proposal.ProposalType).As("ProposalType"),
                         Projections.Property(() => proposal.ContractType).As("ContractType"),
@@ -1590,6 +1591,7 @@ namespace Dqe.Infrastructure.Fdot
                             Included = true,
                             Quantity = pResults.Quantity,
                             EstimateAmount = ((decimal?)pResults.Estimate).HasValue ? ((decimal?)pResults.Estimate).Value : 0,
+                            ExtendedAmount = ((decimal?)pResults.ExtendedAmount).HasValue ? ((decimal?)pResults.ExtendedAmount).Value : 0,
                             Letting = DateTime.MinValue,
                             ProposalType = pResults.ProposalType,
                             ContractType = pResults.ContractType,
@@ -1661,6 +1663,14 @@ namespace Dqe.Infrastructure.Fdot
                     .Where(GetRejectedProposalRestriction())
                     .Where(() => letting.LettingDate < DateTime.Now.Date)
                     .Where(() => letting.LettingDate >= DateTime.Now.Date.AddMonths(range * -1).Date)
+
+                    // This to test with specific data
+                    //.Where(() => proposal.ProposalNumber == "T4424")
+                    //.Where(() => refItem.Name == "0465 20")
+                    //.Where(() => proposal.ProposalNumber == "E8P90")
+                    //.Where(() => refItem.Name == "0561  1")
+                    // end filter for specific data
+
                     .Where(bidTypeDisjunction)
                     .Where(bidStatusDisjunction)
                     .Where(milestoneDisjunction)
@@ -1689,6 +1699,7 @@ namespace Dqe.Infrastructure.Fdot
                         Projections.Property(() => proposalItem.Id).As("Id"),
                         Projections.Property(() => proposalItem.Quantity).As("Quantity"),
                         Projections.Property(() => proposalItem.Price).As("Estimate"),
+                        Projections.Property(() => proposalItem.ExtendedAmount).As("ExtendedAmount"),
                         Projections.Property(() => proposal.ProposalNumber).As("ProposalNumber"),
                         Projections.Property(() => proposal.ProposalType).As("ProposalType"),
                         Projections.Property(() => proposal.ContractType).As("ContractType"),
@@ -1734,6 +1745,7 @@ namespace Dqe.Infrastructure.Fdot
                             Included = true,
                             Quantity = results.First(i => i.Id == p).Quantity,
                             EstimateAmount = results.First(i => i.Id == p).Estimate ?? 0,
+                            ExtendedAmount = results.First(i => i.Id == p).ExtendedAmount ?? 0,
                             Letting = results.First(i => i.Id == p).LettingDate,
                             ProposalType = results.First(i => i.Id == p).ProposalType,
                             ContractType = results.First(i => i.Id == p).ContractType,
