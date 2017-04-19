@@ -120,6 +120,12 @@ namespace Dqe.Automation.PayItemProcessing
                             foreach (var proposal in bidHistory.Proposals)
                             {
                                 proposal.EstimateAmount = proposal.ExtendedAmount / proposal.Quantity;
+
+                                if (proposal.Proposal.LastIndexOf("LS", StringComparison.Ordinal) >= 0 ||
+                                    proposal.Proposal.LastIndexOf("DB", StringComparison.Ordinal) >= 0)
+                                    // For the LS and DB duplicate jobs, it is already a unit price
+                                    continue;
+
                                 foreach (var bid in proposal.Bids)
                                 {
                                     bid.Price = bid.Price / bid.Quantity;

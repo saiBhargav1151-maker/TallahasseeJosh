@@ -1541,6 +1541,14 @@ namespace Dqe.Infrastructure.Fdot
                     .Left.JoinQueryOver(() => proposal.Milestones, () => milestone)
                     .Where(lsDbDisjunction)
                     .Where(milestoneDisjunction)
+
+                    // This to test with specific data
+                    //.Where(() => proposal.ProposalNumber == "E1M42LS")
+                    //.Where(() => refItem.Name == "0102  1")
+                    //.Where(() => proposal.ProposalNumber == "E8P90")
+                    //.Where(() => refItem.Name == "0561  1")
+                    // end filter for specific data
+
                     .OrderBy(() => refItem.Name).Asc
                     .OrderBy(() => proposal.ProposalNumber).Asc
                     .Select
@@ -1665,8 +1673,8 @@ namespace Dqe.Infrastructure.Fdot
                     .Where(() => letting.LettingDate >= DateTime.Now.Date.AddMonths(range * -1).Date)
 
                     // This to test with specific data
-                    //.Where(() => proposal.ProposalNumber == "T4424")
-                    //.Where(() => refItem.Name == "0465 20")
+                    //.Where(() => proposal.ProposalNumber == "E1M42")
+                    //.Where(() => refItem.Name == "0102  1")
                     //.Where(() => proposal.ProposalNumber == "E8P90")
                     //.Where(() => refItem.Name == "0561  1")
                     // end filter for specific data
