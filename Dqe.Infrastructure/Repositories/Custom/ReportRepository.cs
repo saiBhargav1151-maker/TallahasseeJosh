@@ -518,7 +518,8 @@ namespace Dqe.Infrastructure.Repositories.Custom
             {
                 var reportLettingSummary = new ReportLettingSummary();
                 var proposals = reportLetting.ReportProposals
-                    .Where(i => i.ReportProposalVendors.Min(v => v.Total) >= contractRanges[j, 0] &&
+                    .Where(i => i.ReportProposalVendors.Any() &&
+                                i.ReportProposalVendors.Min(v => v.Total) >= contractRanges[j, 0] &&
                                 i.ReportProposalVendors.Min(v => v.Total) < contractRanges[j, 1])
                     .ToList();
 
