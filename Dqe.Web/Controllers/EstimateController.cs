@@ -1027,25 +1027,26 @@ namespace Dqe.Web.Controllers
                     }
                     return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved - {0}", pricesPushed ? "Project Preconstruction prices updated" : "Project Preconstruction prices not updated because a project is not synchronized") }, JsonRequestBehavior.AllowGet);
                 }
-                if (nextSnapshot == SnapshotLabel.Official)
-                {
-                    var isSynced = false;
-                    foreach (var p in proposal.Projects)
-                    {
-                        isSynced = IsProjectSynced(p.Id);
-                        if (!isSynced) break;
-                    }
-                    if (isSynced)
-                    {
-                        var result = _webTransportService.UpdateFixedPrices(proposal, currentDqeUser);
-                        if (!string.IsNullOrWhiteSpace(result))
-                        {
-                            return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = result }, JsonRequestBehavior.AllowGet);
-                        }
-                        pricesPushed = true;
-                    }
-                    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved - {0}", pricesPushed ? "Project Preconstruction fixed price items updated" : "Project Preconstruction fixed price items not updated because a project is not synchronized") }, JsonRequestBehavior.AllowGet);
-                }
+                // Stop pushing prices for non-bid items
+                //if (nextSnapshot == SnapshotLabel.Official)
+                //{
+                //    var isSynced = false;
+                //    foreach (var p in proposal.Projects)
+                //    {
+                //        isSynced = IsProjectSynced(p.Id);
+                //        if (!isSynced) break;
+                //    }
+                //    if (isSynced)
+                //    {
+                //        var result = _webTransportService.UpdateFixedPrices(proposal, currentDqeUser);
+                //        if (!string.IsNullOrWhiteSpace(result))
+                //        {
+                //            return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = result }, JsonRequestBehavior.AllowGet);
+                //        }
+                //        pricesPushed = true;
+                //    }
+                //    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved - {0}", pricesPushed ? "Project Preconstruction fixed price items updated" : "Project Preconstruction fixed price items not updated because a project is not synchronized") }, JsonRequestBehavior.AllowGet);
+                //}
             }
             return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved") }, JsonRequestBehavior.AllowGet);
         }
