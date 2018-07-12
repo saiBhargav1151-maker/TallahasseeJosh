@@ -536,7 +536,7 @@ namespace Dqe.Web.Controllers
                         if (wtBid == null)
                             return true;
 
-                        var wtBidPrice = bid.MyReportProposalItem.Unit.StartsWith("LS") ? wtBid.BidPrice / bid.MyReportProposalItem.Quantity : bid.BidPrice;
+                        var wtBidPrice = bid.MyReportProposalItem.Unit.StartsWith("LS") ? wtBid.BidPrice / bid.MyReportProposalItem.Quantity : wtBid.BidPrice;
                         if (bid.BidPrice != Decimal.Round((Decimal)wtBidPrice, 5))
                             return true;
                     }
