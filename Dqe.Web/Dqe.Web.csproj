@@ -278,9 +278,7 @@
     <Content Include="Scripts\angular-cookies.min.js.map" />
     <Content Include="Scripts\app\controllers\adminCostGroupsController.js" />
     <Content Include="Scripts\app\controllers\adminDefaultValuesGeneralController.js" />
-    <Content Include="Scripts\app\controllers\adminPayItemsMaintainController.js" />
-    <None Include="Properties\PublishProfiles\DQE_System.pubxml" />
-    <None Include="Properties\PublishProfiles\DQE_Unit.pubxml" />
+    <Content Include="Scripts\app\controllers\adminPayItemsMaintainController.js" />   
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <None Include="Scripts\app\controllers\adminPayItemsMaintainController.js.bak" />
     <Content Include="Scripts\app\controllers\adminWebLinksController.js" />
