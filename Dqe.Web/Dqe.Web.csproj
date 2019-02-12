@@ -20,6 +20,8 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <Use64BitIISExpress />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -281,6 +283,7 @@
     <Content Include="Scripts\app\controllers\adminPayItemsMaintainController.js" />
     <None Include="Properties\PublishProfiles\DQE_System.pubxml" />
     <None Include="Properties\PublishProfiles\DQE_Unit.pubxml" />
+    <None Include="Properties\PublishProfiles\Generic.pubxml" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <None Include="Scripts\app\controllers\adminPayItemsMaintainController.js.bak" />
     <Content Include="Scripts\app\controllers\adminWebLinksController.js" />
