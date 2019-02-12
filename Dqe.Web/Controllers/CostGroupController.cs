@@ -173,7 +173,8 @@ namespace Dqe.Web.Controllers
         [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
         public ActionResult SaveCostGroupPayItem(dynamic costGroupPayItem)
         {
-            if (costGroupPayItem.conversionFactor == null || string.IsNullOrWhiteSpace(costGroupPayItem.conversionFactor))
+            //if (costGroupPayItem.conversionFactor == null || string.IsNullOrWhiteSpace(costGroupPayItem.conversionFactor.ToString()))  
+            if (costGroupPayItem.conversionFactor == null) 
                 return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "Conversion Factor is Required" });
 
             var currentUser = (DqeIdentity)User.Identity;
