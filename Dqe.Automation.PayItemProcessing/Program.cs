@@ -24,7 +24,6 @@ namespace Dqe.Automation.PayItemProcessing
             {
                 Initializer.Initialize();
                 EntityDependencyResolver.OnResolveConstructorArguments += EntityDependencyResolverOnResolveConstructorArguments;
-
                 //test
                 //var mfl1 = new MasterFileRepository().GetAll().ToList();
                 //var syl1 = mfl1.Select(masterFile => masterFile.FileNumber.ToString(CultureInfo.InvariantCulture).StartsWith("9")
