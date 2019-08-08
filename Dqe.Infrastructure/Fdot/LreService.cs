@@ -398,7 +398,8 @@ namespace Dqe.Infrastructure.Fdot
                     //TODO: how do we handle obsolete items - LRE doesn't have an obsolete date, so we have a problem
                     if (!isInLre)
                     {
-                        ps.PayItemStatusCode = "N";
+                        //Changeing PayItemStatusCode from "N" to "A" for Cherwell ticket 418654 
+                        ps.PayItemStatusCode = "A";
                     }
                     else
                     {
