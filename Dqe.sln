@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4AE65780-5595-49EA-A4BA-152CE6664588}"
 EndProject
@@ -280,8 +280,6 @@ Global
 		{0D4774BB-0823-4201-9770-19B15FEBCD0B}.Release|Any CPU.Build.0 = Release
 		{0D4774BB-0823-4201-9770-19B15FEBCD0B}.Release|Any CPU.Deploy.0 = Release
 		{0D4774BB-0823-4201-9770-19B15FEBCD0B}.Release|Mixed Platforms.ActiveCfg = Release
-		{0D4774BB-0823-4201-9770-19B15FEBCD0B}.Release|Mixed Platforms.Build.0 = Release
-		{0D4774BB-0823-4201-9770-19B15FEBCD0B}.Release|Mixed Platforms.Deploy.0 = Release
 		{0D4774BB-0823-4201-9770-19B15FEBCD0B}.Release|x86.ActiveCfg = Release
 		{0D4774BB-0823-4201-9770-19B15FEBCD0B}.Release|x86.Build.0 = Release
 		{0D4774BB-0823-4201-9770-19B15FEBCD0B}.Release|x86.Deploy.0 = Release
@@ -358,5 +356,8 @@ Global
 		{216445D1-9E50-453C-A837-76216A59B4DB} = {4AE65780-5595-49EA-A4BA-152CE6664588}
 		{7BE32EB1-7D3A-4E8A-A545-48AEBD693374} = {4AE65780-5595-49EA-A4BA-152CE6664588}
 		{B11FD77B-C656-4F33-BCCF-AFA5F83D68B1} = {4AE65780-5595-49EA-A4BA-152CE6664588}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BF924759-3EB2-4238-8117-84E63D6D2628}
 	EndGlobalSection
 EndGlobal
