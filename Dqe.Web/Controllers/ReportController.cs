@@ -70,7 +70,7 @@ namespace Dqe.Web.Controllers
             var structure = form["structure"] == "on";
             var current = form["current"] == "on";
 
-            var targetUrl = string.Format(_serviceUrl + "/PayItemMasterReport&rs:Command=Render&rs:Format={0}&MasterFileNumber={1}&WithStructure={2}&CurrentOnly={3}", reportFormat, masterFile, structure, current);
+            var targetUrl = string.Format(_serviceUrl + "/PayItemMasterReport&rs:Command=Render&rs:Format={0}&MasterFileNumber={1}&WithStructure={2}&CurrentOnly={3}", reportFormat, masterFile, structure.ToString().ToLower(), current.ToString().ToLower());
 
             var fileBytes = CallSsrsWebService(targetUrl);
 
