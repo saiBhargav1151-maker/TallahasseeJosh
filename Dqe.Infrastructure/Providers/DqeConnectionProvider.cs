@@ -12,9 +12,9 @@ namespace Dqe.Infrastructure.Providers
     {
         public override IDbConnection GetConnection()
         {
-#if DEBUG
-            var connection = new SqlConnection(@"Data Source=.\SQLEXPRESS;Initial Catalog=DQE;Integrated Security=True");
-#else
+//#if DEBUG
+//            var connection = new SqlConnection(@"Data Source=.\SQLEXPRESS;Initial Catalog=DQE;Integrated Security=True");
+//#else
             var environment = Convert.ToString(ConfigurationManager.AppSettings["environment"]);
             var connectionString = environment == "conversion"
                 ? Convert.ToString(ConfigurationManager.AppSettings["dqeConnection"])
@@ -22,7 +22,7 @@ namespace Dqe.Infrastructure.Providers
                     ? ChannelProvider<IConnectionStringService>.Default.GetConnectionString("DQENET_U")
                     : ChannelProvider<IConnectionStringService>.Default.GetConnectionString("DQEBJS_U");
             var connection = new SqlConnection(connectionString);
-#endif
+//#endif
             connection.Open();
             return connection;
         }

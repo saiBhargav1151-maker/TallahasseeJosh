@@ -801,11 +801,11 @@ namespace Dqe.Web.Controllers
             var req = (HttpWebRequest)WebRequest.Create(targetUrl);
             req.PreAuthenticate = true;
             req.Proxy = null;
-#if DEBUG
-            req.Credentials = CredentialCache.DefaultCredentials;
-#else
+//#if DEBUG
+//            req.Credentials = CredentialCache.DefaultCredentials;
+//#else
             req.Credentials = new NetworkCredential(_userName, _passWord, ConfigurationManager.AppSettings.Get("rptDomain"));
-#endif
+//#endif
             byte[] fileBytes;
 
             try
