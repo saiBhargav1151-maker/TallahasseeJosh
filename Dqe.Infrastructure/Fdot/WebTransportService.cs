@@ -423,11 +423,11 @@ namespace Dqe.Infrastructure.Fdot
                 var estimateGroups = projectEstimate.MyProjectVersion.MyProject.WtLsDbId == 0
                     ? projectEstimate.EstimateGroups.Where(i => !i.IsLsDbSummary).ToList()
                     : projectEstimate.EstimateGroups.Where(i => i.IsLsDbSummary).ToList();
-                return ValidateProjectCategorySynch(estimateGroups, wtProject);
+                return ValidateProjectCategorySynch(estimateGroups, wtProject, dqeProject);
             }
         }
 
-        private bool ValidateProjectCategorySynch(IList<EstimateGroup> estimateGroups, Project wtProject)
+        private bool ValidateProjectCategorySynch(IList<EstimateGroup> estimateGroups, Project wtProject, Domain.Model.Project dProject)
         {
             if (estimateGroups.Count() != wtProject.Categories.Count())
             {
@@ -469,6 +469,10 @@ namespace Dqe.Infrastructure.Fdot
                     {
                         return false;
                     }
+                }
+                if (wtProject.SpecBook != dProject.MyMasterFile.FileNumber.ToString())
+                {
+                    return false;
                 }
             }
             return true;

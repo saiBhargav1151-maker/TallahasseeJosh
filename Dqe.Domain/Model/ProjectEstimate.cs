@@ -376,7 +376,7 @@ namespace Dqe.Domain.Model
             return _webTransportService.IsProjectSynced(this);
         }
 
-        public virtual void SyncWithWt(bool initializePrices, DqeUser account)
+        public virtual void SyncWithWt(bool initializePrices, DqeUser account, MasterFile mf, Wt.Project project)
         {
             if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
             {
@@ -386,9 +386,12 @@ namespace Dqe.Domain.Model
             {
                 throw new InvalidOperationException(string.Format("{0} is not the owner of Project {1} Version {2} Estimate {3}", account.Name, MyProjectVersion.MyProject.ProjectNumber, MyProjectVersion.Version, Estimate));
             }
-            var project = _webTransportService.ExportProject(MyProjectVersion.MyProject.ProjectNumber);
+            //var project = _webTransportService.ExportProject(MyProjectVersion.MyProject.ProjectNumber);
             if (project == null) return;
             var newEstimate = MyProjectVersion.MyProject.CreateNewVersionFromWt("Synchronized with Project Preconstruction design changes", project, initializePrices, account);
+            //update DQET020_PROJ MasterFile for wtproject specbook sync
+            newEstimate.MyProjectVersion.MyProject.MyMasterFile = mf;
+
             foreach (var estimateGroup in EstimateGroups.Where(i => !i.IsLsDbSummary))
             {
                 var eg = estimateGroup;
@@ -402,7 +405,7 @@ namespace Dqe.Domain.Model
                     .Where(i => i.FederalConstructionClass == eg.FederalConstructionClass)
                     .FirstOrDefault(i => i.WtId == eg.WtId);
                 if (egMatch != null)
-                {
+                {                  
                     foreach (var pItem in estimateGroup.ProjectItems)
                     {
                         var pi = pItem;

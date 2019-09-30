@@ -200,7 +200,15 @@ namespace Dqe.Web.Controllers
             if (v == null) throw new InvalidOperationException("Version for estimate not found");
             var e = v.ProjectEstimates.FirstOrDefault(i => i.Id == estimateId);
             if (e == null) throw new InvalidOperationException("Estimate not found");
-            e.SyncWithWt(false, currentDqeUser);
+            //Sync wTproject specbook - get the forign key to DQET019_MSTR_FILE of the specbook from wT
+            var wtp = _webTransportService.ExportProject(p.ProjectNumber);
+            int mfid;
+            if (!int.TryParse(wtp.SpecBook.Trim(), out mfid))
+            {
+                throw new InvalidOperationException(string.Format("Could not parse spec year from WT project {0}", wtp.ProjectNumber));
+            }
+            var mf = _masterFileRepository.GetByFileNumber(mfid);
+            e.SyncWithWt(false, currentDqeUser,mf, wtp);
             return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = "Your working estimate is now synchronized with Project Preconstruction" });
         }
 
@@ -596,11 +604,13 @@ namespace Dqe.Web.Controllers
                             },
                             JsonRequestBehavior.AllowGet);
                     }
+                    //Sync wTproject specbook - get the forign key to DQET019_MSTR_FILE of the specbook from wT
+                    mf.AddProject(project, currentDqeUser);
                     //var p = new Project(_projectRepository, _commandRepository, _webTransportService);
                     var t = project.GetTransformer();
                     t.WtId = wtp.Id;
                     t.Description = wtp.Description;
-                    t.ProjectNumber = wtp.ProjectNumber;
+                    t.ProjectNumber = wtp.ProjectNumber;                    
                     var district = wtp.Districts.FirstOrDefault(i => i.PrimaryDistrict);
                     if (district == null)
                     {
