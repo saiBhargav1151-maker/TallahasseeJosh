@@ -46,14 +46,18 @@
                         <div class="col-lg-1">
                             <strong>District:</strong> {{project.district}}
                         </div>
-                        <div class="col-lg-3">
+                        <div class="col-lg-2">
                             <strong>County:</strong> {{project.county}}
                         </div>
+
                         <div class="col-lg-2">
                             <strong>Letting:</strong> {{project.lettingDate}}
                         </div>
-                        <div class="col-lg-4" ng-if="project.isAvailable == false">
+                        <div class="col-lg-2" ng-if="project.isAvailable == false">
                             <strong>Owner:</strong> {{project.custodyOwner}}
+                        </div>
+                        <div class="col-lg-2" ng-if="project.isAvailable == false">
+                            <strong>Item Year:</strong> {{project.filenumber}}
                         </div>
                     </div>
                     <div class="row">

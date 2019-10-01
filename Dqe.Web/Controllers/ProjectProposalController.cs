@@ -482,6 +482,7 @@ namespace Dqe.Web.Controllers
                     description = prop.Description,
                     district = prop.District,
                     county = prop.County.Name,
+                    filenumber = prop.Projects.FirstOrDefault().MyMasterFile.FileNumber,
                     lettingDate = prop.LettingDate.HasValue ? prop.LettingDate.Value.ToShortDateString() : string.Empty,
                     comment = prop.Comment,
                     hasCustody = prop.Projects.All(i => i.CustodyOwner == currentDqeUser),
@@ -1288,6 +1289,7 @@ namespace Dqe.Web.Controllers
                     district = project.District,
                     designer = project.DesignerName,
                     county = project.MyCounty.Name,
+                    filenumber = project.MyMasterFile.FileNumber,
                     comment = snapshot == null ? string.Empty : snapshot.EstimateComment,
                     lettingDate = wtProposal == null 
                         ? projectLetting.HasValue
@@ -1319,7 +1321,8 @@ namespace Dqe.Web.Controllers
                     source = i.ProposalSource == ProposalSourceType.Wt ? "Project Preconstruction" : "Gaming",
                     comment = i.Comment,
                     created = i.Created,
-                    lastUpdated = i.LastUpdated
+                    lastUpdated = i.LastUpdated,
+                    filenumber = i.Projects.FirstOrDefault().MyMasterFile.FileNumber
                 }),
                 workingEstimate = snapshot == null
                 ? new
