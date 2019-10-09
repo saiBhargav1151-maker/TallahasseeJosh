@@ -343,8 +343,10 @@ namespace Dqe.Automation.PayItemProcessing
             newMasterFileItemTransformer.CommonUnit = payItemMaster.CommonUnit;
             newMasterFileItemTransformer.ContractClass = payItemMaster.ContractClass;
             newMasterFileItemTransformer.ConversionFactorToCommonUnit = payItemMaster.ConversionFactorToCommonUnit;
-            newMasterFileItemTransformer.CreatedBy = payItemMaster.CreatedBy;
-            newMasterFileItemTransformer.CreatedDate = payItemMaster.CreatedDate;
+            //Check to see if the payItemMaster.CreatedDate is null if so set to DQE 
+            newMasterFileItemTransformer.CreatedBy = payItemMaster.CreatedBy == null ? "DQE" :  payItemMaster.CreatedBy;
+            //Check to see if the payItemMaster.CreatedBy is null if so set to todays date         
+            newMasterFileItemTransformer.CreatedDate = payItemMaster.CreatedDate == null ? DateTime.Now  : payItemMaster.CreatedDate; 
             newMasterFileItemTransformer.ConcreteFactor = payItemMaster.ConcreteFactor;
             //D
             newMasterFileItemTransformer.DbeInterest = payItemMaster.DbeInterest;
