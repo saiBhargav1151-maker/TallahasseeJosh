@@ -1442,6 +1442,7 @@ namespace Dqe.Web.Controllers
                     designer = snapshot.MyProjectVersion.MyProject.DesignerName,
                     county = snapshot.MyProjectVersion.MyProject.MyCounty.Name,
                     comment = snapshot.EstimateComment,
+                    filenumber = snapshot.MyProjectVersion.MyProject.MyMasterFile.FileNumber,
                     //lettingDate = wtProposal == null ? string.Empty : wtProposal.LettingDate.HasValue ? wtProposal.LettingDate.Value.ToShortDateString() : string.Empty,
                     lettingDate = wtProposal == null
                         ? projectLetting.HasValue
@@ -1472,7 +1473,8 @@ namespace Dqe.Web.Controllers
                     source = i.ProposalSource == ProposalSourceType.Wt ? "Project Preconstruction" : "Gaming",
                     comment = i.Comment,
                     created = i.Created,
-                    lastUpdated = i.LastUpdated
+                    lastUpdated = i.LastUpdated,
+                    filenumber = i.Projects.FirstOrDefault().MyMasterFile.FileNumber
                 }),
                 workingEstimate = new
                 {
