@@ -253,6 +253,7 @@ namespace Dqe.Automation.PayItemProcessing
             var payItemsUpdated = new Dictionary<long, DateTime?>();
             var payItemsCopied = new List<PayItemMaster>();
             var MasterFileIncludeObsoletePayItems = Convert.ToBoolean(ConfigurationManager.AppSettings["MasterFileIncludeObsoletePayItems"]);
+            var OldSpecBookVaildAsOfDate = Convert.ToString(ConfigurationManager.AppSettings["OldSpecBookVaildAsOfDate"]);
             foreach (var payItemMaster in currentMasterFile.PayItemMasters)
             {
                 if (payItemMaster.ObsoleteDate.HasValue)
@@ -264,7 +265,7 @@ namespace Dqe.Automation.PayItemProcessing
                     }
                     else
                     {
-                        CreatePayItemMaster(newMasterFile, payItemMaster, effectiveDate, payItemMaster.ObsoleteDate, sys);
+                        CreatePayItemMaster(newMasterFile, payItemMaster, Convert.ToDateTime(OldSpecBookVaildAsOfDate), payItemMaster.ObsoleteDate, sys);
                         payItemsCopied.Add(payItemMaster);
                     }
                         continue;
