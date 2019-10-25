@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Linq;
@@ -251,16 +252,21 @@ namespace Dqe.Automation.PayItemProcessing
             //var payItemsUpdated = new List<PayItemMaster>();
             var payItemsUpdated = new Dictionary<long, DateTime?>();
             var payItemsCopied = new List<PayItemMaster>();
+            var MasterFileIncludeObsoletePayItems = Convert.ToBoolean(ConfigurationManager.AppSettings["MasterFileIncludeObsoletePayItems"]);
             foreach (var payItemMaster in currentMasterFile.PayItemMasters)
             {
                 if (payItemMaster.ObsoleteDate.HasValue)
                 {
-                    if (payItemMaster.ObsoleteDate.Value > effectiveDate)
+                    if (payItemMaster.ObsoleteDate.Value > effectiveDate && MasterFileIncludeObsoletePayItems == false)
                     {
                         payItemsUpdated.Add(payItemMaster.Id, payItemMaster.ObsoleteDate);
                         CreatePayItemMaster(newMasterFile, payItemMaster, effectiveDate, payItemMaster.ObsoleteDate, sys);
                     }
                     else
+                    {
+                        CreatePayItemMaster(newMasterFile, payItemMaster, effectiveDate, payItemMaster.ObsoleteDate, sys);
+                        payItemsCopied.Add(payItemMaster);
+                    }
                         continue;
                 }
                 else
