@@ -200,7 +200,15 @@ namespace Dqe.Web.Controllers
             if (v == null) throw new InvalidOperationException("Version for estimate not found");
             var e = v.ProjectEstimates.FirstOrDefault(i => i.Id == estimateId);
             if (e == null) throw new InvalidOperationException("Estimate not found");
-            e.SyncWithWt(false, currentDqeUser);
+            //Sync wTproject specbook - get the forign key to DQET019_MSTR_FILE of the specbook from wT
+            var wtp = _webTransportService.ExportProject(p.ProjectNumber);
+            int mfid;
+            if (!int.TryParse(wtp.SpecBook.Trim(), out mfid))
+            {
+                throw new InvalidOperationException(string.Format("Could not parse spec year from WT project {0}", wtp.ProjectNumber));
+            }
+            var mf = _masterFileRepository.GetByFileNumber(mfid);
+            e.SyncWithWt(false, currentDqeUser,mf, wtp);
             return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = "Your working estimate is now synchronized with Project Preconstruction" });
         }
 
@@ -474,6 +482,7 @@ namespace Dqe.Web.Controllers
                     description = prop.Description,
                     district = prop.District,
                     county = prop.County.Name,
+                    filenumber = prop.Projects.FirstOrDefault().MyMasterFile.FileNumber,
                     lettingDate = prop.LettingDate.HasValue ? prop.LettingDate.Value.ToShortDateString() : string.Empty,
                     comment = prop.Comment,
                     hasCustody = prop.Projects.All(i => i.CustodyOwner == currentDqeUser),
@@ -596,11 +605,13 @@ namespace Dqe.Web.Controllers
                             },
                             JsonRequestBehavior.AllowGet);
                     }
+                    //Sync wTproject specbook - get the forign key to DQET019_MSTR_FILE of the specbook from wT
+                    mf.AddProject(project, currentDqeUser);
                     //var p = new Project(_projectRepository, _commandRepository, _webTransportService);
                     var t = project.GetTransformer();
                     t.WtId = wtp.Id;
                     t.Description = wtp.Description;
-                    t.ProjectNumber = wtp.ProjectNumber;
+                    t.ProjectNumber = wtp.ProjectNumber;                    
                     var district = wtp.Districts.FirstOrDefault(i => i.PrimaryDistrict);
                     if (district == null)
                     {
@@ -1278,6 +1289,7 @@ namespace Dqe.Web.Controllers
                     district = project.District,
                     designer = project.DesignerName,
                     county = project.MyCounty.Name,
+                    filenumber = project.MyMasterFile.FileNumber,
                     comment = snapshot == null ? string.Empty : snapshot.EstimateComment,
                     lettingDate = wtProposal == null 
                         ? projectLetting.HasValue
@@ -1309,7 +1321,8 @@ namespace Dqe.Web.Controllers
                     source = i.ProposalSource == ProposalSourceType.Wt ? "Project Preconstruction" : "Gaming",
                     comment = i.Comment,
                     created = i.Created,
-                    lastUpdated = i.LastUpdated
+                    lastUpdated = i.LastUpdated,
+                    filenumber = i.Projects.FirstOrDefault().MyMasterFile.FileNumber
                 }),
                 workingEstimate = snapshot == null
                 ? new
@@ -1429,6 +1442,7 @@ namespace Dqe.Web.Controllers
                     designer = snapshot.MyProjectVersion.MyProject.DesignerName,
                     county = snapshot.MyProjectVersion.MyProject.MyCounty.Name,
                     comment = snapshot.EstimateComment,
+                    filenumber = snapshot.MyProjectVersion.MyProject.MyMasterFile.FileNumber,
                     //lettingDate = wtProposal == null ? string.Empty : wtProposal.LettingDate.HasValue ? wtProposal.LettingDate.Value.ToShortDateString() : string.Empty,
                     lettingDate = wtProposal == null
                         ? projectLetting.HasValue
@@ -1459,7 +1473,8 @@ namespace Dqe.Web.Controllers
                     source = i.ProposalSource == ProposalSourceType.Wt ? "Project Preconstruction" : "Gaming",
                     comment = i.Comment,
                     created = i.Created,
-                    lastUpdated = i.LastUpdated
+                    lastUpdated = i.LastUpdated,
+                    filenumber = i.Projects.FirstOrDefault().MyMasterFile.FileNumber
                 }),
                 workingEstimate = new
                 {
