@@ -532,7 +532,7 @@ namespace Dqe.Infrastructure.Repositories.Custom
                     reportLettingSummary.NumberOfContracts = proposals.Count();
                     reportLettingSummary.ValueInCategory = proposals.Sum(p => p.ReportProposalVendors.Min(v => v.Total));
                     reportLettingSummary.ValueOfEstimate = proposals.Sum(i => i.Total) + proposals.Sum(i => i.ReportProposalMilestones.Sum(m => m.Total));
-                    reportLettingSummary.PercentageOfContracts = Math.Round((proposals.Count() / (decimal)reportLetting.ReportProposals.Count()) * 100, 2);
+                    reportLettingSummary.PercentageOfContracts = Math.Round((proposals.Count() / (decimal)reportLetting.ReportProposals.Count()) * 100, 2, MidpointRounding.AwayFromZero);
 
                     reportLettingSummary.PercentageOfLettingTotal =
                         Math.Round(
@@ -548,7 +548,7 @@ namespace Dqe.Infrastructure.Repositories.Custom
                     foreach (var proposal in proposals)
                     {
                         var lowestVendor = proposal.ReportProposalVendors.Min(i => i.Total);
-                        var range = Math.Round((lowestVendor / (proposal.Total + proposal.ReportProposalMilestones.Sum(m => m.Total))) * 100 - 100, 2);
+                        var range = Math.Round((lowestVendor / (proposal.Total + proposal.ReportProposalMilestones.Sum(m => m.Total))) * 100 - 100, 2, MidpointRounding.AwayFromZero);
 
                         if (lowestVendor <= proposal.Total + proposal.ReportProposalMilestones.Sum(m => m.Total))
                         {
@@ -578,7 +578,7 @@ namespace Dqe.Infrastructure.Repositories.Custom
                         ? Math.Abs(rangeOfAbove.Sum() / rangeOfAbove.Count)
                         : 0;
 
-                    reportLettingSummary.AverageBidsPerContract = Math.Round(proposals.Sum(i => i.ReportProposalVendors.Count() / (decimal)reportLettingSummary.NumberOfContracts), 2);
+                    reportLettingSummary.AverageBidsPerContract = Math.Round(proposals.Sum(i => i.ReportProposalVendors.Count() / (decimal)reportLettingSummary.NumberOfContracts), 2, MidpointRounding.AwayFromZero);
                 }
                 else
                 {

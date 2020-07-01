@@ -1089,7 +1089,7 @@ namespace Dqe.Infrastructure.Fdot
                                         queryUpdateProposalItem
                                             .SetParameter("price", Math.Round(proposalItemTemp.Price, 2))
                                             .SetParameter("isLowCost", true)
-                                            .SetParameter("extendedAmount", Math.Round(proposalItem.Quantity * proposalItemTemp.Price, 2))
+                                            .SetParameter("extendedAmount", Math.Round(proposalItem.Quantity * proposalItemTemp.Price, 2, MidpointRounding.AwayFromZero))
                                             .SetParameter("pricingComments", Enum.GetName(typeof(PriceSetType), proposalItemTemp.PriceSet))
                                             .SetParameter("lastUpdatedDate", DateTime.Now)
                                             .SetParameter("lastUpdatedBy", "DQE")
@@ -1100,7 +1100,7 @@ namespace Dqe.Infrastructure.Fdot
                                             queryUpdateProjectItem
                                                 .SetParameter("price", Math.Round(projectItem.Price, 2))
                                                 .SetParameter("isLowCost", true)
-                                                .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2))
+                                                .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2, MidpointRounding.AwayFromZero))
                                                 .SetParameter("pricingComments", Enum.GetName(typeof(PriceSetType), projectItem.PriceSet))
                                                 .SetParameter("lastUpdatedDate", DateTime.Now)
                                                 .SetParameter("lastUpdatedBy", "DQE")
@@ -1218,7 +1218,7 @@ namespace Dqe.Infrastructure.Fdot
                                         records = queryUpdateProjectItem
                                             .SetParameter("price", Math.Round(projectItem.Price, 2))
                                             .SetParameter("isLowCost", categorySet.Included)
-                                            .SetParameter("extendedAmount", Math.Round(projectItem.Quantity*projectItem.Price, 2))
+                                            .SetParameter("extendedAmount", Math.Round(projectItem.Quantity*projectItem.Price, 2, MidpointRounding.AwayFromZero))
                                             .SetParameter("pricingComments", Enum.GetName(typeof (PriceSetType), projectItem.PriceSet))
                                             .SetParameter("lastUpdatedDate", DateTime.Now)
                                             .SetParameter("lastUpdatedBy", "DQE")
@@ -1242,7 +1242,7 @@ namespace Dqe.Infrastructure.Fdot
                                 records = queryUpdateProjectItem
                                 .SetParameter("price", Math.Round(projectItem.Price, 2))
                                 .SetParameter("isLowCost", true)
-                                .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2))
+                                .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2, MidpointRounding.AwayFromZero))
                                 .SetParameter("pricingComments", Enum.GetName(typeof(PriceSetType), projectItem.PriceSet))
                                 .SetParameter("lastUpdatedDate", DateTime.Now)
                                 .SetParameter("lastUpdatedBy", "DQE")
@@ -1415,7 +1415,7 @@ namespace Dqe.Infrastructure.Fdot
                                     records = queryUpdateProjectItem
                                     .SetParameter("price", Math.Round(projectItem.Price, 2))
                                     .SetParameter("isLowCost", true)
-                                    .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2))
+                                    .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2, MidpointRounding.AwayFromZero))
                                     .SetParameter("pricingComments", Enum.GetName(typeof(PriceSetType), projectItem.PriceSet))
                                     .SetParameter("lastUpdatedDate", DateTime.Now)
                                     .SetParameter("lastUpdatedBy", "DQE")
@@ -1459,7 +1459,7 @@ namespace Dqe.Infrastructure.Fdot
                                         records = queryUpdateProposalItem
                                             .SetParameter("price", Math.Round(proposalItemTemp.Price, 2))
                                             .SetParameter("isLowCost", itemSet.Included)
-                                            .SetParameter("extendedAmount", Math.Round(proposalItem.Quantity * proposalItemTemp.Price, 2))
+                                            .SetParameter("extendedAmount", Math.Round(proposalItem.Quantity * proposalItemTemp.Price, 2, MidpointRounding.AwayFromZero))
                                             .SetParameter("pricingComments", Enum.GetName(typeof(PriceSetType), proposalItemTemp.PriceSet))
                                             .SetParameter("lastUpdatedDate", DateTime.Now)
                                             .SetParameter("lastUpdatedBy", "DQE")
@@ -1471,7 +1471,7 @@ namespace Dqe.Infrastructure.Fdot
                                             records = queryUpdateProjectItem
                                             .SetParameter("price", Math.Round(projectItem.Price, 2))
                                             .SetParameter("isLowCost", itemSet.Included)
-                                            .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2))
+                                            .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2, MidpointRounding.AwayFromZero))
                                             .SetParameter("pricingComments", Enum.GetName(typeof(PriceSetType), projectItem.PriceSet))
                                             .SetParameter("lastUpdatedDate", DateTime.Now)
                                             .SetParameter("lastUpdatedBy", "DQE")

@@ -15,7 +15,7 @@ namespace Dqe.ApplicationServices
         {
             get
             {
-                return Math.Round((TimeWeightedAveragePrice + QuantityWeightedAveragePrice + LocationWeightedAveragePrice)/3, 2);
+                return Math.Round((TimeWeightedAveragePrice + QuantityWeightedAveragePrice + LocationWeightedAveragePrice)/3, 2, MidpointRounding.AwayFromZero);
                 //return (TimeWeightedAveragePrice + QuantityWeightedAveragePrice) / 2;
             }
         }

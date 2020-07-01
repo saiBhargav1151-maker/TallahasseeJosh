@@ -57,7 +57,7 @@ namespace Dqe.Domain.Model.Reports
 
         public virtual decimal GetTotal()
         {
-            return Math.Round(Price*Quantity, 2);
+            return Math.Round(Price*Quantity, 2, MidpointRounding.AwayFromZero);
         }
 
         public virtual decimal Total

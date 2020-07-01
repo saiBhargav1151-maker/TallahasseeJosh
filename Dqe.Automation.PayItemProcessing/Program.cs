@@ -134,7 +134,7 @@ namespace Dqe.Automation.PayItemProcessing
                         }
                         var bidSet = engine.CalculateStateAveragePrice(bidHistory, item, sys);
                         var tItem = item.GetTransformer();
-                        tItem.StateReferencePrice = Math.Round((bidSet.QuantityWeightedAveragePrice + bidSet.TimeWeightedAveragePrice) / 2, 2);
+                        tItem.StateReferencePrice = Math.Round((bidSet.QuantityWeightedAveragePrice + bidSet.TimeWeightedAveragePrice) / 2, 2, MidpointRounding.AwayFromZero);
 
                         //todo: check
                         if (tItem.StateReferencePrice != 0)
@@ -148,7 +148,7 @@ namespace Dqe.Automation.PayItemProcessing
                             bidSet = engine.CalculateMarketAreaAveragePrice(bidHistory, ma);
                             var maap = new MarketAreaAveragePrice();
                             var tMaap = maap.GetTransformer();
-                            tMaap.Price = Math.Round((bidSet.QuantityWeightedAveragePrice + bidSet.TimeWeightedAveragePrice) / 2, 2);
+                            tMaap.Price = Math.Round((bidSet.QuantityWeightedAveragePrice + bidSet.TimeWeightedAveragePrice) / 2, 2, MidpointRounding.AwayFromZero);
                             maap.Transform(tMaap, sys);
                             maap.MyMarketArea = ma;
                             maap.MyPayItemMaster = item;
@@ -160,7 +160,7 @@ namespace Dqe.Automation.PayItemProcessing
                             bidSet = engine.CalculateCountyAveragePrice(bidHistory, county);
                             var cap = new CountyAveragePrice();
                             var tCap = cap.GetTransformer();
-                            tCap.Price = Math.Round((bidSet.QuantityWeightedAveragePrice + bidSet.TimeWeightedAveragePrice) / 2, 2);
+                            tCap.Price = Math.Round((bidSet.QuantityWeightedAveragePrice + bidSet.TimeWeightedAveragePrice) / 2, 2, MidpointRounding.AwayFromZero);
                             cap.Transform(tCap, sys);
                             cap.MyCounty = county;
                             cap.MyPayItemMaster = item;

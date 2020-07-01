@@ -363,7 +363,7 @@ namespace Dqe.Domain.Model
                                 Member = itemMember,
                                 //Total = memberItems.Sum(i => i.ProjectItems.Sum(ii => ii.Quantity * ii.Price))
 
-                                Total = memberItems.Sum(i => i.GetEstimatorProjectItems(estimator).Sum(ii => Math.Round(ii.Quantity * ii.Price, 2)))
+                                Total = memberItems.Sum(i => i.GetEstimatorProjectItems(estimator).Sum(ii => Math.Round(ii.Quantity * ii.Price, 2, MidpointRounding.AwayFromZero)))
                             };
                             cSet.ItemSets.Add(iSet);
                         }
@@ -409,7 +409,7 @@ namespace Dqe.Domain.Model
                                 Set = itemSet,
                                 Member = itemMember,
                                 ProposalItems = memberItems,
-                                Total = memberItems.Sum(i => i.GetEstimatorProjectItems(estimator).Sum(ii => Math.Round(ii.Quantity * ii.Price, 2)))
+                                Total = memberItems.Sum(i => i.GetEstimatorProjectItems(estimator).Sum(ii => Math.Round(ii.Quantity * ii.Price, 2, MidpointRounding.AwayFromZero)))
                             };
                             cSet.ItemSets.Add(iSet);
                         }

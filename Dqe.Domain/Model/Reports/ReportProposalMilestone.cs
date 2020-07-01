@@ -35,7 +35,7 @@ namespace Dqe.Domain.Model.Reports
 
         public virtual decimal GetTotal()
         {
-            return Math.Round(CostPerDay * ConstructionDays, 2);
+            return Math.Round(CostPerDay * ConstructionDays, 2, MidpointRounding.AwayFromZero);
         }
 
         public virtual ReportProposal MyReportProposal { get; set; }
