@@ -538,7 +538,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotNew") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotNew"), 2)</Value>
+                              <Value>=Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotNew") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotNew"), 2, MidpointRounding.AwayFromZero)</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>
@@ -644,7 +644,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotOld") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotOld"), 2)</Value>
+                              <Value>=Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotOld") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotOld"), 2, MidpointRounding.AwayFromZero)</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>
@@ -752,10 +752,11 @@ Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Va
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=IIf(Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotNew") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotNew"), 2) -
-Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotOld") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotOld"), 2) = 0, "", 
-Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotNew") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotNew"), 2) -
-Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotOld") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotOld"), 2))</Value>
+                              <Value>
+                                =IIf(Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotNew") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotNew"), 2, MidpointRounding.AwayFromZero) -
+                                Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotOld") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotOld"), 2, MidpointRounding.AwayFromZero) = 0, "",
+                                Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotNew") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotNew"), 2, MidpointRounding.AwayFromZero) -
+                                Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotOld") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotOld"), 2, MidpointRounding.AwayFromZero))</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>
@@ -841,7 +842,7 @@ Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE
                               </Style>
                             </TextRun>
                             <TextRun>
-                              <Value>=Sum(Round(Fields!QTY_NUM.Value * Fields!PRCE_NUM.Value, 2), "SnapshotNew")</Value>
+                              <Value>=Sum(Round(Fields!QTY_NUM.Value * Fields!PRCE_NUM.Value, 2, MidpointRounding.AwayFromZero), "SnapshotNew")</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>
@@ -903,7 +904,7 @@ Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE
                               </Style>
                             </TextRun>
                             <TextRun>
-                              <Value>=Sum(Round(Fields!QTY_NUM.Value * Fields!PRCE_NUM.Value, 2), "SnapshotOld")</Value>
+                              <Value>=Sum(Round(Fields!QTY_NUM.Value * Fields!PRCE_NUM.Value, 2, MidpointRounding.AwayFromZero), "SnapshotOld")</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>
@@ -965,8 +966,9 @@ Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE
                               </Style>
                             </TextRun>
                             <TextRun>
-                              <Value>=Sum(Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotNew") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotNew"), 2) -
-Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotOld") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotOld"), 2))</Value>
+                              <Value>
+                                =Sum(Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotNew") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotNew"), 2, MidpointRounding.AwayFromZero) -
+                                Round(Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!PRCE_NUM.Value, "SnapshotOld") * Lookup(Fields!TRNSP_SYS_NUM.Value, Fields!TRNSP_SYS_NUM.Value, Fields!QTY_NUM.Value, "SnapshotOld"), 2, MidpointRounding.AwayFromZero))</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>

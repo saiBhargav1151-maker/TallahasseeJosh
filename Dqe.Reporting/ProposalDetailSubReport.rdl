@@ -683,7 +683,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Round(Fields!Quantity.Value * Fields!Price.Value, 2)</Value>
+                              <Value>=Round(Fields!Quantity.Value * Fields!Price.Value, 2, MidpointRounding.AwayFromZero)</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>
@@ -833,7 +833,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Sum(iif(Fields!IsLowCost.Value = "Y", Cdbl(Round(Fields!Quantity.Value*Fields!Price.Value, 3)), Cdbl(0)))</Value>
+                              <Value>=Sum(iif(Fields!IsLowCost.Value = "Y", Cdbl(Round(Fields!Quantity.Value*Fields!Price.Value, 2, MidpointRounding.AwayFromZero)), Cdbl(0)))</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>

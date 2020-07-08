@@ -557,7 +557,8 @@
             $scope.getExtendedAmount = function(price, quantity)
             {
                 price = Number(price.toString().replace(/[^0-9\.]+/g, ""));
-                return Math.round(price * 100) / 100 * quantity;
+                //return Math.round(price * 100) / 100 * quantity;
+                return Math.round(price * quantity, 2, MidpointRounding.AwayFromZero); 
             }
             $scope.saveEstimate = function (updatePreviousPrices, pushPrices) {
                 var siteManagerDssMaximum = false;

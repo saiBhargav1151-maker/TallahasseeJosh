@@ -1003,7 +1003,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Round(Fields!PRCE_NUM.Value*Fields!QTY_NUM.Value, 2)</Value>
+                              <Value>=Round(Fields!PRCE_NUM.Value*Fields!QTY_NUM.Value, 2, MidpointRounding.AwayFromZero)</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>
@@ -1092,7 +1092,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Sum(Round(Fields!PRCE_NUM.Value*Fields!QTY_NUM.Value, 2))</Value>
+                              <Value>=Sum(Round(Fields!PRCE_NUM.Value*Fields!QTY_NUM.Value, 2, MidpointRounding.AwayFromZero))</Value>
                               <Style>
                                 <FontSize>8pt</FontSize>
                                 <Format>'$'#,0.00;('$'#,0.00)</Format>
