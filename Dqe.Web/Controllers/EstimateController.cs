@@ -289,7 +289,7 @@ namespace Dqe.Web.Controllers
             foreach (var itemGroup in igl)
             {
                 var pis = itemGroup.ProjectItems.Where(i => i.Price > 0).ToList();
-                var average = pis.Count == 0 ? 0 : Math.Round(pis.Sum(i => Math.Round(i.Price * i.Quantity, 2, MidpointRounding.AwayFromZero)) / pis.Sum(i => i.Quantity), 2, MidpointRounding.AwayFromZero);
+                var average = pis.Count == 0 ? 0 : pis.Count == 1 ? pis[0].Price : Math.Round(pis.Sum(i => Math.Round(i.Price * i.Quantity, 2, MidpointRounding.AwayFromZero)) / pis.Sum(i => i.Quantity), 2, MidpointRounding.AwayFromZero);
                 //var average = pis.Count == 0 ? 0 : Math.Round(pis.Sum(i => i.Price) / pis.Count(), 2);
                 var priceType = itemGroup.ProjectItems.Any(i => i.PriceSet == PriceSetType.SystemOverride)
                     ? "X"
@@ -556,11 +556,15 @@ namespace Dqe.Web.Controllers
                 .ToList();
             var l = new List<object>();
             var key = 0;
+            
             foreach (var itemGroup in estimateGroups)
+
             {
                 if (!itemGroup.ProjectItems.Any()) continue;
-                var pis = itemGroup.ProjectItems.Where(i => i.Price > 0).ToList();
-                var average = pis.Count == 0 ? 0 : Math.Round(pis.Sum(i => Math.Round(i.Price * i.Quantity, 2, MidpointRounding.AwayFromZero)) / pis.Sum(i => i.Quantity), 2, MidpointRounding.AwayFromZero);
+                
+                   var pis = itemGroup.ProjectItems.Where(i => i.Price > 0).ToList();
+                var average = pis.Count == 0 ? 0 : pis.Count == 1 ? pis[0].Price : Math.Round(pis.Sum(i => Math.Round(i.Price * i.Quantity, 2, MidpointRounding.AwayFromZero)) / pis.Sum(i => i.Quantity), 2, MidpointRounding.AwayFromZero);
+                
                 //var average = pis.Count == 0 ? 0 : Math.Round(pis.Sum(i => i.Price) / pis.Count(), 2, MidpointRounding.AwayFromZero);
                 var projects = itemGroup.ProjectItems.Select(i => i.MyEstimateGroup.MyProjectEstimate.MyProjectVersion.MyProject).Distinct().ToList();
                 var priceType = itemGroup.ProjectItems.Select(i => i.Price).Distinct().Count() > 1

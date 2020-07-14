@@ -556,13 +556,15 @@
             }
             $scope.getExtendedAmount = function(price, quantity)
             {
+               
                 price = Number(price.toString().replace(/[^0-9\.]+/g, ""));
-                //return Math.round(price * 100) / 100 * quantity;
-                return Math.round(price * quantity, 2, MidpointRounding.AwayFromZero); 
+                return Math.round(price * 100) / 100 * quantity;
+                
             }
             $scope.saveEstimate = function (updatePreviousPrices, pushPrices) {
-                var siteManagerDssMaximum = false;
+                var siteManagerDssMaximum = false;                
                 angular.forEach($scope.estimate.itemGroups, function (itemGroup) {
+           
                     if ($scope.getExtendedAmount(itemGroup.price, itemGroup.quantity) > 99999999.99) {
                         siteManagerDssMaximum = true;
                     }
