@@ -39,6 +39,12 @@ namespace Dqe.Infrastructure
 
         internal static ISessionFactory SessionFactory;
 
+        public static readonly Dictionary<string, string> ConnectionStringCache =
+        new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
+        {
+                //{"connection label", "connection string"}
+        };
+
         /// <summary>
         /// REQUIRES IMPLEMENTATION
         /// </summary>

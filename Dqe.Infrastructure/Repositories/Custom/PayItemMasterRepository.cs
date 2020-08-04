@@ -259,11 +259,12 @@ namespace Dqe.Infrastructure.Repositories.Custom
 
         public void ResetAveragePricesAndClearBidHistory()
         {
-            InitializeSession();
-            Session.CreateQuery("delete from AveragePrice").ExecuteUpdate();
-            Session.CreateQuery("delete from BidHistory").ExecuteUpdate();
-            Session.CreateQuery("delete from ProposalHistory").ExecuteUpdate();
-            Session.CreateQuery("update PayItemMaster set StateReferencePrice = 0").ExecuteUpdate();
+            //ss939tg 7/31/2020 549333 DQE db timeout errors, set sql command timeout to 4 min (240 sec)
+            InitializeSession();            
+            Session.CreateQuery("delete from AveragePrice").SetTimeout(240).ExecuteUpdate();
+            Session.CreateQuery("delete from BidHistory").SetTimeout(240).ExecuteUpdate();
+            Session.CreateQuery("delete from ProposalHistory").SetTimeout(240).ExecuteUpdate();
+            Session.CreateQuery("update PayItemMaster set StateReferencePrice = 0").SetTimeout(240).ExecuteUpdate();
         }
 
         public IEnumerable<PayItemMaster> PayItemSearchByName(string name)

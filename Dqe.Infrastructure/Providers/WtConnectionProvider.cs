@@ -13,11 +13,22 @@ namespace Dqe.Infrastructure.Providers
         public override IDbConnection GetConnection()
         {
             var environment = Convert.ToString(ConfigurationManager.AppSettings["environment"]);
+
+            string connectionLabel = environment == "web"
+                            ? "DQEWTNET_U"
+                            : "DQEWTBJS_U";
+
+            //get connectinString from cache if exist else call FEL GetConnectionString
             var connectionString = environment == "conversion"
                 ? Convert.ToString(ConfigurationManager.AppSettings["wtConnection"])
-                : environment == "web"
-                    ? ChannelProvider<IConnectionStringService>.Default.GetConnectionString("DQEWTNET_U")
-                    : ChannelProvider<IConnectionStringService>.Default.GetConnectionString("DQEWTBJS_U");
+                : Initializer.ConnectionStringCache.ContainsKey(connectionLabel)
+                    ? Initializer.ConnectionStringCache[connectionLabel]
+                    : ChannelProvider<IConnectionStringService>.Default.GetConnectionString(connectionLabel);
+
+            //add connection connectionLabel and conectionString to cache if not exist
+            if (!string.IsNullOrEmpty(connectionString) && !Initializer.ConnectionStringCache.ContainsKey(connectionLabel))
+                Initializer.ConnectionStringCache.Add(connectionLabel, connectionString);
+            
             var connection = new SqlConnection(connectionString);
             connection.Open();
             return connection;

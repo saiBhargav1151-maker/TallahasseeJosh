@@ -8,7 +8,15 @@ namespace Dqe.Infrastructure.Providers
     {
         public string[] GetConnection()
         {
-            var connectionString = ChannelProvider<IConnectionStringService>.Default.GetConnectionString("DQESRVREP_R");
+            //get connectinString from cache if exist else call FEL GetConnectionString
+            string connectionLabel = "DQESRVREP_R";
+            var connectionString = Initializer.ConnectionStringCache.ContainsKey(connectionLabel)
+                    ? Initializer.ConnectionStringCache[connectionLabel]
+                    : ChannelProvider<IConnectionStringService>.Default.GetConnectionString(connectionLabel);
+
+            //add connection connectionLabel and conectionString to cache if not exist
+            if (!string.IsNullOrEmpty(connectionString) && !Initializer.ConnectionStringCache.ContainsKey(connectionLabel))
+                Initializer.ConnectionStringCache.Add(connectionLabel, connectionString);
 
             var splitConnection = connectionString.Split(';');
             var userName = splitConnection[0].Substring(splitConnection[0].IndexOf('=') + 1, splitConnection[0].Length - (splitConnection[0].IndexOf('=') + 1));

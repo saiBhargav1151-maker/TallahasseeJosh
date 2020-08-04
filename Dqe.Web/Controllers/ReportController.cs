@@ -55,11 +55,7 @@ namespace Dqe.Web.Controllers
             _userName = reportConnection[0];
             _passWord = reportConnection[1];
             _environment = environmentProvider.GetEnvironment();
-#if DEBUG
-            _serviceUrl = ConfigurationManager.AppSettings.Get("reportServerUrl");
-#else
             _serviceUrl = DetermineUrl();
-#endif
         }
 
         [HttpPost]
@@ -792,7 +788,8 @@ namespace Dqe.Web.Controllers
                 return ConfigurationManager.AppSettings.Get("reportServerUrlDotSystem");
             if (_environment.ToUpper().StartsWith(ApplicationConstants.EnvironmentLevel.Production))
                 return ConfigurationManager.AppSettings.Get("reportServerUrlDotProduction");
-
+            if (_environment.ToUpper().StartsWith(ApplicationConstants.EnvironmentLevel.WorkStationLocal))
+                return ConfigurationManager.AppSettings.Get("reportServerUrl");
             return null;
         }
 

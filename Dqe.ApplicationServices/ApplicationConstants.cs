@@ -13,6 +13,7 @@
             public const string UnitTest = "U";
             public const string SystemTest = "S";
             public const string Production = "P";
+            public const string WorkStationLocal = "W";
         }
     }
 }

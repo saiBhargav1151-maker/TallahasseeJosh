@@ -6,7 +6,7 @@
     <!--<property name="connection.driver_class">Dqe.Infrastructure.Driver.ExtendedSqlDriver2008, Dqe.Infrastructure</property>-->
     <property name="connection.connection_string"></property>
     <property name="connection.isolation">ReadCommitted</property>
-    <property name="command_timeout">120</property>
+    <property name="command_timeout">240</property> 
     <property name="show_sql">false</property>
     <property name="format_sql">false</property>
     <property name="generate_statistics">false</property>
