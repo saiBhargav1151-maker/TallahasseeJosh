@@ -8,7 +8,7 @@ namespace Dqe.Web.ActionResults
         public ClientMessage()
         {
             Severity = ClientMessageSeverity.Success;
-            ttl = 3500;
+            ttl = 10000;  //miliseconds, set to 10 seconds
             text = "Operation completed successfully";
         }
 

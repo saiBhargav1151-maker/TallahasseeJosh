@@ -37,6 +37,12 @@ namespace Dqe.Web.Controllers
         string _serviceUrl;
         readonly string _environment;
 
+        public static readonly Dictionary<string, string> RebuildReportDataCache =
+        new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
+        {
+            //{"lettingID", "lettingID"}
+        };
+
         public ReportController(IWebTransportService webTransportService, IStaffService staffService, IReportRepository reportRepository,
                                 IProjectRepository projectRepository, ISsrsConnectionProvider ssrsConnectionProvider, IEnvironmentProvider environmentProvider,
                                 IProposalRepository proposalRepository, IMasterFileRepository masterFileRepository, IPayItemMasterRepository payItemMasterRepository, 
@@ -477,6 +483,7 @@ namespace Dqe.Web.Controllers
 
                 //rebuild
                 _reportRepository.RebuildReportStructure(letting, officialProposals, null, true, payItems);
+                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Information, text = "Completed rebuild of DQE reporting data for letting " + letting.LettingName, ttl=10000 }, JsonRequestBehavior.AllowGet);
             }
 
             return Json(true, JsonRequestBehavior.AllowGet);
@@ -512,6 +519,9 @@ namespace Dqe.Web.Controllers
             foreach (var proposal in dqeLetting.ReportProposals)
             {
                 var wtProposal = wtLetting.Proposals.First(p => p.ProposalNumber == proposal.ProposalNumber);
+
+                if (wtProposal == null)
+                    return true;
 
                 if (proposal.ReportProposalVendors.Count() != wtProposal.ProposalVendors.Count(v => v.Bids.Any()))
                     return true;
@@ -550,6 +560,14 @@ namespace Dqe.Web.Controllers
                 }
             }
 
+            //check letting report data rebuild cache indicator to see if already rebuild for letting 
+            //if not in rebuild cache indicator, return rebuild true and add to cache
+            //if in rebuild cache indicator, letting has already been rebuilt, return rebuild false
+            if (!RebuildReportDataCache.ContainsKey(dqeLetting.LettingName))
+            {
+                RebuildReportDataCache.Add(dqeLetting.LettingName, dqeLetting.LettingName);
+                return true;
+            }
             return false;
         }
 
@@ -584,6 +602,7 @@ namespace Dqe.Web.Controllers
 
                 //rebuild
                 _reportRepository.RebuildReportStructure(letting, officialProposals, authorizedProposals, true, payItems);
+                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Information, text = "Completed rebuild of DQE reporting data for letting " + letting.LettingName, ttl=10000 }, JsonRequestBehavior.AllowGet);
             }
 
             return Json(true, JsonRequestBehavior.AllowGet);
@@ -625,6 +644,7 @@ namespace Dqe.Web.Controllers
 
                 //rebuild
                 _reportRepository.RebuildReportStructure(letting, officialProposals, authorizedProposals, true, payItems);
+                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Information, text = "Completed rebuild of DQE reporting data for letting " + letting.LettingName, ttl=10000 }, JsonRequestBehavior.AllowGet);
             }
 
             return Json(true, JsonRequestBehavior.AllowGet);
