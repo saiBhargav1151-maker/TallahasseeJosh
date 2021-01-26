@@ -89,7 +89,7 @@ namespace Dqe.Infrastructure.Services
                 {
                     return StaffByIdCache[id];
                 }
-                StaffByIdCache.Add(staff.Id, staff);
+                StaffByIdCache.Add(id, staff);
             }
             return staff;
         }
