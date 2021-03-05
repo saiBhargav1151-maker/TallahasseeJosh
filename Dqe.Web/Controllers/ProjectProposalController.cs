@@ -850,7 +850,14 @@ namespace Dqe.Web.Controllers
                 70 AUTHORIZATION ESTIMATE 
              */
             Domain.Model.Lre.Project lreProject = null;
-            var lreNumber = p.ProjectNumber.Length > 11 ? p.ProjectNumber.Substring(0, 11) : p.ProjectNumber;
+
+            // 3/4/2021 Service Request 613498 skip update DQE DQET020_PROJ from LRE snapshot phase estimates 1,2,3,4 if DQE project is a LS/DB project number
+            // LS/DB project number  example: 01234515201LS
+            if (p.ProjectNumber.Length > 11)
+                return null;  
+ 
+            var lreNumber = p.ProjectNumber;
+            //var lreNumber = p.ProjectNumber.Length > 11 ? p.ProjectNumber.Substring(0, 11) : p.ProjectNumber;
             var lreProjects = _lreService.GetProjects(lreNumber).ToList();
             if (lreProjects.Count == 1)
             {
