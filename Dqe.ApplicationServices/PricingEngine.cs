@@ -281,9 +281,16 @@ namespace Dqe.ApplicationServices
             var size = ob.Count;
             int rem;
             var mid = Math.DivRem(size, 2, out rem) + rem;
-            return (rem == 0)
+            var newAbsoluteDeviation = (rem == 0)
+                ? (ob[mid - 1].AbsoluteDeviation + ob[mid].AbsoluteDeviation) / 2
+                : ob[mid - 1].AbsoluteDeviation;
+            var currentAbsoluteDeviation = (rem == 0)
                 ? (ob[mid - 1].AbsoluteDeviation + ob[mid].AbsoluteDeviation) / 2
                 : ob[mid].AbsoluteDeviation;
+            //return (rem == 0)
+            //    ? (ob[mid - 1].AbsoluteDeviation + ob[mid].AbsoluteDeviation) / 2
+            //    : ob[mid].AbsoluteDeviation;
+            return newAbsoluteDeviation;
         }
 
         private static decimal CalculateMedian(IEnumerable<Bid> bids)
@@ -292,9 +299,16 @@ namespace Dqe.ApplicationServices
             var size = ob.Count;
             int rem;
             var mid = Math.DivRem(size, 2, out rem) + rem;
-            return (rem == 0)
+            var newMedian = (rem == 0)
+                ? (ob[mid - 1].Price + ob[mid].Price) / 2
+                : ob[mid -1].Price;
+            var currentMedian = (rem == 0)
                 ? (ob[mid - 1].Price + ob[mid].Price) / 2
                 : ob[mid].Price;
+            //return (rem == 0)
+            //    ? (ob[mid - 1].Price + ob[mid].Price) / 2
+            //    : ob[mid].Price;
+            return newMedian;
         }
     }
 }
