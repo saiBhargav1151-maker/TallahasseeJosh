@@ -78,6 +78,7 @@ namespace Dqe.Automation.PayItemProcessing
                     {
                         var proposal = hp.Proposal;
                         var index = proposal.LastIndexOf("LS", StringComparison.Ordinal);
+                        var test = hp.Quantity;
                         if (index >= 0)
                         {
                             proposal = proposal.Remove(index, 2);
@@ -119,6 +120,11 @@ namespace Dqe.Automation.PayItemProcessing
                         {
                             foreach (var proposal in bidHistory.Proposals)
                             {
+                                //check for zero quantity
+                                if (proposal.Quantity == 0)
+                                {
+                                    throw new Exception($"Proposal Id:{proposal.Proposal} and Item {item.RefItemName} has a zero quantity.");
+                                }
                                 proposal.EstimateAmount = proposal.ExtendedAmount / proposal.Quantity;
 
                                 if (proposal.Proposal.LastIndexOf("LS", StringComparison.Ordinal) >= 0 ||

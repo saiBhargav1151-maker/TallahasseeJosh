@@ -1547,7 +1547,7 @@ namespace Dqe.Infrastructure.Fdot
                     .Where(milestoneDisjunction)
 
                     // This to test with specific data
-                    //.Where(() => proposal.ProposalNumber == "E1M42LS")
+                    //.Where(() => proposal.ProposalNumber == "E2Z33DB")
                     //.Where(() => refItem.Name == "0102  1")
                     //.Where(() => proposal.ProposalNumber == "E8P90")
                     //.Where(() => refItem.Name == "0561  1")
@@ -1629,6 +1629,7 @@ namespace Dqe.Infrastructure.Fdot
                         };
                     histories.Add(history);
                 }
+                var test = histories.SelectMany(s => s.Proposals).Where(w => w.Quantity == 0);
                 return histories;
             }
         }
@@ -1677,7 +1678,7 @@ namespace Dqe.Infrastructure.Fdot
                     .Where(() => letting.LettingDate >= DateTime.Now.Date.AddMonths(range * -1).Date)
 
                     // This to test with specific data
-                    //.Where(() => proposal.ProposalNumber == "E1M42")
+                    //.Where(() => proposal.ProposalNumber == "E2Z33")
                     //.Where(() => refItem.Name == "0102  1")
                     //.Where(() => proposal.ProposalNumber == "E8P90")
                     //.Where(() => refItem.Name == "0561  1")
@@ -1700,6 +1701,7 @@ namespace Dqe.Infrastructure.Fdot
                     //22 - intent to award
                     //24 - intent to reject
                     //SA - scope alternate rejected
+                  
                     .WhereRestrictionOn(() => proposal.ProposalStatus).IsIn(new object[] { "01", "02", "03", "04", "06", "07", "22", "24", "SA" })
                     .OrderBy(() => refItem.Name).Asc
                     .OrderBy(() => letting.LettingDate).Desc
