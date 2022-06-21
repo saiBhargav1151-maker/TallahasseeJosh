@@ -355,7 +355,9 @@
     </EmbeddedResource>
     <Content Include="Scripts\AjaxExceptionHandling.js" />
     <Content Include="_Dependencies\FDOT.Enterprise.Architecture.Core.dll" />
-    <Content Include="_Dependencies\Oracle.DataAccess.dll" />
+    <Content Include="_Dependencies\Oracle.DataAccess.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="_NuGetReadMes\AjaxExceptionHandling\ReadMe.txt" />
     <EmbeddedResource Include="Mapping\SystemTask.hbm.xml">
       <SubType>Designer</SubType>
