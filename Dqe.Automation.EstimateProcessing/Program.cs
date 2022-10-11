@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using Dqe.ApplicationServices;
 using Dqe.Domain.Model;
@@ -12,6 +15,7 @@ using Dqe.Infrastructure.Messaging;
 using Dqe.Infrastructure.Providers;
 using Dqe.Infrastructure.Repositories.Custom;
 using Dqe.Infrastructure.Services;
+
 
 namespace Dqe.Automation.EstimateProcessing
 {
@@ -65,7 +69,7 @@ namespace Dqe.Automation.EstimateProcessing
                     else
                         noOfficialProposals.Add(wtProposal);
                 }
-                    var emailAddresses = AcquireEmailAddresses(dqeUserRepository);
+                var emailAddresses = AcquireEmailAddresses(dqeUserRepository);
                 if (processedProposals.Any())
                     HandleProcessedEmail(dqeUserRepository, processedProposals, environment, emailAddresses);
                     if (unSynchronizedProposals.Any())
@@ -163,11 +167,22 @@ namespace Dqe.Automation.EstimateProcessing
             var administrators = dqeUserRepository.GetAllSystemAdministrators().ToList();
             var staffService = new StaffService();
             var emailAddresses = new List<string>();
+            
             foreach (var administrator in administrators)
             {
-                var userAccount = staffService.GetStaffById(administrator.SrsId);
+                var userAccount = staffService.GetStaffById(administrator.SrsId); 
                 if (userAccount != null)
                     emailAddresses.Add(userAccount.Email);
+            }
+
+            var toField = ConfigurationManager.AppSettings["AdditionalDOTEmail"];
+            string[] toArray = toField.Split(';');
+            for (int idx = 0; idx < toArray.Length; idx++)
+            {
+                if (!string.IsNullOrEmpty(toArray[idx]))
+                {
+                    emailAddresses.Add(toArray[idx]);
+                }
             }
             return emailAddresses;
         }
