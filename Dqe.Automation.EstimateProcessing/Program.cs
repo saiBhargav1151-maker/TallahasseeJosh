@@ -175,7 +175,7 @@ namespace Dqe.Automation.EstimateProcessing
                     emailAddresses.Add(userAccount.Email);
             }
 
-            var toField = ConfigurationManager.AppSettings["AdditionalDOTEmail"];
+            var toField = ConfigurationManager.AppSettings["AdditionalDOTEmails"];
             string[] toArray = toField.Split(';');
             for (int idx = 0; idx < toArray.Length; idx++)
             {
