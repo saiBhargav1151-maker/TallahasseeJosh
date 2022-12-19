@@ -1680,7 +1680,7 @@ namespace Dqe.Infrastructure.Fdot
 
                     // This to test with specific data
                     //.Where(() => proposal.ProposalNumber == "E2Z33")
-                    //.Where(() => refItem.Name == "0102  1")
+                    //.Where(() => refItem.Name == "0560  1  1")
                     //.Where(() => proposal.ProposalNumber == "E8P90")
                     //.Where(() => refItem.Name == "0561  1")
                     // end filter for specific data
