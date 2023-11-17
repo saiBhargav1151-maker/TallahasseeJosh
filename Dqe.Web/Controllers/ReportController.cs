@@ -475,7 +475,7 @@ namespace Dqe.Web.Controllers
                         {
                             Severity = ClientMessageSeverity.Error,
                             text = "Report cannot be run due to an incomplete set of bids."
-                        });
+                        }, JsonRequestBehavior.AllowGet);
 
                 var masterFiles = _masterFileRepository.GetAll();
                 var latest = masterFiles.Where(i => i.FileNumber < 90).Max(f => f.FileNumber).ToString();
@@ -594,7 +594,7 @@ namespace Dqe.Web.Controllers
 
                 //check for proposals which have not had bids loaded
                 if (!AreBidsComplete(letting, officialProposals))
-                    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "Report cannot be run due to an incomplete set of bids." });
+                    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "Report cannot be run due to an incomplete set of bids." }, JsonRequestBehavior.AllowGet);
 
                 var masterFiles = _masterFileRepository.GetAll();
                 var latest = masterFiles.Where(i => i.FileNumber < 90).Max(f => f.FileNumber).ToString();

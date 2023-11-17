@@ -106,7 +106,7 @@ namespace Dqe.Inverter
             _kernel.Bind<ICostBasedTemplateRepository>().To<CostBasedTemplateRepository>();
             _kernel.Bind<IPayItemStructureRepository>().To<PayItemStructureRepository>();
             _kernel.Bind<IDocumentService>().To<DocumentService>();
-            //_kernel.Bind<IDocumentConverterService>().To<DocumentConverterService>();
+            _kernel.Bind<IDocumentConverterService>().To<DocumentConverterService>();
             _kernel.Bind<IMasterFileRepository>().To<MasterFileRepository>();
             //_kernel.Bind<IPayItemRepository>().To<PayItemRepository>();
             _kernel.Bind<IPricingParameterRepository>().To<PricingParameterRepository>();
