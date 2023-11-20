@@ -106,9 +106,7 @@ namespace Dqe.Inverter
             _kernel.Bind<ICostBasedTemplateRepository>().To<CostBasedTemplateRepository>();
             _kernel.Bind<IPayItemStructureRepository>().To<PayItemStructureRepository>();
             _kernel.Bind<IDocumentService>().To<DocumentService>();
-            //_kernel.Bind<IDocumentConverterService>().To<DocumentConverterService>();
             _kernel.Bind<IMasterFileRepository>().To<MasterFileRepository>();
-            //_kernel.Bind<IPayItemRepository>().To<PayItemRepository>();
             _kernel.Bind<IPricingParameterRepository>().To<PricingParameterRepository>();
             _kernel.Bind<ISystemTaskRepository>().To<SystemTaskRepository>();
             _kernel.Bind<IProjectRepository>().To<ProjectRepository>();
@@ -124,22 +122,6 @@ namespace Dqe.Inverter
             //bind FDOT services
             _kernel.Bind<ILreService>().To<LreService>();
             _kernel.Bind<IWebTransportService>().To<WebTransportService>();
-//#if DEBUG
-//            var vpn = Convert.ToBoolean(ConfigurationManager.AppSettings["vpn"]);
-//            if (vpn)
-//            {
-//                _kernel.Bind<ILreService>().To<LreService>();
-//                _kernel.Bind<IWebTransportService>().To<WebTransportService>();
-//            }
-//            else
-//            {
-//                _kernel.Bind<ILreService>().To<MockLreService>();
-//                _kernel.Bind<IWebTransportService>().To<MockWebTransportService>();
-//            }
-//#else
-//            _kernel.Bind<ILreService>().To<LreService>();
-//            _kernel.Bind<IWebTransportService>().To<WebTransportService>();
-//#endif
         }
 
         public static ITransactionManager ResolveTransactionManager()

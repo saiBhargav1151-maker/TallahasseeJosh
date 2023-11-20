@@ -189,18 +189,12 @@
     <Compile Include="Repositories\DynamicTransformer.cs" />
     <Compile Include="Repositories\GenericTransformer.cs" />
     <Compile Include="Repositories\ProjectionTypeCache.cs" />
-    <Compile Include="Service References\DocumentConverterService\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
     <Compile Include="Service References\WtEstimatorService\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
     <Compile Include="Services\DatabaseDocumentService.cs" />
-    <Compile Include="Services\DocumentConverterService.cs" />
     <Compile Include="Services\DocumentService.cs" />
     <Compile Include="Services\StaffService.cs" />
     <Compile Include="Services\TaskRunner.cs" />
@@ -369,53 +363,6 @@
     <None Include="Schema\nhibernate-mapping.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\DocumentConverterService\01.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\06.wsdl" />
-    <None Include="Service References\DocumentConverterService\06.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\061.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\062.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\14.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\16.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\17.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\22.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\Arrays.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\Dqe.Infrastructure.DocumentConverterService.BatchResults.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\DocumentConverterService\Dqe.Infrastructure.DocumentConverterService.Configuration.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\DocumentConverterService\Dqe.Infrastructure.DocumentConverterService.Diagnostics.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\DocumentConverterService\Muhimbi.DocumentConverter.WebService.Data.Graphics.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\Muhimbi.DocumentConverter.WebService.Data.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\DocumentConverterService\service.wsdl" />
-    <None Include="Service References\DocumentConverterService\service.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Service References\WtEstimatorService\estimator.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -452,12 +399,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Configuration\dqe.hibernate.config.xml" />
-    <None Include="Service References\DocumentConverterService\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-    <None Include="Service References\DocumentConverterService\configuration.svcinfo" />
-    <None Include="Service References\DocumentConverterService\configuration91.svcinfo" />
     <EmbeddedResource Include="Mapping\PricingParameter.hbm.xml" />
     <EmbeddedResource Include="Mapping\CostBasedTemplateDocumentVersion.hbm.xml" />
     <EmbeddedResource Include="Mapping\Document.hbm.xml" />

@@ -57,7 +57,7 @@ namespace Dqe.Web.Controllers
             _payItemMasterRepository = payItemMasterRepository;
             _dqeUserRepository = dqeUserRepository;
             _commandRepository = commandRepository;
-            var reportConnection = ssrsConnectionProvider.GetConnection();
+           var reportConnection = ssrsConnectionProvider.GetConnection();
             _userName = reportConnection[0];
             _passWord = reportConnection[1];
             _environment = environmentProvider.GetEnvironment();
@@ -818,11 +818,8 @@ namespace Dqe.Web.Controllers
             var req = (HttpWebRequest)WebRequest.Create(targetUrl);
             req.PreAuthenticate = true;
             req.Proxy = null;
-//#if DEBUG
-//            req.Credentials = CredentialCache.DefaultCredentials;
-//#else
             req.Credentials = new NetworkCredential(_userName, _passWord, ConfigurationManager.AppSettings.Get("rptDomain"));
-//#endif
+
             byte[] fileBytes;
 
             try
