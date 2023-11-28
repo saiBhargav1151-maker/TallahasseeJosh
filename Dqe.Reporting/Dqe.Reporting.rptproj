@@ -4,15 +4,15 @@
     <FullPath>Debug</FullPath>
     <OutputPath>bin\Debug</OutputPath>
     <ErrorLevel>2</ErrorLevel>
-    <OverwriteDatasets>True</OverwriteDatasets>
-    <OverwriteDataSources>True</OverwriteDataSources>
-    <TargetServerVersion>SSRS2008R2</TargetServerVersion>
+    <OverwriteDatasets>False</OverwriteDatasets>
+    <OverwriteDataSources>False</OverwriteDataSources>
+    <TargetServerVersion>SSRS2016</TargetServerVersion>
     <Platform>Win32</Platform>
-    <TargetReportFolder>Dqe.Reporting</TargetReportFolder>
+    <TargetReportFolder>DQE_Reports</TargetReportFolder>
     <TargetDatasetFolder>Datasets</TargetDatasetFolder>
     <TargetDatasourceFolder>Data Sources</TargetDatasourceFolder>
     <TargetReportPartFolder>Report Parts</TargetReportPartFolder>
-    <TargetServerURL>http://kevin-laptop/ReportServer_SQLEXPRESS</TargetServerURL>
+    <TargetServerURL>https://ssrspreprod.fdot.gov/Reportserver_SSRSDEV</TargetServerURL>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'DebugLocal' ">
     <FullPath>DebugLocal</FullPath>
@@ -64,7 +64,9 @@
     <Report Include="NonBidItemsSubReport.rdl" />
     <Report Include="PayItemDataFile.rdl" />
     <Report Include="PayItemMasterReport.rdl" />
-    <Report Include="PayItemMasterReport.rdl.bk" />
+    <Report Include="PayItemMasterReport.rdl.bk">
+      <MimeType>text/xml</MimeType>
+    </Report>
     <Report Include="PayItemsSubReport.rdl" />
     <Report Include="ProjectDetailCategorySubReport.rdl" />
     <Report Include="ProjectDetailSubReport.rdl" />
