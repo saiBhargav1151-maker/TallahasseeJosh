@@ -604,34 +604,7 @@ ORDER BY rpv.TOT_AMT</CommandText>
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>(1) A document or electronic file revealing the official cost estimate of the department of a project is confidential and exempt from the provisions of s.</Value>
-                    <Style>
-                      <FontStyle>Normal</FontStyle>
-                      <FontSize>8pt</FontSize>
-                      <FontWeight>Normal</FontWeight>
-                      <TextDecoration>None</TextDecoration>
-                      <Color>#000000</Color>
-                    </Style>
-                  </TextRun>
-                  <TextRun>
-                    <Value>119.07</Value>
-                    <ActionInfo>
-                      <Actions>
-                        <Action>
-                          <Hyperlink>http://www.leg.state.fl.us/Statutes/index.cfm?App_mode=Display_Statute&amp;Search_String=&amp;URL=0100-0199/0119/Sections/0119.07.html</Hyperlink>
-                        </Action>
-                      </Actions>
-                    </ActionInfo>
-                    <Style>
-                      <FontStyle>Normal</FontStyle>
-                      <FontSize>8pt</FontSize>
-                      <FontWeight>Normal</FontWeight>
-                      <TextDecoration>None</TextDecoration>
-                      <Color>#000000</Color>
-                    </Style>
-                  </TextRun>
-                  <TextRun>
-                    <Value>(1) until the contract for the project has been executed or until the project is no longer under active consideration.</Value>
+                    <Value>(1) A document or electronic file revealing the official cost estimate of the department of a project is confidential and exempt from the provisions of s.119.07 (1) until the contract for the project has been executed or until the project is no longer under active consideration.</Value>
                     <Style>
                       <FontStyle>Normal</FontStyle>
                       <FontSize>8pt</FontSize>
