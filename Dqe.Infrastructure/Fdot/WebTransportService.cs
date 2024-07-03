@@ -1899,8 +1899,8 @@ namespace Dqe.Infrastructure.Fdot
                     .Where(i => i.ProposalStatus == "02" || i.ProposalStatus == "03")
                     .Where(statusDateConjunction)
                     .Where(i => i.OfficialEstimate == null)
-                    //.Where(i => i.ProposalNumber == "E8M65")
                     .Fetch(i => i.Projects).Eager
+                    .Fetch(i => i.District).Eager
                     .List()
                     .Distinct()
                     .ToList();

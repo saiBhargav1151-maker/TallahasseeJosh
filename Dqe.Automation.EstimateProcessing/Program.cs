@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Configuration;
 using System.Linq;
-using System.Net.Mail;
 using System.Text;
 using Dqe.ApplicationServices;
 using Dqe.Domain.Model;
@@ -45,8 +43,6 @@ namespace Dqe.Automation.EstimateProcessing
                     if (dqeProposal != null)
                     {
                         var proposal = proposalRepository.GetById(dqeProposal.Id);
-                        
-                        //var currentDqeUser = dqeUserRepository.GetBySrsId(proposal.Users.First().SrsId);
                         var currentDqeUser = proposal
                             .Projects
                             .First()
@@ -55,6 +51,7 @@ namespace Dqe.Automation.EstimateProcessing
                             .VersionOwner;
 
                         proposal.SetCurrentEstimator(currentDqeUser);
+
                         var wtp = webTransportService.GetProposal(proposal.ProposalNumber);
                         if (proposal.SynchronizeStructure(wtp, currentDqeUser, true))
                         {
@@ -64,18 +61,31 @@ namespace Dqe.Automation.EstimateProcessing
                         else
                         {
                             unSynchronizedProposals.Add(proposal);
-                    }
+                        }
                     }
                     else
-                        noOfficialProposals.Add(wtProposal);
+                    {
+                        // Exclude all maintenance contracts except for D3
+                        // Include all other contract types
+                        if (wtProposal.ContractType.StartsWith("M"))
+                        {
+                            if (wtProposal.District.Name == "03")
+                                noOfficialProposals.Add(wtProposal);
+                        }    
+                        else
+                        {
+                            noOfficialProposals.Add(wtProposal);
+                        }
+                    }
                 }
+
                 var emailAddresses = AcquireEmailAddresses(dqeUserRepository);
                 if (processedProposals.Any())
                     HandleProcessedEmail(dqeUserRepository, processedProposals, environment, emailAddresses);
-                    if (unSynchronizedProposals.Any())
-                        HandleSynchronizationEmail(dqeUserRepository, unSynchronizedProposals, environment, emailAddresses);
-                    if (noOfficialProposals.Any())
-                        HandleNoOfficialEmail(dqeUserRepository, noOfficialProposals, environment, emailAddresses);
+                if (unSynchronizedProposals.Any())
+                    HandleSynchronizationEmail(dqeUserRepository, unSynchronizedProposals, environment, emailAddresses);
+                if (noOfficialProposals.Any())
+                    HandleNoOfficialEmail(dqeUserRepository, noOfficialProposals, environment, emailAddresses);
                 UnitOfWorkProvider.TransactionManager.Commit();
 
                 Environment.Exit(0);
@@ -267,7 +277,7 @@ namespace Dqe.Automation.EstimateProcessing
 
         public override string Subject
         {
-            get { return _environment + " - Proposals Not found in DQE"; }
+            get { return _environment + " - Proposals not found in DQE"; }
         }
 
         public override string Body
