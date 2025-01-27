@@ -43,6 +43,8 @@ namespace Dqe.Domain.Fdot
         Letting GetResponsiveLettings(string number);
         bool IsProposalReadyForOfficialEstimate(string proposalNumber);
         Exception InsertRefItems(IEnumerable<PayItemMaster> payItemMasters, DqeUser user);
-        void UpdateProposalReadyForDssPass(Proposal proposal);
+
+        //not needed since DSS is decommissioned, dont need to pass to DSS
+        //void UpdateProposalReadyForDssPass(Proposal proposal);
     }
 }

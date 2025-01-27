@@ -1885,43 +1885,64 @@ namespace Dqe.Infrastructure.Fdot
 
         public IList<Proposal> GetProposalsReadyForOfficialEstimate()
         {
+            Letting letting = null;
+            Proposal proposal = null;
 
+            //Criteria
+            //Letting date has occured, in past
+            //Letting status is "ARCH" or "SCHD"
+            //Proposal status is not 05-withdrawn, 09-moved, 17-postponed
+            //Proposal officialEstimate flag PRFLG4 is null
+            //Proposal is not marked rejected
             var statusDateConjunction = new Conjunction();
-            statusDateConjunction.Add(Restrictions.Where<Proposal>(i => i.StatusDate != null));
-            statusDateConjunction.Add(Restrictions.Where<Proposal>(i => i.StatusDate >= new DateTime(2015, 6, 1)));
-            statusDateConjunction.Add(Restrictions.Where<Proposal>(i => i.StatusDate <= DateTime.Now.Date));
-
+            statusDateConjunction.Add(Restrictions.Where(() => letting.LettingDate != null));
+            statusDateConjunction.Add(Restrictions.Where(() => letting.LettingDate >= new DateTime(2015, 6, 1).Date));
+            statusDateConjunction.Add(Restrictions.Where(() => letting.LettingDate <= DateTime.Now.Date));
+            statusDateConjunction.Add(Restrictions.Where(() => letting.LettingStatus.IsIn(new object[] { "ARCH", "SCHD" })));
 
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 return session
-                    .QueryOver<Proposal>()
-                    .Where(i => i.ProposalStatus == "02" || i.ProposalStatus == "03")
-                    .Where(statusDateConjunction)
-                    .Where(i => i.OfficialEstimate == null)
-                    .Fetch(i => i.Projects).Eager
-                    .Fetch(i => i.District).Eager
-                    .List()
-                    .Distinct()
-                    .ToList();
+                 .QueryOver(() => proposal)
+                .Where(()=> proposal.ProposalStatus != "05" && proposal.ProposalStatus != "09" && proposal.ProposalStatus != "17")
+                .Where(() => !proposal.IsRejected)
+                .Where(() => proposal.OfficialEstimate == null)
+                .Fetch(i => i.Projects).Eager
+                .Fetch(i => i.District).Eager
+                .JoinQueryOver(() => proposal.MyLetting, () => letting)
+                .Where(statusDateConjunction)
+                .OrderBy(() => letting.LettingDate).Desc
+                .OrderBy(() => proposal.ProposalNumber).Asc
+                .List()
+                .Distinct()
+                .ToList();
             }
         }
 
         public bool IsProposalReadyForOfficialEstimate(string proposalNumber)
         {
-            var statusDateConjunction = new Conjunction();
-            statusDateConjunction.Add(Restrictions.Where<Proposal>(i => i.StatusDate != null));
-            statusDateConjunction.Add(Restrictions.Where<Proposal>(i => i.StatusDate >= new DateTime(2015, 6, 1)));
-            statusDateConjunction.Add(Restrictions.Where<Proposal>(i => i.StatusDate <= DateTime.Now.Date));
+            Letting letting = null;
 
+            //Criteria
+            //Letting date has occured, in past
+            //Letting status is "ARCH" or "SCHD"
+            //Proposal status is not 05-withdrawn, 09-moved, 17-postponed
+            //Proposal is not rejected
+            var statusDateConjunction = new Conjunction();
+            statusDateConjunction.Add(Restrictions.Where<Letting>(i => i.LettingDate != null));
+            statusDateConjunction.Add(Restrictions.Where<Letting>(i => i.LettingDate >= new DateTime(2015, 6, 1).Date));
+            statusDateConjunction.Add(Restrictions.Where<Letting>(i => i.LettingDate <= DateTime.Now.Date));
+            statusDateConjunction.Add(Restrictions.Where<Letting>(i => i.LettingStatus.IsIn(new object[] { "ARCH", "SCHD" })));
+           
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 var wtProposal = session
                     .QueryOver<Proposal>()
                     .Where(i => i.ProposalNumber == proposalNumber)
-                    .Where(i => i.ProposalStatus == "02" || i.ProposalStatus == "03")
+                    .Where(i => i.ProposalStatus != "05" && i.ProposalStatus != "09" && i.ProposalStatus != "17")
+                    .Where(i => !i.IsRejected)
+                    .JoinQueryOver(i => i.MyLetting, () => letting)
                     .Where(statusDateConjunction)
-                    //.Where(i => i.OfficialEstimate == null)
                     .SingleOrDefault();
 
                 if (wtProposal != null)
@@ -1930,44 +1951,45 @@ namespace Dqe.Infrastructure.Fdot
             return false;
         }
 
-        public void UpdateProposalReadyForDssPass(Proposal proposal)
-        {
-            using (var session = Initializer.TransportSessionFactory.OpenSession())
-            {
-                using (var transaction = session.BeginTransaction())
-                {
-                    try
-                    {
-                        var queryUpdateProposalSb = new StringBuilder();
-                        queryUpdateProposalSb.Append(" update Proposal                                ");
-                        queryUpdateProposalSb.Append("    set PassToDss         = :passToDss,         ");
-                        queryUpdateProposalSb.Append("        PassToDssDate     = :passToDssDate,     ");
-                        queryUpdateProposalSb.Append("        LastUpdatedDate   = :lastUpdatedDate,   ");
-                        queryUpdateProposalSb.Append("        LastUpdatedBy     = :lastUpdatedBy      ");
-                        queryUpdateProposalSb.Append("  where Id                = :id                 ");
+        //not needed since DSS is decommissioned, dont need to pass to DSS
+        //public void UpdateProposalReadyForDssPass(Proposal proposal)
+        //{
+        //    using (var session = Initializer.TransportSessionFactory.OpenSession())
+        //    {
+        //        using (var transaction = session.BeginTransaction())
+        //        {
+        //            try
+        //            {
+        //                var queryUpdateProposalSb = new StringBuilder();
+        //                queryUpdateProposalSb.Append(" update Proposal                                ");
+        //                queryUpdateProposalSb.Append("    set PassToDss         = :passToDss,         ");
+        //                queryUpdateProposalSb.Append("        PassToDssDate     = :passToDssDate,     ");
+        //                queryUpdateProposalSb.Append("        LastUpdatedDate   = :lastUpdatedDate,   ");
+        //                queryUpdateProposalSb.Append("        LastUpdatedBy     = :lastUpdatedBy      ");
+        //                queryUpdateProposalSb.Append("  where Id                = :id                 ");
 
-                        var queryUpdateProposal = session.CreateQuery(queryUpdateProposalSb.ToString());
+        //                var queryUpdateProposal = session.CreateQuery(queryUpdateProposalSb.ToString());
 
-                        var records = queryUpdateProposal
-                            .SetParameter("passToDss", proposal.PassToDss == "B" ? "C" : null)
-                            .SetParameter("passToDssDate", null)
-                            .SetParameter("lastUpdatedDate", DateTime.Now)
-                            .SetParameter("lastUpdatedBy", "DQE")
-                            .SetParameter("id", proposal.Id)
-                            .ExecuteUpdate();
+        //                var records = queryUpdateProposal
+        //                    .SetParameter("passToDss", proposal.PassToDss == "B" ? "C" : null)
+        //                    .SetParameter("passToDssDate", null)
+        //                    .SetParameter("lastUpdatedDate", DateTime.Now)
+        //                    .SetParameter("lastUpdatedBy", "DQE")
+        //                    .SetParameter("id", proposal.Id)
+        //                    .ExecuteUpdate();
 
-                        if (records == 0) throw new InvalidOperationException("Proposal Not updated for DSS");
+        //                if (records == 0) throw new InvalidOperationException("Proposal Not updated for DSS");
 
-                        transaction.Commit();
+        //                transaction.Commit();
 
-                    }
-                    catch
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
-                }
-            }
-        }
+        //            }
+        //            catch
+        //            {
+        //                transaction.Rollback();
+        //                throw;
+        //            }
+        //        }
+        //    }
+        //}
     }
 }

@@ -23,6 +23,7 @@ namespace Dqe.Automation.EstimateProcessing
         {
             try
             {
+                Console.WriteLine("Starting DQE Estimate Processing {0}", DateTime.Now);
                 Initializer.Initialize();
                 EntityDependencyResolver.OnResolveConstructorArguments += EntityDependencyResolverOnResolveConstructorArguments;
                 var dqeUserRepository = new DqeUserRepository();
@@ -32,7 +33,16 @@ namespace Dqe.Automation.EstimateProcessing
                 var webTransportService = new WebTransportService();
                 var wtProposals = webTransportService.GetProposalsReadyForOfficialEstimate().ToList();
 
+                Console.WriteLine("Processing {0} proposals for Official Estimate updates in AASHTOWare Project", wtProposals.Count());
+                Console.WriteLine("Criteria:");
+                Console.WriteLine("     Letting date has occured");
+                Console.WriteLine("     Letting status is 'ARCH' or 'SCHD'");
+                Console.WriteLine("     Proposal status is not 05-withdrawn, 09-moved, 17-postponed");
+                Console.WriteLine("     Proposal officialEstimate flag PRFLG4 is null");
+                Console.WriteLine("     Proposal is not marked rejected" + Environment.NewLine);
+               
                 var proposalRepository = new ProposalRepository();
+                var skipMaintProposals = new List<string>();
                 var unSynchronizedProposals = new List<Proposal>();
                 var noOfficialProposals = new List<Domain.Model.Wt.Proposal>();
                 var processedProposals = new List<Proposal>();
@@ -71,6 +81,7 @@ namespace Dqe.Automation.EstimateProcessing
                         {
                             if (wtProposal.District.Name == "03")
                                 noOfficialProposals.Add(wtProposal);
+                            else skipMaintProposals.Add(wtProposal.ProposalNumber);
                         }    
                         else
                         {
@@ -80,6 +91,8 @@ namespace Dqe.Automation.EstimateProcessing
                 }
 
                 var emailAddresses = AcquireEmailAddresses(dqeUserRepository);
+                if (skipMaintProposals.Any())
+                    Console.WriteLine("Skipped {0} proposals of maintenance types, excluding district 03" + Environment.NewLine, skipMaintProposals.Count());
                 if (processedProposals.Any())
                     HandleProcessedEmail(dqeUserRepository, processedProposals, environment, emailAddresses);
                 if (unSynchronizedProposals.Any())
@@ -87,6 +100,7 @@ namespace Dqe.Automation.EstimateProcessing
                 if (noOfficialProposals.Any())
                     HandleNoOfficialEmail(dqeUserRepository, noOfficialProposals, environment, emailAddresses);
                 UnitOfWorkProvider.TransactionManager.Commit();
+                Console.WriteLine("End DQE Estimate Processing {0}", DateTime.Now);
 
                 Environment.Exit(0);
             }
@@ -107,15 +121,21 @@ namespace Dqe.Automation.EstimateProcessing
 
         private static void HandleNoOfficialEmail(IDqeUserRepository dqeUserRepository, IEnumerable<Domain.Model.Wt.Proposal> wtProposal, string environment, List<string> emailAddresses)
         {
+            var webTransportService = new WebTransportService();
+
             if (!emailAddresses.Any())
                 emailAddresses = AcquireEmailAddresses(dqeUserRepository);
 
             var sb = new StringBuilder();
+            sb.AppendLine("The following {" + wtProposal.Count() + "} Project Preconstruction Proposals were not found in DQE. <br />");
+
             foreach (var proposal in wtProposal.OrderBy(i => i.ProposalNumber))
             {
-                var status = proposal.ProposalStatus == "02" ? "Awarded" : "Executed";
-                sb.AppendLine("Proposal " + proposal.ProposalNumber + " was found in Project Preconstruction with a status of " + status + " without a corresponding record in DQE.<br />");
+                var code = webTransportService.GetCodeTable("PRPSTAT");
+                var status = code.CodeValues.First(i => i.CodeValueName == proposal.ProposalStatus);
+                sb.AppendLine("Proposal " + proposal.ProposalNumber + " was found in Project Preconstruction with a status of " + status.CodeValueName + "-" + status.Description + " without a corresponding record in DQE.<br />");
             }
+            Console.WriteLine(Environment.NewLine + sb.ToString());
 
             foreach (var emailAddress in emailAddresses)
             {
@@ -132,7 +152,7 @@ namespace Dqe.Automation.EstimateProcessing
                 emailAddresses = AcquireEmailAddresses(dqeUserRepository);
 
             var sb = new StringBuilder();
-            sb.AppendLine("The following Official Estimate Proposals were not updated in Project Preconstruction. <br />");
+            sb.AppendLine("The following {" + proposals.Count() + "} Official Estimate Proposals were not updated in Project Preconstruction. <br />");
             sb.AppendLine("Please check the synchronization of the project(s) on the proposal provided. <br />");
             sb.AppendLine("Once the estimate is fixed you can immediately take the official estimate and the system will automatically push prices. <br />");
 
@@ -140,6 +160,7 @@ namespace Dqe.Automation.EstimateProcessing
             {
                 sb.AppendLine("Proposal: " + proposal.ProposalNumber + " <br />");
             }
+            Console.WriteLine(Environment.NewLine + sb.ToString());
 
             foreach (var emailAddress in emailAddresses)
             {
@@ -156,12 +177,13 @@ namespace Dqe.Automation.EstimateProcessing
                 emailAddresses = AcquireEmailAddresses(dqeUserRepository);
 
             var sb = new StringBuilder();
-            sb.AppendLine("The following Official Estimate Proposals were updated in Project Preconstruction. <br />");
+            sb.AppendLine("The following {" + proposals.Count() + "} Official Estimate Proposals were updated in Project Preconstruction. <br />");
             
             foreach (var proposal in proposals.OrderBy(i => i.ProposalNumber))
             {
                 sb.AppendLine("Proposal: " + proposal.ProposalNumber + " <br />");
             }
+            Console.WriteLine(sb.ToString());
 
             foreach (var emailAddress in emailAddresses)
             {
