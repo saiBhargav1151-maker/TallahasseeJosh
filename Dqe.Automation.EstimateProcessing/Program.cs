@@ -13,16 +13,39 @@ using Dqe.Infrastructure.Messaging;
 using Dqe.Infrastructure.Providers;
 using Dqe.Infrastructure.Repositories.Custom;
 using Dqe.Infrastructure.Services;
+using CommandLine;
 
 
 namespace Dqe.Automation.EstimateProcessing
 {
     class Program
     {
-        static void Main()
+        static void Main(string[] args)
         {
+            string argProposal = string.Empty;
+            string argUserid = string.Empty;
+
+
             try
             {
+                //check for aguments
+                if (args?.Length != 0)
+                {
+                    var commandLineOptions = Parser.Default.ParseArguments<CommandLineOptions>(args);
+
+                    commandLineOptions.WithParsed(options =>
+                    {
+                        argUserid = options.Puserid?.Trim();
+                        argProposal = options.Pproposal?.Trim();
+
+                        if (argUserid.Contains('\\'))
+                            argUserid = argUserid.Split(new[] { '\\' })[1];
+
+                        Console.WriteLine($"On-Demand DQE OE load submit by Userid: {argUserid}");
+                        Console.WriteLine($"Parm Proposal: {argProposal}");
+                    });
+                }
+
                 Console.WriteLine("Starting DQE Estimate Processing {0}", DateTime.Now);
                 Initializer.Initialize();
                 EntityDependencyResolver.OnResolveConstructorArguments += EntityDependencyResolverOnResolveConstructorArguments;
@@ -31,7 +54,7 @@ namespace Dqe.Automation.EstimateProcessing
                 var environment = environmentProvider.GetEnvironment();
 
                 var webTransportService = new WebTransportService();
-                var wtProposals = webTransportService.GetProposalsReadyForOfficialEstimate().ToList();
+                var wtProposals = webTransportService.GetProposalsReadyForOfficialEstimate(argProposal).ToList();
 
                 Console.WriteLine("Processing {0} proposals for Official Estimate updates in AASHTOWare Project", wtProposals.Count());
                 Console.WriteLine("Criteria:");
@@ -40,66 +63,74 @@ namespace Dqe.Automation.EstimateProcessing
                 Console.WriteLine("     Proposal status is not 05-withdrawn, 09-moved, 17-postponed");
                 Console.WriteLine("     Proposal officialEstimate flag PRFLG4 is null");
                 Console.WriteLine("     Proposal is not marked rejected" + Environment.NewLine);
-               
-                var proposalRepository = new ProposalRepository();
-                var skipMaintProposals = new List<string>();
-                var unSynchronizedProposals = new List<Proposal>();
-                var noOfficialProposals = new List<Domain.Model.Wt.Proposal>();
-                var processedProposals = new List<Proposal>();
-                foreach (var wtProposal in wtProposals)
-                {
-                    var dqeProposal = proposalRepository.GetOfficialProposal(wtProposal.ProposalNumber);
 
-                    if (dqeProposal != null)
+                if (wtProposals.Count > 0)
+                {        
+                    var proposalRepository = new ProposalRepository();
+                    var skipMaintProposals = new List<string>();
+                    var unSynchronizedProposals = new List<Proposal>();
+                    var noOfficialProposals = new List<Domain.Model.Wt.Proposal>();
+                    var processedProposals = new List<Proposal>();
+                    foreach (var wtProposal in wtProposals)
                     {
-                        var proposal = proposalRepository.GetById(dqeProposal.Id);
-                        var currentDqeUser = proposal
-                            .Projects
-                            .First()
-                            .ProjectVersions
-                            .First(i => i.ProjectEstimates.FirstOrDefault(ii => ii.Label == SnapshotLabel.Official) != null)
-                            .VersionOwner;
+                        var dqeProposal = proposalRepository.GetOfficialProposal(wtProposal.ProposalNumber);
 
-                        proposal.SetCurrentEstimator(currentDqeUser);
-
-                        var wtp = webTransportService.GetProposal(proposal.ProposalNumber);
-                        if (proposal.SynchronizeStructure(wtp, currentDqeUser, true))
+                        if (dqeProposal != null)
                         {
-                            webTransportService.UpdatePrices(proposal, true, currentDqeUser);
-                            processedProposals.Add(proposal);
+                            var proposal = proposalRepository.GetById(dqeProposal.Id);
+                            var currentDqeUser = proposal
+                                .Projects
+                                .First()
+                                .ProjectVersions
+                                .First(i => i.ProjectEstimates.FirstOrDefault(ii => ii.Label == SnapshotLabel.Official) != null)
+                                .VersionOwner;
+
+                            proposal.SetCurrentEstimator(currentDqeUser);
+
+                            var wtp = webTransportService.GetProposal(proposal.ProposalNumber);
+                            if (proposal.SynchronizeStructure(wtp, currentDqeUser, true))
+                            {
+                                webTransportService.UpdatePrices(proposal, true, currentDqeUser);
+                                processedProposals.Add(proposal);
+                            }
+                            else
+                            {
+                                unSynchronizedProposals.Add(proposal);
+                            }
                         }
                         else
                         {
-                            unSynchronizedProposals.Add(proposal);
-                        }
-                    }
-                    else
-                    {
-                        // Exclude all maintenance contracts except for D3
-                        // Include all other contract types
-                        if (wtProposal.ContractType.StartsWith("M"))
-                        {
-                            if (wtProposal.District.Name == "03")
+                            // Exclude all maintenance contracts except for D3
+                            // Include all other contract types
+                            if (wtProposal.ContractType.StartsWith("M"))
+                            {
+                                if (wtProposal.District.Name == "03")
+                                    noOfficialProposals.Add(wtProposal);
+                                else skipMaintProposals.Add(wtProposal.ProposalNumber);
+                            }
+                            else
+                            {
                                 noOfficialProposals.Add(wtProposal);
-                            else skipMaintProposals.Add(wtProposal.ProposalNumber);
-                        }    
-                        else
-                        {
-                            noOfficialProposals.Add(wtProposal);
+                            }
                         }
                     }
+
+                    var emailAddresses = AcquireEmailAddresses(dqeUserRepository);
+                    if (skipMaintProposals.Any())
+                        Console.WriteLine("Skipped {0} proposals of maintenance types, excluding district 03" + Environment.NewLine, skipMaintProposals.Count());
+                    if (processedProposals.Any())
+                        HandleProcessedEmail(dqeUserRepository, processedProposals, environment, emailAddresses);
+                    if (unSynchronizedProposals.Any())
+                        HandleSynchronizationEmail(dqeUserRepository, unSynchronizedProposals, environment, emailAddresses);
+                    if (noOfficialProposals.Any())
+                        HandleNoOfficialEmail(dqeUserRepository, noOfficialProposals, environment, emailAddresses);
+                    UnitOfWorkProvider.TransactionManager.Commit();
+                }
+                else
+                {
+                    Console.WriteLine("No Proposals found that meet criteria");
                 }
 
-                var emailAddresses = AcquireEmailAddresses(dqeUserRepository);
-                if (skipMaintProposals.Any())
-                    Console.WriteLine("Skipped {0} proposals of maintenance types, excluding district 03" + Environment.NewLine, skipMaintProposals.Count());
-                if (processedProposals.Any())
-                    HandleProcessedEmail(dqeUserRepository, processedProposals, environment, emailAddresses);
-                if (unSynchronizedProposals.Any())
-                    HandleSynchronizationEmail(dqeUserRepository, unSynchronizedProposals, environment, emailAddresses);
-                if (noOfficialProposals.Any())
-                    HandleNoOfficialEmail(dqeUserRepository, noOfficialProposals, environment, emailAddresses);
-                UnitOfWorkProvider.TransactionManager.Commit();
                 Console.WriteLine("End DQE Estimate Processing {0}", DateTime.Now);
 
                 Environment.Exit(0);
@@ -306,5 +337,15 @@ namespace Dqe.Automation.EstimateProcessing
         {
             get { return _body; }
         }
+    }
+
+    class CommandLineOptions
+    {
+        [Option('u', "ARG_Userid", Required = false, HelpText = "Userid that submitted job")]
+        public string Puserid { get; set; }
+
+        [Option('p', "ARG_Proposal", Required = false, HelpText = "Proposal to process")]
+        public string Pproposal { get; set; }
+ 
     }
 }

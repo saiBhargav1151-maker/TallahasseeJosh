@@ -1883,7 +1883,7 @@ namespace Dqe.Infrastructure.Fdot
             }
         }
 
-        public IList<Proposal> GetProposalsReadyForOfficialEstimate()
+        public IList<Proposal> GetProposalsReadyForOfficialEstimate(string proposalNumber)
         {
             Letting letting = null;
             Proposal proposal = null;
@@ -1900,13 +1900,19 @@ namespace Dqe.Infrastructure.Fdot
             statusDateConjunction.Add(Restrictions.Where(() => letting.LettingDate <= DateTime.Now.Date));
             statusDateConjunction.Add(Restrictions.Where(() => letting.LettingStatus.IsIn(new object[] { "ARCH", "SCHD" })));
 
+            var proposalConjunction = new Conjunction();
+            if (string.IsNullOrEmpty(proposalNumber))
+                proposalConjunction.Add(Restrictions.Where(() => proposal.OfficialEstimate == null));
+            else 
+                proposalConjunction.Add(Restrictions.Where(() => proposal.ProposalNumber == proposalNumber));
+
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 return session
                  .QueryOver(() => proposal)
                 .Where(()=> proposal.ProposalStatus != "05" && proposal.ProposalStatus != "09" && proposal.ProposalStatus != "17")
                 .Where(() => !proposal.IsRejected)
-                .Where(() => proposal.OfficialEstimate == null)
+                .Where(proposalConjunction)
                 .Fetch(i => i.Projects).Eager
                 .Fetch(i => i.District).Eager
                 .JoinQueryOver(() => proposal.MyLetting, () => letting)
