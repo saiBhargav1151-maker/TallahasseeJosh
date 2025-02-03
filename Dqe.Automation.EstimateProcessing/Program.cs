@@ -119,11 +119,11 @@ namespace Dqe.Automation.EstimateProcessing
                     if (skipMaintProposals.Any())
                         Console.WriteLine("Skipped {0} proposals of maintenance types, excluding district 03" + Environment.NewLine, skipMaintProposals.Count());
                     if (processedProposals.Any())
-                        HandleProcessedEmail(dqeUserRepository, processedProposals, environment, emailAddresses);
+                        HandleProcessedEmail(dqeUserRepository, processedProposals, environment, emailAddresses, argUserid);
                     if (unSynchronizedProposals.Any())
-                        HandleSynchronizationEmail(dqeUserRepository, unSynchronizedProposals, environment, emailAddresses);
+                        HandleSynchronizationEmail(dqeUserRepository, unSynchronizedProposals, environment, emailAddresses, argUserid);
                     if (noOfficialProposals.Any())
-                        HandleNoOfficialEmail(dqeUserRepository, noOfficialProposals, environment, emailAddresses);
+                        HandleNoOfficialEmail(dqeUserRepository, noOfficialProposals, environment, emailAddresses, argUserid);
                     UnitOfWorkProvider.TransactionManager.Commit();
                 }
                 else
@@ -150,7 +150,7 @@ namespace Dqe.Automation.EstimateProcessing
             }
         }
 
-        private static void HandleNoOfficialEmail(IDqeUserRepository dqeUserRepository, IEnumerable<Domain.Model.Wt.Proposal> wtProposal, string environment, List<string> emailAddresses)
+        private static void HandleNoOfficialEmail(IDqeUserRepository dqeUserRepository, IEnumerable<Domain.Model.Wt.Proposal> wtProposal, string environment, List<string> emailAddresses, string argUserid)
         {
             var webTransportService = new WebTransportService();
 
@@ -158,6 +158,9 @@ namespace Dqe.Automation.EstimateProcessing
                 emailAddresses = AcquireEmailAddresses(dqeUserRepository);
 
             var sb = new StringBuilder();
+            if (!string.IsNullOrEmpty(argUserid))
+                sb.AppendLine("On-Demand submit by: " + argUserid + " <br /><br />");
+
             sb.AppendLine("The following {" + wtProposal.Count() + "} Project Preconstruction Proposals were not found in DQE. <br />");
 
             foreach (var proposal in wtProposal.OrderBy(i => i.ProposalNumber))
@@ -177,12 +180,15 @@ namespace Dqe.Automation.EstimateProcessing
             }
         }
 
-        private static void HandleSynchronizationEmail(IDqeUserRepository dqeUserRepository, IEnumerable<Proposal> proposals, string environment, List<string> emailAddresses)
+        private static void HandleSynchronizationEmail(IDqeUserRepository dqeUserRepository, IEnumerable<Proposal> proposals, string environment, List<string> emailAddresses, string argUserid )
         {
             if (!emailAddresses.Any())
                 emailAddresses = AcquireEmailAddresses(dqeUserRepository);
 
             var sb = new StringBuilder();
+            if (!string.IsNullOrEmpty(argUserid))
+                sb.AppendLine("On-Demand submit by: " + argUserid + " <br /><br />");
+
             sb.AppendLine("The following {" + proposals.Count() + "} Official Estimate Proposals were not updated in Project Preconstruction. <br />");
             sb.AppendLine("Please check the synchronization of the project(s) on the proposal provided. <br />");
             sb.AppendLine("Once the estimate is fixed you can immediately take the official estimate and the system will automatically push prices. <br />");
@@ -202,12 +208,15 @@ namespace Dqe.Automation.EstimateProcessing
             }
         }
 
-        private static void HandleProcessedEmail(IDqeUserRepository dqeUserRepository, IEnumerable<Proposal> proposals, string environment, List<string> emailAddresses)
+        private static void HandleProcessedEmail(IDqeUserRepository dqeUserRepository, IEnumerable<Proposal> proposals, string environment, List<string> emailAddresses, string argUserid)
         {
             if (!emailAddresses.Any())
                 emailAddresses = AcquireEmailAddresses(dqeUserRepository);
 
             var sb = new StringBuilder();
+            if (!string.IsNullOrEmpty(argUserid))
+                sb.AppendLine("On-Demand submit by: " + argUserid + " <br /><br />");
+
             sb.AppendLine("The following {" + proposals.Count() + "} Official Estimate Proposals were updated in Project Preconstruction. <br />");
             
             foreach (var proposal in proposals.OrderBy(i => i.ProposalNumber))
