@@ -72,7 +72,7 @@
     $scope.reportFormat = {
         type: "PDF"
     };
-    $scope.listItems = function (set) {
+    $scope.listItems = function ($event, set) {
         $scope.filteredItems = undefined;
         document.getElementById("hiddenStructureName").value = set;
         $http.get('./PayItemStructureAdministration/GetStructuresRange', {params: { set: set, currentStructuresOnly: true }}).success(function (result) {
@@ -84,6 +84,7 @@
                     unit: ''
                 };
                 $scope.filterItems();
+                $scope.boeChapterTitle = $event.currentTarget.title.substring(34);
             }
         });
         $scope.showList = true;
@@ -113,10 +114,6 @@
             }
         });
     }
-    $scope.filterStructure = function (structureNumber) {
-        $scope.filter.name = structureNumber;
-        $scope.filterItems();
-    }
     $scope.filterItems = function () {
         $scope.currentPage = 0;
         $scope.filteredItems = $filter('filter')($scope.structures,
@@ -124,8 +121,6 @@
             name: $scope.filter.name,
             title: $scope.filter.title,
             unit: $scope.filter.unit
-            //primaryUnit: $scope.filter.unit.split('/')[0],
-            //hybridUnit: $scope.filter.unit.split('/').length == 2 ? $scope.filter.unit.split('/')[1] : '',
         });
     }
     $scope.clearAllFilters = function () {

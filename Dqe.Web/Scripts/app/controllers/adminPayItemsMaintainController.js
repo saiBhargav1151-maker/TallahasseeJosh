@@ -64,7 +64,6 @@
             });
         }
     });
-
     $http.get('./PayItemStructureAdministration/GetSpecBooks').success(function (result) {
         if (!containsDqeError(result)) {
             $scope.specBooks = getDqeData(result);
@@ -80,8 +79,7 @@
             });
         }
     });
-
-    $scope.listItems = function (set) {
+    $scope.listItems = function ($event, set) {
         $scope.holdSet = set;
         $http.get('./PayItemStructureAdministration/GetStructuresRange', { params: { set: set, currentStructuresOnly: $scope.showCurrentStructures } }).success(function (result) {
             if (!containsDqeError(result)) {
@@ -92,53 +90,10 @@
                     unit: ''
                 };
                 $scope.filterItems();
+                $scope.boeChapterTitle = $event.currentTarget.title.substring(34);
             }
         });
-        //$scope.showList = true;
-        //$scope.showChapters = false;
     }
-
-    //$http.get('./PayItemStructureAdministration/GetStructures').success(function (result) {
-    //    if (!containsDqeError(result)) {
-    //        $scope.structures = getDqeData(result);
-    //        $scope.filter = {
-    //            name: '',
-    //            title: '',
-    //            unit: ''
-    //        };
-    //        $scope.filterItems();
-    //    }
-    //});
-    //$http.get('./PayItemStructureAdministration/GetUnitCodes').success(function (result) {
-    //    if (!containsDqeError(result)) {
-    //        var units = getDqeData(result);
-    //        $scope.primaryUnits = units.slice();
-    //        $scope.primaryUnits.splice(0, 0, {
-    //            name: "MIXED",
-    //            description: "Mixed"
-    //        });
-    //        $scope.hybridUnits = units.slice();
-    //    }
-    //});
-    //$http.get('./PayItemStructureAdministration/GetUnlinkedItems').success(function (result) {
-    //    if (!containsDqeError(result)) {
-    //        $scope.unlinkedItems = getDqeData(result);
-    //    }
-    //});
-
-    //$scope.currentPage = 0;
-    //$scope.pageSize = 25;
-    //$scope.setCurrentPage = function (currentPage) {
-    //    $scope.currentPage = currentPage;
-    //}
-    //$scope.getNumberAsArray = function (num) {
-    //    return new Array(num);
-    //};
-    //$scope.numberOfPages = function () {
-    //    if ($scope.filteredItems == undefined) return 0;
-    //    return Math.ceil($scope.filteredItems.length / $scope.pageSize);
-    //};
-
     $scope.toggleStructureDetail = function (structure) {
         if (structure.showDetail) {
             structure.showDetail = false;
@@ -217,10 +172,6 @@
         $scope.structures.splice(index, 1);
         $scope.filterItems();
     }
-    $scope.filterStructure = function (structureNumber) {
-        $scope.filter.name = structureNumber;
-        $scope.filterItems();
-    }
     $scope.filterItems = function () {
         $scope.currentPage = 0;
         $scope.filteredItems = $filter('filter')($scope.structures,
@@ -228,8 +179,6 @@
             name: $scope.filter.name,
             title: $scope.filter.title,
             unit: $scope.filter.unit
-            //primaryUnit: $scope.filter.unit.split('/')[0],
-            //hybridUnit: $scope.filter.unit.split('/').length == 2 ? $scope.filter.unit.split('/')[1] : '',
         });
     }
     $scope.clearAllFilters = function () {
