@@ -84,7 +84,7 @@
                     unit: ''
                 };
                 $scope.filterItems();
-                $scope.boeChapterTitle = $event.currentTarget.title.substring(34);
+                $scope.boeChapterTitle = $event.currentTarget.title.substring(25);
             }
         });
         $scope.showList = true;

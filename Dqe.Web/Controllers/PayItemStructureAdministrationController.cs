@@ -589,7 +589,9 @@ namespace Dqe.Web.Controllers
                 id = i.Id,
                 name = i.RefItemName,
                 description = i.Description,
-                unit = i.Unit ?? string.Empty,
+                unit = i.BidAsLumpSum
+                    ? string.Format("LS/{0}", i.Unit)
+                    : i.Unit,
                 detail = string.Empty,
                 itemClass = i.ItemClass ?? string.Empty,
                 specTech = i.Ilflg1 ?? string.Empty,
