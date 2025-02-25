@@ -172,6 +172,10 @@
         $scope.structures.splice(index, 1);
         $scope.filterItems();
     }
+    $scope.filterStructure = function (structureNumber) {
+        $scope.filter.name = structureNumber;
+        $scope.filterItems();
+    }
     $scope.filterItems = function () {
         $scope.currentPage = 0;
         $scope.filteredItems = $filter('filter')($scope.structures,
