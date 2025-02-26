@@ -90,6 +90,7 @@
                     unit: ''
                 };
                 $scope.filterItems();
+                // JWW 02/25/25 - Title attribute of link is truncated and assigned to variable to be displayed on admin_payitems_maintain page as title above grid
                 $scope.boeChapterTitle = $event.currentTarget.title.substring(25);
             }
         });
