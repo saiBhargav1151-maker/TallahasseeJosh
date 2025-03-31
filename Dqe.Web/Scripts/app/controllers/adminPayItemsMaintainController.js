@@ -80,6 +80,7 @@
         }
     });
     $scope.listItems = function ($event, set) {
+        $scope.holdEvent = $event;
         $scope.holdSet = set;
         $http.get('./PayItemStructureAdministration/GetStructuresRange', { params: { set: set, currentStructuresOnly: $scope.showCurrentStructures } }).success(function (result) {
             if (!containsDqeError(result)) {
@@ -224,7 +225,7 @@
         }
     }
     $scope.resetList = function () {
-        $scope.listItems($scope.holdSet);
+        $scope.listItems($scope.holdEvent, $scope.holdSet);
     }
 
     $scope.downloadStructures = function () {
