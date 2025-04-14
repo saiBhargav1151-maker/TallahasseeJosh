@@ -1272,6 +1272,9 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
                             <Parameter Name="ReportProposalId">
                               <Value>=Fields!ReportProposalId.Value</Value>
                             </Parameter>
+                            <Parameter Name="ProposalLevel">
+                              <Value>=Parameters!ProposalLevel.Value</Value>
+                            </Parameter>
                           </Parameters>
                           <KeepTogether>true</KeepTogether>
                           <Style>
@@ -1280,6 +1283,7 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
                             </Border>
                           </Style>
                         </Subreport>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                   </TablixCells>
@@ -1482,7 +1486,7 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>** CONFIDENTIAL **</Value>
+                    <Value>=IIf(Parameters!ProposalLevel.Value = "O", "** CONFIDENTIAL **", "")</Value>
                     <Style>
                       <FontSize>8pt</FontSize>
                       <FontWeight>Bold</FontWeight>
@@ -1498,9 +1502,6 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
             <Height>0.25in</Height>
             <Width>2in</Width>
             <ZIndex>16</ZIndex>
-            <Visibility>
-              <Hidden>=Parameters!ProposalLevel.Value &lt;&gt; "O"</Hidden>
-            </Visibility>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1518,7 +1519,7 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>** CONFIDENTIAL **</Value>
+                    <Value>=IIf(Parameters!ProposalLevel.Value = "O", "** CONFIDENTIAL **", "")</Value>
                     <Style>
                       <FontSize>8pt</FontSize>
                       <FontWeight>Bold</FontWeight>
@@ -1536,9 +1537,6 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
             <Height>0.25in</Height>
             <Width>2.125in</Width>
             <ZIndex>17</ZIndex>
-            <Visibility>
-              <Hidden>=Parameters!ProposalLevel.Value &lt;&gt; "O"</Hidden>
-            </Visibility>
             <Style>
               <Border>
                 <Style>None</Style>
