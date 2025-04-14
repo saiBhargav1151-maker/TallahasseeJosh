@@ -843,7 +843,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Fields!PLN_QTY_CD.Value</Value>
+                              <Value>=IIf(IsNothing(Fields!PLN_QTY_CD.Value), "Y/N", Fields!PLN_QTY_CD.Value)</Value>
                               <Style />
                             </TextRun>
                           </TextRuns>
