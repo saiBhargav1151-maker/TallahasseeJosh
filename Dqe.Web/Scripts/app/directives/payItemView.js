@@ -8,7 +8,7 @@
                 specBook: "",
                 masterFile: new Object(),
                 structure: false,
-                showCurrentItems: false
+                showCurrentItems: true
             };
 
             $scope.removedItemsWithoutStructures = new Array();
@@ -44,7 +44,7 @@
                 $http.get('./PayItemStructureAdministration/GetPayItemsBySpecBook', { params: { specBook: specBook } }).success(function (result) {
                     if (!containsDqeError(result)) {
                         $scope.searchPayItems.structure = false;
-                        $scope.searchPayItems.showCurrentItems = false;
+                        $scope.searchPayItems.showCurrentItems = true;
                         //$scope.payItems = getDqeData(result);
 
                         var data = getDqeData(result);
@@ -70,6 +70,7 @@
                         };
                         $scope.filterItems();
                         $scope.filteredItems = $filter('orderBy')($scope.filteredItems, 'name');
+                        $scope.filterCurrent();
                     }
                 });
             };
