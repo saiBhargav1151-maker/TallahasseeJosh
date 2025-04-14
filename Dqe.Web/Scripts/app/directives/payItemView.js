@@ -83,30 +83,6 @@
                 }
             });
 
-            $scope.filterStructures = function () {
-                if ($scope.searchPayItems.structure) {
-                    angular.forEach($scope.payItems, function (item) {
-                        if (!item.hasStructure) {
-                            $scope.removedItemsWithoutStructures.push(item);
-                        }
-                    });
-                    angular.forEach($scope.removedItemsWithoutStructures, function (item) {
-                        var index = $scope.payItems.indexOf(item);
-                        $scope.payItems.splice(index, 1);
-                    });
-                } else {
-                    angular.forEach($scope.removedItemsWithoutStructures, function (item) {
-                        if (item.isObsolete && $scope.searchPayItems.showCurrentItems) {
-                            $scope.removedItemsNotCurrent.push(item);
-                        } else {
-                            $scope.payItems.push(item);
-                        }
-                    });
-                    $scope.removedItemsWithoutStructures = new Array();
-                }
-                $scope.filterItems();
-            };
-
             $scope.filterCurrent = function () {
                 if ($scope.searchPayItems.showCurrentItems) {
                     angular.forEach($scope.payItems, function (item) {
