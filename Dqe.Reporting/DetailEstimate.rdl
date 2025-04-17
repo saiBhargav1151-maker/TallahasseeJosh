@@ -20,9 +20,9 @@
             <Value>=Parameters!ProposalLevel.Value</Value>
           </QueryParameter>
         </QueryParameters>
-        <CommandText>SELECT        prop.PRPOS_NM AS ProposalNumber, prop.CNST_DY_NUM AS ConstructionDays, prop.DY_CST_AMT AS CostPerDay, prop.PRPOS_DS AS Description, prop.WRK_TYP_TXT AS WorkType, 
-                         prop.CNTY_TXT AS County, prop.TOT_AMT AS ProposalTotal, prop.LAST_UPDT_USER_NM AS LastUpdatedUser, proj.PROJ_NM AS ProjectNumber, proj.PROJ_DS AS ProjectDescription, 
-                         proj.LET_DT AS ProjectLettingDate, proj.TOT_AMT AS ProjectTotal, let.LET_NM AS LettingName, let.LET_DT AS LettingDate, proj.WRK_TYP_TXT AS ProjectWorkType, proj.FED_PROJ_TXT AS FederalAid
+        <CommandText>SELECT        prop.PRPOS_NM AS ProposalNumber, prop.CNST_DY_NUM AS ConstructionDays, prop.DY_CST_AMT AS CostPerDay, prop.PRPOS_DS AS Description, prop.WRK_TYP_TXT AS WorkType, prop.CNTY_TXT AS PropCounty, 
+                         prop.TOT_AMT AS ProposalTotal, prop.LAST_UPDT_USER_NM AS LastUpdatedUser, proj.PROJ_NM AS ProjectNumber, proj.PROJ_DS AS ProjectDescription, proj.LET_DT AS ProjectLettingDate, proj.TOT_AMT AS ProjectTotal, 
+                         let.LET_NM AS LettingName, let.LET_DT AS LettingDate, proj.WRK_TYP_TXT AS ProjectWorkType, proj.FED_PROJ_TXT AS FederalAid, proj.CNTY_TXT AS ProjCounty
 FROM            DQET036_RPT_PROPOS AS prop INNER JOIN
                          DQET033_RPT_PROJ AS proj ON prop.RPT_PRPOS_SQ = proj.RPT_PRPOS_SQ LEFT OUTER JOIN
                          DQET031_RPT_LET AS let ON prop.RPT_LET_SQ = let.RPT_LET_SQ
@@ -39,7 +39,7 @@ WHERE        (prop.PRPOS_NM = @ProposalNumber) AND (prop.PRPOS_LVL_CD = @Proposa
         </Field>
         <Field Name="ConstructionDays">
           <DataField>ConstructionDays</DataField>
-          <rd:TypeName>System.Int64</rd:TypeName>
+          <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="CostPerDay">
           <DataField>CostPerDay</DataField>
@@ -53,8 +53,8 @@ WHERE        (prop.PRPOS_NM = @ProposalNumber) AND (prop.PRPOS_LVL_CD = @Proposa
           <DataField>WorkType</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="County">
-          <DataField>County</DataField>
+        <Field Name="PropCounty">
+          <DataField>PropCounty</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="ProposalTotal">
@@ -91,6 +91,10 @@ WHERE        (prop.PRPOS_NM = @ProposalNumber) AND (prop.PRPOS_LVL_CD = @Proposa
         </Field>
         <Field Name="FederalAid">
           <DataField>FederalAid</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ProjCounty">
+          <DataField>ProjCounty</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -734,14 +738,14 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="County">
+                        <Textbox Name="ProjCounty">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!County.Value</Value>
+                                  <Value>=Fields!ProjCounty.Value</Value>
                                   <Style>
                                     <FontSize>8pt</FontSize>
                                   </Style>
@@ -750,7 +754,7 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>County</rd:DefaultName>
+                          <rd:DefaultName>ProjCounty</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1111,7 +1115,7 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
                     </Style>
                   </TextRun>
                   <TextRun>
-                    <Value>=First(Fields!County.Value, "ProposalHeader")</Value>
+                    <Value>=First(Fields!PropCounty.Value, "ProposalHeader")</Value>
                     <Style>
                       <FontSize>8pt</FontSize>
                     </Style>
@@ -1283,7 +1287,6 @@ WHERE        (rp.PRPOS_NM = @ProposalNumber) AND (rp.PRPOS_LVL_CD = @ProposalLev
                             </Border>
                           </Style>
                         </Subreport>
-                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                   </TablixCells>
