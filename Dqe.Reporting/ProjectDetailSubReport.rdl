@@ -1095,76 +1095,6 @@ WHERE        (rp.RPT_PRPOS_SQ = @ReportProposalId) AND (rp.PROJ_NM = @ProjectNum
               </Border>
             </Style>
           </Rectangle>
-          <Textbox Name="Textbox5">
-            <CanGrow>true</CanGrow>
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>=IIf(Parameters!ProposalLevel.Value = "O", "** CONFIDENTIAL **", "")</Value>
-                    <Style>
-                      <FontSize>8pt</FontSize>
-                      <FontWeight>Bold</FontWeight>
-                      <Color>SteelBlue</Color>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style />
-              </Paragraph>
-            </Paragraphs>
-            <rd:DefaultName>Textbox5</rd:DefaultName>
-            <Top>0.29188in</Top>
-            <Left>0.02475in</Left>
-            <Height>0.25in</Height>
-            <Width>2in</Width>
-            <ZIndex>12</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-              <PaddingLeft>2pt</PaddingLeft>
-              <PaddingRight>2pt</PaddingRight>
-              <PaddingTop>2pt</PaddingTop>
-              <PaddingBottom>2pt</PaddingBottom>
-            </Style>
-          </Textbox>
-          <Textbox Name="Textbox7">
-            <CanGrow>true</CanGrow>
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>=IIf(Parameters!ProposalLevel.Value = "O", "** CONFIDENTIAL **", "")</Value>
-                    <Style>
-                      <FontSize>8pt</FontSize>
-                      <FontWeight>Bold</FontWeight>
-                      <Color>SteelBlue</Color>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style>
-                  <TextAlign>Right</TextAlign>
-                </Style>
-              </Paragraph>
-            </Paragraphs>
-            <rd:DefaultName>Textbox5</rd:DefaultName>
-            <Top>0.29188in</Top>
-            <Left>7.46484in</Left>
-            <Height>0.25in</Height>
-            <Width>2.125in</Width>
-            <ZIndex>13</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-              <PaddingLeft>2pt</PaddingLeft>
-              <PaddingRight>2pt</PaddingRight>
-              <PaddingTop>2pt</PaddingTop>
-              <PaddingBottom>2pt</PaddingBottom>
-            </Style>
-          </Textbox>
           <Textbox Name="textbox1">
             <CanGrow>true</CanGrow>
             <KeepTogether>true</KeepTogether>
@@ -1200,7 +1130,7 @@ WHERE        (rp.RPT_PRPOS_SQ = @ReportProposalId) AND (rp.PROJ_NM = @ProjectNum
             <Left>2.09419in</Left>
             <Height>0.25in</Height>
             <Width>5.3012in</Width>
-            <ZIndex>14</ZIndex>
+            <ZIndex>12</ZIndex>
             <Style>
               <PaddingLeft>2pt</PaddingLeft>
               <PaddingRight>2pt</PaddingRight>
@@ -1752,7 +1682,7 @@ WHERE        (rp.RPT_PRPOS_SQ = @ReportProposalId) AND (rp.PROJ_NM = @ProjectNum
             <Left>0.01498in</Left>
             <Height>0.5in</Height>
             <Width>9.58462in</Width>
-            <ZIndex>15</ZIndex>
+            <ZIndex>13</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1790,7 +1720,7 @@ WHERE        (rp.RPT_PRPOS_SQ = @ReportProposalId) AND (rp.PROJ_NM = @ProjectNum
             <Left>2.09419in</Left>
             <Height>0.20833in</Height>
             <Width>5.3012in</Width>
-            <ZIndex>16</ZIndex>
+            <ZIndex>14</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1820,7 +1750,7 @@ WHERE        (rp.RPT_PRPOS_SQ = @ReportProposalId) AND (rp.PROJ_NM = @ProjectNum
             <Left>2.09419in</Left>
             <Height>0.39021in</Height>
             <Width>5.3012in</Width>
-            <ZIndex>17</ZIndex>
+            <ZIndex>15</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
