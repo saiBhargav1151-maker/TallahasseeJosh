@@ -64,7 +64,6 @@
             });
         }
     });
-
     $http.get('./PayItemStructureAdministration/GetSpecBooks').success(function (result) {
         if (!containsDqeError(result)) {
             $scope.specBooks = getDqeData(result);
@@ -80,8 +79,8 @@
             });
         }
     });
-
-    $scope.listItems = function (set) {
+    $scope.listItems = function ($event, set) {
+        $scope.holdEvent = $event;
         $scope.holdSet = set;
         $http.get('./PayItemStructureAdministration/GetStructuresRange', { params: { set: set, currentStructuresOnly: $scope.showCurrentStructures } }).success(function (result) {
             if (!containsDqeError(result)) {
@@ -92,53 +91,11 @@
                     unit: ''
                 };
                 $scope.filterItems();
+                // JWW 02/25/25 - Title attribute of link is truncated and assigned to variable to be displayed on admin_payitems_maintain page as title above grid
+                $scope.boeChapterTitle = $event.currentTarget.title.substring(25);
             }
         });
-        //$scope.showList = true;
-        //$scope.showChapters = false;
     }
-
-    //$http.get('./PayItemStructureAdministration/GetStructures').success(function (result) {
-    //    if (!containsDqeError(result)) {
-    //        $scope.structures = getDqeData(result);
-    //        $scope.filter = {
-    //            name: '',
-    //            title: '',
-    //            unit: ''
-    //        };
-    //        $scope.filterItems();
-    //    }
-    //});
-    //$http.get('./PayItemStructureAdministration/GetUnitCodes').success(function (result) {
-    //    if (!containsDqeError(result)) {
-    //        var units = getDqeData(result);
-    //        $scope.primaryUnits = units.slice();
-    //        $scope.primaryUnits.splice(0, 0, {
-    //            name: "MIXED",
-    //            description: "Mixed"
-    //        });
-    //        $scope.hybridUnits = units.slice();
-    //    }
-    //});
-    //$http.get('./PayItemStructureAdministration/GetUnlinkedItems').success(function (result) {
-    //    if (!containsDqeError(result)) {
-    //        $scope.unlinkedItems = getDqeData(result);
-    //    }
-    //});
-
-    //$scope.currentPage = 0;
-    //$scope.pageSize = 25;
-    //$scope.setCurrentPage = function (currentPage) {
-    //    $scope.currentPage = currentPage;
-    //}
-    //$scope.getNumberAsArray = function (num) {
-    //    return new Array(num);
-    //};
-    //$scope.numberOfPages = function () {
-    //    if ($scope.filteredItems == undefined) return 0;
-    //    return Math.ceil($scope.filteredItems.length / $scope.pageSize);
-    //};
-
     $scope.toggleStructureDetail = function (structure) {
         if (structure.showDetail) {
             structure.showDetail = false;
@@ -228,8 +185,6 @@
             name: $scope.filter.name,
             title: $scope.filter.title,
             unit: $scope.filter.unit
-            //primaryUnit: $scope.filter.unit.split('/')[0],
-            //hybridUnit: $scope.filter.unit.split('/').length == 2 ? $scope.filter.unit.split('/')[1] : '',
         });
     }
     $scope.clearAllFilters = function () {
@@ -270,7 +225,7 @@
         }
     }
     $scope.resetList = function () {
-        $scope.listItems($scope.holdSet);
+        $scope.listItems($scope.holdEvent, $scope.holdSet);
     }
 
     $scope.downloadStructures = function () {

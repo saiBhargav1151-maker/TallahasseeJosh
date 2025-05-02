@@ -589,7 +589,8 @@ namespace Dqe.Web.Controllers
                 id = i.Id,
                 name = i.RefItemName,
                 description = i.Description,
-                unit = i.Unit ?? string.Empty,
+                // JWW 02/26/25 - Added logic for LS items to display LS/XX
+                unit = i.BidAsLumpSum ? $"LS/{i.Unit}" : i.Unit,
                 detail = string.Empty,
                 itemClass = i.ItemClass ?? string.Empty,
                 specTech = i.Ilflg1 ?? string.Empty,

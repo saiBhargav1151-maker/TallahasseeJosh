@@ -2,7 +2,7 @@
 <RptDataSource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="DQE">
   <ConnectionProperties>
     <Extension>SQL</Extension>
-    <ConnectString>Data Source=DOT-WDDB004.fdot.dot.state.fl.us\ENTDEVSQL;Initial Catalog=DQESQL1</ConnectString>
+    <ConnectString>Data Source=DOT-WDDB004\ENTDEVSQL;Initial Catalog=DQESQL1</ConnectString>
     <IntegratedSecurity>true</IntegratedSecurity>
   </ConnectionProperties>
   <DataSourceID>22fb713c-ad5d-4b24-9dda-a3b40561d484</DataSourceID>

@@ -46,58 +46,82 @@
             </div>
             <div class="panel-body">
                 <div class="row">
+                    <!-- JWW 02/25/25 - Title attribute of links is used by listItems function. Beginning words are truncated, leaving only range and description.
+                         Updates to title, requires changes to function in adminPayItemsMaintainController.js -->
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 000- 199" ng-click="listItems(' 0')">
-                            <pre> 000- 199</pre>
+                        <a href=""
+                           title="View pay item structures 000 - 199: MOT, Erosion Control, Litter Removal, Moving, Earthwork"
+                           ng-click="listItems($event, ' 0')">
+                            <pre> 000 - 199</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 200- 299" ng-click="listItems(' 2')">
-                            <pre> 200- 299</pre>
+                        <a href=""
+                           title="View pay item structures 200 - 299: Base Courses"
+                           ng-click="listItems($event, ' 2')">
+                            <pre> 200 - 299</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 300- 399" ng-click="listItems(' 3')">
-                            <pre> 300- 399</pre>
+                        <a href=""
+                           title="View pay item structures 300 - 399: Surface Courses and Concrete Pavement"
+                           ng-click="listItems($event, ' 3')">
+                            <pre> 300 - 399</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 400- 499" ng-click="listItems(' 4')">
-                            <pre> 400- 499</pre>
+                        <a href=""
+                           title="View pay item structures 400 - 499: Structures, Drainage, Foundations"
+                           ng-click="listItems($event, ' 4')">
+                            <pre> 400 - 499</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 500- 599" ng-click="listItems(' 5')">
-                            <pre> 500- 599</pre>
+                        <a href=""
+                           title="View pay item structures 500 - 599: Incidental Construction, Curb, Sidewalk, Guardrail, Crash Cushions, Fencing, Turf"
+                           ng-click="listItems($event, ' 5')">
+                            <pre> 500 - 599</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 600- 699" ng-click="listItems(' 6')">
-                            <pre> 600- 699</pre>
+                        <a href=""
+                           title="View pay item structures 600 - 699: Traffic Control Signals and Devices, Conduit, Midblock Crosswalks, Traffic Monitoring Sites"
+                           ng-click="listItems($event, ' 6')">
+                            <pre> 600 - 699</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 700- 799" ng-click="listItems(' 7')">
-                            <pre> 700- 799</pre>
+                        <a href=""
+                           title="View pay item structures 700 - 799: Signing, Pavement Markings, Lighting"
+                           ng-click="listItems($event, ' 7')">
+                            <pre> 700 - 799</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 800- 899" ng-click="listItems(' 8')">
-                            <pre> 800- 899</pre>
+                        <a href=""
+                           title="View pay item structures 800 - 899: Mass Transit"
+                           ng-click="listItems($event, ' 8')">
+                            <pre> 800 - 899</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 900- 999" ng-click="listItems(' 9')">
-                            <pre> 900- 999</pre>
+                        <a href=""
+                           title="View pay item structures 900 - 999: Developmental and Special Pay Items"
+                           ng-click="listItems($event, ' 9')">
+                            <pre> 900 - 999</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view pay item structures 1000-1999" ng-click="listItems('1')">
-                            <pre>1000-1999</pre>
+                        <a href=""
+                           title="View pay item structures 1000 - 1999: Utilities"
+                           ng-click="listItems($event, '1')">
+                            <pre>1000 - 1999</pre>
                         </a>
                     </div>
                     <div class="col-lg-1">
-                        <a href="" title="Click to view other pay item structures" ng-click="listItems('X')">
+                        <a href=""
+                           title="View pay item structures Other"
+                           ng-click="listItems($event, 'X')">
                             <pre>Other</pre>
                         </a>
                     </div>
@@ -113,12 +137,14 @@
             <div class="panel-body">
                 <div style="width: 300px; float: left;">
                     <label>
-                        <input type="checkbox" title="Show current structures only" ng-model="showCurrentStructures" ng-change="resetList()" /> Show Current Structures Only
+                        <!-- 04/14/2025 JWW Changed label from 'Show Current Structures Only' to 'Show only active Pay Item Structures'. -->
+                        <input type="checkbox" title="Show current structures only" ng-model="showCurrentStructures" ng-change="resetList()" /> Show only Active Pay Item Structures
                     </label>
                 </div>
                 <div style="width: 300px; float: left;">
                     <label>
-                        <input type="checkbox" title="Show current pay items only" ng-model="showCurrentItems" ng-change="resetStructures()" /> Show Current Items Only
+                        <!-- 04/14/2025 JWW Changed label from 'Show Current Items Only' to 'Show only active Pay Items'. -->
+                        <input type="checkbox" title="Show current pay items only" ng-model="showCurrentItems" ng-change="resetStructures()" /> Show only Active Pay Items
                     </label>
                 </div>
                 <div style="clear: both;">
@@ -129,6 +155,7 @@
 </div>
 <div class="row">
     <div class="col-lg-12">
+        <span style="font-size:17px; font-weight:bold;">{{boeChapterTitle}}</span>
         <table class="table table-condensed table-bordered">
             <thead>
                 <tr>
@@ -156,7 +183,7 @@
                         </a>
                     </td>
                     <td>
-                        <a href="" title="filter this structure number" ng-click="filterStructure(structure.name)">
+                        <a href="" title="Filter to this structure number" ng-click="filterStructure(structure.name)">
                             <pre>{{structure.name}}</pre>
                         </a>
                     </td>

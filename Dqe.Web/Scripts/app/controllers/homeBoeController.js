@@ -72,7 +72,7 @@
     $scope.reportFormat = {
         type: "PDF"
     };
-    $scope.listItems = function (set) {
+    $scope.listItems = function ($event, set) {
         $scope.filteredItems = undefined;
         document.getElementById("hiddenStructureName").value = set;
         $http.get('./PayItemStructureAdministration/GetStructuresRange', {params: { set: set, currentStructuresOnly: true }}).success(function (result) {
@@ -84,6 +84,8 @@
                     unit: ''
                 };
                 $scope.filterItems();
+                // JWW 02/25/25 - Title attribute of link is truncated and assigned to variable to be displayed on BOE page as title above grid
+                $scope.boeChapterTitle = $event.currentTarget.title.substring(25);
             }
         });
         $scope.showList = true;
@@ -124,8 +126,6 @@
             name: $scope.filter.name,
             title: $scope.filter.title,
             unit: $scope.filter.unit
-            //primaryUnit: $scope.filter.unit.split('/')[0],
-            //hybridUnit: $scope.filter.unit.split('/').length == 2 ? $scope.filter.unit.split('/')[1] : '',
         });
     }
     $scope.clearAllFilters = function () {

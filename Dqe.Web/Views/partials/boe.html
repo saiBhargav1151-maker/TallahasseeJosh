@@ -2,7 +2,6 @@
     <div ng-show="!showChapters">
         <div class="row">
             <div class="col-lg-9">
-                <!--<a href="" ng-click="showChapters = true; showList = false;">Back to BOE Chapter Index</a>-->
                 <a href="" title="Click to go to the BOE chapter index" focus-me="boeDetailFocus" ng-click="navigate(); boeDetailFocus = false; boeIndexFocus = true;">Back to BOE Chapter Index</a>
             </div>
             <div class="col-lg-3" style="text-align: right;">
@@ -12,7 +11,9 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-9"></div>
+            <div class="col-lg-9" style="height:34px;">
+                <span style="position:absolute; bottom:0; font-size:17px; font-weight:bold; line-height:1;">{{boeChapterTitle}}</span>
+            </div>
             <div class="col-lg-3" style="text-align: right;">
                 <button type="button" class="btn btn-primary" title="Click to download the report - file type: PDF file size: unknown" ng-click="viewBoeReport()">
                     Download BOE Chapter
@@ -23,65 +24,90 @@
     </div>
 </form>
 <div class="row" ng-show="showChapters">
-    <div class="col-lg-2">
+    <div class="col-lg-4">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 BOE Chapter Index
             </div>
             <div class="panel-body">
-                <div>
-                    <a href="" title="Click to view pay item structures 000- 199" focus-me="boeIndexFocus" ng-click="listItems(' 0'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 000- 199</pre>
+                <!-- JWW 02/25/25 - Title attribute of links is used by listItems function. Beginning words are truncated, leaving only range and description.
+                     Updates to title, requires changes to function in homeBoeController.js -->
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 000 - 199: MOT, Erosion Control, Litter Removal, Moving, Earthwork"
+                       focus-me="boeIndexFocus"
+                       ng-click="listItems($event, ' 0'); boeDetailFocus = true; boeIndexFocus = false;">
+                        000 - 199<br />MOT, Erosion Control, Litter Removal, Moving, Earthwork
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 200- 299" ng-click="listItems(' 2'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 200- 299</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 200 - 299: Base Courses"
+                       ng-click="listItems($event, ' 2'); boeDetailFocus = true; boeIndexFocus = false;">
+                        200 - 299<br />Base Courses
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 300- 399" ng-click="listItems(' 3'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 300- 399</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 300 - 399: Surface Courses and Concrete Pavement"
+                       ng-click="listItems($event, ' 3'); boeDetailFocus = true; boeIndexFocus = false;">
+                        300 - 399<br />Surface Courses and Concrete Pavement
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 400- 499" ng-click="listItems(' 4'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 400- 499</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 400 - 499: Structures, Drainage, Foundations"
+                       ng-click="listItems($event, ' 4'); boeDetailFocus = true; boeIndexFocus = false;">
+                        400 - 499<br />Structures, Drainage, Foundations
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 500- 599" ng-click="listItems(' 5'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 500- 599</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 500 - 599: Incidental Construction, Curb, Sidewalk, Guardrail, Crash Cushions, Fencing, Turf"
+                       ng-click="listItems($event, ' 5'); boeDetailFocus = true; boeIndexFocus = false;">
+                        500 - 599<br />Incidental Construction, Curb, Sidewalk, Guardrail, Crash Cushions, Fencing, Turf
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 600- 699" ng-click="listItems(' 6'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 600- 699</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 600 - 699: Traffic Control Signals and Devices, Conduit, Midblock Crosswalks, Traffic Monitoring Sites"
+                       ng-click="listItems($event, ' 6'); boeDetailFocus = true; boeIndexFocus = false;">
+                        600 - 699<br />Traffic Control Signals and Devices, Conduit, Midblock Crosswalks, Traffic Monitoring Sites
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 700- 799" ng-click="listItems(' 7'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 700- 799</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 700 - 799: Signing, Pavement Markings, Lighting"
+                       ng-click="listItems($event, ' 7'); boeDetailFocus = true; boeIndexFocus = false;">
+                        700 - 799<br />Signing, Pavement Markings, Lighting
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 800- 899" ng-click="listItems(' 8'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 800- 899</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 800 - 899: Mass Transit"
+                       ng-click="listItems($event, ' 8'); boeDetailFocus = true; boeIndexFocus = false;">
+                        800 - 899<br />Mass Transit
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 900- 999" ng-click="listItems(' 9'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre> 900- 999</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 900 - 999: Developmental and Special Pay Items"
+                       ng-click="listItems($event, ' 9'); boeDetailFocus = true; boeIndexFocus = false;">
+                        900 - 999<br />Developmental and Special Pay Items
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item structures 1000-1999" ng-click="listItems('1'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre>1000-1999</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures 1000 - 1999: Utilities"
+                       ng-click="listItems($event, '1'); boeDetailFocus = true; boeIndexFocus = false;">
+                        1000 - 1999<br />Utilities
                     </a>
                 </div>
-                <div>
-                    <a href="" title="Click to view pay item other structures" ng-click="listItems('X'); boeDetailFocus = true; boeIndexFocus = false;">
-                        <pre>Other</pre>
+                <div class="boeChapterBtn">
+                    <a href=""
+                       title="View pay item structures Other"
+                       ng-click="listItems($event, 'X'); boeDetailFocus = true; boeIndexFocus = false;">
+                        Other<br />
                     </a>
                 </div>
             </div>
@@ -118,7 +144,7 @@
                         </a>
                     </td>
                     <td>
-                        <a href="" title="filter this structure number" ng-click="filterStructure(structure.name)">
+                        <a href="" title="Filter to this structure number" ng-click="filterStructure(structure.name)">
                             <pre>{{structure.name}}</pre>
                         </a>
                     </td>

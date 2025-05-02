@@ -8,7 +8,7 @@
                 specBook: "",
                 masterFile: new Object(),
                 structure: false,
-                showCurrentItems: false
+                showCurrentItems: true // 04-14-2025 JWW Changed the check state for 'Show only Active Pay Items' checkbox from 'false' to 'true'.
             };
 
             $scope.removedItemsWithoutStructures = new Array();
@@ -44,7 +44,7 @@
                 $http.get('./PayItemStructureAdministration/GetPayItemsBySpecBook', { params: { specBook: specBook } }).success(function (result) {
                     if (!containsDqeError(result)) {
                         $scope.searchPayItems.structure = false;
-                        $scope.searchPayItems.showCurrentItems = false;
+                        $scope.searchPayItems.showCurrentItems = true; // 04-14-2025 JWW Changed the check state for 'Show only Active Pay Items' checkbox from 'false' to 'true'.
                         //$scope.payItems = getDqeData(result);
 
                         var data = getDqeData(result);
@@ -70,6 +70,7 @@
                         };
                         $scope.filterItems();
                         $scope.filteredItems = $filter('orderBy')($scope.filteredItems, 'name');
+                        $scope.filterCurrent(); // 04-14-2025 JWW Added call to filterCurrent to purge inactive payitems.
                     }
                 });
             };
@@ -83,29 +84,30 @@
                 }
             });
 
-            $scope.filterStructures = function () {
-                if ($scope.searchPayItems.structure) {
-                    angular.forEach($scope.payItems, function (item) {
-                        if (!item.hasStructure) {
-                            $scope.removedItemsWithoutStructures.push(item);
-                        }
-                    });
-                    angular.forEach($scope.removedItemsWithoutStructures, function (item) {
-                        var index = $scope.payItems.indexOf(item);
-                        $scope.payItems.splice(index, 1);
-                    });
-                } else {
-                    angular.forEach($scope.removedItemsWithoutStructures, function (item) {
-                        if (item.isObsolete && $scope.searchPayItems.showCurrentItems) {
-                            $scope.removedItemsNotCurrent.push(item);
-                        } else {
-                            $scope.payItems.push(item);
-                        }
-                    });
-                    $scope.removedItemsWithoutStructures = new Array();
-                }
-                $scope.filterItems();
-            };
+            // 04/14/2025 JWW Removed 'Has Structure' checkbox and supporting code.
+            //$scope.filterStructures = function () {
+            //    if ($scope.searchPayItems.structure) {
+            //        angular.forEach($scope.payItems, function (item) {
+            //            if (!item.hasStructure) {
+            //                $scope.removedItemsWithoutStructures.push(item);
+            //            }
+            //        });
+            //        angular.forEach($scope.removedItemsWithoutStructures, function (item) {
+            //            var index = $scope.payItems.indexOf(item);
+            //            $scope.payItems.splice(index, 1);
+            //        });
+            //    } else {
+            //        angular.forEach($scope.removedItemsWithoutStructures, function (item) {
+            //            if (item.isObsolete && $scope.searchPayItems.showCurrentItems) {
+            //                $scope.removedItemsNotCurrent.push(item);
+            //            } else {
+            //                $scope.payItems.push(item);
+            //            }
+            //        });
+            //        $scope.removedItemsWithoutStructures = new Array();
+            //    }
+            //    $scope.filterItems();
+            //};
 
             $scope.filterCurrent = function () {
                 if ($scope.searchPayItems.showCurrentItems) {
