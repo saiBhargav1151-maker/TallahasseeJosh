@@ -44,5 +44,11 @@ namespace Dqe.Domain.Fdot
         bool IsProposalReadyForOfficialEstimate(string proposalNumber);
         Exception InsertRefItems(IEnumerable<PayItemMaster> payItemMasters, DqeUser user);
         void UpdateProposalReadyForDssPass(Proposal proposal);
+        /*Proposal GetUnitPrice(string number);*/
+        /* IList<object[]> GetUnitPriceSearch(string proposalNumber);*/
+        /* IList<UnitPriceResultDto> GetUnitPriceDetails(string proposalNumber);*/
+        IList<ProposalItemDTO> GetUnitPriceDetails(string payItem);
+
+        IList<PayItemDTO> GetPayItemDetails(string input);
     }
 }

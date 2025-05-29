@@ -1,0 +1,231 @@
+﻿<div focus-me="boeDetailFocus" class="panel panel-default" style="padding: 20px; border-radius: 8px;">
+    <!-- Input -->
+    <div class="form-group" style="position: relative; max-width: 400px;">
+        <label for="payItemInput">Enter Pay Item Number or Description:</label>
+
+        <input type="text"
+               id="payItemInput"
+               ng-model="searchText"
+               ng-change="fetchPayItemSuggestions()"
+               placeholder="e.g., 0101 or MOBILIZATION"
+               class="form-control input-lg"
+               style="padding-right: 30px;"
+        autocomplete="off" />
+
+        <!-- Clear (X) -->
+        <span ng-if="searchText"
+              ng-click="clearSearchText()"
+              style="position: absolute; right: 12px; top: 40px; cursor: pointer; font-size: 22px; color: #aaa; line-height: 1;">
+            &times;
+        </span>
+
+        <!-- Suggestions List -->
+        <ul class="list-group"
+            ng-show="items.length > 0"
+            style="max-width: 400px; position: absolute; z-index: 1000;">
+            <li class="list-group-item"
+                ng-repeat="item in items"
+                ng-click="selectPayItem(item)"
+                style="cursor: pointer;">
+                {{ item.Description }}
+            </li>
+        </ul>
+    </div>
+
+
+
+    <button class="btn btn-primary btn-lg" ng-click="searchBids()" >
+        <i class="glyphicon glyphicon-search"></i> Search Bids
+    </button>
+    <div class="text-right" ng-if="bidHistoryData && bidHistoryData.length > 0" >
+        <button class="btn btn-success btn-lg" ng-click="exportClick()">
+            <i class="glyphicon glyphicon-download"></i> Download Bid Data CSV
+        </button>
+    </div>
+
+
+    <!-- Loader -->
+    <div ng-if="isLoading" class="text-info" style="margin-top: 15px; font-weight: bold;">
+        <i class="glyphicon glyphicon-refresh spinning"></i> Loading bid data...
+    </div>
+
+    <div ng-if="bidHistoryData && bidHistoryData.length > 0">
+        <div class="container-fluid" style="padding: 20px;">
+            <div style="height: 55vh; overflow-x: auto; overflow-y: auto; border: 1px solid #ccc; border-radius: 6px; background: #fff; padding: 0;">
+                <table class="table table-bordered bid-table" style="min-width: 2800px;">
+
+                    <thead>
+                        <tr>
+                            <th>Proposal Number</th>
+                            <th>Project Number</th>
+                            <th>Letting Date</th>
+                            <th>Pay Item</th>
+                            <th>Description</th>
+                            <!--<th >Supplemental Description</th>-->
+                            <th>Units</th>
+                            <th>Quantity</th>
+                            <th>Unit Price Bid</th>
+                            <th>Bid Amount</th>
+                            <th>Awarded</th>
+                            <th>Weighted Avg</th>
+                            <th>Weighted Avg (No Outliers)</th>
+                            <th>Outlier</th>
+                            <th>County</th>
+                            <th>District</th>
+                            <th>Contract Type</th>
+                            <th>Work Type</th>
+                            <th>Proposal Type</th>
+                            <th>Bidder Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in bidHistoryData">
+                            <td>{{ item.p }}</td>
+                            <td>{{ item.ProjectNumber }}</td>
+                            <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                            <td>{{ item.ri }}</td>
+                            <td>{{ item.Description }}</td>
+                            <!-- <td>{{ item.SupplementalDescription }}</td>-->
+                            <td>{{ item.CalculatedUnit }}</td>
+                            <td>{{ item.Quantity }}</td>
+                            <td>{{ item.b | currency }}</td>
+                            <td>{{ item.PvBidTotal | currency }}</td>
+                            <td>{{ item.PvAwarded ? 'Won' : 'Lost' }}</td>
+                            <td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>
+                            <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>
+                            <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
+                            <td>{{ item.c }}</td>
+                            <td>{{ item.d }}</td>
+                            <td>{{ item.ContractType }}</td>
+                            <td>{{ getWorkTypeLabel(item.ContractWorkType) }}</td>
+                            <td>{{ item.ProposalType }}</td>
+                            <td>{{ item.VendorName }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 30px;">
+                <h4>Unit Price Bid Analysis</h4>
+
+
+                <!-- <div style="width: 100%; max-width: 1000px;">
+                     <canvas id="priceChart"
+                             ng-style="{ height: (400 + Math.min(500, bidHistoryData.length * 5)) + 'px' }"
+                             style="width: 100%;">
+                     </canvas>
+                 </div>-->
+                <div style="width: 100%; max-width: 1000px;">
+                    <canvas id="priceChart"
+                            ng-style="{ height: Math.min(600, 400 + bidHistoryData.length * 2) + 'px' }"
+                            style="width: 100%;">
+                    </canvas>
+                </div>
+                <!-- Summary stats -->
+                <div ng-if="chartStats"
+                     class="well"
+                     style="margin-top: 20px; background: #f5f5f5; border-radius: 6px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <h5 style="margin-top: 0;">
+                        <i class="glyphicon glyphicon-stats" aria-hidden="true"></i> Summary Statistics
+                    </h5>
+                    <ul style="list-style: none; padding-left: 0; font-size: 14px; margin-bottom: 0;">
+                        <li><strong>Average Unit Price:</strong> ${{ chartStats.avg | number:2 }}</li>
+
+                        <!-- <li><strong>Median Unit Price:</strong> ${{ chartStats.median | number:2 }}</li>-->
+                        <li><strong>Standard Deviation:</strong> ${{ chartStats.stdDev | number:2 }}</li>
+
+                        <!--<li><strong>MAD (Median Abs. Deviation):</strong> ${{ chartStats.mad | number:2 }}</li>-->
+                        <li><strong>Regression Slope:</strong> {{ chartStats.slope | number:4 }}</li>
+                        <li><strong>Intercept:</strong> ${{ chartStats.intercept | number:2 }}</li>
+                        <li><strong>Total Bids:</strong> {{ chartStats.count }}</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div ng-if="searchAttempted && bidHistoryData && bidHistoryData.length == 0" class="alert alert-warning" style="margin-top: 30px;">
+        <strong>No data:</strong> No bid history found for Pay Item <strong>{{ searchText }}</strong>.
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .bid-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        background-color: #fff;
+        
+    }
+
+        .bid-table th, .bid-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: normal !important;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+
+        .bid-table th {
+            position: sticky;
+            top: 0;
+            background-color: #007bff;
+            color: #fff;
+            font-weight: 600;
+            z-index: 2;
+            border-bottom: 2px solid #0056b3;
+        }
+
+        .bid-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .bid-table tbody tr:hover {
+            background-color: #e2e6ea;
+        }
+
+    .spinning {
+        animation: spin 1s infinite linear;
+        font-size: 18px;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .table th {
+        background-color: #337ab7;
+        color: white;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .btn-primary:hover {
+        background-color: #286090;
+        border-color: #204d74;
+    }
+
+    .panel {
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+</style>
+

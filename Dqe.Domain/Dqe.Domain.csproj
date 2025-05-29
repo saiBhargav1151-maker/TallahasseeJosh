@@ -167,6 +167,7 @@
     <Compile Include="Model\StatewidePricingParameter.cs" />
     <Compile Include="Model\SystemParameters.cs" />
     <Compile Include="Model\SystemTask.cs" />
+    <Compile Include="Model\UnitPriceResultDto.cs" />
     <Compile Include="Model\WorkType.cs" />
     <Compile Include="Model\Wt\Alternate.cs" />
     <Compile Include="Model\Wt\Bid.cs" />

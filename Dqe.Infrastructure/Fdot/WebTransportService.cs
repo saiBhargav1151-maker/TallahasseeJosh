@@ -11,6 +11,7 @@ using Dqe.Infrastructure.Providers;
 using Dqe.Infrastructure.Repositories;
 using Dqe.Infrastructure.Repositories.Custom;
 using NHibernate.Criterion;
+using NHibernate.Transform;
 using NHibernate.Linq;
 using NHibernate.Mapping.ByCode;
 using County = Dqe.Domain.Model.Wt.County;
@@ -18,15 +19,215 @@ using Project = Dqe.Domain.Model.Wt.Project;
 using ProjectItem = Dqe.Domain.Model.Wt.ProjectItem;
 using Proposal = Dqe.Domain.Model.Wt.Proposal;
 using ProposalItem = Dqe.Domain.Model.Wt.ProposalItem;
+using NHibernate.SqlCommand;
+using NHibernate;
+using NHibernate.Type;
 
 namespace Dqe.Infrastructure.Fdot
 {
+
     public class WebTransportService : IWebTransportService
     {
 
         private static readonly IDictionary<string, CodeTable> CodeTables = new Dictionary<string, CodeTable>();
 
         private static readonly object Lock = new object();
+
+        public IList<PayItemDTO> GetPayItemDetails(string input)
+        {
+
+
+            /*using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                var query = session.CreateCriteria<ProposalItem>("p")
+                    .CreateAlias("MyRefItem", "ri") // ✅ Ensure correct aliasing
+                    .SetProjection(Projections.SqlProjection(
+                        "ri1_.REFITEM_NM + ' - ' + ri1_.DESCR AS FullNameDescription",
+                        new[] { "FullNameDescription" },
+                        new IType[] { NHibernateUtil.String }
+                    ))
+                    .SetResultTransformer(NHibernate.Transform.Transformers.AliasToBean<ProposalItemDTO>())
+                    .SetMaxResults(1000); // ✅ Limit results to 1000
+
+                var result = query.List<ProposalItemDTO>();
+                return result;
+            }*/
+            /* using (var session = Initializer.TransportSessionFactory.OpenSession())
+             {
+                 RefItem riAlias = null;
+                 PayItemDTO dtoAlias = null;
+
+
+                 var sanitizedInput = input.Replace(" ", "").Trim();
+
+                 var query = session.QueryOver<RefItem>(() => riAlias)
+                     .Where(Restrictions.Or(
+                         Expression.Sql("REPLACE(this_.REFITEM_NM, ' ', '') LIKE ?", $"%{sanitizedInput}%", NHibernateUtil.String),
+                         Restrictions.On(() => riAlias.Description).IsLike(input.Trim(), MatchMode.Anywhere)
+                     ))
+                     .SelectList(list => list
+                         .Select(() => riAlias.Name).WithAlias(() => dtoAlias.Name)
+                         .Select(Projections.SqlProjection(
+                             "RTRIM(LTRIM(this_.REFITEM_NM)) + ' - ' + RTRIM(LTRIM(this_.DESCR)) as Description",
+                             new[] { "Description" },
+                             new[] { NHibernateUtil.String }
+                         )).WithAlias(() => dtoAlias.Description)
+                     )
+                     .OrderBy(() => riAlias.Name).Asc
+                     .Take(10);
+
+                 query.UnderlyingCriteria.SetResultTransformer(
+                     NHibernate.Transform.Transformers.AliasToBean<PayItemDTO>()
+                 );
+
+                 return query.List<PayItemDTO>();
+             }*/
+            /*' using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                ProposalItem pi = null;
+                RefItem ri = null;
+                Bid b = null;
+                ProposalVendor pv = null;
+                Proposal p = null;
+
+                var sanitizedInput = input.Replace(" ", "").Trim();
+
+                var rawResults = session.QueryOver(() => ri)
+
+                    .Where(() => ri.SpecBook == "13")
+                    .And(Restrictions.Or(
+                        Expression.Sql("REPLACE(ri1_.REFITEM_NM, ' ', '') LIKE ?", $"%{sanitizedInput}%", NHibernateUtil.String),
+                        Restrictions.On(() => ri.Description).IsLike(input.Trim(), MatchMode.Anywhere)
+                    ))
+
+                    .SelectList(list => list
+                        .Select(() => ri.Id)
+                        .Select(() => ri.Name)
+                        .Select(() => ri.Description)
+                    )
+                    .Take(10)
+                    .List<object[]>();
+
+                // Map to DTOs manually
+                var finalResults = rawResults
+                    .Select(row => new PayItemDTO
+                    {
+                        Name = row[1]?.ToString(),
+                        Description = $"{row[1]?.ToString()} - {row[2]?.ToString()}"
+                    })
+                    .Distinct()
+                    .ToList();
+
+                return finalResults;
+            }*/
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                RefItem ri = null;
+
+                var sanitizedInput = input.Replace(" ", "").Trim();
+
+                var rawResults = session.QueryOver(() => ri)
+                    .Where(() => ri.SpecBook == "13")
+                    .And(Restrictions.Or(
+                        Expression.Sql("LOWER(REPLACE(RTRIM(LTRIM(REFITEM_NM)) + ' - ' + RTRIM(LTRIM(DESCR)), ' ', '')) LIKE ?", $"%{input.Trim().ToLower().Replace(" ", "")}%", NHibernateUtil.String),
+                        Restrictions.On(() => ri.Description).IsLike(input.Trim(), MatchMode.Anywhere)
+                    ))
+                    .SelectList(list => list
+                        .Select(() => ri.Id)
+                        .Select(() => ri.Name)
+                        .Select(() => ri.Description)
+                    )
+                    .Take(10)
+                    .List<object[]>();
+
+                var finalResults = rawResults
+                    .Select(row => new PayItemDTO
+                    {
+                        Name = row[1]?.ToString(),
+                        Description = $"{row[1]?.ToString()} - {row[2]?.ToString()}"
+                    })
+                    .Distinct()
+                    .ToList();
+
+                return finalResults;
+            }
+
+
+
+        }
+        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem)
+        {
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                var query = session.CreateCriteria<ProposalItem>()
+                    .CreateAlias("MyRefItem", "ri")
+                    .CreateAlias("Bids", "b")
+                    .CreateAlias("b.MyProposalVendor", "pv")
+                    .CreateAlias("pv.MyProposal", "p")
+                    .CreateAlias("p.MyLetting", "l")
+                    .CreateAlias("p.County", "c")
+                    .CreateAlias("p.District", "d")
+                    .CreateAlias("p.Milestones", "m")
+                    .CreateAlias("pv.MyRefVendor", "rv")
+                    .CreateAlias("p.Projects", "prj")
+
+                    /*.Add(Restrictions.Eq("p.ProposalNumber", proposalNumber))*/
+                    .Add(Restrictions.Eq("ri.Name", payItem))
+                    .Add(Restrictions.Or(
+                        Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
+                        Restrictions.IsNull("pv.BidType")
+                    ))
+                    .Add(Restrictions.Or(
+                        Restrictions.IsNull("pv.BidStatus"),
+                        Restrictions.Not(Restrictions.Eq("pv.BidStatus", "I"))
+                    ))
+                    .Add(Restrictions.Eq("p.ProposalStatus", "03"))
+                    .Add(Restrictions.Or(
+                        Restrictions.IsNull("m.Main"),
+                        Restrictions.Eq("m.Main", true)
+                    ))
+                    .Add(Restrictions.Lt("l.LettingDate", DateTime.Today))
+                    .Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-120)))
+                    .Add(Restrictions.Eq("ri.SpecBook", "13"))
+ 
+                   /* .Add(Restrictions.InsensitiveLike("prj.ProjectNumber", number, MatchMode.Start))*/ // ✅ Matching Project Number
+                    .Add(GetProjectValidRestriction())
+                    .Add(Restrictions.Eq("prj.Controlling", true))
+                    .Add(Restrictions.Eq("prj.IsLatestVersion", true)) 
+                    .AddOrder(Order.Asc("ri.Name"))
+                    .AddOrder(Order.Desc("l.LettingDate"))
+                    .AddOrder(Order.Asc("p.ProposalNumber"))
+                    .AddOrder(Order.Asc("b.BidPrice"))
+
+                    .SetProjection(Projections.ProjectionList()
+                        .Add(Projections.Property("pv.Awarded"), "PvAwarded")
+                        .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
+                        .Add(Projections.Property("ri.Name"), "ri")
+                        .Add(Projections.Property("Id"), "Id")
+                        .Add(Projections.Property("Quantity"), "Quantity")
+                        .Add(Projections.Property("b.BidPrice"), "b")
+                        .Add(Projections.Property("prj.ProjectNumber"), "ProjectNumber")
+                        .Add(Projections.Property("p.ProposalNumber"), "p")
+                        .Add(Projections.Property("p.ProposalType"), "ProposalType")
+                        .Add(Projections.Property("p.ContractType"), "ContractType")
+                        .Add(Projections.Property("p.ContractWorkType"), "ContractWorkType")
+                        .Add(Projections.Property("c.Description"), "c")
+                        .Add(Projections.Property("d.Description"), "d")
+                        .Add(Projections.Property("rv.VendorName"), "VendorName")
+                        .Add(Projections.Property("l.LettingDate"), "l")
+                        .Add(Projections.Property("ri.Description"), "Description")
+                        .Add(Projections.Property("SupplementalDescription"), "SupplementalDescription")
+                        .Add(Projections.Property("ri.CalculatedUnit"), "CalculatedUnit")
+                    )
+
+                    .SetResultTransformer(NHibernate.Transform.Transformers.AliasToBean<ProposalItemDTO>());
+
+                var res = query.List<ProposalItemDTO>();
+
+                return res.Distinct().ToList();
+            }
+
+        }
 
         public IEnumerable<CodeTable> GetCodeTables()
         {
@@ -349,7 +550,7 @@ namespace Dqe.Infrastructure.Fdot
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 ProposalItem proposalItem = null;
-                return session
+                var res= session
                     .QueryOver<Proposal>()
                     .Where(i => !i.IsRejected)
                     .Where(i => i.ProposalNumber == number)
@@ -363,6 +564,7 @@ namespace Dqe.Infrastructure.Fdot
                     .Left.JoinQueryOver(() => proposalItem.MyRefItem)
                     .Left.JoinQueryOver(() => proposalItem.ProjectItems)
                     .SingleOrDefault();
+                return res;
             }
         }
 
@@ -1874,12 +2076,13 @@ namespace Dqe.Infrastructure.Fdot
                 Letting letting = null;
                 Proposal proposal = null;
 
-                return session
+                var res= session
                     .QueryOver(() => proposal)
                     .Where(() => proposal.ProposalNumber == number)
                     .Left.JoinQueryOver(() => proposal.MyLetting, () => letting)
                     .SingleOrDefault()
                     .MyLetting;
+                return res;
             }
         }
 
