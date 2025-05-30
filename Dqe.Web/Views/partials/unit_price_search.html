@@ -56,7 +56,8 @@
 
                     <thead>
                         <tr>
-                            <th>Proposal Number</th>
+                            <th>Contract</th>
+                            <th>Duration</th>
                             <th>Project Number</th>
                             <th>Letting Date</th>
                             <th>Pay Item</th>
@@ -66,9 +67,9 @@
                             <th>Quantity</th>
                             <th>Unit Price Bid</th>
                             <th>Bid Amount</th>
-                            <th>Awarded</th>
-                            <th>Weighted Avg</th>
-                            <th>Weighted Avg (No Outliers)</th>
+                            <th>Bid Status</th>
+                            <!--<th>Weighted Avg</th>
+                            <th>Weighted Avg (No Outliers)</th>-->
                             <th>Outlier</th>
                             <th>County</th>
                             <th>District</th>
@@ -81,6 +82,7 @@
                     <tbody>
                         <tr ng-repeat="item in bidHistoryData">
                             <td>{{ item.p }}</td>
+                            <td>{{ item.Duration }}</td>
                             <td>{{ item.ProjectNumber }}</td>
                             <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
                             <td>{{ item.ri }}</td>
@@ -90,9 +92,9 @@
                             <td>{{ item.Quantity }}</td>
                             <td>{{ item.b | currency }}</td>
                             <td>{{ item.PvBidTotal | currency }}</td>
-                            <td>{{ item.PvAwarded ? 'Won' : 'Lost' }}</td>
-                            <td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>
-                            <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>
+                            <td>{{ item.PvAwarded ? 'Winning Bid' : 'Non Winning Bid' }}</td>
+                            <!-- <td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>
+     <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>-->
                             <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
                             <td>{{ item.c }}</td>
                             <td>{{ item.d }}</td>
@@ -107,19 +109,15 @@
             <div style="margin-top: 30px;">
                 <h4>Unit Price Bid Analysis</h4>
 
+                <div style="width: 100%; max-width: 1000px; position: relative;">
 
-                <!-- <div style="width: 100%; max-width: 1000px;">
-                     <canvas id="priceChart"
-                             ng-style="{ height: (400 + Math.min(500, bidHistoryData.length * 5)) + 'px' }"
-                             style="width: 100%;">
-                     </canvas>
-                 </div>-->
-                <div style="width: 100%; max-width: 1000px;">
+                    <!-- Chart Canvas -->
                     <canvas id="priceChart"
                             ng-style="{ height: Math.min(600, 400 + bidHistoryData.length * 2) + 'px' }"
                             style="width: 100%;">
                     </canvas>
                 </div>
+
                 <!-- Summary stats -->
                 <div ng-if="chartStats"
                      class="well"
@@ -143,7 +141,7 @@
 
         </div>
     </div>
-    <div ng-if="searchAttempted && bidHistoryData && bidHistoryData.length == 0" class="alert alert-warning" style="margin-top: 30px;">
+    <div ng-if="searchAttempted && !isLoading && (!bidHistoryData || bidHistoryData.length === 0)" class="alert alert-warning" style="margin-top: 30px;">
         <strong>No data:</strong> No bid history found for Pay Item <strong>{{ searchText }}</strong>.
     </div>
 </div>

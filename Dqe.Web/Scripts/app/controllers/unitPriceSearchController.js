@@ -1,6 +1,6 @@
-﻿dqeControllers.controller('UnitPriceSearchController', [
-    '$scope', '$http', '$timeout',
-    function ($scope, $http, $timeout) {
+﻿dqeControllers.controller('UnitPriceSearchController', ['$scope', '$rootScope', '$http', '$timeout',
+    function ($scope, $rootScope, $http, $timeout) {
+        $rootScope.$broadcast('initializeNavigation');
         $scope.searchText = "";
         $scope.items = [];
         $scope.selectedPayItemNumber = null;
@@ -8,6 +8,7 @@
         $scope.isLoading = false;
         $scope.searchAttempted = false;
         let debounceTimer;
+        $scope.isChartLoading = false;
         $scope.workTypeMap = {
             "I": "Maintenance Other",
             "X0": "Interstate Construction (new)",
@@ -44,6 +45,7 @@
                 });
             }, 300);
         };
+        // clear the text box input
         $scope.clearSearchText = function () {
             $scope.searchText = "";
             $scope.items = [];
@@ -96,7 +98,7 @@
 
                     if (!isOutlier) {
                         cleanQty.push(qty);
-                        cleanPrices.push(price); //Date and time for csv file
+                        cleanPrices.push(price); 
                     }
                 });
 
@@ -115,17 +117,17 @@
                 $scope.isLoading = false;
             });
         };
-        // Export Functionlity
+        // CSV Export Functionlity
         $scope.exportClick = function () {
             let headers = [
-                "Proposal Number", "Project Number", "Letting Date", "Pay Item",
+                "Contract Number", "Duration", "Project Number", "Letting Date", "Pay Item",
                 "Description", "Supplemental Description", "Units", "Quantity",
                 "Unit Price Bid", "Bid Amount", "Awarded", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "County", "District",
                 "Contract Type", "Work Type", "Proposal Type", "Bidder Name"
             ].join(",") + "\n";
 
             let rows = $scope.bidHistoryData.map(item => [
-                `"${item.p}"`, `"${item.ProjectNumber}"`, `"${new Date(item.l).toLocaleDateString()}"`, `"${item.ri}"`,
+                `"${item.p}"`, `"${item.Duration}"`, `"${item.ProjectNumber}"`, `"${new Date(item.l).toLocaleDateString()}"`, `"${item.ri}"`,
                 `"${item.Description}"`, `"${item.SupplementalDescription}"`, `"${item.CalculatedUnit}"`, `"${item.Quantity}"`,
                 `"${item.b}"`, `"${item.PvBidTotal}"`, `"${item.PvAwardedLabel}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"` , `"${item.c}"`, `"${item.d}"`,
                 `"${item.ContractType}"`, `"${item.ContractWorkType}"`, `"${item.ProposalType}"`, `"${item.VendorName}"`
@@ -140,125 +142,16 @@
             link.click();
         };
 
-
-
-       /* $scope.convertArrayToCSV = function (dataArray) {
-            debugger
-            const headers = Object.keys(dataArray[0]).join(","); // Extract headers
-            const rows = dataArray.map(row => Object.values(row).join(",")).join("\n"); // Convert rows
-            return `${headers}\n${rows}`; // Combine headers and rows
-        }
-        $scope.downloadCSV = function (dataArray, filename = "data.csv") {
-            debugger
-            const csvContent = $scope.convertArrayToCSV(dataArray);
-            const blob = new Blob([csvContent], { type: "text/csv" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }*/
-
         // Watch for data update
         $scope.$watch('bidHistoryData', function (newVal) {
             if (newVal && newVal.length > 0) {
                 waitForCanvasAndRender();
             }
         });
-
-        // Render Chart
-        /*function waitForCanvasAndRender(retryCount = 10) {
-            $timeout(function () {
-                requestAnimationFrame(function () {
-                    const canvas = document.getElementById("priceChart");
-                    if (!canvas) {
-                        console.warn("Chart canvas not yet rendered. Retrying...");
-                        if (retryCount > 0) {
-                            waitForCanvasAndRender(retryCount - 1);
-                        }
-                        return;
-                    }
-
-                    const ctx = canvas.getContext("2d");
-                    const labels = $scope.bidHistoryData.map(item => item.VendorName || item.p);
-                    const prices = $scope.bidHistoryData.map(item => item.b || 0);
-
-                    const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
-                    const stdDev = Math.sqrt(
-                        prices.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / prices.length
-                    );
-
-                    if ($scope.chartInstance) {
-                        $scope.chartInstance.destroy();
-                    }
-
-                    $scope.chartInstance = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Unit Price Bid ($)',
-                                    data: prices,
-                                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
-                                },
-                                {
-                                    label: `Average ($${avg.toFixed(2)})`,
-                                    data: Array(prices.length).fill(avg),
-                                    type: 'line',
-                                    borderColor: 'green',
-                                    borderWidth: 2,
-                                    fill: false
-                                },
-                                {
-                                    label: 'Std Dev Range',
-                                    data: Array(prices.length).fill(avg + stdDev),
-                                    type: 'line',
-                                    borderColor: 'orange',
-                                    borderWidth: 1,
-                                    borderDash: [4, 4],
-                                    fill: false
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                tooltip: {
-                                    callbacks: {
-                                        label: function (context) {
-                                            return `$${context.raw.toFixed(2)}`;
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Dollars ($)'
-                                    }
-                                },
-                                x: {
-                                    ticks: {
-                                        autoSkip: false,
-                                        maxRotation: 60,
-                                        minRotation: 30
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    console.log("✅ Chart rendered.");
-                });
-            }, 100);
-        }*/
         // Line Graph
         function waitForCanvasAndRender(retryCount = 10) {
+            $scope.isChartLoading = true;
+
             $timeout(function () {
                 requestAnimationFrame(function () {
                     const canvas = document.getElementById("priceChart");
@@ -270,75 +163,47 @@
                     const ctx = canvas.getContext("2d");
                     const quantities = $scope.bidHistoryData.map(item => item.Quantity || 0);
                     const prices = $scope.bidHistoryData.map(item => item.b || 0);
-                    const outlierPoints = [];
-                    const normalPoints = [];
+                    const outlierPoints = [], normalPoints = [];
 
-                    // Remove duplicate points
-                    /*const bidPoints = [];
-                    const seen = new Set();
-                    for (let i = 0; i < quantities.length; i++) {
-                        const key = `${quantities[i]}-${prices[i]}`;
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            bidPoints.push({ x: quantities[i], y: prices[i] });
-                        }
-                    }*/
                     const bidPoints = [];
                     for (let i = 0; i < quantities.length; i++) {
                         bidPoints.push({ x: quantities[i], y: prices[i] });
                     }
-                    // Weighted Average Calculation
+
                     const totalQty = quantities.reduce((sum, q) => sum + q, 0);
                     const weightedAvg = quantities.reduce((sum, q, i) => sum + (q * prices[i]), 0) / totalQty;
 
-                    // Weighted Standard Deviation Calculation
                     const weightedStdDev = Math.sqrt(
                         quantities.reduce((sum, q, i) => sum + q * Math.pow(prices[i] - weightedAvg, 2), 0) / totalQty
                     );
 
-                    // Outlier Detection
                     bidPoints.forEach(point => {
                         const isOutlier = Math.abs(point.y - weightedAvg) > weightedStdDev;
-                        point.label = isOutlier ? "Outlier" : "Not Outlier";
+                        const formattedPoint = { x: point.x, y: point.y };
 
-                        const formattedPoint = {
-                            x: point.x,
-                            y: point.y
-                        };
-
-                        if (isOutlier) {
-                            outlierPoints.push(formattedPoint);
-                        } else {
-                            normalPoints.push(formattedPoint);
-                        }
+                        if (isOutlier) outlierPoints.push(formattedPoint);
+                        else normalPoints.push(formattedPoint);
                     });
 
-                    // Regression Line Calculation
                     const n = quantities.length;
                     const meanX = quantities.reduce((a, b) => a + b, 0) / n;
                     const meanY = prices.reduce((a, b) => a + b, 0) / n;
-                    const numerator = quantities.map((x, i) => (x - meanX) * (prices[i] - meanY)).reduce((a, b) => a + b, 0);
-                    const denominator = quantities.map(x => Math.pow(x - meanX, 2)).reduce((a, b) => a + b, 0);
-                    const slope = numerator / denominator || 0;
+                    const slope = quantities.map((x, i) => (x - meanX) * (prices[i] - meanY)).reduce((a, b) => a + b, 0) /
+                        quantities.map(x => Math.pow(x - meanX, 2)).reduce((a, b) => a + b, 0) || 0;
                     const intercept = meanY - slope * meanX;
 
                     const uniqueQuantities = [...new Set(quantities)].sort((a, b) => a - b);
                     const regressionLine = uniqueQuantities.map(q => ({ x: q, y: slope * q + intercept }));
 
-                    // Weighted Avg horizontal line - only 2 points
                     const minQty = Math.min(...quantities);
                     const maxQty = Math.max(...quantities);
                     const weightedAvgLine = [
                         { x: minQty, y: weightedAvg },
                         { x: maxQty, y: weightedAvg }
                     ];
-                    if ($scope.chartInstance) {
-                        $scope.chartInstance.destroy();
-                        $scope.chartInstance = null;
-                    }
-                   
-                    // Update summary stats
-                    
+
+                    if ($scope.chartInstance) $scope.chartInstance.destroy();
+
                     $scope.chartInstance = new Chart(ctx, {
                         type: 'scatter',
                         data: {
@@ -347,18 +212,16 @@
                                     label: 'Non-Outlier Bid Points',
                                     data: normalPoints,
                                     backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                                    pointRadius: 5,
-                                    pointHoverRadius: 8,
-                                    type: 'scatter',
+                                    pointRadius: 8,
+                                    pointHoverRadius: 10,
                                     showLine: false
                                 },
                                 {
                                     label: 'Outlier Bid Points',
                                     data: outlierPoints,
                                     backgroundColor: 'red',
-                                    pointRadius: 6,
-                                    pointHoverRadius: 10,
-                                    type: 'scatter',
+                                    pointRadius: 5,
+                                    pointHoverRadius: 8,
                                     showLine: false
                                 },
                                 {
@@ -385,17 +248,11 @@
                             maintainAspectRatio: false,
                             scales: {
                                 x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Quantity'
-                                    },
+                                    title: { display: true, text: 'Quantity' },
                                     beginAtZero: true
                                 },
                                 y: {
-                                    title: {
-                                        display: true,
-                                        text: 'Unit Price ($)'
-                                    },
+                                    title: { display: true, text: 'Unit Price ($)' },
                                     beginAtZero: true
                                 }
                             },
@@ -419,19 +276,16 @@
                         intercept: intercept,
                         count: bidPoints.length
                     };
-                    // Clear previous chart
 
+                    $scope.isChartLoading = false;
+                    $scope.$applyAsync();
                 });
             }, 0);
         }
-
-
-
-
     }
 ]);
 
-// Filter to convert MS JSON date to JavaScript Date
+// calling from HTML Dynamically, Filter to convert MS JSON date to JavaScript Date
 angular.module('dqeControllers')
     .filter('msDateToJS', function () {
         return function (input) {

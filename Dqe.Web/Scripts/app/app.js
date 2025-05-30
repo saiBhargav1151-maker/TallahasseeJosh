@@ -35,6 +35,10 @@ dqeApp.config(['$routeProvider', function ($routeProvider) {
             templateUrl: './Views/partials/home_payitems.html',
             controller: 'HomePayItemsController'
         }).
+        when('/unitpricesearch', {
+            templateUrl: './Views/partials/unit_price_search.html',
+            controller: 'UnitPriceSearchController'
+        }).
         when('/home_estimates', {
             templateUrl: './Views/partials/profile_projects.html',
             controller: 'ProfileProjectsController'
@@ -162,9 +166,6 @@ dqeApp.config(['$routeProvider', function ($routeProvider) {
         when('/signin', {
             templateUrl: './Views/partials/signin.html',
             controller: 'SigninController'
-        }).when('/unitpricesearch', {
-            templateUrl: './Views/partials/unit_price_search.html',
-            controller: 'UnitPriceSearchController'
         }).
         otherwise({
             redirectTo: '/signin'

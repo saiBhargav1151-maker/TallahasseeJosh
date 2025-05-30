@@ -5,7 +5,7 @@
         $scope.topTabs = navigationService.getTopTabs($scope.currentUser);
         $scope.navs = navigationService.getNavs($scope.currentUser);
         if (!$scope.currentUser.isAuthenticated) {
-            if ($location.url().startsWith('/boe') || $location.url().startsWith('/payitems')) {
+            if ($location.url().startsWith('/boe') || $location.url().startsWith('/payitems') || $location.url().startsWith('/unitpricesearch') ) {
                 //$location.url('/boe');
             } else {
                 $location.url('/signin');

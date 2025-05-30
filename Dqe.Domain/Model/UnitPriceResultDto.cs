@@ -30,6 +30,7 @@ namespace Dqe.Domain.Model
         public DateTime? ExecutionDate { get; set; }
         public string VendorName { get; set; }
         public string FullNameDescription { get; set; }
+        public long Duration { get; set; }
 
     }
     public class PayItemDTO
