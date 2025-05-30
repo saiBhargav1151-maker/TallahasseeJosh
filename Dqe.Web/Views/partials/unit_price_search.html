@@ -68,8 +68,8 @@
                             <th>Unit Price Bid</th>
                             <th>Bid Amount</th>
                             <th>Bid Status</th>
-                            <!--<th>Weighted Avg</th>
-                            <th>Weighted Avg (No Outliers)</th>-->
+                            <th>Weighted Avg</th>
+                            <th>Weighted Avg (No Outliers)</th>
                             <th>Outlier</th>
                             <th>County</th>
                             <th>District</th>
@@ -93,8 +93,8 @@
                             <td>{{ item.b | currency }}</td>
                             <td>{{ item.PvBidTotal | currency }}</td>
                             <td>{{ item.PvAwarded ? 'Winning Bid' : 'Non Winning Bid' }}</td>
-                            <!-- <td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>
-     <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>-->
+                             <td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>
+     <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>
                             <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
                             <td>{{ item.c }}</td>
                             <td>{{ item.d }}</td>
