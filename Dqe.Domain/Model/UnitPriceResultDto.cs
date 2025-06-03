@@ -21,7 +21,7 @@ namespace Dqe.Domain.Model
         public string d { get; set; }  // District Description
         public DateTime? l { get; set; }  // LettingDate
         public decimal b { get; set; }  // BidPrice
-        public bool PvAwarded { get; set; }
+        public string BidStatus { get; set; }
         public decimal PvBidTotal { get; set; }
         public string ProjectNumber { get; set; }
         public string Description { get; set; }
@@ -31,7 +31,9 @@ namespace Dqe.Domain.Model
         public string VendorName { get; set; }
         public string FullNameDescription { get; set; }
         public long Duration { get; set; }
-
+        public virtual DateTime ExecutedDate { get; set; }
+        public virtual string BidType { get; set; }
+        public virtual int? VendorRanking { get; set; }
     }
     public class PayItemDTO
     {

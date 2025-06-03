@@ -100,10 +100,7 @@ namespace Dqe.Infrastructure.Fdot
                         Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
                         Restrictions.IsNull("pv.BidType")
                     ))
-                    .Add(Restrictions.Or(
-                        Restrictions.IsNull("pv.BidStatus"),
-                        Restrictions.Not(Restrictions.Eq("pv.BidStatus", "I"))
-                    ))
+                    /*.Add(Restrictions.IsNull("pv.BidStatus"))*/
                     .Add(Restrictions.Eq("p.ProposalStatus", "03"))
                     .Add(Restrictions.Or(
                         Restrictions.IsNull("m.Main"),
@@ -121,7 +118,7 @@ namespace Dqe.Infrastructure.Fdot
                     .AddOrder(Order.Asc("b.BidPrice"))
 
                     .SetProjection(Projections.ProjectionList()
-                        .Add(Projections.Property("pv.Awarded"), "PvAwarded")
+                        .Add(Projections.Property("pv.BidStatus"), "BidStatus")
                         .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
                         .Add(Projections.Property("ri.Name"), "ri")
                         .Add(Projections.Property("Id"), "Id")
@@ -140,7 +137,11 @@ namespace Dqe.Infrastructure.Fdot
                         .Add(Projections.Property("SupplementalDescription"), "SupplementalDescription")
                         .Add(Projections.Property("ri.CalculatedUnit"), "CalculatedUnit")
                         .Add(Projections.Property("m.NumberOfUnits"), "Duration")
-                      
+                        .Add(Projections.Property("p.ExecutedDate"), "ExecutedDate")
+                        .Add(Projections.Property("pv.BidType"), "BidType")
+                        .Add(Projections.Property("pv.BidType"), "BidType")
+                        .Add(Projections.Property("pv.VendorRanking"), "VendorRanking")
+
                     )
 
                     .SetResultTransformer(NHibernate.Transform.Transformers.AliasToBean<ProposalItemDTO>());

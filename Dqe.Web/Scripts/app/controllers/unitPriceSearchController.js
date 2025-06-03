@@ -23,6 +23,22 @@
             "X9": "Interstate Rehabilition",
             "Z": "Other"
         };
+        $scope.bidTypeMap = {
+            "RESP": "Responsive",
+            "NONR": "Non-Responsive",
+            "IRR": "Irregular",
+            "OTH": "Other"
+        };
+        $scope.proposalTypeMap = {
+            "DIST": "District",
+            "CENT": "Central Office"
+        };
+        $scope.bidStatusMap = {
+            "L": "Lost",
+            "W": "Won",
+            "I": "Irregular"
+        };
+
         // Fetch Pay Item Suggestions
         $scope.fetchPayItemSuggestions = function () {
             if (debounceTimer) $timeout.cancel(debounceTimer);
@@ -32,8 +48,18 @@
                 $scope.selectedPayItemNumber = null;
                 return;
             }
+            $scope.getBidTypeLabel = function (code) {
+                return code ? ($scope.bidTypeMap[code] || "Unknown") : "Unknown";
+            };
+
             $scope.getWorkTypeLabel = function (code) {
                 return code ? `${code} - ${$scope.workTypeMap[code] || "Unknown"}` : "";
+            };
+            $scope.proposalTypeLabel = function (code) {
+                return code ? `${code} - ${$scope.proposalTypeMap[code] || "Unknown"}` : "";
+            };
+            $scope.getBidStatusLabel = function (code) {
+                return code ? ($scope.bidStatusMap[code] || "Unknown") : "Unknown";
             };
             debounceTimer = $timeout(function () {
                 $http.get('/UnitPriceSearch/GetPayItemSuggestions', {
@@ -117,20 +143,28 @@
                 $scope.isLoading = false;
             });
         };
+        function formatDotNetDate(msDateString) {
+            if (!msDateString) return '';
+            const match = /\/Date\((\d+)\)\//.exec(msDateString);
+            if (!match) return '';
+            const date = new Date(parseInt(match[1]));
+            return date.toLocaleDateString('en-US'); // Format: MM/DD/YYYY
+        }
         // CSV Export Functionlity
         $scope.exportClick = function () {
             let headers = [
                 "Contract Number", "Duration", "Project Number", "Letting Date", "Pay Item",
                 "Description", "Supplemental Description", "Units", "Quantity",
-                "Unit Price Bid", "Bid Amount", "Awarded", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "County", "District",
-                "Contract Type", "Work Type", "Proposal Type", "Bidder Name"
+                "Unit Price Bid", "Bid Amount", "Bid Status","Bid Type", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "Primary County", "District",
+                "Contract Type", "Work Type", "Proposal Type"," Executed Date", "Bidder Rank","Bidder Name"
             ].join(",") + "\n";
 
             let rows = $scope.bidHistoryData.map(item => [
-                `"${item.p}"`, `"${item.Duration}"`, `"${item.ProjectNumber}"`, `"${new Date(item.l).toLocaleDateString()}"`, `"${item.ri}"`,
+                `"${item.p}"`, `"${item.Duration}"`, `"${item.ProjectNumber}"`, `"${formatDotNetDate(item.l)}"`, `"${item.ri}"`,
                 `"${item.Description}"`, `"${item.SupplementalDescription}"`, `"${item.CalculatedUnit}"`, `"${item.Quantity}"`,
-                `"${item.b}"`, `"${item.PvBidTotal}"`, `"${item.PvAwardedLabel}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"` , `"${item.c}"`, `"${item.d}"`,
-                `"${item.ContractType}"`, `"${item.ContractWorkType}"`, `"${item.ProposalType}"`, `"${item.VendorName}"`
+                `"${item.b}"`, `"${item.PvBidTotal}"`, `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"` , `"${item.c}"`, `"${item.d}"`,
+                `"${item.ContractType}"`, `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`,
+                `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${formatDotNetDate(item.ExecutedDate)}"`, `"${item.VendorRanking}"`,`"${item.VendorName}"`
             ].join(",")).join("\n");
 
             let csvContent = "data:text/csv;charset=utf-8," + headers + rows;

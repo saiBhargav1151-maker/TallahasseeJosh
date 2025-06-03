@@ -68,14 +68,17 @@
                             <th>Unit Price Bid</th>
                             <th>Bid Amount</th>
                             <th>Bid Status</th>
+                            <th>Bid Type</th>
                             <th>Weighted Avg</th>
                             <th>Weighted Avg (No Outliers)</th>
                             <th>Outlier</th>
-                            <th>County</th>
+                            <th>Primary County</th>
                             <th>District</th>
                             <th>Contract Type</th>
                             <th>Work Type</th>
                             <th>Proposal Type</th>
+                            <th>Executed Date</th>
+                            <th>Bidder Rank</th>
                             <th>Bidder Name</th>
                         </tr>
                     </thead>
@@ -92,15 +95,18 @@
                             <td>{{ item.Quantity }}</td>
                             <td>{{ item.b | currency }}</td>
                             <td>{{ item.PvBidTotal | currency }}</td>
-                            <td>{{ item.PvAwarded ? 'Winning Bid' : 'Non Winning Bid' }}</td>
-                             <td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>
-     <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>
+                            <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
+                            <td>{{ getBidTypeLabel(item.BidType) }}</td>
+                            <td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>
+                            <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>
                             <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
                             <td>{{ item.c }}</td>
                             <td>{{ item.d }}</td>
                             <td>{{ item.ContractType }}</td>
                             <td>{{ getWorkTypeLabel(item.ContractWorkType) }}</td>
-                            <td>{{ item.ProposalType }}</td>
+                            <td>{{ proposalTypeLabel(item.ProposalType) }}</td>
+                            <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                            <td>{{ item.VendorRanking }}</td>
                             <td>{{ item.VendorName }}</td>
                         </tr>
                     </tbody>
