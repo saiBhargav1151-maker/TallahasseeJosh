@@ -80,7 +80,7 @@ namespace Dqe.Infrastructure.Fdot
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
-        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem)
+        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, int months = 36, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
@@ -107,17 +107,29 @@ namespace Dqe.Infrastructure.Fdot
                         Restrictions.Eq("m.Main", true)
                     ))
                     .Add(Restrictions.Lt("l.LettingDate", DateTime.Today))
-                    .Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-120)))
+                    /*.Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-months)))*/
                     .Add(Restrictions.Eq("ri.SpecBook", "13"))
                     .Add(GetProjectValidRestriction())
                     .Add(Restrictions.Eq("prj.Controlling", true))
-                    .Add(Restrictions.Eq("prj.IsLatestVersion", true)) 
+                    .Add(Restrictions.Eq("prj.IsLatestVersion", true))
                     .AddOrder(Order.Asc("ri.Name"))
                     .AddOrder(Order.Desc("l.LettingDate"))
                     .AddOrder(Order.Asc("p.ProposalNumber"))
-                    .AddOrder(Order.Asc("b.BidPrice"))
+                    .AddOrder(Order.Asc("b.BidPrice"));
+                if (!string.IsNullOrWhiteSpace(contractWorkType))
+                {
+                    query.Add(Restrictions.Eq("p.ContractWorkType", contractWorkType));
+                }
+                if (startDate.HasValue && endDate.HasValue)
+                {
+                    query.Add(Restrictions.Between("l.LettingDate", startDate.Value, endDate.Value));
+                }
+                else
+                {
+                    query.Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-months)));
+                }
 
-                    .SetProjection(Projections.ProjectionList()
+                query.SetProjection(Projections.ProjectionList()
                         .Add(Projections.Property("pv.BidStatus"), "BidStatus")
                         .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
                         .Add(Projections.Property("ri.Name"), "ri")

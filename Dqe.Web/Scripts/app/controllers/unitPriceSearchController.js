@@ -5,10 +5,17 @@
         $scope.items = [];
         $scope.selectedPayItemNumber = null;
         $scope.bidHistoryData = [];
+        $scope.lastSearchedPayItem = $scope.searchText;
         $scope.isLoading = false;
+        $scope.monthsOfHistory = 36;
         $scope.searchAttempted = false;
         let debounceTimer;
         $scope.isChartLoading = false;
+        const today = new Date();
+        const pastLimit = new Date();
+        pastLimit.setMonth(pastLimit.getMonth() - 120);
+        $scope.today = today;
+        $scope.minAllowedDate = pastLimit;
         $scope.workTypeMap = {
             "I": "Maintenance Other",
             "X0": "Interstate Construction (new)",
@@ -88,7 +95,7 @@
         // Search Bids
         $scope.searchBids = function () {
             if (!$scope.selectedPayItemNumber) {
-                alert("Please select a Pay Item from the list.");
+                alert("Please enter a valid Pay Item (minimum 2 characters) before searching.");
                 return;
             }
             $scope.bidHistoryData = [];
@@ -100,8 +107,15 @@
                 $scope.chartInstance = null;
             }
             $http.get('/UnitPriceSearch/GetPayItemDetails', {
-                params: { number: $scope.selectedPayItemNumber }
+                params: {
+                    number: $scope.selectedPayItemNumber,
+                    months: $scope.monthsOfHistory || 36,
+                    contractWorkType: $scope.selectedWorkTypeCode || null,
+                    startDate: $scope.startDate || null,
+                    endDate: $scope.endDate || null
+                }
             }).success(function (data) {
+                debugger
                 const quantities = data.map(item => item.Quantity || 0);
                 const prices = data.map(item => item.b || 0);
                 const totalQty = quantities.reduce((sum, q) => sum + q, 0);

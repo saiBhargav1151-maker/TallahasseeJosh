@@ -1,43 +1,113 @@
-﻿<div focus-me="boeDetailFocus" class="panel panel-default" style="padding: 20px; border-radius: 8px;">
+﻿<div focus-me="boeDetailFocus" class="panel panel-default" style="padding: 10px; border-radius: 8px;">
     <!-- Input -->
-    <div class="form-group" style="position: relative; max-width: 400px;">
-        <label for="payItemInput">Enter Pay Item Number or Description:</label>
+    <div class="row" style="margin-bottom: 15px;">
+        <div class="col-md-4">
+            <div class="form-group" style="position: relative; max-width: 400px;">
+                <label for="payItemInput">Enter Pay Item Number or Description:</label>
 
-        <input type="text"
-               id="payItemInput"
-               ng-model="searchText"
-               ng-change="fetchPayItemSuggestions()"
-               placeholder="e.g., 0101 or MOBILIZATION"
-               class="form-control input-lg"
-               style="padding-right: 30px;"
-        autocomplete="off" />
+                <input type="text"
+                       id="payItemInput"
+                       ng-model="searchText"
+                       ng-change="fetchPayItemSuggestions()"
+                       placeholder="e.g., 0101 or MOBILIZATION"
+                       autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       spellcheck="false"
+                       class="form-control"
+                       required />
+                <div ng-show="unitPriceForm.payItemInput.$touched && unitPriceForm.payItemInput.$invalid" class="text-danger small mt-1">
+                    <div ng-show="unitPriceForm.payItemInput.$error.required">Pay Item is required.</div>
+                    <div ng-show="unitPriceForm.payItemInput.$error.pattern">Minimum 2 letters/numbers. No special characters allowed.</div>
+                </div>
 
-        <!-- Clear (X) -->
-        <span ng-if="searchText"
-              ng-click="clearSearchText()"
-              style="position: absolute; right: 12px; top: 40px; cursor: pointer; font-size: 22px; color: #aaa; line-height: 1;">
-            &times;
-        </span>
+                <!-- Clear (X) -->
+                <span ng-if="searchText"
+                      ng-click="clearSearchText()"
+                      style="position: absolute; right: 12px; top: 40px; cursor: pointer; font-size: 22px; color: #aaa; line-height: 1;">
+                    &times;
+                </span>
 
-        <!-- Suggestions List -->
-        <ul class="list-group"
-            ng-show="items.length > 0"
-            style="max-width: 400px; position: absolute; z-index: 1000;">
-            <li class="list-group-item"
-                ng-repeat="item in items"
-                ng-click="selectPayItem(item)"
-                style="cursor: pointer;">
-                {{ item.Description }}
-            </li>
-        </ul>
+                <!-- Suggestions List -->
+                <ul class="list-group"
+                    ng-show="items.length > 0"
+                    style="max-width: 400px; position: absolute; z-index: 1000;">
+                    <li class="list-group-item"
+                        ng-repeat="item in items"
+                        ng-click="selectPayItem(item)"
+                        style="cursor: pointer;">
+                        {{ item.Description }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group d-flex align-items-center justify-content-between" style="gap: 20px; flex-wrap: wrap;">
+
+                <!-- Months of Bid History -->
+                <div class="d-flex align-items-center" style="gap: 10px;">
+                    <label for="monthsInput" class="mb-0" style="white-space: nowrap;">
+                        Months of Bid History:
+                        <span class="text-muted" style="font-weight: normal; font-size: 12px;">
+                            (Default: 36, Range: 1–120)
+                        </span>
+                    </label>
+                    <input type="number"
+                           id="monthsInput"
+                           name="monthsInput"
+                           class="form-control"
+                           style="width: 120px; text-align: center;"
+                           ng-model="monthsOfHistory"
+                           min="1"
+                           max="120"
+                           placeholder="36"
+                           title="Enter number of months (1 to 120). Default is 36." />
+                </div>
+
+                <!-- Custom Date Range -->
+                <div class="d-flex align-items-center" style="gap: 10px;">
+                    <label class="mb-0" style="white-space: nowrap;">Custom Date Range:</label>
+                    <input type="date" class="form-control" style="max-width: 150px;" ng-model="startDate" max="{{ today | date:'yyyy-MM-dd' }}"
+                           min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
+                    <span style="white-space: nowrap;">to</span>
+                    <input type="date" class="form-control" style="max-width: 150px;" ng-model="endDate" max="{{ today | date:'yyyy-MM-dd' }}"
+                           min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
+                </div>
+            </div>
+
+            <!-- Hints -->
+            <small class="form-text text-muted">
+                You can either use the months filter or choose a custom date range (which overrides the months filter).
+            </small>
+
+            <!-- Validation Errors -->
+            <div ng-show="unitPriceForm.monthsInput.$touched && unitPriceForm.monthsInput.$invalid" class="text-danger small mt-1">
+                <div ng-show="unitPriceForm.monthsInput.$error.required">Months value is required.</div>
+                <div ng-show="unitPriceForm.monthsInput.$error.min || unitPriceForm.monthsInput.$error.max">
+                    Value must be between 1 and 120.
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="col-md-4">
+            <div class="form-group" style="max-width: 300px;">
+                <label for="contractWorkTypeSelect">Contract Work Type</label>
+                <select id="contractWorkTypeSelect"
+                        class="form-control"
+                        ng-model="selectedWorkTypeCode"
+                        ng-options="code as label for (code, label) in workTypeMap">
+                    <option value="">-- All Work Types --</option>
+                </select>
+            </div>
+        </div>
     </div>
 
-
-
-    <button class="btn btn-primary btn-lg" ng-click="searchBids()" >
+    <button class="btn btn-primary btn-lg" ng-click="searchBids()">
         <i class="glyphicon glyphicon-search"></i> Search Bids
     </button>
-    <div class="text-right" ng-if="bidHistoryData && bidHistoryData.length > 0" >
+    <div class="text-right" ng-if="bidHistoryData && bidHistoryData.length > 0">
         <button class="btn btn-success btn-lg" ng-click="exportClick()">
             <i class="glyphicon glyphicon-download"></i> Download Bid Data CSV
         </button>
@@ -51,7 +121,7 @@
 
     <div ng-if="bidHistoryData && bidHistoryData.length > 0">
         <div class="container-fluid" style="padding: 20px;">
-            <div style="height: 55vh; overflow-x: auto; overflow-y: auto; border: 1px solid #ccc; border-radius: 6px; background: #fff; padding: 0;">
+            <div style="height: 65vh; overflow-x: auto; overflow-y: auto; border: 1px solid #ccc; border-radius: 6px; background: #fff; padding: 0;">
                 <table class="table table-bordered bid-table" style="min-width: 2800px;">
 
                     <thead>
@@ -147,8 +217,10 @@
 
         </div>
     </div>
-    <div ng-if="searchAttempted && !isLoading && (!bidHistoryData || bidHistoryData.length === 0)" class="alert alert-warning" style="margin-top: 30px;">
-        <strong>No data:</strong> No bid history found for Pay Item <strong>{{ searchText }}</strong>.
+    <div ng-if="searchAttempted && !isLoading && (!bidHistoryData || bidHistoryData.length === 0)"
+         class="alert alert-warning" style="margin-top: 30px;">
+        <strong>No data:</strong> No bid history found for Pay Item
+        <strong>{{ lastSearchedPayItem }}</strong>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

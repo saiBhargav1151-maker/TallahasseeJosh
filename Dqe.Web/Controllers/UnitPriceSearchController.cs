@@ -52,11 +52,11 @@ namespace Dqe.Web.Controllers
         /// <param name="number">Pay item number to fetch historical unit price data for.</param>
         /// <returns>JSON result
         [HttpGet]
-        public ActionResult GetPayItemDetails(string number)
+        public ActionResult GetPayItemDetails(string number, int months, string contractWorkType, DateTime? startDate, DateTime? endDate)
         {
             try
             {
-                var historyData = _webTransportService.GetUnitPriceDetails(number);
+                var historyData = _webTransportService.GetUnitPriceDetails(number, months, contractWorkType, startDate, endDate);
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
 
