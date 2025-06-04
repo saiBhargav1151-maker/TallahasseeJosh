@@ -138,7 +138,7 @@
 
                     if (!isOutlier) {
                         cleanQty.push(qty);
-                        cleanPrices.push(price); 
+                        cleanPrices.push(price);
                     }
                 });
 
@@ -169,16 +169,16 @@
             let headers = [
                 "Contract Number", "Duration", "Project Number", "Letting Date", "Pay Item",
                 "Description", "Supplemental Description", "Units", "Quantity",
-                "Unit Price Bid", "Bid Amount", "Bid Status","Bid Type", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "Primary County", "District",
-                "Contract Type", "Work Type", "Proposal Type"," Executed Date", "Bidder Rank","Bidder Name"
+                "Unit Price Bid", "Bid Amount", "Bid Status", "Bid Type", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "Primary County", "District",
+                "Contract Type", "Work Type", "Proposal Type", " Executed Date", "Bidder Rank", "Bidder Name"
             ].join(",") + "\n";
 
             let rows = $scope.bidHistoryData.map(item => [
                 `"${item.p}"`, `"${item.Duration}"`, `"${item.ProjectNumber}"`, `"${formatDotNetDate(item.l)}"`, `"${item.ri}"`,
                 `"${item.Description}"`, `"${item.SupplementalDescription}"`, `"${item.CalculatedUnit}"`, `"${item.Quantity}"`,
-                `"${item.b}"`, `"${item.PvBidTotal}"`, `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"` , `"${item.c}"`, `"${item.d}"`,
+                `"${item.b}"`, `"${item.PvBidTotal}"`, `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`, `"${item.c}"`, `"${item.d}"`,
                 `"${item.ContractType}"`, `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`,
-                `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${formatDotNetDate(item.ExecutedDate)}"`, `"${item.VendorRanking}"`,`"${item.VendorName}"`
+                `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${formatDotNetDate(item.ExecutedDate)}"`, `"${item.VendorRanking}"`, `"${item.VendorName}"`
             ].join(",")).join("\n");
 
             let csvContent = "data:text/csv;charset=utf-8," + headers + rows;

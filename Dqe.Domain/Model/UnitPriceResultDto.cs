@@ -32,6 +32,7 @@ namespace Dqe.Domain.Model
         public string FullNameDescription { get; set; }
         public long Duration { get; set; }
         public virtual DateTime ExecutedDate { get; set; }
+        public virtual DateTime ObsoleteDate { get; set; }
         public virtual string BidType { get; set; }
         public virtual int? VendorRanking { get; set; }
     }

@@ -153,6 +153,7 @@ namespace Dqe.Infrastructure.Fdot
                         .Add(Projections.Property("pv.BidType"), "BidType")
                         .Add(Projections.Property("pv.BidType"), "BidType")
                         .Add(Projections.Property("pv.VendorRanking"), "VendorRanking")
+                        .Add(Projections.Property("ri.ObsoleteDate"), "ObsoleteDate")
 
                     )
 
