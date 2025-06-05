@@ -80,7 +80,7 @@ namespace Dqe.Infrastructure.Fdot
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
-        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, int months = 36, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null)
+        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, int months = 36, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties=null, string bidStatus=null)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
@@ -127,6 +127,14 @@ namespace Dqe.Infrastructure.Fdot
                 else
                 {
                     query.Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-months)));
+                }
+                if (counties != null && counties.Length > 0)
+                {
+                    query.Add(Restrictions.In("c.Description", counties));
+                }
+                if (!string.IsNullOrWhiteSpace(bidStatus))
+                {
+                    query.Add(Restrictions.Eq("pv.BidStatus", bidStatus));
                 }
 
                 query.SetProjection(Projections.ProjectionList()

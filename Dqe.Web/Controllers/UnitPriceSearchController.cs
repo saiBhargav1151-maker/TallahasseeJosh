@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using Dqe.Domain.Fdot;
 using Dqe.Domain.Model;
+using System.Linq;
 
 
 namespace Dqe.Web.Controllers
@@ -52,11 +53,12 @@ namespace Dqe.Web.Controllers
         /// <param name="number">Pay item number to fetch historical unit price data for.</param>
         /// <returns>JSON result
         [HttpGet]
-        public ActionResult GetPayItemDetails(string number, int months, string contractWorkType, DateTime? startDate, DateTime? endDate)
+        public ActionResult GetPayItemDetails(string number, int months, string contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus)
         {
             try
             {
-                var historyData = _webTransportService.GetUnitPriceDetails(number, months, contractWorkType, startDate, endDate);
+                var selectedCounties = counties?.ToList() ?? new List<string>();
+                var historyData = _webTransportService.GetUnitPriceDetails(number, months, contractWorkType, startDate, endDate, counties, bidStatus);
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
 

@@ -1,11 +1,11 @@
-﻿<div focus-me="boeDetailFocus" class="panel panel-default modern-panel">
+﻿<div class="panel panel-default modern-panel">
     <!-- Input -->
     <div class="row input-section">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="form-group search-input-group">
                 <label for="payItemInput" class="modern-label">
                     <i class="fas fa-hammer label-icon"></i>
-                    Enter Pay Item Number or Description: <span class="required">*</span>
+                    Enter Pay Item Number or Description: <span class="required"> *</span>
                 </label>
 
                 <div class="input-wrapper">
@@ -50,8 +50,21 @@
                 </ul>
             </div>
         </div>
-
-        <div class="col-md-4">
+        <div class="form-group col-md-2">
+            <label for="bidStatusFilter" class="modern-label">
+                <i class="fas fa-flag-checkered label-icon"></i>
+                Bid Status:
+            </label>
+            <select id="bidStatusFilter"
+                    class="form-control modern-select"
+                    ng-model="selectedBidStatus">
+                <option value="">-- All --</option>
+                <option value="W">Won</option>
+                <option value="L">Loss</option>
+                <option value="I">Irregular</option>
+            </select>
+        </div>
+        <div class="col-md-3">
             <div class="form-group time-filter-group">
                 <!-- Months of Bid History -->
                 <div class="filter-section">
@@ -75,7 +88,7 @@
                 <div class="filter-section date-range-section">
                     <label class="modern-label">
                         <i class="fas fa-calendar-week label-icon"></i>
-                        Custom Date Range:
+                        Letting Date Range:
                     </label>
                     <div class="date-inputs">
                         <input type="date"
@@ -91,10 +104,11 @@
                                min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
                     </div>
                 </div>
+
             </div>
 
             <!-- Hints -->
-            <small class="help-text">
+            <small class="label-hint">
                 <i class="fas fa-info-circle"></i>
                 You can either use the months filter or choose a custom date range (which overrides the months filter).
             </small>
@@ -110,7 +124,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
             <div class="form-group">
                 <label for="contractWorkTypeSelect" class="modern-label">
                     <i class="fas fa-tools label-icon"></i>
@@ -127,6 +141,76 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="form-group district-county-group">
+                <label class="modern-label">
+                    <i class="fas fa-map-marker-alt label-icon"></i>
+                    District & County Filter:
+                </label>
+
+                <!-- District Selection -->
+                <div class="filter-section">
+                    <label for="districtSelect" class="sub-label">Select District:</label>
+                    <div class="select-wrapper">
+                        <select id="districtSelect"
+                                class="form-control modern-select"
+                                ng-model="selectedDistrict"
+                                ng-change="updateCounties()">
+                            <option value="">-- All Districts --</option>
+                            <option ng-repeat="district in districts" value="{{district}}">{{district}}</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- County Multi-Select -->
+                <div class="filter-section county-section">
+                    <label class="sub-label">Select Counties:</label>
+                    <div class="county-filter-container">
+                        <!-- Select All/None buttons -->
+                        <div class="county-actions">
+                            <button type="button" class="btn btn-sm btn-outline-primary" ng-click="selectAllCounties()">
+                                <i class="fas fa-check-double"></i> Select All
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" ng-click="clearAllCounties()">
+                                <i class="fas fa-times"></i> Clear All
+                            </button>
+                            <span class="selected-count">{{selectedCounties.length}} selected</span>
+                        </div>
+
+                        <!-- County Checkboxes Container -->
+                        <div class="county-checkboxes">
+                            <div ng-if="!selectedDistrict" class="no-district-message">
+                                <i class="fas fa-info-circle"></i>
+                                Select a district to view available counties
+                            </div>
+                            <div ng-if="selectedDistrict" class="county-checkbox-item" ng-repeat="county in availableCounties">
+                                <label class="county-checkbox-label">
+                                    <input type="checkbox"
+                                           ng-model="county.selected"
+                                           ng-change="toggleCounty(county)">
+                                    <span class="county-name">{{county.name}}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Counties Display -->
+                <div class="selected-counties" ng-if="selectedCounties.length > 0">
+                    <label class="sub-label">Selected Counties:</label>
+                    <div class="selected-tags">
+                        <span class="county-tag" ng-repeat="county in selectedCounties">
+                            {{county}}
+                            <button type="button" class="remove-tag" ng-click="removeCounty(county)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="action-buttons">
@@ -166,6 +250,7 @@
                                 <th>Letting Date</th>
                                 <th>Pay Item</th>
                                 <th>Description</th>
+                                <th>Supp Desc</th>
                                 <th>Units</th>
                                 <th>Quantity</th>
                                 <th>Unit Price Bid</th>
@@ -193,6 +278,7 @@
                                 <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
                                 <td>{{ item.ri }}</td>
                                 <td>{{ item.Description }}</td>
+                                <td>{{ item.SupplementalDescription }}</td>
                                 <td>{{ item.CalculatedUnit }}</td>
                                 <td>{{ item.Quantity }}</td>
                                 <td>{{ item.b | currency }}</td>
@@ -240,16 +326,16 @@
                             <div class="stat-value">${{ chartStats.avg | number:2 }}</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-label">Standard Deviation</div>
-                            <div class="stat-value">${{ chartStats.stdDev | number:2 }}</div>
+                            <div class="stat-label">Total Contracts</div>
+                            <div class="stat-value">{{ chartStats.totalContracts }}</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-label">Regression Slope</div>
-                            <div class="stat-value">{{ chartStats.slope | number:4 }}</div>
+                            <div class="stat-label">Total Amount</div>
+                            <div class="stat-value">${{ chartStats.totalBidAmount | number:2 }}</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-label">Intercept</div>
-                            <div class="stat-value">${{ chartStats.intercept | number:2 }}</div>
+                            <div class="stat-label">Total Quantity</div>
+                            <div class="stat-value">{{ chartStats.totalQuantity | number:2 }}</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Total Bids</div>
@@ -406,7 +492,10 @@
     .select-wrapper {
         position: relative;
     }
-
+    .filter-input-container {
+        position: relative;
+        margin-bottom: 12px;
+    }
     .modern-select {
         appearance: none;
         background-image: none;
@@ -805,4 +894,127 @@
     .no-data-section {
         animation: fadeInUp 0.5s ease;
     }
+    /* District/County Filter Styles */
+    .district-county-group {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+    }
+
+    .sub-label {
+        font-weight: 500;
+        color: #4b5563;
+        font-size: 13px;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .county-filter-container {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .county-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .selected-count {
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 500;
+        margin-left: auto;
+    }
+
+    .county-checkboxes {
+        max-height: 150px;
+        overflow-y: auto;
+        border: 1px solid #f3f4f6;
+        border-radius: 4px;
+        padding: 6px;
+    }
+
+    .no-district-message {
+        text-align: center;
+        color: #6b7280;
+        font-style: italic;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .county-checkbox-item {
+        margin-bottom: 8px;
+    }
+
+    .county-checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+        margin-bottom: 0;
+        font-weight: 400;
+    }
+
+        .county-checkbox-label:hover {
+            background-color: #f3f4f6;
+        }
+
+    .county-name {
+        font-size: 13px;
+        color: #374151;
+    }
+
+    .selected-counties {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .county-tag {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .remove-tag {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        font-size: 10px;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+        .remove-tag:hover {
+            opacity: 1;
+        }
 </style>

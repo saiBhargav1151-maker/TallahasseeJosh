@@ -8,6 +8,7 @@
         $scope.lastSearchedPayItem = $scope.searchText;
         $scope.isLoading = false;
         $scope.monthsOfHistory = 36;
+        $scope.selectedBidStatus = "";
         $scope.searchAttempted = false;
         let debounceTimer;
         $scope.isChartLoading = false;
@@ -45,7 +46,81 @@
             "W": "Won",
             "I": "Irregular"
         };
+        $scope.districtCountyMap = {
+            'District 1 (Southwest Florida)': [
+                '01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY',
+                '09 - HIGHLANDS', '12 - LEE', '13 - MANATEE', '16 - POLK', '17 - SARASOTA', '91 - OKEECHOBEE', '99 - DIST/ST-WIDE'
+            ],
+            'District 2 (Northeast Florida)': [
+                '26 - ALACHUA', '27 - BAKER', '28 - BRADFORD', '29 - COLUMBIA', '30 - DIXIE', '31 - GILCHRIST',
+                '32 - HAMILTON', '33 - LAFAYETTE', '34 - LEVY', '35 - MADISON', '37 - SUWANNEE', '38 - TAYLOR',
+                '39 - UNION', '71 - CLAY', '72 - DUVAL', '74 - NASSAU', '76 - PUTNAM', '78 - ST JOHNS', '99 - DIST/ST-WIDE'
+            ],
+            'District 3 (Northwest Florida)': [
+                '46 - BAY', '47 - CALHOUN', '48 - ESCAMBIA', '49 - FRANKLIN', '50 - GADSDEN', '51 - GULF',
+                '52 - HOLMES', '53 - JACKSON', '54 - JEFFERSON', '55 - LEON', '56 - LIBERTY', '57 - OKALOOSA',
+                '58 - SANTA ROSA', '59 - WAKULLA', '60 - WALTON', '61 - WASHINGTON', '99 - DIST/ST-WIDE'
+            ],
+            'District 4 (Southeast Florida)': [
+                '86 - BROWARD', '88 - INDIAN RIVER', '89 - MARTIN', '93 - PALM BEACH', '94 - ST LUCIE', '99 - DIST/ST-WIDE'
+            ],
+            'District 5 (Central Florida)': [
+                '11 - LAKE', '18 - SUMTER', '36 - MARION', '70 - BREVARD', '73 - FLAGLER',
+                '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA', '99 - DIST/ST-WIDE'
+            ],
+            'District 6 (South Florida)': [
+                '87 - MIAMI-DADE', '90 - MONROE', '99 - DIST/ST-WIDE'
+            ],
+            'District 7 (West Central Florida)': [
+                '02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS', '99 - DIST/ST-WIDE'
+            ],
+            "Florida's Turnpike Enterprise": [
+                'TURNPIKE'
+            ]
+        };
+        $scope.districts = Object.keys($scope.districtCountyMap);
+        $scope.availableCounties = [];
+        $scope.selectedDistrict = null;
+        $scope.selectedCounties = [];
+        $scope.getCountiesForSelectedDistrict = function () {
+            return $scope.districtCountyMap[$scope.selectedDistrict] || [];
+        };
+        $scope.updateCounties = function () {
+            const rawCounties = $scope.districtCountyMap[$scope.selectedDistrict] || [];
+            $scope.availableCounties = rawCounties.map(c => {
+                const clean = c.includes(" - ") ? c.split(" - ")[1].trim() : c.trim();
+                return {
+                    name: clean,
+                    selected: $scope.selectedCounties.includes(clean)
+                };
+            });
+        };
+        $scope.toggleCounty = function (county) {
+            const index = $scope.selectedCounties.indexOf(county.name);
+            if (county.selected && index === -1) {
+                $scope.selectedCounties.push(county.name);
+            } else if (!county.selected && index > -1) {
+                $scope.selectedCounties.splice(index, 1);
+            }
+        };
 
+        $scope.selectAllCounties = function () {
+            $scope.availableCounties.forEach(c => c.selected = true);
+            $scope.selectedCounties = $scope.availableCounties.map(c => c.name);
+        };
+
+        $scope.clearAllCounties = function () {
+            $scope.availableCounties.forEach(c => c.selected = false);
+            $scope.selectedCounties = [];
+        };
+
+        $scope.removeCounty = function (countyName) {
+            const index = $scope.selectedCounties.indexOf(countyName);
+            if (index > -1) $scope.selectedCounties.splice(index, 1);
+
+            const match = $scope.availableCounties.find(c => c.name === countyName);
+            if (match) match.selected = false;
+        };
         // Fetch Pay Item Suggestions
         $scope.fetchPayItemSuggestions = function () {
             if (debounceTimer) $timeout.cancel(debounceTimer);
@@ -95,7 +170,7 @@
         // Search Bids
         $scope.searchBids = function () {
             if (!$scope.selectedPayItemNumber) {
-                alert("Please enter a valid Pay Item (minimum 2 characters) before searching.");
+                alert("Please enter a valid Pay Item before searching.");
                 return;
             }
             $scope.bidHistoryData = [];
@@ -112,8 +187,11 @@
                     months: $scope.monthsOfHistory || 36,
                     contractWorkType: $scope.selectedWorkTypeCode || null,
                     startDate: $scope.startDate || null,
-                    endDate: $scope.endDate || null
-                }
+                    endDate: $scope.endDate || null,
+                    counties: $scope.selectedCounties,
+                    bidStatus: $scope.selectedBidStatus || null
+                },
+                traditional: true
             }).success(function (data) {
                 debugger
                 const quantities = data.map(item => item.Quantity || 0);
@@ -319,14 +397,14 @@
 
                     $scope.chartStats = {
                         avg: weightedAvg,
-                        stdDev: weightedStdDev,
-                        slope: slope,
-                        intercept: intercept,
-                        count: bidPoints.length
+                        totalContracts: new Set($scope.bidHistoryData.map(item => item.p)).size,
+                        totalBidAmount: $scope.bidHistoryData.reduce((sum, item) => sum + (item.PvBidTotal || 0), 0),
+                        totalQuantity: $scope.bidHistoryData.reduce((sum, item) => sum + (item.Quantity || 0), 0),
+                        count: $scope.bidHistoryData.length
                     };
 
                     $scope.isChartLoading = false;
-                    $scope.$applyAsync();
+                    $scope.$apply();
                 });
             }, 0);
         }
