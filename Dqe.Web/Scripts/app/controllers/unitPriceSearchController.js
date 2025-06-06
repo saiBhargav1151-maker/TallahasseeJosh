@@ -42,8 +42,8 @@
             "CENT": "Central Office"
         };
         $scope.bidStatusMap = {
-            "L": "Lost",
-            "W": "Won",
+            "L": "Loss",
+            "W": "Wins",
             "I": "Irregular"
         };
         $scope.isInvalidDateRange = function () {
@@ -215,7 +215,6 @@
 
                     item.IsOutlier = isOutlier;
                     item.WeightedAvg = weightedAvg;
-                    item.PvAwardedLabel = item.PvAwarded ? "Winning Bid" : "Non Winning Bid";
 
                     if (!isOutlier) {
                         cleanQty.push(qty);
@@ -256,7 +255,7 @@
 
             let rows = $scope.bidHistoryData.map(item => [
                 `"${item.p}"`, `"${item.Duration}"`, `"${item.ProjectNumber}"`, `"${formatDotNetDate(item.l)}"`, `"${item.ri}"`,
-                `"${item.Description}"`, `"${item.SupplementalDescription}"`, `"${item.CalculatedUnit}"`, `"${item.Quantity}"`,
+                `"${item.Description.replace(/"/g, '""')}"`, `"${item.SupplementalDescription}"`, `"${item.CalculatedUnit}"`, `"${item.Quantity}"`,
                 `"${item.b}"`, `"${item.PvBidTotal}"`, `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`, `"${item.c}"`, `"${item.d}"`,
                 `"${item.ContractType}"`, `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`,
                 `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${formatDotNetDate(item.ExecutedDate)}"`, `"${item.VendorRanking}"`, `"${item.VendorName}"`
