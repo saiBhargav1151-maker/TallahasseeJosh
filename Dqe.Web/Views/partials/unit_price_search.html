@@ -13,7 +13,7 @@
                            id="payItemInput"
                            ng-model="searchText"
                            ng-change="fetchPayItemSuggestions()"
-                           placeholder="e.g., 0101 or MOBILIZATION"
+                           placeholder="e.g., 01 or Maintenance"
                            autocomplete="off"
                            autocorrect="off"
                            autocapitalize="off"
@@ -50,81 +50,23 @@
                 </ul>
             </div>
         </div>
-        <div class="form-group col-md-2">
-            <label for="bidStatusFilter" class="modern-label">
-                <i class="fas fa-flag-checkered label-icon"></i>
-                Bid Status:
-            </label>
-            <select id="bidStatusFilter"
-                    class="form-control modern-select"
-                    ng-model="selectedBidStatus">
-                <option value="">-- All --</option>
-                <option value="W">Won</option>
-                <option value="L">Loss</option>
-                <option value="I">Irregular</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group time-filter-group">
-                <!-- Months of Bid History -->
-                <div class="filter-section">
-                    <label for="monthsInput" class="modern-label">
-                        <i class="fas fa-calendar-alt label-icon"></i>
-                        Months of Bid History:
-                        <span class="label-hint">(Default: 36, Range: 1–120)</span>
-                    </label>
-                    <input type="number"
-                           id="monthsInput"
-                           name="monthsInput"
-                           class="form-control modern-input number-input"
-                           ng-model="monthsOfHistory"
-                           min="1"
-                           max="120"
-                           placeholder="36"
-                           title="Enter number of months (1 to 120). Default is 36." />
-                </div>
-
-                <!-- Custom Date Range -->
-                <div class="filter-section date-range-section">
-                    <label class="modern-label">
-                        <i class="fas fa-calendar-week label-icon"></i>
-                        Letting Date Range:
-                    </label>
-                    <div class="date-inputs">
-                        <input type="date"
-                               class="form-control modern-input date-input"
-                               ng-model="startDate"
-                               max="{{ today | date:'yyyy-MM-dd' }}"
-                               min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
-                        <span class="date-separator">to</span>
-                        <input type="date"
-                               class="form-control modern-input date-input"
-                               ng-model="endDate"
-                               max="{{ today | date:'yyyy-MM-dd' }}"
-                               min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Hints -->
-            <small class="label-hint">
-                <i class="fas fa-info-circle"></i>
-                You can either use the months filter or choose a custom date range (which overrides the months filter).
-            </small>
-
-            <!-- Validation Errors -->
-            <div ng-show="unitPriceForm.monthsInput.$touched && unitPriceForm.monthsInput.$invalid" class="error-message">
-                <div ng-show="unitPriceForm.monthsInput.$error.required">
-                    <i class="fas fa-exclamation-circle"></i> Months value is required.
-                </div>
-                <div ng-show="unitPriceForm.monthsInput.$error.min || unitPriceForm.monthsInput.$error.max">
-                    <i class="fas fa-exclamation-circle"></i> Value must be between 1 and 120.
-                </div>
-            </div>
-        </div>
 
         <div class="col-md-2">
+            <div class="form-group">
+                <label for="bidStatusFilter" class="modern-label">
+                    <i class="fas fa-flag-checkered label-icon"></i>
+                    Bid Status:
+                </label>
+                <select id="bidStatusFilter"
+                        class="form-control modern-select"
+                        ng-model="selectedBidStatus">
+                    <option value="">-- All --</option>
+                    <option value="W">Won</option>
+                    <option value="L">Loss</option>
+                    <option value="I">Irregular</option>
+                </select>
+            </div>
+
             <div class="form-group">
                 <label for="contractWorkTypeSelect" class="modern-label">
                     <i class="fas fa-tools label-icon"></i>
@@ -141,76 +83,138 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="form-group district-county-group">
-                <label class="modern-label">
-                    <i class="fas fa-map-marker-alt label-icon"></i>
-                    District & County Filter:
-                </label>
 
-                <!-- District Selection -->
+        <div class="col-md-2">
+            <div class="form-group time-filter-group">
+                <!-- Months of Bid History - Inline Layout -->
                 <div class="filter-section">
-                    <label for="districtSelect" class="sub-label">Select District:</label>
-                    <div class="select-wrapper">
-                        <select id="districtSelect"
-                                class="form-control modern-select"
-                                ng-model="selectedDistrict"
-                                ng-change="updateCounties()">
-                            <option value="">-- All Districts --</option>
-                            <option ng-repeat="district in districts" value="{{district}}">{{district}}</option>
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
+                    <label for="monthsInput" class="modern-label">
+                        <i class="fas fa-calendar-alt label-icon"></i>
+                        Months of Bid History:
+                    </label>
+                    <div class="months-input-container">
+                        <input type="number"
+                               id="monthsInput"
+                               name="monthsInput"
+                               class="form-control modern-input number-input-inline"
+                               ng-model="monthsOfHistory"
+                               min="1"
+                               max="120"
+                               placeholder="36"
+                               title="Enter number of months (1 to 120). Default is 36." />
+                        <span class="months-hint">(1–120, Default: 36)</span>
                     </div>
                 </div>
-
-                <!-- County Multi-Select -->
-                <div class="filter-section county-section">
-                    <label class="sub-label">Select Counties:</label>
-                    <div class="county-filter-container">
-                        <!-- Select All/None buttons -->
-                        <div class="county-actions">
-                            <button type="button" class="btn btn-sm btn-outline-primary" ng-click="selectAllCounties()">
-                                <i class="fas fa-check-double"></i> Select All
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" ng-click="clearAllCounties()">
-                                <i class="fas fa-times"></i> Clear All
-                            </button>
-                            <span class="selected-count">{{selectedCounties.length}} selected</span>
-                        </div>
-
-                        <!-- County Checkboxes Container -->
-                        <div class="county-checkboxes">
-                            <div ng-if="!selectedDistrict" class="no-district-message">
-                                <i class="fas fa-info-circle"></i>
-                                Select a district to view available counties
-                            </div>
-                            <div ng-if="selectedDistrict" class="county-checkbox-item" ng-repeat="county in availableCounties">
-                                <label class="county-checkbox-label">
-                                    <input type="checkbox"
-                                           ng-model="county.selected"
-                                           ng-change="toggleCounty(county)">
-                                    <span class="county-name">{{county.name}}</span>
-                                </label>
-                            </div>
-                        </div>
+                <!-- Custom Date Range - Compact Layout -->
+                <div class="filter-section">
+                    <label class="modern-label">
+                        <i class="fas fa-calendar-week label-icon"></i>
+                        Date Range:
+                    </label>
+                    <div class="date-inputs-compact">
+                        <input type="date"
+                               class="form-control modern-input date-input-compact"
+                               ng-model="startDate"
+                               max="{{ today | date:'yyyy-MM-dd' }}"
+                               min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
+                        <span class="date-separator">to</span>
+                        <input type="date"
+                               class="form-control modern-input date-input-compact"
+                               ng-model="endDate"
+                               max="{{ today | date:'yyyy-MM-dd' }}"
+                               min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
                     </div>
                 </div>
+                <div class="error-message" ng-show="isInvalidDateRange()">
+                    <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
+                </div>
+                <!-- Compact Hints -->
+                <small class="label-hint-compact">
+                    <i class="fas fa-info-circle"></i>
+                    Use months filter OR date range (date range overrides months)
+                </small>
 
-                <!-- Selected Counties Display -->
-                <div class="selected-counties" ng-if="selectedCounties.length > 0">
-                    <label class="sub-label">Selected Counties:</label>
-                    <div class="selected-tags">
-                        <span class="county-tag" ng-repeat="county in selectedCounties">
-                            {{county}}
-                            <button type="button" class="remove-tag" ng-click="removeCounty(county)">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </span>
+                <!-- Validation Errors -->
+                <div ng-show="unitPriceForm.monthsInput.$touched && unitPriceForm.monthsInput.$invalid" class="error-message">
+                    <div ng-show="unitPriceForm.monthsInput.$error.required">
+                        <i class="fas fa-exclamation-circle"></i> Months value is required.
+                    </div>
+                    <div ng-show="unitPriceForm.monthsInput.$error.min || unitPriceForm.monthsInput.$error.max">
+                        <i class="fas fa-exclamation-circle"></i> Value must be between 1 and 120.
                     </div>
                 </div>
             </div>
         </div>
 
+        <div class="col-md-4">
+            <div class="form-group district-county-group-compact">
+                <label class="modern-label">
+                    <i class="fas fa-map-marker-alt label-icon"></i>
+                    Select Counties by District:
+                </label>
+
+                <!-- District Selection - Compact -->
+                <div class="district-county-row">
+                    <div class="district-section">
+                        <label for="districtSelect" class="sub-label">District:</label>
+                        <div class="select-wrapper">
+                            <select id="districtSelect"
+                                    class="form-control modern-select compact-select"
+                                    ng-model="selectedDistrict"
+                                    ng-change="updateCounties()">
+                                <option value="">-- All --</option>
+                                <option ng-repeat="district in districts" value="{{district}}">{{district}}</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+
+                    <div class="county-section-compact">
+                        <label class="sub-label">Counties:</label>
+                        <div class="county-filter-compact">
+                            <!-- County Actions Row -->
+                            <div class="county-actions-compact">
+                                <button type="button" class="btn btn-xs btn-outline-primary" ng-click="selectAllCounties()">
+                                    <i class="fas fa-check-double"></i> All
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary" ng-click="clearAllCounties()">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                                <span class="selected-count-compact">{{selectedCounties.length}} selected</span>
+                            </div>
+
+                            <!-- County Selection - Collapsible -->
+                            <div class="county-selection-container">
+                                <div ng-if="!selectedDistrict" class="no-district-message-compact">
+                                    <i class="fas fa-info-circle"></i>
+                                    Select district first
+                                </div>
+                                <div ng-if="selectedDistrict" class="county-checkboxes-compact">
+                                    <div class="county-checkbox-grid">
+                                        <label class="county-checkbox-label-compact" ng-repeat="county in availableCounties">
+                                            <input type="checkbox"
+                                                   ng-model="county.selected"
+                                                   ng-change="toggleCounty(county)">
+                                            <span class="county-name-compact">{{county.name}}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Selected Counties Display - Inline -->
+                            <div class="selected-counties-inline" ng-if="selectedCounties.length > 0">
+                                <span class="county-tag-compact" ng-repeat="county in selectedCounties">
+                                    {{county}}
+                                    <button type="button" class="remove-tag-compact" ng-click="removeCounty(county)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="action-buttons">
@@ -385,18 +389,19 @@
 
     /* Input Section */
     .input-section {
-        margin-bottom: 30px;
+        margin-bottom: 15px; /* Reduced from 30px */
     }
 
     .modern-label {
         font-weight: 600;
         color: #374151;
-        font-size: 15px;
-        margin-bottom: 8px;
+        font-size: 14px; /* Reduced from 15px */
+        margin-bottom: 6px; /* Reduced from 8px */
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px; /* Reduced from 8px */
     }
+
     .required {
         color: red;
         font-weight: bolder;
@@ -404,15 +409,25 @@
 
     .label-icon {
         color: #6366f1;
-        font-size: 14px;
+        font-size: 12px; /* Reduced from 14px */
     }
 
     .label-hint {
         font-weight: 400;
         color: #6b7280;
-        font-size: 12px;
-        margin-left: 8px;
+        font-size: 11px; /* Reduced from 12px */
+        margin-left: 6px; /* Reduced from 8px */
     }
+    .label-hint-compact {
+        font-weight: 400;
+        color: #6b7280;
+        font-size: 11px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
 
     /* Input Controls */
     .input-wrapper {
@@ -487,6 +502,26 @@
         font-weight: 500;
         white-space: nowrap;
     }
+    .date-inputs-compact {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .date-input-compact {
+        max-width: 140px;
+        flex: 1;
+        min-width: 110px;
+    }
+
+    .date-separator {
+        color: #6b7280;
+        font-weight: 500;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+
 
     /* Select Styling */
     .select-wrapper {
@@ -499,19 +534,25 @@
     .modern-select {
         appearance: none;
         background-image: none;
-        padding-right: 40px;
+        padding-right: 30px;
         cursor: pointer;
     }
+    .compact-select {
+        padding: 6px 30px 6px 10px;
+        font-size: 13px;
+    }
+
 
     .select-arrow {
         position: absolute;
-        right: 16px;
+        right: 12px;
         top: 50%;
         transform: translateY(-50%);
         pointer-events: none;
         color: #9ca3af;
         transition: transform 0.3s ease;
     }
+
 
     .select-wrapper:hover .select-arrow {
         transform: translateY(-50%) rotate(180deg);
@@ -536,14 +577,15 @@
     }
 
     .suggestion-item {
-        padding: 12px 16px;
+        padding: 8px 12px;
         cursor: pointer;
         transition: all 0.2s ease;
         border-bottom: 1px solid #f3f4f6;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
+
 
         .suggestion-item:hover {
             background: linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 100%);
@@ -574,17 +616,17 @@
         background: #fee2e2;
         border: 1px solid #fecaca;
         color: #dc2626;
-        padding: 10px 12px;
-        border-radius: 8px;
-        margin-top: 8px;
-        font-size: 13px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 6px;
+        font-size: 12px;
     }
 
         .error-message div {
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
             .error-message div:last-child {
@@ -895,92 +937,125 @@
         animation: fadeInUp 0.5s ease;
     }
     /* District/County Filter Styles */
-    .district-county-group {
+    .district-county-group-compact {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        padding: 12px;
+        padding: 10px;
+    }
+    .district-county-row {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .district-section {
+        flex: 0 0 140px; /* Fixed width for district */
+    }
+
+    .county-section-compact {
+        flex: 1;
+        min-width: 0;
     }
 
     .sub-label {
         font-weight: 500;
         color: #4b5563;
-        font-size: 13px;
+        font-size: 12px;
         margin-bottom: 4px;
         display: block;
     }
 
-    .county-filter-container {
+    .county-filter-compact {
         background: white;
         border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 16px;
+        border-radius: 6px;
+        padding: 8px;
     }
 
-    .county-actions {
+    .county-actions-compact {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
+        gap: 6px;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
         border-bottom: 1px solid #e5e7eb;
     }
 
-    .selected-count {
+
+    .selected-count-compact {
         color: #6b7280;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 500;
         margin-left: auto;
     }
-
-    .county-checkboxes {
-        max-height: 150px;
+    .county-selection-container {
+        margin-bottom: 8px;
+    }
+    .county-checkboxes-compact {
+        max-height: 80px; /* Reduced from 150px */
         overflow-y: auto;
         border: 1px solid #f3f4f6;
         border-radius: 4px;
-        padding: 6px;
+        padding: 4px; /* Reduced from 6px */
+    }
+    .county-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 2px;
     }
 
-    .no-district-message {
+    .no-district-message-compact {
         text-align: center;
         color: #6b7280;
         font-style: italic;
-        padding: 20px;
+        padding: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
+        font-size: 11px;
     }
 
     .county-checkbox-item {
         margin-bottom: 8px;
     }
 
-    .county-checkbox-label {
+   
+    .county-checkbox-label-compact {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 4px;
         cursor: pointer;
-        padding: 8px 12px;
-        border-radius: 6px;
+        padding: 3px 6px;
+        border-radius: 4px;
         transition: background-color 0.2s ease;
         margin-bottom: 0;
         font-weight: 400;
+        font-size: 11px;
     }
 
         .county-checkbox-label:hover {
             background-color: #f3f4f6;
         }
-
-    .county-name {
-        font-size: 13px;
-        color: #374151;
+    .county-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 2px;
     }
-
-    .selected-counties {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid #e5e7eb;
+    .county-name-compact {
+        font-size: 12px;
+        color: #374151;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .selected-counties-inline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-height: 60px;
+        overflow-y: auto;
     }
 
     .selected-tags {
@@ -989,32 +1064,34 @@
         gap: 8px;
         margin-top: 8px;
     }
-
-    .county-tag {
+    .county-selection-container {
+        margin-bottom: 8px;
+    }
+    .county-tag-compact {
         background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
         color: white;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
+        padding: 2px 6px; 
+        border-radius: 12px;
+        font-size: 10px;
         font-weight: 500;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 3px;
     }
 
-    .remove-tag {
+    .remove-tag-compact {
         background: none;
         border: none;
         color: white;
         cursor: pointer;
         padding: 0;
         margin: 0;
-        font-size: 10px;
+        font-size: 8px;
         opacity: 0.8;
         transition: opacity 0.2s ease;
     }
 
-        .remove-tag:hover {
+        .remove-tag-compact:hover {
             opacity: 1;
         }
 </style>

@@ -46,6 +46,9 @@
             "W": "Won",
             "I": "Irregular"
         };
+        $scope.isInvalidDateRange = function () {
+            return $scope.startDate && $scope.endDate && new Date($scope.startDate) > new Date($scope.endDate);
+        };
         $scope.districtCountyMap = {
             'District 1 (Southwest Florida)': [
                 '01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY',
@@ -74,7 +77,7 @@
             'District 7 (West Central Florida)': [
                 '02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS', '99 - DIST/ST-WIDE'
             ],
-            "Florida's Turnpike Enterprise": [
+            "Turnpike": [
                 'TURNPIKE'
             ]
         };
