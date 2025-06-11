@@ -120,7 +120,28 @@
         };
         $scope.selectedMarketArea = "";
         $scope.selectedMarketCounties = [];
-
+        $scope.clearFilters = function () {
+            $scope.searchText = "";
+            $scope.selectedPayItemNumber = null;
+            $scope.selectedMinQuantity = null;
+            $scope.selectedMaxQuantity = null;
+            $scope.selectedMinRank = null;
+            $scope.selectedMaxRank = null;
+            $scope.monthsOfHistory = 36;
+            $scope.selectedBidStatus = "";
+            $scope.selectedContractType = null;
+            $scope.selectedWorkTypeCode = null;
+            $scope.startDate = null;
+            $scope.endDate = null;
+            $scope.selectedDistrict = "";
+            $scope.selectedCounties = [];
+            $scope.availableCounties = [];
+            $scope.selectedMarketArea = "";
+            $scope.selectedMarketCounties = [];
+            $scope.items = [];
+            $scope.hasError = false;
+            $scope.errorMessage = '';
+        };
         $scope.onMarketAreaChange = function () {
             if ($scope.selectedMarketArea && $scope.marketAreaToCountiesMap[$scope.selectedMarketArea]) {
                 $scope.selectedMarketCounties = angular.copy($scope.marketAreaToCountiesMap[$scope.selectedMarketArea]);
