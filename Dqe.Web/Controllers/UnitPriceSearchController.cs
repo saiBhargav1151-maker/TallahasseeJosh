@@ -33,7 +33,7 @@ namespace Dqe.Web.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(input) || input.Length < 2)
+                if (string.IsNullOrWhiteSpace(input) || input.Length < 3)
                 {
                     return Json(new List<PayItemDTO>(), JsonRequestBehavior.AllowGet);
                 }
@@ -53,12 +53,12 @@ namespace Dqe.Web.Controllers
         /// <param name="number">Pay item number to fetch historical unit price data for.</param>
         /// <returns>JSON result
         [HttpGet]
-        public ActionResult GetPayItemDetails(string number, int months, string contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus)
+        public ActionResult GetPayItemDetails(string number, string contractType, int months, string contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, int? minRank, int? maxRank)
         {
             try
             {
                 var selectedCounties = counties?.ToList() ?? new List<string>();
-                var historyData = _webTransportService.GetUnitPriceDetails(number, months, contractWorkType, startDate, endDate, counties, bidStatus);
+                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months,  contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank);
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
 

@@ -5,8 +5,11 @@
         $scope.items = [];
         $scope.selectedPayItemNumber = null;
         $scope.bidHistoryData = [];
+        /*$scope.selectedMinRank = '';
+        $scope.selectedMaxRank = '';*/
         $scope.lastSearchedPayItem = $scope.searchText;
         $scope.isLoading = false;
+        $scope.draggingThumb = null;
         $scope.monthsOfHistory = 36;
         $scope.selectedBidStatus = "";
         $scope.searchAttempted = false;
@@ -31,6 +34,19 @@
             "X9": "Interstate Rehabilition",
             "Z": "Other"
         };
+        $scope.contractTypeMap = {
+            "CC": "Const Contract",
+            "CEC": "Const Emergency Contract",
+            "CFR": "Const Fast Response",
+            "CPB": "Const Push Button",
+            "CSL": "Construction Streamline",
+            "MC": "Maint Contract",
+            "MEC": "Maint Emergency Contract",
+            "MFR": "Maint Fast Response",
+            "MLC": "MT Landscape Install Establish",
+            "TO": "Traffic Operations",
+            "TOPB": "Traffic Operations Push Button"
+        };
         $scope.bidTypeMap = {
             "RESP": "Responsive",
             "NONR": "Non-Responsive",
@@ -49,6 +65,7 @@
         $scope.isInvalidDateRange = function () {
             return $scope.startDate && $scope.endDate && new Date($scope.startDate) > new Date($scope.endDate);
         };
+        $scope.contractTypes = Object.keys($scope.contractTypeMap);
         $scope.districtCountyMap = {
             'District 1 (Southwest Florida)': [
                 '01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY',
@@ -81,9 +98,46 @@
                 'TURNPIKE'
             ]
         };
+        $scope.marketAreaToCountiesMap = {
+            "Area 01": ["BAY", "ESCAMBIA", "OKALOOSA", "SANTA ROSA", "WALTON"],
+            "Area 02": ["CALHOUN", "FRANKLIN", "GULF", "HOLMES", "JACKSON", "LIBERTY", "WASHINGTON"],
+            "Area 03": ["GADSDEN", "JEFFERSON", "LEON", "WAKULLA"],
+            "Area 04": [
+                "BAKER", "BRADFORD", "COLUMBIA", "DIXIE", "GILCHRIST", "HAMILTON",
+                "LAFAYETTE", "LEVY", "MADISON", "PUTNAM", "SUWANNEE", "TAYLOR", "UNION"
+            ],
+            "Area 05": ["CLAY", "DUVAL", "NASSAU", "ST JOHNS"],
+            "Area 06": ["ALACHUA", "MARION", "VOLUSIA"],
+            "Area 07": ["CITRUS", "FLAGLER", "HERNANDO", "LAKE", "PASCO", "SUMTER"],
+            "Area 08": ["BREVARD", "HILLSBOROUGH", "ORANGE", "OSCEOLA", "PINELLAS", "POLK", "SEMINOLE"],
+            "Area 09": ["DESOTO", "GLADES", "HARDEE", "HENDRY", "HIGHLANDS", "OKEECHOBEE"],
+            "Area 10": ["CHARLOTTE", "COLLIER", "LEE", "MANATEE", "SARASOTA"],
+            "Area 11": ["INDIAN RIVER", "MARTIN", "ST LUCIE"],
+            "Area 12": ["BROWARD", "PALM BEACH"],
+            "Area 13": ["MIAMI-DADE"],
+            "Area 14": ["MONROE"],
+            "Area 99": ["DIST/ST-WIDE", "DISTRICT WIDE", "TURNPIKE"]
+        };
+        $scope.selectedMarketArea = "";
+        $scope.selectedMarketCounties = [];
+
+        $scope.onMarketAreaChange = function () {
+            if ($scope.selectedMarketArea && $scope.marketAreaToCountiesMap[$scope.selectedMarketArea]) {
+                $scope.selectedMarketCounties = angular.copy($scope.marketAreaToCountiesMap[$scope.selectedMarketArea]);
+            } else {
+                $scope.selectedMarketCounties = [];
+            }
+        };
+        $scope.startDragging = function (thumb) {
+            $scope.draggingThumb = thumb;
+            document.addEventListener('mousemove', onThumbDrag);
+            document.addEventListener('mouseup', stopDragging);
+        };
+        $scope.hasError = false;
+        $scope.errorMessage = '';
         $scope.districts = Object.keys($scope.districtCountyMap);
         $scope.availableCounties = [];
-        $scope.selectedDistrict = null;
+        $scope.selectedDistrict = "";
         $scope.selectedCounties = [];
         $scope.getCountiesForSelectedDistrict = function () {
             return $scope.districtCountyMap[$scope.selectedDistrict] || [];
@@ -97,6 +151,31 @@
                     selected: $scope.selectedCounties.includes(clean)
                 };
             });
+        };
+        $scope.validateQuantity = function () {
+            const min = $scope.selectedMinQuantity;
+            const max = $scope.selectedMaxQuantity;
+            // Reset error
+            $scope.hasError = false;
+            $scope.errorMessage = '';
+
+            if (min === undefined || min === null || min < 1) {
+                $scope.hasError = true;
+                $scope.errorMessage = 'Minimum quantity must be at least 1.';
+                return;
+            }
+
+            if (max === undefined || max === null || max < 1) {
+                $scope.hasError = true;
+                $scope.errorMessage = 'Maximum quantity must be at least 1.';
+                return;
+            }
+
+            if (min !== null && max !== null && min > max) {
+                $scope.hasError = true;
+                $scope.errorMessage = 'Minimum quantity cannot be greater than maximum quantity.';
+                return;
+            }
         };
         $scope.toggleCounty = function (county) {
             const index = $scope.selectedCounties.indexOf(county.name);
@@ -136,13 +215,6 @@
             $scope.getBidTypeLabel = function (code) {
                 return code ? ($scope.bidTypeMap[code] || "Unknown") : "Unknown";
             };
-
-            $scope.getWorkTypeLabel = function (code) {
-                return code ? `${code} - ${$scope.workTypeMap[code] || "Unknown"}` : "";
-            };
-            $scope.proposalTypeLabel = function (code) {
-                return code ? `${code} - ${$scope.proposalTypeMap[code] || "Unknown"}` : "";
-            };
             $scope.getBidStatusLabel = function (code) {
                 return code ? ($scope.bidStatusMap[code] || "Unknown") : "Unknown";
             };
@@ -169,13 +241,21 @@
             $scope.selectedPayItemNumber = item.Name;
             $scope.items = [];
         };
+        $scope.shouldHideGraphForLumpSum = function () {
+            if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) return false;
 
+            const totalQty = $scope.bidHistoryData.reduce((sum, item) => sum + (item.Quantity || 0), 0);
+            const allLumpSum = $scope.bidHistoryData.every(item => item.CalculatedUnit === 'LS - Lump Sum');
+
+            return totalQty === $scope.bidHistoryData.length && allLumpSum;
+        };
         // Search Bids
         $scope.searchBids = function () {
             if (!$scope.selectedPayItemNumber) {
                 alert("Please enter a valid Pay Item before searching.");
                 return;
             }
+
             $scope.bidHistoryData = [];
             $scope.chartStats = null;
             $scope.isLoading = true;
@@ -192,11 +272,14 @@
                     startDate: $scope.startDate || null,
                     endDate: $scope.endDate || null,
                     counties: $scope.selectedCounties,
-                    bidStatus: $scope.selectedBidStatus || null
+                    bidStatus: $scope.selectedBidStatus || null,
+                    contractType: $scope.selectedContractType || null,
+                    marketCounties: $scope.selectedMarketCounties,
+                    minRank: $scope.selectedMinQuantity || null,
+                    maxRank: $scope.selectedMaxQuantity || null,
                 },
                 traditional: true
             }).success(function (data) {
-                debugger
                 const quantities = data.map(item => item.Quantity || 0);
                 const prices = data.map(item => item.b || 0);
                 const totalQty = quantities.reduce((sum, q) => sum + q, 0);
@@ -244,6 +327,7 @@
             const date = new Date(parseInt(match[1]));
             return date.toLocaleDateString('en-US'); // Format: MM/DD/YYYY
         }
+       
         // CSV Export Functionlity
         $scope.exportClick = function () {
             let headers = [
@@ -257,7 +341,7 @@
                 `"${item.p}"`, `"${item.Duration}"`, `"${item.ProjectNumber}"`, `"${formatDotNetDate(item.l)}"`, `"${item.ri}"`,
                 `"${item.Description.replace(/"/g, '""')}"`, `"${item.SupplementalDescription}"`, `"${item.CalculatedUnit}"`, `"${item.Quantity}"`,
                 `"${item.b}"`, `"${item.PvBidTotal}"`, `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`, `"${item.c}"`, `"${item.d}"`,
-                `"${item.ContractType}"`, `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`,
+                `"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`, `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`,
                 `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${formatDotNetDate(item.ExecutedDate)}"`, `"${item.VendorRanking}"`, `"${item.VendorName}"`
             ].join(",")).join("\n");
 
@@ -269,7 +353,6 @@
             document.body.appendChild(link);
             link.click();
         };
-
         // Watch for data update
         $scope.$watch('bidHistoryData', function (newVal) {
             if (newVal && newVal.length > 0) {
@@ -277,16 +360,16 @@
             }
         });
         // Line Graph
-        function waitForCanvasAndRender(retryCount = 10) {
+        function waitForCanvasAndRender() {
             $scope.isChartLoading = true;
 
             $timeout(function () {
                 requestAnimationFrame(function () {
                     const canvas = document.getElementById("priceChart");
-                    if (!canvas) {
+                    /*if (!canvas) {
                         if (retryCount > 0) waitForCanvasAndRender(retryCount - 1);
-                        return;
-                    }
+                        return; retryCount = 10
+                    }*/
 
                     const ctx = canvas.getContext("2d");
                     const quantities = $scope.bidHistoryData.map(item => item.Quantity || 0);
