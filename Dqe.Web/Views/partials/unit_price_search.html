@@ -5,7 +5,7 @@
             <div class="form-group search-input-group">
                 <label for="payItemInput" class="modern-label">
                     <i class="fas fa-hammer label-icon"></i>
-                    Enter Pay Item Number or Description: <span class="required"> *</span>
+                    Enter Pay Item Number or Description: <span class="label-hint-compact" style="color: red;"> * required</span>
                 </label>
 
                 <div class="input-wrapper">
@@ -13,7 +13,7 @@
                            id="payItemInput"
                            ng-model="searchText"
                            ng-change="fetchPayItemSuggestions()"
-                           placeholder="e.g., 01 or Maintenance"
+                           placeholder="e.g., 102 or Embarkment"
                            autocomplete="off"
                            autocorrect="off"
                            autocapitalize="off"
@@ -130,7 +130,7 @@
                     <select id="bidStatusFilter"
                             class="form-control modern-select"
                             ng-model="selectedBidStatus">
-                        <option value="">-- All --</option>
+                        <option value="">-- All Statuses--</option>
                         <option value="W">Won</option>
                        <!-- <option value="W">Fair Market Value(Bidder Rank 1–3)</option>-->
                         <option value="L">Loss</option>
@@ -193,11 +193,11 @@
                                max="120"
                                placeholder="36"
                                title="Enter number of months (1 to 120). Default is 36." />
-                        <span class="months-hint">(1–120, Default: 36)</span>
+                        <span class="months-hint">(1–120, Default: 12)</span>
                     </div>
                 </div>
                 <!-- Custom Date Range - Compact Layout -->
-                <div class="filter-section">
+                <div class="filter-section" style="margin-top:20px;">
                     <label class="modern-label">
                         <i class="fas fa-calendar-week label-icon"></i>
                         Letting Date Range:
@@ -254,7 +254,7 @@
                                     class="form-control modern-select compact-select"
                                     ng-model="selectedDistrict"
                                     ng-change="updateCounties()">
-                                <option value="">-- All --</option>
+                                <option value="">-- All Districts--</option>
                                 <option ng-repeat="district in districts" value="{{district}}">{{district}}</option>
                             </select>
                             <i class="fas fa-chevron-down select-arrow"></i>
@@ -314,7 +314,7 @@
         <button class="btn btn-primary btn-lg search-button" ng-click="searchBids()">
             <i class="fas fa-search"></i> Search Bids
         </button>
-            <button class="btn btn-secondary btn-lg clear-button" ng-click="clearFilters()">
+            <button class="btn btn-secondary clear-button" ng-click="clearFilters()">
                 <i class="fas fa-times-circle"></i> Clear Filters
             </button>
         
@@ -390,7 +390,7 @@
                         <thead>
                             <tr>
                                 <th>Contract</th>
-                                <th>Duration</th>
+                                <th>Awarded Days</th>
                                 <th>Lead Project</th>
                                 <th>Letting Date</th>
                                 <th>Pay Item</th>
@@ -406,9 +406,11 @@
                                 <th>Weighted Avg (No Outliers)</th>
                                 <th>Outlier</th>
                                 <th>Primary County</th>
+                                <th>Market Area</th>
                                 <th>District</th>
                                 <th>Contract Type</th>
                                 <th>Work Type</th>
+                                <th>Category</th>
                                 <th>Proposal Type</th>
                                 <th>Executed Date</th>
                                 <th>Bidder Rank</th>
@@ -434,9 +436,11 @@
                                 <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>
                                 <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
                                 <td>{{ item.c }}</td>
+                                <td>{{ item.MarketArea }}</td>
                                 <td>{{ item.d }}</td>
                                 <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
                                 <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
+                                <td>{{ item.CategoryDes }}</td>
                                 <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
                                 <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
                                 <td>{{ item.VendorRanking }}</td>
@@ -467,58 +471,53 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 <style>
-    body {
-        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    body {   
         min-height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    /* Main Panel Styling */
-    .modern-panel {
-        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid #192c3f;
-        border-radius: 16px;
-        padding: 30px;
-        position: relative;
-        overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+        color: #0B172D;
     }
 
-        .modern-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-           <!-- background: linear-gradient(90deg, #192c3f 0%, #192c3f 50%, #192c3f 100%);-->
-        }
+    /* Main Panel Styling */
+    .modern-panel {
+        background: #ffffff;
+        border: 2px solid #1F4283;
+        padding: 30px;
+        position: relative;
+    }
+
+    .modern-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #1F4283;
+    }
 
     /* Input Section */
     .input-section {
-        margin-bottom: 15px; /* Reduced from 30px */
+        margin-bottom: 15px;
     }
 
     .modern-label {
         font-weight: 600;
-        color: #374151;
-        font-size: 12px; /* Reduced from 15px */
-        margin-bottom: 6px; /* Reduced from 8px */
+        color: #152C57;
+        font-size: 12px;
+        margin-bottom: 6px;
         display: flex;
         align-items: center;
-        gap: 6px; /* Reduced from 8px */
-    }
-
-    .required {
-        color: red;
-        font-weight: bolder;
+        gap: 6px;
     }
 
     .label-icon {
-        color: #6366f1;
-        font-size: 12px; /* Reduced from 14px */
+        color: #1F4283;
+        font-size: 12px;
     }
+
     .label-hint-compact {
         font-weight: 400;
-        color: #6b7280;
+        color: #5E89D9;
         font-size: 10px;
         margin-top: 4px;
         display: flex;
@@ -526,30 +525,28 @@
         gap: 4px;
     }
 
-
     /* Input Controls */
     .input-wrapper {
         position: relative;
     }
 
     .modern-input {
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
+        border: 2px solid #B1C6EC;
         padding: 12px 16px;
         font-size: 12px;
         transition: all 0.3s ease;
-        background: #f9fafb;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(31, 66, 131, 0.1);
         padding-right: 30px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
     }
 
-        .modern-input:focus {
-            outline: none;
-            border-color: #6366f1;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-            transform: translateY(-1px);
-        }
+    .modern-input:focus {
+        outline: none;
+        border-color: #1F4283;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+    }
 
     .search-input-group {
         position: relative;
@@ -561,45 +558,17 @@
         right: 12px;
         top: 50%;
         cursor: pointer;
-        color: #9ca3af;
+        color: #5E89D9;
         transition: color 0.3s ease;
         padding: 4px;
-        border-radius: 50%;
     }
 
         .clear-button:hover {
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
+            color: #ffffff;
+            background: #1F4283;
         }
 
-    .number-input {
-        width: 120px;
-        text-align: center;
-    }
-
     /* Date Inputs */
-    .date-range-section {
-        margin-top: 16px;
-    }
-
-    .date-inputs {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .date-input {
-        max-width: 150px;
-        flex: 1;
-        min-width: 120px;
-    }
-
-    .date-separator {
-        color: #6b7280;
-        font-weight: 500;
-        white-space: nowrap;
-    }
     .date-inputs-compact {
         display: flex;
         align-items: center;
@@ -614,32 +583,37 @@
     }
 
     .date-separator {
-        color: #6b7280;
+        color: #5E89D9;
         font-weight: 500;
         white-space: nowrap;
         font-size: 12px;
     }
 
-
     /* Select Styling */
     .select-wrapper {
         position: relative;
     }
-    .filter-input-container {
-        position: relative;
-        margin-bottom: 12px;
-    }
+
     .modern-select {
         appearance: none;
         background-image: none;
         padding-right: 30px;
         cursor: pointer;
+        border: 2px solid #B1C6EC;
+        background: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
     }
+
+    .modern-select:focus {
+        border-color: #1F4283;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+    }
+
     .compact-select {
         padding: 6px 30px 6px 10px;
         font-size: 12px;
     }
-
 
     .select-arrow {
         position: absolute;
@@ -647,10 +621,9 @@
         top: 50%;
         transform: translateY(-50%);
         pointer-events: none;
-        color: #9ca3af;
+        color: #5E89D9;
         transition: transform 0.3s ease;
     }
-
 
     .select-wrapper:hover .select-arrow {
         transform: translateY(-50%) rotate(180deg);
@@ -662,10 +635,9 @@
         top: 100%;
         left: 0;
         right: 0;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+        border: 2px solid #B1C6EC;
+        box-shadow: 0 4px 8px rgba(31, 66, 131, 0.15);
         z-index: 1000;
         max-height: 200px;
         overflow-y: auto;
@@ -678,58 +650,45 @@
         padding: 8px 12px;
         cursor: pointer;
         transition: all 0.2s ease;
-        border-bottom: 1px solid #f3f4f6;
+        border-bottom: 1px solid #D6E1F5;
         display: flex;
         align-items: center;
         gap: 8px;
     }
 
-
-        .suggestion-item:hover {
-            background: linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 100%);
-            transform: translateX(4px);
-        }
-
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-    .suggestion-icon {
-        color: #6366f1;
-        font-size: 12px;
+    .suggestion-item:hover {
+        background: #EAF0FA;
     }
 
-    /* Help Text */
-    .help-text {
-        color: #6b7280;
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .suggestion-icon {
+        color: #1F4283;
         font-size: 12px;
-        margin-top: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
     }
 
     /* Error Messages */
     .error-message {
-        background: #fee2e2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
+        background: #fef2f2;
+        border: 1px solid #D72E2A;
+        color: #D72E2A;
         padding: 8px 12px;
-        border-radius: 6px;
         margin-top: 6px;
         font-size: 12px;
     }
 
-        .error-message div {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 2px;
-        }
+    .error-message div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 2px;
+    }
 
-            .error-message div:last-child {
-                margin-bottom: 0;
-            }
+    .error-message div:last-child {
+        margin-bottom: 0;
+    }
 
     /* Action Buttons */
     .action-buttons {
@@ -741,37 +700,62 @@
         padding: 10px;
     }
 
-    .search-button {
-        background: linear-gradient(135deg, #192c3f 0%, #192c3f 100%);
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 32px;
         border: none;
-        border-radius: 12px;
-        padding: 14px 28px;
+        font-size: 18px;
         font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        gap: 8px;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
     }
 
-        .search-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
-            background: linear-gradient(135deg, #428bca 0%, #428bca 100%);
-        }
+    .search-button {
+        background: #1F4283;
+        color: #ffffff;
+        border: 2px solid #1F4283;
+        box-shadow: 0 2px 4px rgba(31, 66, 131, 0.2);
+    }
+
+    .search-button:hover {
+        background: #152C57;
+        border-color: #152C57;
+        box-shadow: 0 4px 8px rgba(31, 66, 131, 0.3);
+    }
+
+    .btn-secondary {
+        background: #5E89D9;
+        color: #ffffff;
+        border: 2px solid #5E89D9;
+        box-shadow: 0 2px 4px rgba(94, 137, 217, 0.2);
+    }
+
+  .btn-secondary:hover {
+        background: #356BCF;
+        border-color: #356BCF;
+        box-shadow: 0 4px 8px rgba(94, 137, 217, 0.3);
+    }
 
     .export-button {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border: none;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        background: #28a745;
+        color: #ffffff;
+        border: 2px solid #28a745;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
     }
 
-        .export-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        }
+    .export-button:hover {
+        background: #218838;
+        border-color: #218838;
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
 
     /* Loading Section */
     .loading-section {
@@ -782,12 +766,12 @@
 
     .loading-spinner {
         font-size: 2.5rem;
-        color: #6366f1;
+        color: #1F4283;
         margin-bottom: 16px;
     }
 
     .loading-text {
-        color: #4f46e5;
+        color: #1F4283;
         font-weight: 600;
         font-size: 16px;
     }
@@ -802,7 +786,7 @@
     }
 
     .section-title {
-        color: #1f2937;
+        color: #0B172D;
         font-weight: 700;
         margin-bottom: 20px;
         display: flex;
@@ -813,82 +797,84 @@
 
     /* Table Section */
     .table-section {
-        background: white;
-        border-radius: 16px;
+        background: #ffffff;
         padding: 24px;
         margin-bottom: 30px;
-        border: 1px solid #428bca;
+        border: 2px solid #1F4283;
     }
 
     .table-wrapper {
         height: 65vh;
         overflow: auto;
-        border-radius: 12px;
-        border: 1px solid #428bca;
+        border: 2px solid #1F4283;
     }
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 16px 32px;
-        border: none;
-        border-radius: 12px;
-        font-size: 18px;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        gap: 8px;
-        letter-spacing: 0.5px;
-        position: relative;
-        overflow: hidden;
-    }
+
     .bid-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 12px;
-        background-color: #fff;
+        background-color: #ffffff;
         min-width: 2800px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
     }
 
-        .bid-table th {
+    .bid-table th {
+        position: sticky;
+        top: 0;
+        background: #1F4283;
+        color: #ffffff;
+        font-weight: 600;
+        z-index: 10;
+        border: 1px solid #152C57;
+        padding: 14px 12px;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .bid-table td {
+        border: 1px solid #B1C6EC;
+        padding: 12px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 12px;
+    }
+
+    .bid-table tbody tr:nth-child(even) {
+        background-color: #EAF0FA;
+    }
+
+    .bid-table tbody tr:hover {
+        background: #D6E1F5;
+        transition: all 0.2s ease;
+    }
+        .bid-table th:first-child {
             position: sticky;
-            top: 0;
-            background: linear-gradient(135deg, #428bca 0%, #428bca 100%);
-            color: #fff;
+            left: 0;
+            z-index: 11;
+            background: #1F4283;
+            color: #ffffff;
+            box-shadow: 3px 0 6px rgba(0, 0, 0, 0.15);
+            border-right: 1px solid #ccc;
+        }
+        .bid-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 9;
+            background-color: #ffffff;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.15);
             font-weight: 600;
-            z-index: 10;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 14px 12px;
-            text-align: center;
-            font-size: 12px;
+            color: #152C57;
         }
-
-        .bid-table td {
-            border: 1px solid #428bca;
-            padding: 12px;
-            text-align: center;
-            vertical-align: middle;
-            font-size: 12px;
-        }
-
-        .bid-table tbody tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-
-        .bid-table tbody tr:hover {
-            background: linear-gradient(90deg, #e0e7ff 0%, #ddd6fe 100%);
-            transform: scale(1.001);
-            transition: all 0.2s ease;
+        .bid-table tbody tr:hover td:first-child {
+            background: #D6E1F5;
         }
 
     /* Chart Section */
     .chart-section {
-        background: white;
-        border-radius: 16px;
+        background: #ffffff;
         padding: 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 4px rgba(31, 66, 131, 0.1);
+        border: 2px solid #B1C6EC;
     }
 
     .chart-container {
@@ -901,15 +887,14 @@
 
     /* Statistics Section */
     .stats-section {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        border-radius: 12px;
+        background: #EAF0FA;
         padding: 14px;
-        border: 1px solid #bae6fd;
+        border: 2px solid #B1C6EC;
         margin-bottom: 15px;
     }
 
     .stats-title {
-        color: #0f172a;
+        color: #0B172D;
         font-weight: 700;
         margin-bottom: 15px;
         display: flex;
@@ -925,22 +910,20 @@
     }
 
     .stat-card {
-        background: white;
+        background: #ffffff;
         padding: 16px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e0f2fe;
+        box-shadow: 0 1px 3px rgba(31, 66, 131, 0.1);
+        border: 1px solid #B1C6EC;
         transition: transform 0.2s ease;
     }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
+    .stat-card:hover {
+        box-shadow: 0 2px 8px rgba(31, 66, 131, 0.15);
+    }
 
     .stat-label {
         font-weight: 600;
-        color: #374151;
+        color: #152C57;
         font-size: 12px;
         margin-bottom: 6px;
     }
@@ -948,7 +931,7 @@
     .stat-value {
         font-size: 1.4rem;
         font-weight: 700;
-        color: #0369a1;
+        color: #1F4283;
     }
 
     /* No Data Section */
@@ -957,18 +940,17 @@
     }
 
     .no-data-content {
-        background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
-        border: 1px solid #f59e0b;
-        border-radius: 16px;
+        background: #fff3cd;
+        border: 2px solid #ffc107;
         padding: 40px;
         text-align: center;
-        color: #92400e;
+        color: #856404;
     }
 
     .no-data-icon {
         font-size: 3rem;
         margin-bottom: 16px;
-        color: #d97706;
+        color: #ffc107;
     }
 
     .no-data-title {
@@ -982,6 +964,276 @@
         font-weight: 500;
     }
 
+    /* District/County Filter Styles */
+    .district-county-group-compact {
+        background: #EAF0FA;
+        border: 2px solid #B1C6EC;
+        padding: 10px;
+    }
+
+    .district-county-row {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .district-section {
+        flex: 0 0 140px;
+    }
+
+    .county-section-compact {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sub-label {
+        font-weight: 500;
+        color: #152C57;
+        font-size: 12px;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .county-filter-compact {
+        background: #ffffff;
+        border: 1px solid #B1C6EC;
+        padding: 8px;
+    }
+
+    .county-actions-compact {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #B1C6EC;
+    }
+
+    .btn-xs {
+        padding: 4px 8px;
+        font-size: 10px;
+        border: 1px solid;
+        background: #ffffff;
+        cursor: pointer;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .btn-outline-primary {
+        color: #1F4283;
+        border-color: #1F4283;
+    }
+
+    .btn-outline-primary:hover {
+        background: #1F4283;
+        color: #ffffff;
+    }
+
+    .btn-outline-secondary {
+        color: #5E89D9;
+        border-color: #5E89D9;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #5E89D9;
+        color: #ffffff;
+    }
+
+    .selected-count-compact {
+        color: #5E89D9;
+        font-size: 12px;
+        font-weight: 500;
+        margin-left: auto;
+    }
+
+    .county-checkboxes-compact {
+        max-height: 80px;
+        overflow-y: auto;
+        border: 1px solid #D6E1F5;
+        padding: 4px;
+    }
+
+    .county-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 2px;
+    }
+
+    .no-district-message-compact {
+        text-align: center;
+        color: #5E89D9;
+        font-style: italic;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 11px;
+    }
+
+    .county-checkbox-label-compact {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 3px 6px;
+        transition: background-color 0.2s ease;
+        margin-bottom: 0;
+        font-weight: 400;
+        font-size: 11px;
+    }
+
+    .county-checkbox-label-compact:hover {
+        background-color: #D6E1F5;
+    }
+
+    .county-name-compact {
+        font-size: 12px;
+        color: #152C57;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .selected-counties-inline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-height: 60px;
+        overflow-y: auto;
+    }
+
+    .county-tag-compact {
+        background: #1F4283;
+        color: #ffffff;
+        padding: 2px 6px;
+        font-size: 10px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .remove-tag-compact {
+        background: none;
+        border: none;
+        color: #ffffff;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        font-size: 8px;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+    .remove-tag-compact:hover {
+        opacity: 1;
+    }
+
+    .form-control:focus {
+        border-color: #1F4283;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(31, 66, 131, 0.25);
+    }
+
+    /* Quantity Filter */
+    .quantity-filter {
+        max-width: 400px;
+        height: 130px;
+        padding: 10px;
+        border: 2px solid #B1C6EC;
+        background-color: #EAF0FA;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .quantity-inputs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .input-group {
+        flex: 1;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #152C57;
+        margin-bottom: 5px;
+    }
+
+    .quantity-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #B1C6EC;
+        font-size: 12px;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+        background: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .quantity-input:focus {
+        outline: none;
+        border-color: #1F4283;
+        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+    }
+
+    .quantity-input:invalid {
+        border-color: #D72E2A;
+    }
+
+    .separator {
+        font-size: 15px;
+        font-weight: bold;
+        color: #5E89D9;
+        margin: 0 5px;
+        align-self: flex-end;
+        margin-bottom: 15px;
+    }
+
+    .quantity-preview {
+        background-color: #d4edda;
+        border: 1px solid #28a745;
+        padding: 12px;
+        margin-top: 15px;
+        font-size: 12px;
+        color: #155724;
+        line-height: 1.4;
+    }
+
+    .quantity-preview i {
+        margin-right: 6px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .months-input-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .number-input-inline {
+        width: 80px;
+        text-align: center;
+    }
+
+    .months-hint {
+        font-size: 10px;
+        color: #5E89D9;
+        font-weight: 400;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .modern-panel {
@@ -991,9 +1243,10 @@
         .action-buttons {
             flex-direction: column;
             align-items: stretch;
+            gap: 12px;
         }
 
-        .date-inputs {
+        .date-inputs-compact {
             flex-direction: column;
             align-items: stretch;
         }
@@ -1010,6 +1263,15 @@
         .section-title {
             font-size: 1.2rem;
         }
+
+        .district-county-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .district-section {
+            flex: none;
+        }
     }
 
     @media (max-width: 576px) {
@@ -1017,300 +1279,6 @@
             max-width: 100%;
         }
 
-        .number-input {
-            width: 100%;
-            text-align: left;
-        }
-    }
-
-    /* Filter Groups */
-    .time-filter-group .filter-section {
-        margin-bottom: 16px;
-    }
-
-        .time-filter-group .filter-section:last-child {
-            margin-bottom: 0;
-        }
-
-    /* Animations */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .results-section {
-        animation: fadeInUp 0.5s ease;
-    }
-
-    .no-data-section {
-        animation: fadeInUp 0.5s ease;
-    }
-    /* District/County Filter Styles */
-    .district-county-group-compact {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 10px;
-    }
-    .district-county-row {
-        display: flex;
-        gap: 15px;
-        align-items: flex-start;
-    }
-
-    .district-section {
-        flex: 0 0 140px; /* Fixed width for district */
-    }
-
-    .county-section-compact {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .sub-label {
-        font-weight: 500;
-        color: #4b5563;
-        font-size: 12px;
-        margin-bottom: 4px;
-        display: block;
-    }
-
-    .county-filter-compact {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        padding: 8px;
-    }
-
-    .county-actions-compact {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 8px;
-        padding-bottom: 6px;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-
-    .selected-count-compact {
-        color: #6b7280;
-        font-size: 12px;
-        font-weight: 500;
-        margin-left: auto;
-    }
-    .county-selection-container {
-        margin-bottom: 8px;
-    }
-    .county-checkboxes-compact {
-        max-height: 80px; /* Reduced from 150px */
-        overflow-y: auto;
-        border: 1px solid #f3f4f6;
-        border-radius: 4px;
-        padding: 4px; /* Reduced from 6px */
-    }
-    .county-checkbox-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        gap: 2px;
-    }
-
-    .no-district-message-compact {
-        text-align: center;
-        color: #6b7280;
-        font-style: italic;
-        padding: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        font-size: 11px;
-    }
-
-    .county-checkbox-item {
-        margin-bottom: 8px;
-    }
-
-   
-    .county-checkbox-label-compact {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        cursor: pointer;
-        padding: 3px 6px;
-        border-radius: 4px;
-        transition: background-color 0.2s ease;
-        margin-bottom: 0;
-        font-weight: 400;
-        font-size: 11px;
-    }
-
-        .county-checkbox-label:hover {
-            background-color: #f3f4f6;
-        }
-    .county-checkbox-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        gap: 2px;
-    }
-    .county-name-compact {
-        font-size: 12px;
-        color: #374151;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .selected-counties-inline {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        max-height: 60px;
-        overflow-y: auto;
-    }
-
-    .selected-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 8px;
-    }
-    .county-selection-container {
-        margin-bottom: 8px;
-    }
-    .county-tag-compact {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        color: white;
-        padding: 2px 6px; 
-        border-radius: 12px;
-        font-size: 10px;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 3px;
-    }
-
-    .remove-tag-compact {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        padding: 0;
-        margin: 0;
-        font-size: 8px;
-        opacity: 0.8;
-        transition: opacity 0.2s ease;
-    }
-
-        .remove-tag-compact:hover {
-            opacity: 1;
-        }
-
-    .form-control:focus {
-        border-color: #6366f1;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
-    }
-    .quantity-filter {
-        max-width: 400px;
-        height:130px;
-        padding: 10px;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        background-color: #f9f9f9;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .quantity-inputs {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
-        align-items: center;
-    }
-
-    .input-group {
-        flex: 1;
-    }
-
-        .input-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 5px;
-        }
-
-    .quantity-input {
-        width: 100%;
-        padding: 10px 12px;
-        border: 2px solid #ddd;
-        border-radius: 6px;
-        font-size: 12px;
-        transition: border-color 0.3s ease;
-        box-sizing: border-box;
-    }
-
-        .quantity-input:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-
-        .quantity-input:invalid {
-            border-color: #f44336;
-        }
-
-    .separator {
-        font-size: 15px;
-        font-weight: bold;
-        color: #666;
-        margin: 0 5px;
-        align-self: flex-end;
-        margin-bottom: 15px;
-    }
-
-    .quantity-preview {
-        background-color: #e8f5e8;
-        border: 1px solid #4CAF50;
-        border-radius: 6px;
-        padding: 12px;
-        margin-top: 15px;
-        font-size: 12px;
-        color: #2e7d32;
-        line-height: 1.4;
-    }
-
-        .quantity-preview i {
-            margin-right: 6px;
-        }
-
-   .error-message {
-        background-color: #ffebee;
-        border: 1px solid #f44336;
-        border-radius: 6px;
-        padding: 10px;
-        margin-top: 10px;
-        font-size: 12px;
-        color: #c62828;
-    }
-    .form-group {
-        margin-bottom: 20px;
-        position: relative;
-    }
-
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-        .error-message i {
-            margin-right: 6px;
-        }
-
-    @media (max-width: 480px) {
         .quantity-inputs {
             flex-direction: column;
             gap: 10px;
@@ -1320,111 +1288,4 @@
             display: none;
         }
     }
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-    }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-    .clear-button {
-        background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
-        color: white;
-        box-shadow: 0 8px 25px rgba(113, 128, 150, 0.3);
-    }
-
-        .clear-button:hover {
-            
-            box-shadow: 0 12px 35px rgba(113, 128, 150, 0.4);
-        }
-
-        .clear-button:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 15px rgba(113, 128, 150, 0.3);
-        }
-
-    .btn-success {
-        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        color: white;
-        box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
-    }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(72, 187, 120, 0.4);
-        }
-
-        .btn-success:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
-        }
-
-    .btn i {
-        font-size: 16px;
-    }
-
-    .btn-lg i {
-        font-size: 18px;
-    }
-
-    .export-section {
-        margin-left: auto;
-    }
-
-    /* Ripple effect */
-    .btn::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
-
-    .btn:active::before {
-        width: 300px;
-        height: 300px;
-    }
-
-    @media (max-width: 768px) {
-        .action-buttons {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 12px;
-        }
-
-        .export-section {
-            margin-left: 0;
-        }
-
-        .btn-lg {
-            padding: 14px 28px;
-            font-size: 16px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .btn-lg {
-            padding: 12px 24px;
-            font-size: 15px;
-        }
-
-        .action-buttons {
-            gap: 10px;
-        }
-    }
-
 </style>

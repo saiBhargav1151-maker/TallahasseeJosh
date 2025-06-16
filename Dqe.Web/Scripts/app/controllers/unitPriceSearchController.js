@@ -10,7 +10,7 @@
         $scope.lastSearchedPayItem = $scope.searchText;
         $scope.isLoading = false;
         $scope.draggingThumb = null;
-        $scope.monthsOfHistory = 36;
+        $scope.monthsOfHistory = 12;
         $scope.selectedBidStatus = "";
         $scope.searchAttempted = false;
         let debounceTimer;
@@ -127,9 +127,9 @@
             $scope.selectedMaxQuantity = null;
             $scope.selectedMinRank = null;
             $scope.selectedMaxRank = null;
-            $scope.monthsOfHistory = 36;
+            $scope.monthsOfHistory = 12;
             $scope.selectedBidStatus = "";
-            $scope.selectedContractType = null;
+            $scope.selectedContractType = "";
             $scope.selectedWorkTypeCode = null;
             $scope.startDate = null;
             $scope.endDate = null;
@@ -165,14 +165,12 @@
         };
         $scope.updateCounties = function () {
             const rawCounties = $scope.districtCountyMap[$scope.selectedDistrict] || [];
-            $scope.availableCounties = rawCounties.map(c => {
-                const clean = c.includes(" - ") ? c.split(" - ")[1].trim() : c.trim();
-                return {
-                    name: clean,
-                    selected: $scope.selectedCounties.includes(clean)
-                };
-            });
+            const cleaned = rawCounties.map(c => c.includes(" - ") ? c.split(" - ")[1].trim() : c.trim());
+
+            $scope.availableCounties = cleaned.map(c => ({ name: c, selected: true }));
+            $scope.selectedCounties = cleaned;
         };
+
         $scope.validateQuantity = function () {
             const min = $scope.selectedMinQuantity;
             const max = $scope.selectedMaxQuantity;
@@ -288,7 +286,7 @@
             $http.get('/UnitPriceSearch/GetPayItemDetails', {
                 params: {
                     number: $scope.selectedPayItemNumber,
-                    months: $scope.monthsOfHistory || 36,
+                    months: $scope.monthsOfHistory || 12,
                     contractWorkType: $scope.selectedWorkTypeCode || null,
                     startDate: $scope.startDate || null,
                     endDate: $scope.endDate || null,
@@ -334,6 +332,19 @@
                 });
 
                 $scope.bidHistoryData = data;
+                $scope.bidHistoryData.forEach(item => {
+                    const county = item.c;
+                    let marketArea = '';
+
+                    for (const [area, counties] of Object.entries($scope.marketAreaToCountiesMap)) {
+                        if (counties.includes(county)) {
+                            marketArea = area;
+                            break;
+                        }
+                    }
+
+                    item.MarketArea = marketArea || "Unknown";
+                });
 
             }).error(function (err) {
                 console.error("Error fetching bid data:", err);
@@ -349,19 +360,19 @@
             return date.toLocaleDateString('en-US'); // Format: MM/DD/YYYY
         }
        
-        // CSV Export Functionlity
+        //CSV Export
         $scope.exportClick = function () {
             let headers = [
                 "Contract Number", "Duration", "Project Number", "Letting Date", "Pay Item",
                 "Description", "Supplemental Description", "Units", "Quantity",
-                "Unit Price Bid", "Bid Amount", "Bid Status", "Bid Type", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "Primary County", "District",
+                "Unit Price Bid", "Bid Amount", "Bid Status", "Bid Type", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "Primary County", "Market Area", "District",
                 "Contract Type", "Work Type", "Proposal Type", " Executed Date", "Bidder Rank", "Bidder Name"
             ].join(",") + "\n";
 
             let rows = $scope.bidHistoryData.map(item => [
                 `"${item.p}"`, `"${item.Duration}"`, `"${item.ProjectNumber}"`, `"${formatDotNetDate(item.l)}"`, `"${item.ri}"`,
                 `"${item.Description.replace(/"/g, '""')}"`, `"${item.SupplementalDescription}"`, `"${item.CalculatedUnit}"`, `"${item.Quantity}"`,
-                `"${item.b}"`, `"${item.PvBidTotal}"`, `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`, `"${item.c}"`, `"${item.d}"`,
+                `"${item.b}"`, `"${item.PvBidTotal}"`, `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`, `"${item.c}"`, `"${item.MarketArea}"`, `"${item.d}"`,
                 `"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`, `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`,
                 `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${formatDotNetDate(item.ExecutedDate)}"`, `"${item.VendorRanking}"`, `"${item.VendorName}"`
             ].join(",")).join("\n");

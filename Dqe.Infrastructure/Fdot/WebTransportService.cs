@@ -80,7 +80,7 @@ namespace Dqe.Infrastructure.Fdot
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
-        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, string contractType=null, int months = 36, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties=null, string bidStatus=null, string[] marketCounties = null,  int? minRank=null, int? maxRank=null)
+        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, string contractType=null, int months = 12, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties=null, string bidStatus=null, string[] marketCounties = null,  int? minRank=null, int? maxRank=null)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
