@@ -5,12 +5,16 @@
         $scope.items = [];
         $scope.selectedPayItemNumber = null;
         $scope.bidHistoryData = [];
-        /*$scope.selectedMinRank = '';
-        $scope.selectedMaxRank = '';*/
         $scope.lastSearchedPayItem = $scope.searchText;
         $scope.isLoading = false;
         $scope.draggingThumb = null;
         $scope.monthsOfHistory = 12;
+        $scope.regionType = '';
+        $scope.regionOptions = [];
+        $scope.selectedRegions = [];
+        $scope.relatedCounties = [];
+        $scope.selectedRegionCounties = [];
+        $scope.isRegionDropdownOpen = false;
         $scope.selectedBidStatus = "";
         $scope.searchAttempted = false;
         let debounceTimer;
@@ -121,6 +125,12 @@
         $scope.selectedMarketArea = "";
         $scope.selectedMarketCounties = [];
         $scope.clearFilters = function () {
+            $scope.regionType = '';
+            $scope.regionOptions = [];
+            $scope.selectedRegions = [];
+            $scope.relatedCounties = [];
+            $scope.selectedRegionCounties = [];
+            $scope.isRegionDropdownOpen = false;
             $scope.searchText = "";
             $scope.selectedPayItemNumber = null;
             $scope.selectedMinQuantity = null;
@@ -142,18 +152,114 @@
             $scope.hasError = false;
             $scope.errorMessage = '';
         };
-        $scope.onMarketAreaChange = function () {
-            if ($scope.selectedMarketArea && $scope.marketAreaToCountiesMap[$scope.selectedMarketArea]) {
-                $scope.selectedMarketCounties = angular.copy($scope.marketAreaToCountiesMap[$scope.selectedMarketArea]);
+        $scope.onRegionTypeChange = function () {
+            $scope.selectedRegions = [];
+            $scope.relatedCounties = [];
+            $scope.selectedRegionCounties = [];
+            $scope.isRegionDropdownOpen = false;
+
+            if ($scope.regionType === 'district') {
+                $scope.regionOptions = Object.keys($scope.districtCountyMap);
+            } else if ($scope.regionType === 'market') {
+                $scope.regionOptions = Object.keys($scope.marketAreaToCountiesMap);
+            } else if ($scope.regionType === 'county') {
+                const allCounties = new Set();
+
+                Object.values($scope.districtCountyMap).forEach(countyList =>
+                    countyList.forEach(c => {
+                        const cleaned = c.includes(" - ") ? c.split(" - ")[1].trim() : c.trim();
+                        allCounties.add(cleaned);
+                    })
+                );
+
+                Object.values($scope.marketAreaToCountiesMap).forEach(countyList =>
+                    countyList.forEach(c => allCounties.add(c.trim()))
+                );
+
+                $scope.regionOptions = Array.from(allCounties).sort();
             } else {
-                $scope.selectedMarketCounties = [];
+                $scope.regionOptions = [];
+                $scope.relatedCounties = [];
+                $scope.selectedRegionCounties = null;
             }
         };
-        $scope.startDragging = function (thumb) {
-            $scope.draggingThumb = thumb;
-            document.addEventListener('mousemove', onThumbDrag);
-            document.addEventListener('mouseup', stopDragging);
+        $scope.toggleRegionSelection = function (option) {
+            const idx = $scope.selectedRegions.indexOf(option);
+            if (idx > -1) {
+                $scope.selectedRegions.splice(idx, 1);
+            } else {
+                $scope.selectedRegions.push(option);
+            }
+            $scope.onMultiRegionChange(); // update counties
         };
+
+        $scope.onMultiRegionChange = function () {
+            let combined = [];
+
+            $scope.selectedRegions.forEach(region => {
+                let rawList = [];
+
+                if ($scope.regionType === 'district') {
+                    rawList = $scope.districtCountyMap[region] || [];
+                } else if ($scope.regionType === 'market') {
+                    rawList = $scope.marketAreaToCountiesMap[region] || [];
+                } else if ($scope.regionType === 'county') {
+                    rawList = [region];
+                }
+
+                rawList.forEach(c => {
+                    const cleaned = c.includes(" - ") ? c.split(" - ")[1].trim() : c.trim();
+                    if (!combined.includes(cleaned)) combined.push(cleaned);
+                });
+            });
+
+            $scope.relatedCounties = combined.map(c => ({ name: c, selected: true }));
+            $scope.selectedRegionCounties = combined;
+        };
+
+        $scope.toggleMultiSelectDropdown = function () {
+            $scope.isRegionDropdownOpen = !$scope.isRegionDropdownOpen;
+        };
+
+       
+        document.addEventListener('click', function (event) {
+            const dropdown = document.querySelector('.multi-select-dropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                const scope = angular.element(dropdown).scope();
+                scope.$apply(() => {
+                    scope.isRegionDropdownOpen = false;
+                });
+            }
+        });
+        $scope.toggleRegionCounty = function (county) {
+            const index = $scope.selectedRegionCounties.indexOf(county.name);
+            if (county.selected && index === -1) {
+                $scope.selectedRegionCounties.push(county.name);
+            } else if (!county.selected && index > -1) {
+                $scope.selectedRegionCounties.splice(index, 1);
+            }
+        };
+
+        $scope.selectAllRegionCounties = function () {
+            $scope.relatedCounties.forEach(c => c.selected = true);
+            $scope.selectedRegionCounties = $scope.relatedCounties.map(c => c.name);
+        };
+
+        $scope.clearAllRegionCounties = function () {
+            $scope.relatedCounties.forEach(c => c.selected = false);
+            $scope.selectedRegionCounties = [];
+        };
+
+        $scope.removeCounty = function (countyName) {
+            const idx = $scope.selectedRegionCounties.indexOf(countyName);
+            if (idx > -1) $scope.selectedRegionCounties.splice(idx, 1);
+
+            const match = $scope.relatedCounties.find(c => c.name === countyName);
+            if (match) match.selected = false;
+        };
+
+        // Call on load
+        $scope.onRegionTypeChange();
         $scope.hasError = false;
         $scope.errorMessage = '';
         $scope.districts = Object.keys($scope.districtCountyMap);
@@ -216,12 +322,17 @@
         };
 
         $scope.removeCounty = function (countyName) {
-            const index = $scope.selectedCounties.indexOf(countyName);
-            if (index > -1) $scope.selectedCounties.splice(index, 1);
-
-            const match = $scope.availableCounties.find(c => c.name === countyName);
-            if (match) match.selected = false;
+            const idx = $scope.selectedRegionCounties.indexOf(countyName);
+            if (idx > -1) {
+                $scope.selectedRegionCounties.splice(idx, 1);
+            }
+            const match = $scope.relatedCounties.find(c => c.name === countyName);
+            if (match) {
+                match.selected = false;
+            }
+            $scope.selectedRegionCounties = angular.copy($scope.selectedRegionCounties);
         };
+
         // Fetch Pay Item Suggestions
         $scope.fetchPayItemSuggestions = function () {
             if (debounceTimer) $timeout.cancel(debounceTimer);
@@ -290,7 +401,7 @@
                     contractWorkType: $scope.selectedWorkTypeCode || null,
                     startDate: $scope.startDate || null,
                     endDate: $scope.endDate || null,
-                    counties: $scope.selectedCounties,
+                    counties: $scope.selectedRegionCounties,
                     bidStatus: $scope.selectedBidStatus || null,
                     contractType: $scope.selectedContractType || null,
                     marketCounties: $scope.selectedMarketCounties,

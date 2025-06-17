@@ -13,7 +13,7 @@
                            id="payItemInput"
                            ng-model="searchText"
                            ng-change="fetchPayItemSuggestions()"
-                           placeholder="e.g., 102 or Embarkment"
+                           placeholder="e.g., 0120 6 or Embankment"
                            autocomplete="off"
                            autocorrect="off"
                            autocapitalize="off"
@@ -155,23 +155,6 @@
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="modern-label">
-                    <i class="fas fa-map-marker-alt label-icon"></i>
-                    Market Area
-                </label>
-                <div class="select-wrapper">
-                    <select class="form-control modern-select"
-                            ng-model="selectedMarketArea"
-                            ng-change="onMarketAreaChange()">
-                        <option value="">-- All Market Areas --</option>
-                        <option ng-repeat="(area, counties) in marketAreaToCountiesMap" value="{{area}}">
-                            {{area}}
-                        </option>
-                    </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
-                </div>
-            </div>
             </div>
 
 
@@ -238,70 +221,105 @@
 
 
         </div>
-        <div class="col-md-5">
-            <div class="form-group district-county-group-compact">
+        <div class="col-md-4">
+            <div class="form-group district-county-group">
                 <label class="modern-label">
                     <i class="fas fa-map-marker-alt label-icon"></i>
-                    Select Primary Counties by District:
+                    Select Primary Counties by Region Type:
                 </label>
 
-                <!-- District Selection - Compact -->
-                <div class="district-county-row">
-                    <div class="district-section">
-                        <label for="districtSelect" class="sub-label">District:</label>
-                        <div class="select-wrapper">
-                            <select id="districtSelect"
-                                    class="form-control modern-select compact-select"
-                                    ng-model="selectedDistrict"
-                                    ng-change="updateCounties()">
-                                <option value="">-- All Districts--</option>
-                                <option ng-repeat="district in districts" value="{{district}}">{{district}}</option>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
+                <!-- Region Type Selection -->
+                <div class="form-group">
+                    <label class="sub-label">Region Type:</label>
+                    <div class="select-wrapper">
+                        <select class="form-control modern-select compact-select"
+                                ng-model="regionType"
+                                ng-change="onRegionTypeChange()">
+                            <option value="">-- Statewide --</option>
+                            <option value="district">District</option>
+                            <option value="market">Market Area</option>
+                            <option value="county">County</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
                     </div>
+                </div>
 
-                    <div class="county-section-compact">
-                        <label class="sub-label">Counties:</label>
-                        <div class="county-filter-compact">
-                            <!-- County Actions Row -->
-                            <div class="county-actions-compact">
-                                <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllCounties()">
-                                    <i class="fas fa-check-double"></i> All
-                                </button>
-                                <button type="button" class=" btn-xs btn-outline-secondary" ng-click="clearAllCounties()">
-                                    <i class="fas fa-times"></i> Clear
-                                </button>
-                                <span class="selected-count-compact">{{selectedCounties.length}} selected</span>
-                            </div>
-
-                            <!-- County Selection - Collapsible -->
-                            <div class="county-selection-container">
-                                <div ng-if="!selectedDistrict" class="no-district-message-compact">
-                                    <i class="fas fa-info-circle"></i>
-                                    Select district first
+                <!-- Region Name Selection with Custom Multi-Select Dropdown -->
+                <div class="form-group" ng-show="regionType === 'district' || regionType === 'market' || regionType === 'county'">
+                    <label class="sub-label">
+                        {{ regionType === 'district' ? 'Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
+                    </label>
+                    <div class="multi-select-wrapper">
+                        <div class="multi-select-dropdown" ng-click="toggleMultiSelectDropdown()">
+                            <div class="multi-select-trigger" id="multiSelectTrigger">
+                                <div class="multi-select-values" id="multiSelectValues">
+                                    <span ng-if="!selectedRegions.length" class="multi-select-placeholder">
+                                        Select {{ regionType === 'district' ? 'Districts' : regionType === 'market' ? 'Market Areas' : 'Counties' }}
+                                    </span>
+                                    <span class="multi-select-tag" ng-repeat="region in selectedRegions">
+                                        {{region}}
+                                        <button type="button" class="remove-tag" ng-click="toggleRegionSelection(region)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </span>
                                 </div>
-                                <div ng-if="selectedDistrict" class="county-checkboxes-compact">
-                                    <div class="county-checkbox-grid">
-                                        <label class="county-checkbox-label-compact" ng-repeat="county in availableCounties">
-                                            <input type="checkbox"
-                                                   ng-model="county.selected"
-                                                   ng-change="toggleCounty(county)">
-                                            <span class="county-name-compact">{{county.name}}</span>
-                                        </label>
-                                    </div>
+                                <i class="fas fa-chevron-down multi-select-arrow"></i>
+                            </div>
+                            <div class="multi-select-options" id="multiSelectOptions" ng-class="{'show': isRegionDropdownOpen}">
+                                <!-- Options will be populated by Angular -->
+                                <div class="multi-select-option" ng-repeat="option in regionOptions"
+                                     ng-class="{'selected': selectedRegions.indexOf(option) !== -1}"
+                                     ng-click="toggleRegionSelection(option)">
+                                    <div class="multi-select-checkbox"></div>
+                                    <span>{{option}}</span>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Selected Counties Display - Inline -->
-                            <div class="selected-counties-inline" ng-if="selectedCounties.length > 0">
-                                <span class="county-tag-compact" ng-repeat="county in selectedCounties">
-                                    {{county}}
-                                    <button type="button" class="remove-tag-compact" ng-click="removeCounty(county)">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </span>
+                        <!-- Hidden original select for Angular binding -->
+                        <select multiple class="form-control modern-select compact-select" style="display: none;"
+                                ng-model="selectedRegions"
+                                ng-change="onMultiRegionChange()"
+                                ng-options="opt for opt in regionOptions">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Related Counties -->
+                <div class="form-group" ng-if="relatedCounties.length > 0 && regionType !== 'county'">
+                    <label class="sub-label">Counties:</label>
+                    <div class="county-filter-compact">
+                        <!-- County Actions -->
+                        <div class="county-actions-compact">
+                            <button type="button" class="btn-xs btn-outline-primary" ng-if="regionType !== 'county'" ng-click="selectAllRegionCounties()">
+                                <i class="fas fa-check-double"></i> All
+                            </button>
+                            <button type="button" class="btn-xs btn-outline-secondary" ng-if="regionType !== 'county'" ng-click="clearAllRegionCounties()">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                            <span class="selected-count-compact">{{selectedRegionCounties.length}} selected</span>
+                        </div>
+
+                        <!-- Checkbox Grid -->
+                        <div class="county-checkboxes-compact" ng-if="regionType !== 'county'">
+                            <div class="county-checkbox-grid">
+                                <label class="county-checkbox-label-compact" ng-repeat="county in relatedCounties">
+                                    <input type="checkbox"
+                                           ng-model="county.selected"
+                                           ng-change="toggleRegionCounty(county)">
+                                    <span class="county-name-compact">{{county.name}}</span>
+                                </label>
                             </div>
+                        </div>
+
+                        <!-- Selected County Tags -->
+                        <div class="selected-counties-inline" ng-if="selectedRegionCounties.length > 0">
+                            <span class="county-tag-compact" ng-repeat="county in selectedRegionCounties">
+                                {{county}}
+                                <button type="button" class="remove-tag-compact" ng-click="removeCounty(county); $event.stopPropagation()" ng-if="regionType !== 'county'">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -592,6 +610,7 @@
     /* Select Styling */
     .select-wrapper {
         position: relative;
+        display: block;
     }
 
     .modern-select {
@@ -970,7 +989,14 @@
         border: 2px solid #B1C6EC;
         padding: 10px;
     }
-
+    .district-county-group {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 10px;
+        
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
     .district-county-row {
         display: flex;
         gap: 15px;
@@ -1288,4 +1314,174 @@
             display: none;
         }
     }
+    /* Custom Multi-Select Dropdown */
+    .multi-select-wrapper {
+        position: relative;
+    }
+
+    /* Dropdown Container */
+    .multi-select-dropdown {
+        position: relative;
+        cursor: pointer;
+    }
+
+    /* Trigger Box */
+    .multi-select-trigger {
+        width: 100%;
+        padding: 12px 40px 12px 16px;
+        border: 2px solid #003366;
+        border-radius: 8px;
+        background: #fff;
+        font-size: 14px;
+        font-weight: 500;
+        color: #003366;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+        min-height: 46px;
+    }
+
+        .multi-select-trigger:hover,
+        .multi-select-trigger.active {
+            border-color: #002244;
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+
+    .multi-select-placeholder {
+        color: #66788a;
+    }
+
+    /* Selected Tag Display */
+    .multi-select-values {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        flex: 1;
+    }
+
+    .multi-select-tag {
+        background: #003366;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+        .multi-select-tag .remove-tag {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0;
+            opacity: 0.7;
+        }
+
+            .multi-select-tag .remove-tag:hover {
+                opacity: 1;
+            }
+
+    /* Arrow Icon */
+    .multi-select-arrow {
+        color: #a0aec0;
+        transition: all 0.2s ease;
+    }
+
+    .multi-select-trigger.active .multi-select-arrow {
+        transform: rotate(180deg);
+        color: #003366;
+    }
+
+    /* Dropdown Menu */
+    .multi-select-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #cbd5e0;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+    }
+
+        .multi-select-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+    /* Dropdown Items */
+    .multi-select-option {
+        padding: 10px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+        .multi-select-option:hover {
+            background: #f1f5f9;
+        }
+
+        .multi-select-option.selected {
+            background: #e0ecf7;
+            color: #003366;
+            font-weight: 600;
+        }
+
+    /* Checkbox Style */
+    .multi-select-checkbox {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .multi-select-option.selected .multi-select-checkbox {
+        background: #003366;
+        border-color: #003366;
+    }
+
+        .multi-select-option.selected .multi-select-checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+    /* Scrollbar Styling */
+    .multi-select-options::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .multi-select-options::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .multi-select-options::-webkit-scrollbar-thumb {
+        background: #003366;
+        border-radius: 3px;
+    }
+
+        .multi-select-options::-webkit-scrollbar-thumb:hover {
+            background: #002244;
+        }
 </style>
