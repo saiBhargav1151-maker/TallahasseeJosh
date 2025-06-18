@@ -358,14 +358,13 @@
                 });
             }, 300);
         };
-        // clear the text box input
         $scope.clearSearchText = function () {
             $scope.searchText = "";
             $scope.items = [];
             $scope.selectedPayItemNumber = null;
         };
 
-        // Select Pay Item
+
         $scope.selectPayItem = function (item) {
             $scope.searchText = item.Description;
             $scope.selectedPayItemNumber = item.Name;
@@ -445,11 +444,12 @@
                 $scope.bidHistoryData = data;
                 $scope.bidHistoryData.forEach(item => {
                     const county = item.c;
+                    const normalizedCounty = county ? county.trim().toUpperCase() : '';
                     let marketArea = '';
 
-                    for (const [areaName, countyList] of Object.entries($scope.marketAreaToCountiesMap)) {
-                        if (countyList.includes(county)) {
-                            marketArea = areaName;
+                    for (const [area, counties] of Object.entries($scope.marketAreaToCountiesMap)) {
+                        if (counties.some(c => c.trim().toUpperCase() === normalizedCounty)) {
+                            marketArea = area;
                             break;
                         }
                     }
@@ -509,22 +509,41 @@
             $timeout(function () {
                 requestAnimationFrame(function () {
                     const canvas = document.getElementById("priceChart");
-                    /*if (!canvas) {
-                        if (retryCount > 0) waitForCanvasAndRender(retryCount - 1);
-                        return; retryCount = 10
-                    }*/
+                    if (!canvas) {
+                        $scope.isChartLoading = false;
+                        return;
+                    }
 
                     const ctx = canvas.getContext("2d");
+
+                    if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) {
+                        $scope.isChartLoading = false;
+                        return;
+                    }
+
                     const quantities = $scope.bidHistoryData.map(item => item.Quantity || 0);
                     const prices = $scope.bidHistoryData.map(item => item.b || 0);
-                    const outlierPoints = [], normalPoints = [];
 
+                    if (quantities.length === 0 || prices.length === 0) {
+                        $scope.isChartLoading = false;
+                        return;
+                    }
+
+                    const outlierPoints = [];
+                    const normalPoints = [];
                     const bidPoints = [];
+
                     for (let i = 0; i < quantities.length; i++) {
                         bidPoints.push({ x: quantities[i], y: prices[i] });
                     }
 
                     const totalQty = quantities.reduce((sum, q) => sum + q, 0);
+
+                    if (totalQty === 0) {
+                        $scope.isChartLoading = false;
+                        return;
+                    }
+
                     const weightedAvg = quantities.reduce((sum, q, i) => sum + (q * prices[i]), 0) / totalQty;
 
                     const weightedStdDev = Math.sqrt(
@@ -535,15 +554,21 @@
                         const isOutlier = Math.abs(point.y - weightedAvg) > weightedStdDev;
                         const formattedPoint = { x: point.x, y: point.y };
 
-                        if (isOutlier) outlierPoints.push(formattedPoint);
-                        else normalPoints.push(formattedPoint);
+                        if (isOutlier) {
+                            outlierPoints.push(formattedPoint);
+                        } else {
+                            normalPoints.push(formattedPoint);
+                        }
                     });
 
-                    const n = quantities.length;
-                    const meanX = quantities.reduce((a, b) => a + b, 0) / n;
-                    const meanY = prices.reduce((a, b) => a + b, 0) / n;
-                    const slope = quantities.map((x, i) => (x - meanX) * (prices[i] - meanY)).reduce((a, b) => a + b, 0) /
-                        quantities.map(x => Math.pow(x - meanX, 2)).reduce((a, b) => a + b, 0) || 0;
+                    const numPoints = quantities.length;
+                    const meanX = quantities.reduce((a, b) => a + b, 0) / numPoints;
+                    const meanY = prices.reduce((a, b) => a + b, 0) / numPoints;
+
+                    const numerator = quantities.map((x, i) => (x - meanX) * (prices[i] - meanY)).reduce((a, b) => a + b, 0);
+                    const denominator = quantities.map(x => Math.pow(x - meanX, 2)).reduce((a, b) => a + b, 0);
+
+                    const slope = denominator !== 0 ? numerator / denominator : 0;
                     const intercept = meanY - slope * meanX;
 
                     const uniqueQuantities = [...new Set(quantities)].sort((a, b) => a - b);
@@ -556,7 +581,11 @@
                         { x: maxQty, y: weightedAvg }
                     ];
 
-                    if ($scope.chartInstance) $scope.chartInstance.destroy();
+                    // Destroy existing chart
+                    if ($scope.chartInstance) {
+                        $scope.chartInstance.destroy();
+                        $scope.chartInstance = null;
+                    }
 
                     $scope.chartInstance = new Chart(ctx, {
                         type: 'scatter',
@@ -623,6 +652,7 @@
                         }
                     });
 
+                    // Calculate stats
                     $scope.chartStats = {
                         avg: weightedAvg,
                         weightedAvgNoOutliers: $scope.weightedAvgNoOutliers,
@@ -637,10 +667,36 @@
                 });
             }, 0);
         }
+
+        $scope.getBidTypeLabel = function (code) {
+            return code ? ($scope.bidTypeMap[code] || "Unknown") : "Unknown";
+        };
+
+        $scope.getBidStatusLabel = function (code) {
+            return code ? ($scope.bidStatusMap[code] || "Unknown") : "Unknown";
+        };
+        $scope.fetchPayItemSuggestions = function () {
+            if (debounceTimer) $timeout.cancel(debounceTimer);
+
+            if (!$scope.searchText || $scope.searchText.length < 2) {
+                $scope.items = [];
+                $scope.selectedPayItemNumber = null;
+                return;
+            }
+
+            debounceTimer = $timeout(function () {
+                $http.get('/UnitPriceSearch/GetPayItemSuggestions', {
+                    params: { input: $scope.searchText }
+                }).success(function (data) {
+                    $scope.items = data;
+                }).error(function (err) {
+                    console.error("Error fetching pay item suggestions:", err);
+                });
+            }, 300);
+        };
     }
 ]);
 
-// calling from HTML Dynamically, Filter to convert MS JSON date to JavaScript Date
 angular.module('dqeControllers')
     .filter('msDateToJS', function () {
         return function (input) {
