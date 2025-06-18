@@ -442,19 +442,33 @@
                 });
 
                 $scope.bidHistoryData = data;
-                $scope.bidHistoryData.forEach(item => {
-                    const county = item.c;
-                    const normalizedCounty = county ? county.trim().toUpperCase() : '';
-                    let marketArea = '';
+                $scope.bidHistoryData.forEach(function (bidItem) {
+                    var itemCounty = bidItem.c;
+                    var normalizedItemCounty = itemCounty ? itemCounty.trim().toUpperCase() : '';
+                    var foundMarketArea = '';
 
-                    for (const [area, counties] of Object.entries($scope.marketAreaToCountiesMap)) {
-                        if (counties.some(c => c.trim().toUpperCase() === normalizedCounty)) {
-                            marketArea = area;
-                            break;
+                    if (normalizedItemCounty) {
+                        var marketAreaKeys = Object.keys($scope.marketAreaToCountiesMap);
+
+                        for (var keyIndex = 0; keyIndex < marketAreaKeys.length; keyIndex++) {
+                            var currentMarketArea = marketAreaKeys[keyIndex];
+                            var countyList = $scope.marketAreaToCountiesMap[currentMarketArea];
+
+                            for (var countyIndex = 0; countyIndex < countyList.length; countyIndex++) {
+                                var currentCounty = countyList[countyIndex].trim().toUpperCase();
+                                if (currentCounty === normalizedItemCounty) {
+                                    foundMarketArea = currentMarketArea;
+                                    break;
+                                }
+                            }
+
+                            if (foundMarketArea) {
+                                break;
+                            }
                         }
                     }
 
-                    item.MarketArea = marketArea || "Unknown";
+                    bidItem.MarketArea = foundMarketArea || "Unknown";
                 });
 
             }).error(function (err) {
