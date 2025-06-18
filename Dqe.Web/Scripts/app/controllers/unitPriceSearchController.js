@@ -73,33 +73,33 @@
         $scope.districtCountyMap = {
             'District 1 (Southwest Florida)': [
                 '01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY',
-                '09 - HIGHLANDS', '12 - LEE', '13 - MANATEE', '16 - POLK', '17 - SARASOTA', '91 - OKEECHOBEE', '99 - DIST/ST-WIDE'
+                '09 - HIGHLANDS', '12 - LEE', '13 - MANATEE', '16 - POLK', '17 - SARASOTA', '91 - OKEECHOBEE'
             ],
             'District 2 (Northeast Florida)': [
                 '26 - ALACHUA', '27 - BAKER', '28 - BRADFORD', '29 - COLUMBIA', '30 - DIXIE', '31 - GILCHRIST',
                 '32 - HAMILTON', '33 - LAFAYETTE', '34 - LEVY', '35 - MADISON', '37 - SUWANNEE', '38 - TAYLOR',
-                '39 - UNION', '71 - CLAY', '72 - DUVAL', '74 - NASSAU', '76 - PUTNAM', '78 - ST JOHNS', '99 - DIST/ST-WIDE'
+                '39 - UNION', '71 - CLAY', '72 - DUVAL', '74 - NASSAU', '76 - PUTNAM', '78 - ST JOHNS'
             ],
             'District 3 (Northwest Florida)': [
                 '46 - BAY', '47 - CALHOUN', '48 - ESCAMBIA', '49 - FRANKLIN', '50 - GADSDEN', '51 - GULF',
                 '52 - HOLMES', '53 - JACKSON', '54 - JEFFERSON', '55 - LEON', '56 - LIBERTY', '57 - OKALOOSA',
-                '58 - SANTA ROSA', '59 - WAKULLA', '60 - WALTON', '61 - WASHINGTON', '99 - DIST/ST-WIDE'
+                '58 - SANTA ROSA', '59 - WAKULLA', '60 - WALTON', '61 - WASHINGTON'
             ],
             'District 4 (Southeast Florida)': [
-                '86 - BROWARD', '88 - INDIAN RIVER', '89 - MARTIN', '93 - PALM BEACH', '94 - ST LUCIE', '99 - DIST/ST-WIDE'
+                '86 - BROWARD', '88 - INDIAN RIVER', '89 - MARTIN', '93 - PALM BEACH', '94 - ST LUCIE'
             ],
             'District 5 (Central Florida)': [
                 '11 - LAKE', '18 - SUMTER', '36 - MARION', '70 - BREVARD', '73 - FLAGLER',
-                '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA', '99 - DIST/ST-WIDE'
+                '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA'
             ],
             'District 6 (South Florida)': [
-                '87 - MIAMI-DADE', '90 - MONROE', '99 - DIST/ST-WIDE'
+                '87 - MIAMI-DADE', '90 - MONROE'
             ],
             'District 7 (West Central Florida)': [
-                '02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS', '99 - DIST/ST-WIDE'
+                '02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS'
             ],
             "Turnpike": [
-                'TURNPIKE'
+                'TURNPIKE', '99 - DIST/ST-WIDE'
             ]
         };
         $scope.marketAreaToCountiesMap = {

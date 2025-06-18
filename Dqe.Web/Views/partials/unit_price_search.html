@@ -155,6 +155,7 @@
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
             </div>
+
             </div>
 
 
@@ -428,7 +429,7 @@
                                 <th>District</th>
                                 <th>Contract Type</th>
                                 <th>Work Type</th>
-                                <th>Category</th>
+                               <!-- <th>Category</th>-->
                                 <th>Proposal Type</th>
                                 <th>Executed Date</th>
                                 <th>Bidder Rank</th>
@@ -458,7 +459,7 @@
                                 <td>{{ item.d }}</td>
                                 <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
                                 <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
-                                <td>{{ item.CategoryDes }}</td>
+                               <!-- <td>{{ item.CategoryDescription }}</td>-->
                                 <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
                                 <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
                                 <td>{{ item.VendorRanking }}</td>

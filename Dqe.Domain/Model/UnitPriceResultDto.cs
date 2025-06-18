@@ -35,8 +35,8 @@ namespace Dqe.Domain.Model
         public virtual DateTime ObsoleteDate { get; set; }
         public virtual string BidType { get; set; }
         public virtual int? VendorRanking { get; set; }
-        public virtual string CategoryDes { get; set; }
-        
+        public string CategoryDescription { get; set; }
+
     }
     public class PayItemDTO
     {

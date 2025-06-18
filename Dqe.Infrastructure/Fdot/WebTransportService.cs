@@ -95,6 +95,9 @@ namespace Dqe.Infrastructure.Fdot
                     .CreateAlias("p.Milestones", "m")
                     .CreateAlias("pv.MyRefVendor", "rv")
                     .CreateAlias("p.Projects", "prj")
+                    /*.CreateAlias("prj.Categories", "cat")
+                    .CreateAlias("cat.ProjectItems", "catPi")
+                     .CreateAlias("catPi.MyRefItem", "catRi")*/
                     .Add(Restrictions.Eq("ri.Name", payItem))
                     .Add(Restrictions.Or(
                         Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
@@ -174,6 +177,7 @@ namespace Dqe.Infrastructure.Fdot
                         .Add(Projections.Property("pv.BidType"), "BidType")
                         .Add(Projections.Property("pv.VendorRanking"), "VendorRanking")
                         .Add(Projections.Property("ri.ObsoleteDate"), "ObsoleteDate")
+                        /*.Add(Projections.Property("cat.Description"), "CategoryDescription")*/
 
                     )
 
