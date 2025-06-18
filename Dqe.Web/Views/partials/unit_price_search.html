@@ -371,6 +371,10 @@
                                 <div class="stat-value">${{ chartStats.avg | number:2 }}</div>
                             </div>
                             <div class="stat-card">
+                                <div class="stat-label">Weighted Avg (No Outliers)</div>
+                                <div class="stat-value">${{ chartStats.weightedAvgNoOutliers | number:2 }}</div>
+                            </div>
+                            <div class="stat-card">
                                 <div class="stat-label">Total Contracts</div>
                                 <div class="stat-value">{{ chartStats.totalContracts }}</div>
                             </div>
@@ -422,7 +426,7 @@
                                 <th>Bid Status</th>
                                 <th>Bid Type</th>
                                 <!--<th>Weighted Avg</th>-->
-                                <th>Weighted Avg (No Outliers)</th>
+                                <!--<th>Weighted Avg (No Outliers)</th>-->
                                 <th>Outlier</th>
                                 <th>Primary County</th>
                                 <th>Market Area</th>
@@ -452,7 +456,7 @@
                                 <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
                                 <td>{{ getBidTypeLabel(item.BidType) }}</td>
                                 <!--<td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>-->
-                                <td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>
+                                <!--<td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>-->
                                 <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
                                 <td>{{ item.c }}</td>
                                 <td>{{ item.MarketArea }}</td>

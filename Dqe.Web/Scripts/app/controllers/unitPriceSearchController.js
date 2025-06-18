@@ -437,7 +437,7 @@
 
                 const cleanTotalQty = cleanQty.reduce((sum, q) => sum + q, 0);
                 const weightedAvgNoOutliers = cleanQty.reduce((sum, q, i) => sum + (q * cleanPrices[i]), 0) / cleanTotalQty;
-
+                $scope.weightedAvgNoOutliers = weightedAvgNoOutliers;
                 data.forEach(item => {
                     item.WeightedAvgNoOutliers = weightedAvgNoOutliers;
                 });
@@ -625,6 +625,7 @@
 
                     $scope.chartStats = {
                         avg: weightedAvg,
+                        weightedAvgNoOutliers: $scope.weightedAvgNoOutliers,
                         totalContracts: new Set($scope.bidHistoryData.map(item => item.p)).size,
                         totalBidAmount: $scope.bidHistoryData.reduce((sum, item) => sum + (item.PvBidTotal || 0), 0),
                         totalQuantity: $scope.bidHistoryData.reduce((sum, item) => sum + (item.Quantity || 0), 0),
