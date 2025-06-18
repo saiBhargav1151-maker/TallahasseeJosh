@@ -447,9 +447,9 @@
                     const county = item.c;
                     let marketArea = '';
 
-                    for (const [area, counties] of Object.entries($scope.marketAreaToCountiesMap)) {
-                        if (counties.includes(county)) {
-                            marketArea = area;
+                    for (const [areaName, countyList] of Object.entries($scope.marketAreaToCountiesMap)) {
+                        if (countyList.includes(county)) {
+                            marketArea = areaName;
                             break;
                         }
                     }
