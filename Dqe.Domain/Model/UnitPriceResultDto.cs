@@ -36,6 +36,9 @@ namespace Dqe.Domain.Model
         public virtual string BidType { get; set; }
         public virtual int? VendorRanking { get; set; }
         public string CategoryDescription { get; set; }
+        public string WorkMixDescription { get; set; }
+        public long riId { get; set; }
+        public long ProjectId { get; set; }
 
     }
     public class PayItemDTO

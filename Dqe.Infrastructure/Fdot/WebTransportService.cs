@@ -18,6 +18,7 @@ using ProjectItem = Dqe.Domain.Model.Wt.ProjectItem;
 using Proposal = Dqe.Domain.Model.Wt.Proposal;
 using ProposalItem = Dqe.Domain.Model.Wt.ProposalItem;
 using NHibernate;
+using NHibernate.Type;
 
 namespace Dqe.Infrastructure.Fdot
 {
@@ -80,10 +81,25 @@ namespace Dqe.Infrastructure.Fdot
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
-        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, string contractType=null, int months = 12, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties=null, string bidStatus=null, string[] marketCounties = null,  int? minRank=null, int? maxRank=null)
+        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, string contractType = null, int months = 12, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties = null, string bidStatus = null, string[] marketCounties = null, int? minRank = null, int? maxRank = null)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
+                /* var categorySubquery = DetachedCriteria.For<Category>("catSub")
+                     .CreateAlias("catSub.ProjectItems", "piSub")
+                     .CreateAlias("piSub.MyRefItem", "riSub")
+                     .Add(Restrictions.EqProperty("riSub.Id", "ri.Id"))
+                     .Add(Restrictions.EqProperty("piSub.MyProject.Id", "prj.Id"))
+                     .SetProjection(Projections.Property("catSub.Description"));*/
+                var categorySubquery = DetachedCriteria.For<Category>("catSub")
+                             .CreateAlias("catSub.ProjectItems", "piSub")
+                             .CreateAlias("piSub.MyRefItem", "riSub")
+                             .CreateAlias("piSub.MyProject", "projSub")
+                             .Add(Restrictions.EqProperty("riSub.Id", "ri.Id"))
+                             .Add(Restrictions.EqProperty("projSub.Id", "prj.Id"))
+                             .SetProjection(Projections.Property("catSub.Description"))
+                             .SetMaxResults(1);
+
                 var query = session.CreateCriteria<ProposalItem>()
                     .CreateAlias("MyRefItem", "ri")
                     .CreateAlias("Bids", "b")
@@ -156,10 +172,12 @@ namespace Dqe.Infrastructure.Fdot
                         .Add(Projections.Property("pv.BidStatus"), "BidStatus")
                         .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
                         .Add(Projections.Property("ri.Name"), "ri")
+                        .Add(Projections.Property("ri.Id"), "riId")
                         .Add(Projections.Property("Id"), "Id")
                         .Add(Projections.Property("Quantity"), "Quantity")
                         .Add(Projections.Property("b.BidPrice"), "b")
                         .Add(Projections.Property("prj.ProjectNumber"), "ProjectNumber")
+                        .Add(Projections.Property("prj.Id"), "ProjectId")
                         .Add(Projections.Property("p.ProposalNumber"), "p")
                         .Add(Projections.Property("p.ProposalType"), "ProposalType")
                         .Add(Projections.Property("p.ContractType"), "ContractType")
@@ -177,9 +195,9 @@ namespace Dqe.Infrastructure.Fdot
                         .Add(Projections.Property("pv.BidType"), "BidType")
                         .Add(Projections.Property("pv.VendorRanking"), "VendorRanking")
                         .Add(Projections.Property("ri.ObsoleteDate"), "ObsoleteDate")
-                        /*.Add(Projections.Property("cat.Description"), "CategoryDescription")*/
-
-                    )
+                         /*.Add(Projections.Property("cat.Description"), "CategoryDescription")*/
+                         .Add(Projections.SubQuery(categorySubquery), "CategoryDescription")
+                        )
 
                     .SetResultTransformer(NHibernate.Transform.Transformers.AliasToBean<ProposalItemDTO>());
 
@@ -187,7 +205,6 @@ namespace Dqe.Infrastructure.Fdot
 
                 return res.Distinct().ToList();
             }
-
         }
 
         public IEnumerable<CodeTable> GetCodeTables()
@@ -511,7 +528,7 @@ namespace Dqe.Infrastructure.Fdot
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 ProposalItem proposalItem = null;
-                var res= session
+                var res = session
                     .QueryOver<Proposal>()
                     .Where(i => !i.IsRejected)
                     .Where(i => i.ProposalNumber == number)
@@ -1166,7 +1183,7 @@ namespace Dqe.Infrastructure.Fdot
                         }
                         transaction.Commit();
                     }
-                    catch(Exception exception)
+                    catch (Exception exception)
                     {
                         try
                         {
@@ -1381,8 +1398,8 @@ namespace Dqe.Infrastructure.Fdot
                                         records = queryUpdateProjectItem
                                             .SetParameter("price", Math.Round(projectItem.Price, 2))
                                             .SetParameter("isLowCost", categorySet.Included)
-                                            .SetParameter("extendedAmount", Math.Round(projectItem.Quantity*projectItem.Price, 2, MidpointRounding.AwayFromZero))
-                                            .SetParameter("pricingComments", Enum.GetName(typeof (PriceSetType), projectItem.PriceSet))
+                                            .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2, MidpointRounding.AwayFromZero))
+                                            .SetParameter("pricingComments", Enum.GetName(typeof(PriceSetType), projectItem.PriceSet))
                                             .SetParameter("lastUpdatedDate", DateTime.Now)
                                             .SetParameter("lastUpdatedBy", "DQE")
                                             .SetParameter("id", projectItem.WtId)
@@ -1412,8 +1429,8 @@ namespace Dqe.Infrastructure.Fdot
                                 .SetParameter("id", projectItem.WtId)
                                 .ExecuteUpdate();
                                 if (records == 0) throw new InvalidOperationException("Updated unexpected proposal item");
-                            }    
-                        }  
+                            }
+                        }
                         transaction.Commit();
                     }
                     catch (Exception exception)
@@ -1865,7 +1882,7 @@ namespace Dqe.Infrastructure.Fdot
                     //22 - intent to award
                     //24 - intent to reject
                     //SA - scope alternate rejected
-                  
+
                     .WhereRestrictionOn(() => proposal.ProposalStatus).IsIn(new object[] { "01", "02", "03", "04", "06", "07", "22", "24", "SA" })
                     .OrderBy(() => refItem.Name).Asc
                     .OrderBy(() => letting.LettingDate).Desc
@@ -2037,7 +2054,7 @@ namespace Dqe.Infrastructure.Fdot
                 Letting letting = null;
                 Proposal proposal = null;
 
-                var res= session
+                var res = session
                     .QueryOver(() => proposal)
                     .Where(() => proposal.ProposalNumber == number)
                     .Left.JoinQueryOver(() => proposal.MyLetting, () => letting)

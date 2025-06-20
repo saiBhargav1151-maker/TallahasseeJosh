@@ -98,9 +98,9 @@
             'District 7 (West Central Florida)': [
                 '02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS'
             ],
-            "Turnpike": [
-                'TURNPIKE', '99 - DIST/ST-WIDE'
-            ]
+            "Turnpike ": [
+                'TURNPIKE', 
+            ], "DIST/ST-WIDE": ['99 - DIST/ST-WIDE']
         };
         $scope.marketAreaToCountiesMap = {
             "Area 01": ["BAY", "ESCAMBIA", "OKALOOSA", "SANTA ROSA", "WALTON"],

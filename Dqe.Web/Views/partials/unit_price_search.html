@@ -1,36 +1,26 @@
 ﻿<div class="panel panel-default modern-panel">
     <!-- Input -->
     <div class="row input-section">
-        <div class="col-md-3">
+        <!-- Group 1: Item Filters -->
+        <div class="col-md-4">
+            <div class="section-header">
+                <h4 class="section-title">Item Filters</h4>
+            </div>
+
+            <!-- Pay Item Input -->
             <div class="form-group search-input-group">
                 <label for="payItemInput" class="modern-label">
                     <i class="fas fa-hammer label-icon"></i>
                     Enter Pay Item Number or Description: <span class="label-hint-compact" style="color: red;"> * required</span>
                 </label>
-
                 <div class="input-wrapper">
-                    <input type="text"
-                           id="payItemInput"
-                           ng-model="searchText"
-                           ng-change="fetchPayItemSuggestions()"
-                           placeholder="e.g., 0120 6 or Embankment"
-                           autocomplete="off"
-                           autocorrect="off"
-                           autocapitalize="off"
-                           spellcheck="false"
-                           class="form-control modern-input"
-                           maxlength="180"
-                           required />
-
-                    <!-- Clear (X) -->
-                    <span ng-if="searchText"
-                          ng-click="clearSearchText()"
-                          class=" clear-button " style="transform: translateY(-50%);">
-                        
+                    <input type="text" id="payItemInput" ng-model="searchText" ng-change="fetchPayItemSuggestions()"
+                           placeholder="e.g., 0120 6 or Embankment" autocomplete="off" class="form-control modern-input"
+                           maxlength="180" required />
+                    <span ng-if="searchText" ng-click="clearSearchText()" class="clear-button" style="transform: translateY(-50%);">
                         <i class="fas fa-times"></i>
                     </span>
                 </div>
-
                 <div ng-show="unitPriceForm.payItemInput.$touched && unitPriceForm.payItemInput.$invalid" class="error-message">
                     <div ng-show="unitPriceForm.payItemInput.$error.required">
                         <i class="fas fa-exclamation-circle"></i> Pay Item is required.
@@ -39,75 +29,37 @@
                         <i class="fas fa-exclamation-circle"></i> Minimum 2 letters/numbers. No special characters allowed.
                     </div>
                 </div>
-
-                <!-- Suggestions List -->
-                <ul class="suggestions-dropdown"
-                    ng-show="items.length > 0">
-                    <li class="suggestion-item"
-                        ng-repeat="item in items"
-                        ng-click="selectPayItem(item)">
+                <ul class="suggestions-dropdown" ng-show="items.length > 0">
+                    <li class="suggestion-item" ng-repeat="item in items" ng-click="selectPayItem(item)">
                         <i class="fas fa-search suggestion-icon"></i>
                         {{ item.Description }}
                     </li>
                 </ul>
             </div>
-            <div class="form-group">
-                <label for="contractTypeSelect" class="modern-label">
-                    <i class="fas fa-file-contract label-icon"></i>
-                    Contract Type:
-                </label>
-                <div class="select-wrapper">
-                    <select id="contractTypeSelect"
-                            class="form-control modern-select compact-select"
-                            ng-model="selectedContractType">
-                        <option value="">-- All Contract Types--</option>
-                        <option ng-repeat="type in contractTypes" value="{{type}}">
-                            {{ contractTypeMap[type] }}
-                        </option>
-                    </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
-                </div>
-                </div>
+
+            <!-- Quantity Range -->
             <div class="form-group">
                 <label class="modern-label">
                     <i class="fas fa-hashtag label-icon"></i>
                     Quantity Range:
                 </label>
-
                 <div class="quantity-inputs">
                     <div class="input-group">
                         <label class="modern-label" for="minQuantity">Minimum:</label>
-                        <input type="number"
-                               id="minQuantity"
-                               class="quantity-input"
-                               ng-model="selectedMinQuantity"
-                               ng-change="validateQuantity()"
-                               min="1"
-                               max="{{maxQuantity}}"
-                               placeholder="Min quantity" />
+                        <input type="number" id="minQuantity" class="quantity-input" ng-model="selectedMinQuantity"
+                               ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Min quantity" />
                     </div>
-
                     <div class="separator">to</div>
-
                     <div class="input-group">
                         <label class="modern-label" for="maxQuantity">Maximum:</label>
-                        <input type="number"
-                               id="maxQuantity"
-                               class="quantity-input"
-                               ng-model="selectedMaxQuantity"
-                               ng-change="validateQuantity()"
-                               min="1"
-                               max="{{maxQuantity}}"
-                               placeholder="Max quantity" />
+                        <input type="number" id="maxQuantity" class="quantity-input" ng-model="selectedMaxQuantity"
+                               ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Max quantity" />
                     </div>
-
                 </div>
-                <div class="error-message " ng-show="hasError">
+                <div class="error-message" ng-show="hasError">
                     <i class="fas fa-exclamation-triangle"></i>
                     {{errorMessage}}
                 </div>
-
-
                 <div class="quantity-preview" ng-show="!hasError && selectedMinQuantity && selectedMaxQuantity">
                     <i class="fas fa-eye"></i>
                     <span ng-if="selectedMinQuantity === selectedMaxQuantity">
@@ -120,96 +72,74 @@
             </div>
         </div>
 
+        <!-- Group 2: Contract Filters -->
         <div class="col-md-2">
+            <div class="section-header">
+                <h4 class="section-title">Contract Filters</h4>
+            </div>
+
             <div class="form-group">
-                <label for="bidStatusFilter" class="modern-label">
-                    <i class="fas fa-flag-checkered label-icon"></i>
-                    Bid Status:
+                <label for="contractTypeSelect" class="modern-label">
+                    <i class="fas fa-file-contract label-icon"></i>
+                    Contract Type:
                 </label>
                 <div class="select-wrapper">
-                    <select id="bidStatusFilter"
-                            class="form-control modern-select"
-                            ng-model="selectedBidStatus">
-                        <option value="">-- All Statuses--</option>
-                        <option value="W">Won</option>
-                       <!-- <option value="W">Fair Market Value(Bidder Rank 1–3)</option>-->
-                        <option value="L">Loss</option>
-                         <option value="I">Irregular</option>
+                    <select id="contractTypeSelect" class="form-control modern-select compact-select" ng-model="selectedContractType">
+                        <option value="">-- All Contract Types--</option>
+                        <option ng-repeat="type in contractTypes" value="{{type}}">
+                            {{ contractTypeMap[type] }}
+                        </option>
                     </select>
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
-                </div>
+            </div>
 
             <div class="form-group">
                 <label for="contractWorkTypeSelect" class="modern-label">
                     <i class="fas fa-tools label-icon"></i>
-                    Contract Work Type:
+                    Work Type:
                 </label>
                 <div class="select-wrapper">
-                    <select id="contractWorkTypeSelect"
-                            class="form-control modern-select"
-                            ng-model="selectedWorkTypeCode"
+                    <select id="contractWorkTypeSelect" class="form-control modern-select" ng-model="selectedWorkTypeCode"
                             ng-options="code as label for (code, label) in workTypeMap">
                         <option value="">-- All Work Types --</option>
                     </select>
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
             </div>
+        </div>
 
+        <!-- Group 3: Bid Filters -->
+        <div class="col-md-3">
+            <div class="section-header">
+                <h4 class="section-title">Bid Filters</h4>
             </div>
 
+            <div class="form-group">
+                <label for="bidStatusFilter" class="modern-label">
+                    <i class="fas fa-flag-checkered label-icon"></i>
+                    Bid Status:
+                </label>
+                <div class="select-wrapper">
+                    <select id="bidStatusFilter" class="form-control modern-select" ng-model="selectedBidStatus">
+                        <option value="">-- All Statuses--</option>
+                        <option value="W">Won</option>
+                        <option value="L">Loss</option>
+                        <option value="I">Irregular</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+            </div>
 
-        <div class="col-md-2">
-            <div class="form-group time-filter-group">
-                <!-- Months of Bid History - Inline Layout -->
-                <div class="filter-section">
-                    <label for="monthsInput" class="modern-label">
-                        <i class="fas fa-calendar-alt label-icon"></i>
-                        Months of Bid History:
-                    </label>
-                    <div class="months-input-container">
-                        <input type="number"
-                               id="monthsInput"
-                               name="monthsInput"
-                               class="form-control modern-input number-input-inline"
-                               ng-model="monthsOfHistory"
-                               min="1"
-                               max="120"
-                               placeholder="36"
-                               title="Enter number of months (1 to 120). Default is 36." />
-                        <span class="months-hint">(1–120, Default: 12)</span>
-                    </div>
-                </div>
-                <!-- Custom Date Range - Compact Layout -->
-                <div class="filter-section" style="margin-top:20px;">
-                    <label class="modern-label">
-                        <i class="fas fa-calendar-week label-icon"></i>
-                        Letting Date Range:
-                    </label>
-                    <div class="date-inputs-compact">
-                        <input type="date"
-                               class="form-control date-input-compact"
-                               ng-model="startDate"
-                               max="{{ today | date:'yyyy-MM-dd' }}"
-                               min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
-                        <span class="date-separator">to</span>
-                        <input type="date"
-                               class="form-control date-input-compact"
-                               ng-model="endDate"
-                               max="{{ today | date:'yyyy-MM-dd' }}"
-                               min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
-                    </div>
-                </div>
-                <div class="error-message" ng-show="isInvalidDateRange()">
-                    <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
-                </div>
-                <!-- Compact Hints -->
-                <small class="label-hint-compact">
-                    <i class="fas fa-info-circle"></i>
-                    Use months filter OR date range (date range overrides months)
-                </small>
-
-                <!-- Validation Errors -->
+            <div class="form-group">
+                <label for="monthsInput" class="modern-label">
+                    <i class="fas fa-calendar-alt label-icon"></i>
+                    Months of Bid History:
+                </label>
+                <input type="number" id="monthsInput" name="monthsInput" class="form-control modern-input"
+                       ng-model="monthsOfHistory" min="1" max="120" placeholder="36"
+                       title="Enter number of months (1 to 120). Default is 36." />
+                <span class="months-hint">(1–120, Default: 12)</span>
                 <div ng-show="unitPriceForm.monthsInput.$touched && unitPriceForm.monthsInput.$invalid" class="error-message">
                     <div ng-show="unitPriceForm.monthsInput.$error.required">
                         <i class="fas fa-exclamation-circle"></i> Months value is required.
@@ -220,113 +150,113 @@
                 </div>
             </div>
 
-
-        </div>
-        <div class="col-md-4">
-            <div class="form-group district-county-group">
+            <div class="form-group">
                 <label class="modern-label">
-                    <i class="fas fa-map-marker-alt label-icon"></i>
-                    Select Primary Counties by Region Type:
+                    <i class="fas fa-calendar-week label-icon"></i>
+                    Letting Date Range:
                 </label>
-
-                <!-- Region Type Selection -->
-                <div class="form-group">
-                    <label class="sub-label">Region Type:</label>
-                    <div class="select-wrapper">
-                        <select class="form-control modern-select compact-select"
-                                ng-model="regionType"
-                                ng-change="onRegionTypeChange()">
-                            <option value="">-- Statewide --</option>
-                            <option value="district">District</option>
-                            <option value="market">Market Area</option>
-                            <option value="county">County</option>
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
-                    </div>
+                <div class="date-inputs-compact">
+                    <input type="date" class="form-control date-input-compact" ng-model="startDate"
+                           max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
+                    <span class="date-separator">to</span>
+                    <input type="date" class="form-control date-input-compact" ng-model="endDate"
+                           max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
                 </div>
-
-                <!-- Region Name Selection with Custom Multi-Select Dropdown -->
-                <div class="form-group" ng-show="regionType === 'district' || regionType === 'market' || regionType === 'county'">
-                    <label class="sub-label">
-                        {{ regionType === 'district' ? 'Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
-                    </label>
-                    <div class="multi-select-wrapper">
-                        <div class="multi-select-dropdown" ng-click="toggleMultiSelectDropdown()">
-                            <div class="multi-select-trigger" id="multiSelectTrigger">
-                                <div class="multi-select-values" id="multiSelectValues">
-                                    <span ng-if="!selectedRegions.length" class="multi-select-placeholder">
-                                        Select {{ regionType === 'district' ? 'Districts' : regionType === 'market' ? 'Market Areas' : 'Counties' }}
-                                    </span>
-                                    <span class="multi-select-tag" ng-repeat="region in selectedRegions">
-                                        {{region}}
-                                        <button type="button" class="remove-tag" ng-click="toggleRegionSelection(region)">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </span>
-                                </div>
-                                <i class="fas fa-chevron-down multi-select-arrow"></i>
-                            </div>
-                            <div class="multi-select-options" id="multiSelectOptions" ng-class="{'show': isRegionDropdownOpen}">
-                                <!-- Options will be populated by Angular -->
-                                <div class="multi-select-option" ng-repeat="option in regionOptions"
-                                     ng-class="{'selected': selectedRegions.indexOf(option) !== -1}"
-                                     ng-click="toggleRegionSelection(option)">
-                                    <div class="multi-select-checkbox"></div>
-                                    <span>{{option}}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Hidden original select for Angular binding -->
-                        <select multiple class="form-control modern-select compact-select" style="display: none;"
-                                ng-model="selectedRegions"
-                                ng-change="onMultiRegionChange()"
-                                ng-options="opt for opt in regionOptions">
-                        </select>
-                    </div>
+                <div class="error-message" ng-show="isInvalidDateRange()">
+                    <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
                 </div>
+                <small class="label-hint-compact">
+                    <i class="fas fa-info-circle"></i>
+                    Use months filter OR date range (date range overrides months)
+                </small>
+            </div>
+        </div>
 
-                <!-- Related Counties -->
-                <div class="form-group" ng-if="relatedCounties.length > 0 && regionType !== 'county'">
-                    <label class="sub-label">Counties:</label>
-                    <div class="county-filter-compact">
-                        <!-- County Actions -->
-                        <div class="county-actions-compact">
-                            <button type="button" class="btn-xs btn-outline-primary" ng-if="regionType !== 'county'" ng-click="selectAllRegionCounties()">
-                                <i class="fas fa-check-double"></i> All
-                            </button>
-                            <button type="button" class="btn-xs btn-outline-secondary" ng-if="regionType !== 'county'" ng-click="clearAllRegionCounties()">
-                                <i class="fas fa-times"></i> Clear
-                            </button>
-                            <span class="selected-count-compact">{{selectedRegionCounties.length}} selected</span>
+        <!-- Group 4: Regional Filters -->
+        <div class="col-md-3">
+            <div class="section-header">
+                <h4 class="section-title">Regional Filters</h4>
+            </div>
+
+            <div class="form-group">
+                <label class="sub-label"> <i class="fas fa-map-marker-alt label-icon"></i> Region Type:</label>
+                <div class="select-wrapper">
+                    <select class="form-control modern-select compact-select" ng-model="regionType" ng-change="onRegionTypeChange()">
+                        <option value="">-- Statewide --</option>
+                        <option value="district">District</option>
+                        <option value="market">Market Area</option>
+                        <option value="county">County</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+            </div>
+
+            <div class="form-group" ng-show="regionType === 'district' || regionType === 'market' || regionType === 'county'">
+                <label class="sub-label">
+                    {{ regionType === 'district' ? 'Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
+                </label>
+                <div class="multi-select-wrapper">
+                    <div class="multi-select-dropdown" ng-click="toggleMultiSelectDropdown()">
+                        <div class="multi-select-trigger">
+                            <div class="multi-select-values">
+                                <span ng-if="!selectedRegions.length" class="multi-select-placeholder">
+                                    Select {{ regionType === 'district' ? 'Districts' : regionType === 'market' ? 'Market Areas' : 'Counties' }}
+                                </span>
+                                <span class="multi-select-tag" ng-repeat="region in selectedRegions">
+                                    {{region}}
+                                    <button type="button" class="remove-tag" ng-click="toggleRegionSelection(region)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <i class="fas fa-chevron-down multi-select-arrow"></i>
                         </div>
-
-                        <!-- Checkbox Grid -->
-                        <div class="county-checkboxes-compact" ng-if="regionType !== 'county'">
-                            <div class="county-checkbox-grid">
-                                <label class="county-checkbox-label-compact" ng-repeat="county in relatedCounties">
-                                    <input type="checkbox"
-                                           ng-model="county.selected"
-                                           ng-change="toggleRegionCounty(county)">
-                                    <span class="county-name-compact">{{county.name}}</span>
-                                </label>
+                        <div class="multi-select-options" ng-class="{'show': isRegionDropdownOpen}">
+                            <div class="multi-select-option" ng-repeat="option in regionOptions"
+                                 ng-class="{'selected': selectedRegions.indexOf(option) !== -1}" ng-click="toggleRegionSelection(option)">
+                                <div class="multi-select-checkbox"></div>
+                                <span>{{option}}</span>
                             </div>
                         </div>
+                    </div>
+                    <select multiple class="form-control modern-select compact-select" style="display: none;"
+                            ng-model="selectedRegions" ng-change="onMultiRegionChange()" ng-options="opt for opt in regionOptions">
+                    </select>
+                </div>
+            </div>
 
-                        <!-- Selected County Tags -->
-                        <div class="selected-counties-inline" ng-if="selectedRegionCounties.length > 0">
-                            <span class="county-tag-compact" ng-repeat="county in selectedRegionCounties">
-                                {{county}}
-                                <button type="button" class="remove-tag-compact" ng-click="removeCounty(county); $event.stopPropagation()" ng-if="regionType !== 'county'">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </span>
+            <div class="form-group" ng-if="relatedCounties.length > 0 && regionType !== 'county'">
+                <label class="sub-label">Counties:</label>
+                <div class="county-filter-compact">
+                    <div class="county-actions-compact">
+                        <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllRegionCounties()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn-xs btn-outline-secondary" ng-click="clearAllRegionCounties()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <span class="selected-count-compact">{{selectedRegionCounties.length}} selected</span>
+                    </div>
+                    <div class="county-checkboxes-compact">
+                        <div class="county-checkbox-grid">
+                            <label class="county-checkbox-label-compact" ng-repeat="county in relatedCounties">
+                                <input type="checkbox" ng-model="county.selected" ng-change="toggleRegionCounty(county)">
+                                <span class="county-name-compact">{{county.name}}</span>
+                            </label>
                         </div>
+                    </div>
+                    <div class="selected-counties-inline" ng-if="selectedRegionCounties.length > 0">
+                        <span class="county-tag-compact" ng-repeat="county in selectedRegionCounties">
+                            {{county}}
+                            <button type="button" class="remove-tag-compact" ng-click="removeCounty(county); $event.stopPropagation()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
-        
+
     </div>
 
     <div class="action-buttons">
@@ -408,69 +338,73 @@
                         <i class="fas fa-table"></i> Bid History Data
                     </h4>
                 </div>
-                <div class="table-wrapper">
-                    <table class="table table-bordered bid-table">
-                        <thead>
-                            <tr>
-                                <th>Contract</th>
-                                <th>Awarded Days</th>
-                                <th>Lead Project</th>
-                                <th>Letting Date</th>
-                                <th>Pay Item</th>
-                                <th>Description</th>
-                                <th>Supp Desc</th>
-                                <th>Units</th>
-                                <th>Quantity</th>
-                                <th>Unit Price Bid</th>
-                                <th>Bid Amount</th>
-                                <th>Bid Status</th>
-                                <th>Bid Type</th>
-                                <!--<th>Weighted Avg</th>-->
-                                <!--<th>Weighted Avg (No Outliers)</th>-->
-                                <th>Outlier</th>
-                                <th>Primary County</th>
-                                <th>Market Area</th>
-                                <th>District</th>
-                                <th>Contract Type</th>
-                                <th>Work Type</th>
-                               <!-- <th>Category</th>-->
-                                <th>Proposal Type</th>
-                                <th>Executed Date</th>
-                                <th>Bidder Rank</th>
-                                <th>Bidder Name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="item in bidHistoryData">
-                                <td>{{ item.p }}</td>
-                                <td>{{ item.Duration }}</td>
-                                <td>{{ item.ProjectNumber }}</td>
-                                <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
-                                <td>{{ item.ri }}</td>
-                                <td>{{ item.Description }}</td>
-                                <td>{{ item.SupplementalDescription }}</td>
-                                <td>{{ item.CalculatedUnit }}</td>
-                                <td>{{ item.Quantity }}</td>
-                                <td>{{ item.b | currency }}</td>
-                                <td>{{ item.PvBidTotal | currency }}</td>
-                                <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
-                                <td>{{ getBidTypeLabel(item.BidType) }}</td>
-                                <!--<td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>-->
-                                <!--<td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>-->
-                                <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
-                                <td>{{ item.c }}</td>
-                                <td>{{ item.MarketArea }}</td>
-                                <td>{{ item.d }}</td>
-                                <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
-                                <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
-                               <!-- <td>{{ item.CategoryDescription }}</td>-->
-                                <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
-                                <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
-                                <td>{{ item.VendorRanking }}</td>
-                                <td>{{ item.VendorName }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div >
+                    <div class="table-wrapper">
+                        <table class="table bid-table">
+                            <thead>
+                                <tr>
+                                    <th>Contract</th>
+                                    <th>Lead Project</th>
+                                    <th>Pay Item</th>
+                                    <th>Description</th>
+                                    <th>Supp Desc</th>
+                                    <th>Units</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price Bid</th>
+                                    <th>Outlier</th>
+                                    <th>Bid Amount</th>
+                                    <th>District</th>
+                                    <th>Market Area</th>
+                                    <th>Primary County</th>
+                                    <th>Bidder Name</th>
+                                    <th>Bidder Status</th>
+                                    <th>Bidder Rank</th>
+                                    <th>Contract Type</th>
+                                    <th>Work Type</th>
+                                    <!--<th>Work Mix</th>-->
+                                    <th>Project Category</th>
+                                    <th>Letting Date</th>
+                                    <th>Executed Date</th>
+                                    <th>Awarded Days</th>
+                                    <th>Proposal Type</th>
+                                    <th>Bid Type</th>
+                                    <!--<th>Weighted Avg</th>-->
+                                    <!--<th>Weighted Avg (No Outliers)</th>-->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in bidHistoryData">
+                                    <td>{{ item.p }}</td>
+                                    <td>{{ item.ProjectNumber }}</td>
+                                    <td>{{ item.ri }}</td>
+                                    <td>{{ item.Description }}</td>
+                                    <td>{{ item.SupplementalDescription }}</td>
+                                    <td>{{ item.CalculatedUnit }}</td>
+                                    <td>{{ item.Quantity }}</td>
+                                    <td>{{ item.b | currency }}</td>
+                                    <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
+                                    <td>{{ item.PvBidTotal | currency }}</td>
+                                    <td>{{ item.d }}</td>
+                                    <td>{{ item.MarketArea }}</td>
+                                    <td>{{ item.c }}</td>
+                                    <td>{{ item.VendorName }}</td>
+                                    <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
+                                    <td>{{ item.VendorRanking }}</td>
+                                    <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
+                                    <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
+                                    <!--<td>{{ item.WorkMixDescription }}</td>-->
+                                    <td>{{ item.CategoryDescription }}</td>
+                                    <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                                    <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                                    <td>{{ item.Duration }}</td>
+                                    <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
+                                    <td>{{ getBidTypeLabel(item.BidType) }}</td>
+                                    <!--<td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>-->
+                                    <!--<td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>-->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -823,54 +757,73 @@
     .table-section {
         background: #ffffff;
         padding: 24px;
-        margin-bottom: 30px;
+        margin-bottom: 10px;
         border: 2px solid #1F4283;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(31, 66, 131, 0.1);
     }
 
     .table-wrapper {
-        height: 65vh;
+        height: 85vh;
         overflow: auto;
         border: 2px solid #1F4283;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .bid-table {
         width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 13px;
         background-color: #ffffff;
-        min-width: 2800px;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+        min-width: 3200px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
 
-    .bid-table th {
-        position: sticky;
-        top: 0;
-        background: #1F4283;
-        color: #ffffff;
-        font-weight: 600;
-        z-index: 10;
-        border: 1px solid #152C57;
-        padding: 14px 12px;
-        text-align: center;
-        font-size: 12px;
-    }
+        /* Header Styles */
+        .bid-table th {
+            position: sticky;
+            top: 0;
+            background: #1F4283;
+            color: #ffffff;
+            font-weight: 600;
+            z-index: 10;
+            border: 1px solid #152C57;
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 12px;
+        }
 
-    .bid-table td {
-        border: 1px solid #B1C6EC;
-        padding: 12px;
-        text-align: center;
-        vertical-align: middle;
-        font-size: 12px;
-    }
+        /* Data Cell Styles */
+        .bid-table td {
+            border: 1px solid #B1C6EC;
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 12px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: normal;
+            max-width: 200px;
+        }
 
-    .bid-table tbody tr:nth-child(even) {
-        background-color: #EAF0FA;
-    }
+        /* Alternating row colors */
+        .bid-table tbody tr:nth-child(even) {
+            background-color: #EAF0FA;
+        }
 
-    .bid-table tbody tr:hover {
-        background: #D6E1F5;
-        transition: all 0.2s ease;
-    }
+        .bid-table tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        /* Hover effects */
+        .bid-table tbody tr:hover {
+            background: #D6E1F5;
+            transition: all 0.2s ease;
+        }
+
+        /* Sticky first column */
         .bid-table th:first-child {
             position: sticky;
             left: 0;
@@ -880,6 +833,7 @@
             box-shadow: 3px 0 6px rgba(0, 0, 0, 0.15);
             border-right: 1px solid #ccc;
         }
+
         .bid-table td:first-child {
             position: sticky;
             left: 0;
@@ -889,8 +843,113 @@
             font-weight: 600;
             color: #152C57;
         }
+
+        .bid-table tbody tr:nth-child(even) td:first-child {
+            background-color: #EAF0FA;
+        }
+
         .bid-table tbody tr:hover td:first-child {
             background: #D6E1F5;
+        }
+
+        /* Better data presentation and spacing */
+        .bid-table td {
+            position: relative;
+        }
+
+            /* Long text handling for description columns */
+            .bid-table td:nth-child(4),
+            .bid-table td:nth-child(5),
+            .bid-table td:nth-child(14) {
+                text-align: left;
+                max-width: 180px;
+                white-space: normal;
+                word-wrap: break-word;
+                hyphens: auto;
+            }
+
+            /* Numeric columns alignment */
+            .bid-table td:nth-child(7),
+            .bid-table td:nth-child(8),
+            .bid-table td:nth-child(10),
+            .bid-table td:nth-child(16),
+            .bid-table td:nth-child(22) {
+                text-align: right;
+                font-weight: 600;
+                font-family: 'Consolas', 'Monaco', monospace;
+            }
+
+            /* Date columns */
+            .bid-table td:nth-child(20),
+            .bid-table td:nth-child(21) {
+                font-weight: 500;
+                white-space: nowrap;
+            }
+
+            /* Status columns */
+            .bid-table td:nth-child(15) {
+                font-weight: 600;
+                text-transform: capitalize;
+            }
+
+            /* Improved readability for long content */
+            .bid-table td:nth-child(17),
+            .bid-table td:nth-child(18) {
+                text-align: left;
+                max-width: 120px;
+            }
+
+            /* Project Category column - prevent splitting of long maintenance descriptions */
+            .bid-table td:nth-child(19) {
+                text-align: left;
+                min-width: 200px;
+                max-width: 250px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+                /* Show full text on hover for Project Category */
+                .bid-table td:nth-child(19):hover {
+                    white-space: normal;
+                    overflow: visible;
+                    position: relative;
+                    z-index: 100;
+                    background: #D6E1F5;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                    border-radius: 4px;
+                }
+
+        /* Row height consistency */
+        .bid-table tbody tr {
+            min-height: 48px;
+        }
+
+        /* Better spacing for wrapped text */
+        .bid-table td[style*="white-space: normal"] {
+            line-height: 1.4;
+            padding: 12px 10px;
+        }
+
+    /* Scrollbar styling */
+    .table-wrapper::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 6px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb {
+        background: #1F4283;
+        border-radius: 6px;
+        border: 2px solid #f1f1f1;
+    }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #152C57;
         }
 
     /* Chart Section */
@@ -906,7 +965,7 @@
         max-width: 1000px;
         height: 400px;
         position: relative;
-        margin-bottom: 30px;
+        margin-bottom: 15px;
     }
 
     /* Statistics Section */
@@ -949,7 +1008,7 @@
         font-weight: 600;
         color: #152C57;
         font-size: 12px;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
 
     .stat-value {
