@@ -17,6 +17,10 @@
         $scope.isRegionDropdownOpen = false;
         $scope.selectedBidStatus = "";
         $scope.searchAttempted = false;
+        $scope.showNormal = true;
+        $scope.showOutliers = true;
+        $scope.showTrendLine = true;
+        $scope.showWeightedAvg = true;
         let debounceTimer;
         $scope.isChartLoading = false;
         const today = new Date();
@@ -510,6 +514,27 @@
             document.body.appendChild(link);
             link.click();
         };
+        $scope.toggleLegend = function (type) {
+            switch (type) {
+                case 'normal':
+                    $scope.showNormal = !$scope.showNormal;
+                    break;
+                case 'outlier':
+                    $scope.showOutliers = !$scope.showOutliers;
+                    break;
+                case 'trend':
+                    $scope.showTrendLine = !$scope.showTrendLine;
+                    break;
+                case 'avg':
+                    $scope.showWeightedAvg = !$scope.showWeightedAvg;
+                    break;
+            }
+
+            // Re-render the chart
+            if ($scope.bidHistoryData && $scope.bidHistoryData.length > 0) {
+                waitForCanvasAndRender();
+            }
+        };
         // Watch for data update
         $scope.$watch('bidHistoryData', function (newVal) {
             if (newVal && newVal.length > 0) {
@@ -609,9 +634,10 @@
                                     label: 'Non-Outlier Bid Points',
                                     data: normalPoints,
                                     backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                                    pointRadius: 8,
-                                    pointHoverRadius: 10,
-                                    showLine: false
+                                    pointRadius: 5,
+                                    pointHoverRadius: 8,
+                                    showLine: false,
+                                    hidden: !$scope.showNormal
                                 },
                                 {
                                     label: 'Outlier Bid Points',
@@ -619,15 +645,17 @@
                                     backgroundColor: 'red',
                                     pointRadius: 5,
                                     pointHoverRadius: 8,
-                                    showLine: false
+                                    showLine: false,
+                                    hidden: !$scope.showOutliers
                                 },
                                 {
-                                    label: 'Regression Line',
+                                    label: 'Trend Line',
                                     data: regressionLine,
                                     type: 'line',
                                     borderColor: '#dc3545',
                                     fill: false,
-                                    tension: 0.5
+                                    tension: 0.5,
+                                    hidden: !$scope.showTrendLine
                                 },
                                 {
                                     label: `Weighted Avg: $${weightedAvg.toFixed(2)}`,
@@ -636,7 +664,8 @@
                                     borderColor: 'green',
                                     borderWidth: 1,
                                     fill: false,
-                                    borderDash: [5, 5]
+                                    borderDash: [5, 5],
+                                    hidden: !$scope.showWeightedAvg
                                 }
                             ]
                         },
@@ -661,6 +690,9 @@
                                             return `${label} - Qty: ${context.parsed.x}, Price: $${context.parsed.y.toFixed(2)}`;
                                         }
                                     }
+                                },
+                                legend: {
+                                    display: false
                                 }
                             }
                         }

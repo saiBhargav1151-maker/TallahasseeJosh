@@ -322,10 +322,35 @@
                             </div>
                         </div>
                     </div>
-                    <div class="chart-container" ng-if="!shouldHideGraphForLumpSum()">
-                        <canvas id="priceChart"
-                                ng-style="{ height: Math.min(600, 400 + bidHistoryData.length * 2) + 'px' }">
-                        </canvas>
+                    <div class="chart-container-glass">
+                        <!--<div class="chart-type-badge">Scatter Plot</div>-->
+                        <div class="stats-overlay">
+                            <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
+                            <div class="stat-item"><span class="stat-label">Total Bids:</span><span class="stat-value">{{ chartStats.count }}</span></div>
+                            <!--<div class="stat-item"><span class="stat-label">Outliers:</span><span class="stat-value">${{  }}</span></div>-->
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
+                        </div>
+                        <div class="interactive-legend">
+                            <div class="legend-item" ng-click="toggleLegend('normal')">
+                                <div class="legend-color" style="background: rgba(54, 162, 235, 0.8);"></div>
+                                <span>Normal Bids</span>
+                            </div>
+                            <div class="legend-item" ng-click="toggleLegend('outlier')">
+                                <div class="legend-color" style="background: red;"></div>
+                                <span>Outliers</span>
+                            </div>
+                            <div class="legend-item" ng-click="toggleLegend('trend')">
+                                <div class="legend-color" style="background: #dc3545;"></div>
+                                <span>Trend Line</span>
+                            </div>
+                            <div class="legend-item" ng-click="toggleLegend('avg')">
+                                <div class="legend-color" style="background: green;"></div>
+                                <span>Weighted Avg</span>
+                            </div>
+                        </div>
+
                     </div>
                     <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
                         <i class="fas fa-info-circle"></i> Graph is not available for Lump Sum (LS) bids.
@@ -758,15 +783,13 @@
         background: #ffffff;
         padding: 24px;
         margin-bottom: 10px;
-        border: 2px solid #1F4283;
-        border-radius: 8px;
+        border-radius: 0px;
         box-shadow: 0 2px 8px rgba(31, 66, 131, 0.1);
     }
 
     .table-wrapper {
         height: 85vh;
         overflow: auto;
-        border: 2px solid #1F4283;
         border-radius: 6px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
@@ -967,7 +990,96 @@
         position: relative;
         margin-bottom: 15px;
     }
+    .canvas-wrapper {
+        position: relative;
+        border-radius: 15px;
+        overflow: hidden;
+        background: linear-gradient(45deg, #f0f2f5, #ffffff);
+    }
+    .chart-container-glass {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 25px;
+        margin-bottom: 10px;
+        position: relative;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    }
+    <!--.chart-type-badge {
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        background: #EAF0FA;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        z-index: 10;
+        margin-bottom: 5px;
+    }-->
+    .stats-overlay {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        min-width: 200px;
+    }
 
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+    }
+
+    .stat-label {
+        color: #666;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        color: #2d3748;
+        font-weight: 600;
+    }
+    .interactive-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(248, 249, 255, 0.8);
+        border-radius: 15px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .legend-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
     /* Statistics Section */
     .stats-section {
         background: #EAF0FA;
