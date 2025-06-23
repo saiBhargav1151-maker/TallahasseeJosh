@@ -386,7 +386,7 @@
                                     <th>Bidder Rank</th>
                                     <th>Contract Type</th>
                                     <th>Work Type</th>
-                                    <!--<th>Work Mix</th>-->
+                                    <th>Work Mix</th>
                                     <th>Project Category</th>
                                     <th>Letting Date</th>
                                     <th>Executed Date</th>
@@ -417,7 +417,7 @@
                                     <td>{{ item.VendorRanking }}</td>
                                     <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
                                     <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
-                                    <!--<td>{{ item.WorkMixDescription }}</td>-->
+                                    <td>{{ item.WorkMixDescription }}</td>
                                     <td>{{ item.CategoryDescription }}</td>
                                     <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
                                     <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>

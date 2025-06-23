@@ -94,12 +94,14 @@ namespace Dqe.Infrastructure.Fdot
                 var categorySubquery = DetachedCriteria.For<Category>("catSub")
                              .CreateAlias("catSub.ProjectItems", "piSub")
                              .CreateAlias("piSub.MyRefItem", "riSub")
-                             .CreateAlias("piSub.MyProject", "projSub")
                              .Add(Restrictions.EqProperty("riSub.Id", "ri.Id"))
-                             .Add(Restrictions.EqProperty("projSub.Id", "prj.Id"))
+                            .Add(Restrictions.EqProperty("piSub.MyProposalItem.Id", "this.Id"))
                              .SetProjection(Projections.Property("catSub.Description"))
                              .SetMaxResults(1);
-
+                var workMixSubquery = DetachedCriteria.For<CodeValue>("cv")
+    .Add(Restrictions.EqProperty("cv.CodeValueName", "prj.Pjcde1")) // match code name
+    .SetProjection(Projections.Property("cv.Description"))
+    .SetMaxResults(1);
                 var query = session.CreateCriteria<ProposalItem>()
                     .CreateAlias("MyRefItem", "ri")
                     .CreateAlias("Bids", "b")
@@ -197,6 +199,7 @@ namespace Dqe.Infrastructure.Fdot
                         .Add(Projections.Property("ri.ObsoleteDate"), "ObsoleteDate")
                          /*.Add(Projections.Property("cat.Description"), "CategoryDescription")*/
                          .Add(Projections.SubQuery(categorySubquery), "CategoryDescription")
+                         .Add(Projections.SubQuery(workMixSubquery), "WorkMixDescription")
                         )
 
                     .SetResultTransformer(NHibernate.Transform.Transformers.AliasToBean<ProposalItemDTO>());
