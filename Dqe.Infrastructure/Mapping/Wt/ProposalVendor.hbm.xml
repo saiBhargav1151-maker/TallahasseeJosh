@@ -19,6 +19,9 @@
 		<property name="BidTotal">
 			<column name="VENDORTOTALBID" not-null="false" precision="13" scale="2" sql-type="numeric" />
 		</property>
+		<property name="VendorRanking">
+			<column name="VENDORRANKING" not-null="false" precision="10" scale="0" sql-type="numeric" />
+		</property>
 		<set name="Bids" inverse="true" cascade="none" lazy="true" access="field.camelcase-underscore">
 			<key>
 				<column name="PROPOSALVENDOR_ID"/>

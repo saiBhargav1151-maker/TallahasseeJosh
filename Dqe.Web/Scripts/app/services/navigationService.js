@@ -29,6 +29,11 @@
                             title: 'Master Pay Item List',
                             url: '/payitems',
                             active: $location.url().startsWith('/payitems') ? 'active' : ''
+                        },
+                        {
+                            title: 'Unit Price Search',
+                            url: '/unitpricesearch',
+                            active: $location.url().startsWith('/unitpricesearch') ? 'active' : ''
                         }
                     ];
                 } else if (currentUser.role == 'P' || currentUser.role == 'T') {
@@ -52,6 +57,11 @@
                             title: 'Master Pay Item List',
                             url: '/payitems',
                             active: $location.url().startsWith('/payitems') ? 'active' : ''
+                        },
+                        {
+                            title: 'Unit Price Search',
+                            url: '/unitpricesearch',
+                            active: $location.url().startsWith('/unitpricesearch') ? 'active' : ''
                         }
                     ];
                 } else if (currentUser.role == 'E') {
@@ -76,6 +86,11 @@
                             title: 'Master Pay Item List',
                             url: '/payitems',
                             active: $location.url().startsWith('/payitems') ? 'active' : ''
+                        },
+                        {
+                            title: 'Unit Price Search',
+                            url: '/unitpricesearch',
+                            active: $location.url().startsWith('/unitpricesearch') ? 'active' : ''
                         }
                     ];
                 } else {
@@ -98,7 +113,13 @@
                         title: 'Master Pay Item List',
                         url: '/payitems',
                         active: $location.url().startsWith('/payitems') ? 'active' : ''
+                    },
+                    {
+                        title: 'Unit Price Search',
+                        url: '/unitpricesearch',
+                        active: $location.url().startsWith('/unitpricesearch') ? 'active' : ''
                     }
+                   
                 ];
             }
         },

@@ -1,0 +1,1664 @@
+﻿<div class="panel panel-default modern-panel">
+    <!-- Input -->
+    <div class="row input-section">
+        <!-- Group 1: Item Filters -->
+        <div class="col-md-4">
+            <div class="section-header">
+                <h4 class="section-title">Item Filters</h4>
+            </div>
+
+            <!-- Pay Item Input -->
+            <div class="form-group search-input-group">
+                <label for="payItemInput" class="modern-label">
+                    <i class="fas fa-hammer label-icon"></i>
+                    Enter Pay Item Number or Description: <span class="label-hint-compact" style="color: red;"> * required</span>
+                </label>
+                <div class="input-wrapper">
+                    <input type="text" id="payItemInput" ng-model="searchText" ng-change="fetchPayItemSuggestions()"
+                           placeholder="e.g., 0120 6 or Embankment" autocomplete="off" class="form-control modern-input"
+                           maxlength="180" required />
+                    <span ng-if="searchText" ng-click="clearSearchText()" class="clear-button" style="transform: translateY(-50%);">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </div>
+                <div ng-show="unitPriceForm.payItemInput.$touched && unitPriceForm.payItemInput.$invalid" class="error-message">
+                    <div ng-show="unitPriceForm.payItemInput.$error.required">
+                        <i class="fas fa-exclamation-circle"></i> Pay Item is required.
+                    </div>
+                    <div ng-show="unitPriceForm.payItemInput.$error.pattern">
+                        <i class="fas fa-exclamation-circle"></i> Minimum 2 letters/numbers. No special characters allowed.
+                    </div>
+                </div>
+                <ul class="suggestions-dropdown" ng-show="items.length > 0">
+                    <li class="suggestion-item" ng-repeat="item in items" ng-click="selectPayItem(item)">
+                        <i class="fas fa-search suggestion-icon"></i>
+                        {{ item.Description }}
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Quantity Range -->
+            <div class="form-group">
+                <label class="modern-label">
+                    <i class="fas fa-hashtag label-icon"></i>
+                    Quantity Range:
+                </label>
+                <div class="quantity-inputs">
+                    <div class="input-group">
+                        <label class="modern-label" for="minQuantity">Minimum:</label>
+                        <input type="number" id="minQuantity" class="quantity-input" ng-model="selectedMinQuantity"
+                               ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Min quantity" />
+                    </div>
+                    <div class="separator">to</div>
+                    <div class="input-group">
+                        <label class="modern-label" for="maxQuantity">Maximum:</label>
+                        <input type="number" id="maxQuantity" class="quantity-input" ng-model="selectedMaxQuantity"
+                               ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Max quantity" />
+                    </div>
+                </div>
+                <div class="error-message" ng-show="hasError">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{errorMessage}}
+                </div>
+                <div class="quantity-preview" ng-show="!hasError && selectedMinQuantity && selectedMaxQuantity">
+                    <i class="fas fa-eye"></i>
+                    <span ng-if="selectedMinQuantity === selectedMaxQuantity">
+                        Preview: Showing exactly {{selectedMinQuantity}} item<span ng-if="selectedMinQuantity > 1">s</span>
+                    </span>
+                    <span ng-if="selectedMinQuantity !== selectedMaxQuantity">
+                        Preview: Showing {{selectedMinQuantity}} to {{selectedMaxQuantity}} Quantities ({{getQuantityRange()}} total range)
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group 2: Contract Filters -->
+        <div class="col-md-2">
+            <div class="section-header">
+                <h4 class="section-title">Contract Filters</h4>
+            </div>
+
+            <div class="form-group">
+                <label for="contractTypeSelect" class="modern-label">
+                    <i class="fas fa-file-contract label-icon"></i>
+                    Contract Type:
+                </label>
+                <div class="select-wrapper">
+                    <select id="contractTypeSelect" class="form-control modern-select compact-select" ng-model="selectedContractType">
+                        <option value="">-- All Contract Types--</option>
+                        <option ng-repeat="type in contractTypes" value="{{type}}">
+                            {{ contractTypeMap[type] }}
+                        </option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="contractWorkTypeSelect" class="modern-label">
+                    <i class="fas fa-tools label-icon"></i>
+                    Work Type:
+                </label>
+                <div class="select-wrapper">
+                    <select id="contractWorkTypeSelect" class="form-control modern-select" ng-model="selectedWorkTypeCode"
+                            ng-options="code as label for (code, label) in workTypeMap">
+                        <option value="">-- All Work Types --</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group 3: Bid Filters -->
+        <div class="col-md-3">
+            <div class="section-header">
+                <h4 class="section-title">Bid Filters</h4>
+            </div>
+
+            <div class="form-group">
+                <label for="bidStatusFilter" class="modern-label">
+                    <i class="fas fa-flag-checkered label-icon"></i>
+                    Bid Status:
+                </label>
+                <div class="select-wrapper">
+                    <select id="bidStatusFilter" class="form-control modern-select" ng-model="selectedBidStatus">
+                        <option value="">-- All Statuses--</option>
+                        <option value="W">Won</option>
+                        <option value="L">Loss</option>
+                        <option value="I">Irregular</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="monthsInput" class="modern-label">
+                    <i class="fas fa-calendar-alt label-icon"></i>
+                    Months of Bid History:
+                </label>
+                <input type="number" id="monthsInput" name="monthsInput" class="form-control modern-input"
+                       ng-model="monthsOfHistory" min="1" max="120" placeholder="36"
+                       title="Enter number of months (1 to 120). Default is 36." />
+                <span class="months-hint">(1–120, Default: 12)</span>
+                <div ng-show="unitPriceForm.monthsInput.$touched && unitPriceForm.monthsInput.$invalid" class="error-message">
+                    <div ng-show="unitPriceForm.monthsInput.$error.required">
+                        <i class="fas fa-exclamation-circle"></i> Months value is required.
+                    </div>
+                    <div ng-show="unitPriceForm.monthsInput.$error.min || unitPriceForm.monthsInput.$error.max">
+                        <i class="fas fa-exclamation-circle"></i> Value must be between 1 and 120.
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="modern-label">
+                    <i class="fas fa-calendar-week label-icon"></i>
+                    Letting Date Range:
+                </label>
+                <div class="date-inputs-compact">
+                    <input type="date" class="form-control date-input-compact" ng-model="startDate"
+                           max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
+                    <span class="date-separator">to</span>
+                    <input type="date" class="form-control date-input-compact" ng-model="endDate"
+                           max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
+                </div>
+                <div class="error-message" ng-show="isInvalidDateRange()">
+                    <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
+                </div>
+                <small class="label-hint-compact">
+                    <i class="fas fa-info-circle"></i>
+                    Use months filter OR date range (date range overrides months)
+                </small>
+            </div>
+        </div>
+
+        <!-- Group 4: Regional Filters -->
+        <div class="col-md-3">
+            <div class="section-header">
+                <h4 class="section-title">Regional Filters</h4>
+            </div>
+
+            <div class="form-group">
+                <label class="sub-label"> <i class="fas fa-map-marker-alt label-icon"></i> Region Type:</label>
+                <div class="select-wrapper">
+                    <select class="form-control modern-select compact-select" ng-model="regionType" ng-change="onRegionTypeChange()">
+                        <option value="">-- Statewide --</option>
+                        <option value="district">District</option>
+                        <option value="market">Market Area</option>
+                        <option value="county">County</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+            </div>
+
+            <div class="form-group" ng-show="regionType === 'district' || regionType === 'market' || regionType === 'county'">
+                <label class="sub-label">
+                    {{ regionType === 'district' ? 'Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
+                </label>
+                <div class="multi-select-wrapper">
+                    <div class="multi-select-dropdown" ng-click="toggleMultiSelectDropdown()">
+                        <div class="multi-select-trigger">
+                            <div class="multi-select-values">
+                                <span ng-if="!selectedRegions.length" class="multi-select-placeholder">
+                                    Select {{ regionType === 'district' ? 'Districts' : regionType === 'market' ? 'Market Areas' : 'Counties' }}
+                                </span>
+                                <span class="multi-select-tag" ng-repeat="region in selectedRegions">
+                                    {{region}}
+                                    <button type="button" class="remove-tag" ng-click="toggleRegionSelection(region)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <i class="fas fa-chevron-down multi-select-arrow"></i>
+                        </div>
+                        <div class="multi-select-options" ng-class="{'show': isRegionDropdownOpen}">
+                            <div class="multi-select-option" ng-repeat="option in regionOptions"
+                                 ng-class="{'selected': selectedRegions.indexOf(option) !== -1}" ng-click="toggleRegionSelection(option)">
+                                <div class="multi-select-checkbox"></div>
+                                <span>{{option}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <select multiple class="form-control modern-select compact-select" style="display: none;"
+                            ng-model="selectedRegions" ng-change="onMultiRegionChange()" ng-options="opt for opt in regionOptions">
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" ng-if="relatedCounties.length > 0 && regionType !== 'county'">
+                <label class="sub-label">Counties:</label>
+                <div class="county-filter-compact">
+                    <div class="county-actions-compact">
+                        <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllRegionCounties()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn-xs btn-outline-secondary" ng-click="clearAllRegionCounties()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <span class="selected-count-compact">{{selectedRegionCounties.length}} selected</span>
+                    </div>
+                    <div class="county-checkboxes-compact">
+                        <div class="county-checkbox-grid">
+                            <label class="county-checkbox-label-compact" ng-repeat="county in relatedCounties">
+                                <input type="checkbox" ng-model="county.selected" ng-change="toggleRegionCounty(county)">
+                                <span class="county-name-compact">{{county.name}}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="selected-counties-inline" ng-if="selectedRegionCounties.length > 0">
+                        <span class="county-tag-compact" ng-repeat="county in selectedRegionCounties">
+                            {{county}}
+                            <button type="button" class="remove-tag-compact" ng-click="removeCounty(county); $event.stopPropagation()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn btn-primary btn-lg search-button" ng-click="searchBids()">
+            <i class="fas fa-search"></i> Search Bids
+        </button>
+            <button class="btn btn-secondary clear-button" ng-click="clearFilters()">
+                <i class="fas fa-times-circle"></i> Clear Filters
+            </button>
+        
+        <div class="export-section" ng-if="bidHistoryData && bidHistoryData.length > 0">
+            <button class="btn btn-success btn-lg export-button" ng-click="exportClick()">
+                <i class="fas fa-download"></i> Download Bid Data CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div ng-if="isLoading" class="loading-section">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <div class="loading-text">Loading bid data...</div>
+    </div>
+
+    <div ng-if="bidHistoryData && bidHistoryData.length > 0" class="results-section">
+        <div class="container-fluid results-container">
+            <div class="table-section">
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <h4 class="section-title">
+                            <i class="fas fa-chart-line"></i> Unit Price Bid Analysis
+                        </h4>
+                    </div>
+                    <div ng-if="chartStats" class="stats-section">
+                        <h5 class="stats-title">
+                            <i class="fas fa-calculator"></i> Summary Statistics
+                        </h5>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-label">Weighted Average Unit Price</div>
+                                <div class="stat-value">${{ chartStats.avg | number:2 }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Weighted Avg (No Outliers)</div>
+                                <div class="stat-value">${{ chartStats.weightedAvgNoOutliers | number:2 }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Total Contracts</div>
+                                <div class="stat-value">{{ chartStats.totalContracts }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Total Amount</div>
+                                <div class="stat-value">${{ chartStats.totalBidAmount | number:2 }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Total Quantity</div>
+                                <div class="stat-value">{{ chartStats.totalQuantity | number:2 }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Total Bids</div>
+                                <div class="stat-value">{{ chartStats.count }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container-glass">
+                        <!--<div class="chart-type-badge">Scatter Plot</div>-->
+                        <div class="stats-overlay">
+                            <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
+                            <div class="stat-item"><span class="stat-label">Total Bids:</span><span class="stat-value">{{ chartStats.count }}</span></div>
+                            <!--<div class="stat-item"><span class="stat-label">Outliers:</span><span class="stat-value">${{  }}</span></div>-->
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
+                        </div>
+                        <div class="interactive-legend">
+                            <div class="legend-item" ng-click="toggleLegend('normal')">
+                                <div class="legend-color" style="background: rgba(54, 162, 235, 0.8);"></div>
+                                <span>Normal Bids</span>
+                            </div>
+                            <div class="legend-item" ng-click="toggleLegend('outlier')">
+                                <div class="legend-color" style="background: red;"></div>
+                                <span>Outliers</span>
+                            </div>
+                            <div class="legend-item" ng-click="toggleLegend('trend')">
+                                <div class="legend-color" style="background: #dc3545;"></div>
+                                <span>Trend Line</span>
+                            </div>
+                            <div class="legend-item" ng-click="toggleLegend('avg')">
+                                <div class="legend-color" style="background: green;"></div>
+                                <span>Weighted Avg</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
+                        <i class="fas fa-info-circle"></i> Graph is not available for Lump Sum (LS) bids.
+                    </div>
+                    <!-- Summary stats -->
+
+                </div>
+                <div class="table-header">
+                    <h4 class="section-title">
+                        <i class="fas fa-table"></i> Bid History Data
+                    </h4>
+                </div>
+                <div >
+                    <div class="table-wrapper">
+                        <table class="table bid-table">
+                            <thead>
+                                <tr>
+                                    <th>Contract</th>
+                                    <th>Lead Project</th>
+                                    <th>Pay Item</th>
+                                    <th>Description</th>
+                                    <th>Supp Desc</th>
+                                    <th>Units</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price Bid</th>
+                                    <th>Outlier</th>
+                                    <th>Bid Amount</th>
+                                    <th>District</th>
+                                    <th>Market Area</th>
+                                    <th>Primary County</th>
+                                    <th>Bidder Name</th>
+                                    <th>Bidder Status</th>
+                                    <th>Bidder Rank</th>
+                                    <th>Contract Type</th>
+                                    <th>Work Type</th>
+                                    <th>Work Mix</th>
+                                    <th>Project Category</th>
+                                    <th>Letting Date</th>
+                                    <th>Executed Date</th>
+                                    <th>Awarded Days</th>
+                                    <th>Proposal Type</th>
+                                    <th>Bid Type</th>
+                                    <!--<th>Weighted Avg</th>-->
+                                    <!--<th>Weighted Avg (No Outliers)</th>-->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in bidHistoryData">
+                                    <td>{{ item.p }}</td>
+                                    <td>{{ item.ProjectNumber }}</td>
+                                    <td>{{ item.ri }}</td>
+                                    <td>{{ item.Description }}</td>
+                                    <td>{{ item.SupplementalDescription }}</td>
+                                    <td>{{ item.CalculatedUnit }}</td>
+                                    <td>{{ item.Quantity }}</td>
+                                    <td>{{ item.b | currency }}</td>
+                                    <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
+                                    <td>{{ item.PvBidTotal | currency }}</td>
+                                    <td>{{ item.d }}</td>
+                                    <td>{{ item.MarketArea }}</td>
+                                    <td>{{ item.c }}</td>
+                                    <td>{{ item.VendorName }}</td>
+                                    <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
+                                    <td>{{ item.VendorRanking }}</td>
+                                    <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
+                                    <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
+                                    <td>{{ item.WorkMixDescription }}</td>
+                                    <td>{{ item.CategoryDescription }}</td>
+                                    <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                                    <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                                    <td>{{ item.Duration }}</td>
+                                    <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
+                                    <td>{{ getBidTypeLabel(item.BidType) }}</td>
+                                    <!--<td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>-->
+                                    <!--<td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>-->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
+
+    <div ng-if="searchAttempted && !isLoading && (!bidHistoryData || bidHistoryData.length === 0)"
+         class="no-data-section">
+        <div class="no-data-content">
+            <i class="fas fa-search-minus no-data-icon"></i>
+            <div class="no-data-title">No Data Found</div>
+            <div class="no-data-message">
+                No bid history found for Pay Item <strong>{{ lastSearchedPayItem }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    body {   
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+        color: #0B172D;
+    }
+
+    /* Main Panel Styling */
+    .modern-panel {
+        background: #ffffff;
+        border: 2px solid #1F4283;
+        padding: 30px;
+        position: relative;
+    }
+
+    .modern-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #1F4283;
+    }
+
+    /* Input Section */
+    .input-section {
+        margin-bottom: 15px;
+    }
+
+    .modern-label {
+        font-weight: 600;
+        color: #152C57;
+        font-size: 12px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .label-icon {
+        color: #1F4283;
+        font-size: 12px;
+    }
+
+    .label-hint-compact {
+        font-weight: 400;
+        color: #5E89D9;
+        font-size: 10px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Input Controls */
+    .input-wrapper {
+        position: relative;
+    }
+
+    .modern-input {
+        border: 2px solid #B1C6EC;
+        padding: 12px 16px;
+        font-size: 12px;
+        transition: all 0.3s ease;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(31, 66, 131, 0.1);
+        padding-right: 30px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .modern-input:focus {
+        outline: none;
+        border-color: #1F4283;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+    }
+
+    .search-input-group {
+        position: relative;
+        max-width: 400px;
+    }
+
+    .clear-button {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        cursor: pointer;
+        color: #5E89D9;
+        transition: color 0.3s ease;
+        padding: 4px;
+    }
+
+        .clear-button:hover {
+            color: #ffffff;
+            background: #1F4283;
+        }
+
+    /* Date Inputs */
+    .date-inputs-compact {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .date-input-compact {
+        max-width: 140px;
+        flex: 1;
+        min-width: 134px;
+    }
+
+    .date-separator {
+        color: #5E89D9;
+        font-weight: 500;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+
+    /* Select Styling */
+    .select-wrapper {
+        position: relative;
+        display: block;
+    }
+
+    .modern-select {
+        appearance: none;
+        background-image: none;
+        padding-right: 30px;
+        cursor: pointer;
+        border: 2px solid #B1C6EC;
+        background: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .modern-select:focus {
+        border-color: #1F4283;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+    }
+
+    .compact-select {
+        padding: 6px 30px 6px 10px;
+        font-size: 12px;
+    }
+
+    .select-arrow {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #5E89D9;
+        transition: transform 0.3s ease;
+    }
+
+    .select-wrapper:hover .select-arrow {
+        transform: translateY(-50%) rotate(180deg);
+    }
+
+    /* Suggestions Dropdown */
+    .suggestions-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border: 2px solid #B1C6EC;
+        box-shadow: 0 4px 8px rgba(31, 66, 131, 0.15);
+        z-index: 1000;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 4px;
+        list-style: none;
+        padding: 0;
+    }
+
+    .suggestion-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #D6E1F5;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .suggestion-item:hover {
+        background: #EAF0FA;
+    }
+
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .suggestion-icon {
+        color: #1F4283;
+        font-size: 12px;
+    }
+
+    /* Error Messages */
+    .error-message {
+        background: #fef2f2;
+        border: 1px solid #D72E2A;
+        color: #D72E2A;
+        padding: 8px 12px;
+        margin-top: 6px;
+        font-size: 12px;
+    }
+
+    .error-message div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 2px;
+    }
+
+    .error-message div:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 36px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 10px 0;
+        padding: 10px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 32px;
+        border: none;
+        font-size: 18px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        gap: 8px;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .search-button {
+        background: #1F4283;
+        color: #ffffff;
+        border: 2px solid #1F4283;
+        box-shadow: 0 2px 4px rgba(31, 66, 131, 0.2);
+    }
+
+    .search-button:hover {
+        background: #152C57;
+        border-color: #152C57;
+        box-shadow: 0 4px 8px rgba(31, 66, 131, 0.3);
+    }
+
+    .btn-secondary {
+        background: #5E89D9;
+        color: #ffffff;
+        border: 2px solid #5E89D9;
+        box-shadow: 0 2px 4px rgba(94, 137, 217, 0.2);
+    }
+
+  .btn-secondary:hover {
+        background: #356BCF;
+        border-color: #356BCF;
+        box-shadow: 0 4px 8px rgba(94, 137, 217, 0.3);
+    }
+
+    .export-button {
+        background: #28a745;
+        color: #ffffff;
+        border: 2px solid #28a745;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    }
+
+    .export-button:hover {
+        background: #218838;
+        border-color: #218838;
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Loading Section */
+    .loading-section {
+        text-align: center;
+        padding: 40px 20px;
+        margin-top: 20px;
+    }
+
+    .loading-spinner {
+        font-size: 2.5rem;
+        color: #1F4283;
+        margin-bottom: 16px;
+    }
+
+    .loading-text {
+        color: #1F4283;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    /* Results Section */
+    .results-section {
+        margin-top: 40px;
+    }
+
+    .results-container {
+        padding: 0;
+    }
+
+    .section-title {
+        color: #0B172D;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.4rem;
+    }
+
+    /* Table Section */
+    .table-section {
+        background: #ffffff;
+        padding: 24px;
+        margin-bottom: 10px;
+        border-radius: 0px;
+        box-shadow: 0 2px 8px rgba(31, 66, 131, 0.1);
+    }
+
+    .table-wrapper {
+        height: 85vh;
+        overflow: auto;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 2px solid #1F4283;
+    }
+
+    .bid-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 13px;
+        background-color: #ffffff;
+        min-width: 3200px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+        /* Header Styles */
+        .bid-table th {
+            position: sticky;
+            top: 0;
+            background: #1F4283;
+            color: #ffffff;
+            font-weight: 600;
+            z-index: 10;
+            border: 1px solid #152C57;
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        /* Data Cell Styles */
+        .bid-table td {
+            border: 1px solid #B1C6EC;
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 12px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: normal;
+            max-width: 200px;
+        }
+
+        /* Alternating row colors */
+        .bid-table tbody tr:nth-child(even) {
+            background-color: #EAF0FA;
+        }
+
+        .bid-table tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        /* Hover effects */
+        .bid-table tbody tr:hover {
+            background: #D6E1F5;
+            transition: all 0.2s ease;
+        }
+
+        /* Sticky first column */
+        .bid-table th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 11;
+            background: #1F4283;
+            color: #ffffff;
+            box-shadow: 3px 0 6px rgba(0, 0, 0, 0.15);
+            border-right: 1px solid #ccc;
+        }
+
+        .bid-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 9;
+            background-color: #ffffff;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.15);
+            font-weight: 600;
+            color: #152C57;
+        }
+
+        .bid-table tbody tr:nth-child(even) td:first-child {
+            background-color: #EAF0FA;
+        }
+
+        .bid-table tbody tr:hover td:first-child {
+            background: #D6E1F5;
+        }
+
+        /* Better data presentation and spacing */
+        .bid-table td {
+            position: relative;
+        }
+
+            /* Long text handling for description columns */
+            .bid-table td:nth-child(4),
+            .bid-table td:nth-child(5),
+            .bid-table td:nth-child(14) {
+                text-align: left;
+                max-width: 180px;
+                white-space: normal;
+                word-wrap: break-word;
+                hyphens: auto;
+            }
+
+            /* Numeric columns alignment */
+            .bid-table td:nth-child(7),
+            .bid-table td:nth-child(8),
+            .bid-table td:nth-child(10),
+            .bid-table td:nth-child(16),
+            .bid-table td:nth-child(22) {
+                text-align: right;
+                font-weight: 600;
+                font-family: 'Consolas', 'Monaco', monospace;
+            }
+
+            /* Date columns */
+            .bid-table td:nth-child(20),
+            .bid-table td:nth-child(21) {
+                font-weight: 500;
+                white-space: nowrap;
+            }
+
+            /* Status columns */
+            .bid-table td:nth-child(15) {
+                font-weight: 600;
+                text-transform: capitalize;
+            }
+
+            /* Improved readability for long content */
+            .bid-table td:nth-child(17),
+            .bid-table td:nth-child(18) {
+                text-align: left;
+                max-width: 120px;
+            }
+
+            /* Project Category column - prevent splitting of long maintenance descriptions */
+            .bid-table td:nth-child(19) {
+                text-align: left;
+                min-width: 200px;
+                max-width: 250px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+                /* Show full text on hover for Project Category */
+                .bid-table td:nth-child(19):hover {
+                    white-space: normal;
+                    overflow: visible;
+                    position: relative;
+                    z-index: 100;
+                    background: #D6E1F5;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                    border-radius: 4px;
+                }
+
+        /* Row height consistency */
+        .bid-table tbody tr {
+            min-height: 48px;
+        }
+
+        /* Better spacing for wrapped text */
+        .bid-table td[style*="white-space: normal"] {
+            line-height: 1.4;
+            padding: 12px 10px;
+        }
+
+    /* Scrollbar styling */
+    .table-wrapper::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 6px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb {
+        background: #1F4283;
+        border-radius: 6px;
+        border: 2px solid #f1f1f1;
+    }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #152C57;
+        }
+
+    /* Chart Section */
+    .chart-section {
+        background: #ffffff;
+        padding: 24px;
+        box-shadow: 0 2px 4px rgba(31, 66, 131, 0.1);
+        border: 2px solid #B1C6EC;
+    }
+
+    .chart-container {
+        width: 100%;
+        max-width: 1000px;
+        height: 400px;
+        position: relative;
+        margin-bottom: 15px;
+    }
+    .canvas-wrapper {
+        position: relative;
+        border-radius: 15px;
+        overflow: hidden;
+        background: linear-gradient(45deg, #f0f2f5, #ffffff);
+    }
+    .chart-container-glass {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 25px;
+        margin-bottom: 10px;
+        position: relative;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    }
+    <!--.chart-type-badge {
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        background: #EAF0FA;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        z-index: 10;
+        margin-bottom: 5px;
+    }-->
+    .stats-overlay {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        min-width: 200px;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+    }
+
+    .stat-label {
+        color: #666;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        color: #2d3748;
+        font-weight: 600;
+    }
+    .interactive-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(248, 249, 255, 0.8);
+        border-radius: 15px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .legend-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    /* Statistics Section */
+    .stats-section {
+        background: #EAF0FA;
+        padding: 14px;
+        border: 2px solid #B1C6EC;
+        margin-bottom: 15px;
+    }
+
+    .stats-title {
+        color: #0B172D;
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.2rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(31, 66, 131, 0.1);
+        border: 1px solid #B1C6EC;
+        transition: transform 0.2s ease;
+    }
+
+    .stat-card:hover {
+        box-shadow: 0 2px 8px rgba(31, 66, 131, 0.15);
+    }
+
+    .stat-label {
+        font-weight: 600;
+        color: #152C57;
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1F4283;
+    }
+
+    /* No Data Section */
+    .no-data-section {
+        margin-top: 30px;
+    }
+
+    .no-data-content {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        padding: 40px;
+        text-align: center;
+        color: #856404;
+    }
+
+    .no-data-icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        color: #ffc107;
+    }
+
+    .no-data-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .no-data-message {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* District/County Filter Styles */
+    .district-county-group-compact {
+        background: #EAF0FA;
+        border: 2px solid #B1C6EC;
+        padding: 10px;
+    }
+    .district-county-group {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 10px;
+        
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .district-county-row {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .district-section {
+        flex: 0 0 140px;
+    }
+
+    .county-section-compact {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sub-label {
+        font-weight: 500;
+        color: #152C57;
+        font-size: 12px;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .county-filter-compact {
+        background: #ffffff;
+        border: 1px solid #B1C6EC;
+        padding: 8px;
+    }
+
+    .county-actions-compact {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #B1C6EC;
+    }
+
+    .btn-xs {
+        padding: 4px 8px;
+        font-size: 10px;
+        border: 1px solid;
+        background: #ffffff;
+        cursor: pointer;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .btn-outline-primary {
+        color: #1F4283;
+        border-color: #1F4283;
+    }
+
+    .btn-outline-primary:hover {
+        background: #1F4283;
+        color: #ffffff;
+    }
+
+    .btn-outline-secondary {
+        color: #5E89D9;
+        border-color: #5E89D9;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #5E89D9;
+        color: #ffffff;
+    }
+
+    .selected-count-compact {
+        color: #5E89D9;
+        font-size: 12px;
+        font-weight: 500;
+        margin-left: auto;
+    }
+
+    .county-checkboxes-compact {
+        max-height: 80px;
+        overflow-y: auto;
+        border: 1px solid #D6E1F5;
+        padding: 4px;
+    }
+
+    .county-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 2px;
+    }
+
+    .no-district-message-compact {
+        text-align: center;
+        color: #5E89D9;
+        font-style: italic;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 11px;
+    }
+
+    .county-checkbox-label-compact {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 3px 6px;
+        transition: background-color 0.2s ease;
+        margin-bottom: 0;
+        font-weight: 400;
+        font-size: 11px;
+    }
+
+    .county-checkbox-label-compact:hover {
+        background-color: #D6E1F5;
+    }
+
+    .county-name-compact {
+        font-size: 12px;
+        color: #152C57;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .selected-counties-inline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-height: 60px;
+        overflow-y: auto;
+    }
+
+    .county-tag-compact {
+        background: #1F4283;
+        color: #ffffff;
+        padding: 2px 6px;
+        font-size: 10px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .remove-tag-compact {
+        background: none;
+        border: none;
+        color: #ffffff;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        font-size: 8px;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+    .remove-tag-compact:hover {
+        opacity: 1;
+    }
+
+    .form-control:focus {
+        border-color: #1F4283;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(31, 66, 131, 0.25);
+    }
+
+    /* Quantity Filter */
+    .quantity-filter {
+        max-width: 400px;
+        height: 130px;
+        padding: 10px;
+        border: 2px solid #B1C6EC;
+        background-color: #EAF0FA;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .quantity-inputs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .input-group {
+        flex: 1;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #152C57;
+        margin-bottom: 5px;
+    }
+
+    .quantity-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #B1C6EC;
+        font-size: 12px;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+        background: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
+    .quantity-input:focus {
+        outline: none;
+        border-color: #1F4283;
+        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+    }
+
+    .quantity-input:invalid {
+        border-color: #D72E2A;
+    }
+
+    .separator {
+        font-size: 15px;
+        font-weight: bold;
+        color: #5E89D9;
+        margin: 0 5px;
+        align-self: flex-end;
+        margin-bottom: 15px;
+    }
+
+    .quantity-preview {
+        background-color: #d4edda;
+        border: 1px solid #28a745;
+        padding: 12px;
+        margin-top: 15px;
+        font-size: 12px;
+        color: #155724;
+        line-height: 1.4;
+    }
+
+    .quantity-preview i {
+        margin-right: 6px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .months-input-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .number-input-inline {
+        width: 80px;
+        text-align: center;
+    }
+
+    .months-hint {
+        font-size: 10px;
+        color: #5E89D9;
+        font-weight: 400;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .modern-panel {
+            padding: 20px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .date-inputs-compact {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .date-separator {
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+        }
+
+        .district-county-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .district-section {
+            flex: none;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .search-input-group {
+            max-width: 100%;
+        }
+
+        .quantity-inputs {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .separator {
+            display: none;
+        }
+    }
+    /* Custom Multi-Select Dropdown */
+    .multi-select-wrapper {
+        position: relative;
+    }
+
+    /* Dropdown Container */
+    .multi-select-dropdown {
+        position: relative;
+        cursor: pointer;
+    }
+
+    /* Trigger Box */
+    .multi-select-trigger {
+        width: 100%;
+        padding: 12px 40px 12px 16px;
+        border: 2px solid #003366;
+        border-radius: 8px;
+        background: #fff;
+        font-size: 14px;
+        font-weight: 500;
+        color: #003366;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+        min-height: 46px;
+    }
+
+        .multi-select-trigger:hover,
+        .multi-select-trigger.active {
+            border-color: #002244;
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+
+    .multi-select-placeholder {
+        color: #66788a;
+    }
+
+    /* Selected Tag Display */
+    .multi-select-values {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        flex: 1;
+    }
+
+    .multi-select-tag {
+        background: #003366;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+        .multi-select-tag .remove-tag {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0;
+            opacity: 0.7;
+        }
+
+            .multi-select-tag .remove-tag:hover {
+                opacity: 1;
+            }
+
+    /* Arrow Icon */
+    .multi-select-arrow {
+        color: #a0aec0;
+        transition: all 0.2s ease;
+    }
+
+    .multi-select-trigger.active .multi-select-arrow {
+        transform: rotate(180deg);
+        color: #003366;
+    }
+
+    /* Dropdown Menu */
+    .multi-select-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #cbd5e0;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+    }
+
+        .multi-select-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+    /* Dropdown Items */
+    .multi-select-option {
+        padding: 10px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+        .multi-select-option:hover {
+            background: #f1f5f9;
+        }
+
+        .multi-select-option.selected {
+            background: #e0ecf7;
+            color: #003366;
+            font-weight: 600;
+        }
+
+    /* Checkbox Style */
+    .multi-select-checkbox {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .multi-select-option.selected .multi-select-checkbox {
+        background: #003366;
+        border-color: #003366;
+    }
+
+        .multi-select-option.selected .multi-select-checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+    /* Scrollbar Styling */
+    .multi-select-options::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .multi-select-options::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .multi-select-options::-webkit-scrollbar-thumb {
+        background: #003366;
+        border-radius: 3px;
+    }
+
+        .multi-select-options::-webkit-scrollbar-thumb:hover {
+            background: #002244;
+        }
+</style>

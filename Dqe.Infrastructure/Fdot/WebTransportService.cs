@@ -12,21 +12,203 @@ using Dqe.Infrastructure.Repositories;
 using Dqe.Infrastructure.Repositories.Custom;
 using NHibernate.Criterion;
 using NHibernate.Linq;
-using NHibernate.Mapping.ByCode;
 using County = Dqe.Domain.Model.Wt.County;
 using Project = Dqe.Domain.Model.Wt.Project;
 using ProjectItem = Dqe.Domain.Model.Wt.ProjectItem;
 using Proposal = Dqe.Domain.Model.Wt.Proposal;
 using ProposalItem = Dqe.Domain.Model.Wt.ProposalItem;
+using NHibernate;
+using NHibernate.Type;
 
 namespace Dqe.Infrastructure.Fdot
 {
+
     public class WebTransportService : IWebTransportService
     {
 
         private static readonly IDictionary<string, CodeTable> CodeTables = new Dictionary<string, CodeTable>();
 
         private static readonly object Lock = new object();
+
+        /// <summary>
+        /// Retrieves a list of pay item details (name and description) based on the input string.
+        /// Supports searching by pay item number (Name) or partial description. Results are filtered to SpecBook "13"
+        /// and sorted by Name and Description.
+        /// </summary>
+        /// <param name="input">The user-provided search term, which may be a pay item number or part of a description.</param>
+        /// <returns>A distinct list of matching <see cref="PayItemDTO"/> objects containing Name and combined Description.</returns>
+
+        public IList<PayItemDTO> GetPayItemDetails(string input)
+        {
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                RefItem ri = null;
+
+                var sanitizedInput = input.Replace(" ", "").Trim();
+
+                var rawResults = session.QueryOver(() => ri)
+                    .Where(() => ri.SpecBook == "13")
+                    .And(Restrictions.Or(
+                        Expression.Sql("LOWER(REPLACE(RTRIM(LTRIM(REFITEM_NM)) + ' - ' + RTRIM(LTRIM(DESCR)), ' ', '')) LIKE ?", $"%{input.Trim().ToLower().Replace(" ", "")}%", NHibernateUtil.String),
+                        Restrictions.On(() => ri.Description).IsLike(input.Trim(), MatchMode.Anywhere)
+                    ))
+                    .SelectList(list => list
+                        .Select(() => ri.Id)
+                        .Select(() => ri.Name)
+                        .Select(() => ri.Description)
+                    )
+                    .OrderBy(() => ri.Name).Asc()
+                    .ThenBy(() => ri.Description).Asc()
+                    .Take(15)
+                    .List<object[]>();
+
+                var finalResults = rawResults
+                    .Select(row => new PayItemDTO
+                    {
+                        Name = row[1]?.ToString(),
+                        Description = $"{row[1]?.ToString()} - {row[2]?.ToString()}"
+                    })
+                    .Distinct()
+                    .ToList();
+
+                return finalResults;
+            }
+
+
+
+        }
+        /// <summary>
+        /// Retrieves a list of bid details from WTP database.
+        /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
+        /// </summary>
+        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, string contractType = null, int months = 12, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties = null, string bidStatus = null, string[] marketCounties = null, int? minRank = null, int? maxRank = null)
+        {
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                /* var categorySubquery = DetachedCriteria.For<Category>("catSub")
+                     .CreateAlias("catSub.ProjectItems", "piSub")
+                     .CreateAlias("piSub.MyRefItem", "riSub")
+                     .Add(Restrictions.EqProperty("riSub.Id", "ri.Id"))
+                     .Add(Restrictions.EqProperty("piSub.MyProject.Id", "prj.Id"))
+                     .SetProjection(Projections.Property("catSub.Description"));*/
+                var categorySubquery = DetachedCriteria.For<Category>("catSub")
+                             .CreateAlias("catSub.ProjectItems", "piSub")
+                             .CreateAlias("piSub.MyRefItem", "riSub")
+                             .Add(Restrictions.EqProperty("riSub.Id", "ri.Id"))
+                            .Add(Restrictions.EqProperty("piSub.MyProposalItem.Id", "this.Id"))
+                             .SetProjection(Projections.Property("catSub.Description"))
+                             .SetMaxResults(1);
+                var workMixSubquery = DetachedCriteria.For<CodeValue>("cv")
+    .Add(Restrictions.EqProperty("cv.CodeValueName", "prj.Pjcde1")) // match code name
+    .SetProjection(Projections.Property("cv.Description"))
+    .SetMaxResults(1);
+                var query = session.CreateCriteria<ProposalItem>()
+                    .CreateAlias("MyRefItem", "ri")
+                    .CreateAlias("Bids", "b")
+                    .CreateAlias("b.MyProposalVendor", "pv")
+                    .CreateAlias("pv.MyProposal", "p")
+                    .CreateAlias("p.MyLetting", "l")
+                    .CreateAlias("p.County", "c")
+                    .CreateAlias("p.District", "d")
+                    .CreateAlias("p.Milestones", "m")
+                    .CreateAlias("pv.MyRefVendor", "rv")
+                    .CreateAlias("p.Projects", "prj")
+                    /*.CreateAlias("prj.Categories", "cat")
+                    .CreateAlias("cat.ProjectItems", "catPi")
+                     .CreateAlias("catPi.MyRefItem", "catRi")*/
+                    .Add(Restrictions.Eq("ri.Name", payItem))
+                    .Add(Restrictions.Or(
+                        Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
+                        Restrictions.IsNull("pv.BidType")
+                    ))
+                    /*.Add(Restrictions.IsNull("pv.BidStatus"))*/
+                    .Add(Restrictions.Eq("p.ProposalStatus", "03"))
+                    .Add(Restrictions.Or(
+                        Restrictions.IsNull("m.Main"),
+                        Restrictions.Eq("m.Main", true)
+                    ))
+                    .Add(Restrictions.Lt("l.LettingDate", DateTime.Today))
+                    /*.Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-months)))*/
+                    .Add(Restrictions.Eq("ri.SpecBook", "13"))
+                    .Add(GetProjectValidRestriction())
+                    .Add(Restrictions.Eq("prj.Controlling", true))
+                    .Add(Restrictions.Eq("prj.IsLatestVersion", true))
+                    .AddOrder(Order.Asc("ri.Name"))
+                    .AddOrder(Order.Desc("l.LettingDate"))
+                    .AddOrder(Order.Asc("p.ProposalNumber"))
+                    .AddOrder(Order.Asc("b.BidPrice"));
+                if (!string.IsNullOrWhiteSpace(contractWorkType))
+                {
+                    query.Add(Restrictions.Eq("p.ContractWorkType", contractWorkType));
+                }
+                if (startDate.HasValue && endDate.HasValue)
+                {
+                    query.Add(Restrictions.Between("l.LettingDate", startDate.Value, endDate.Value));
+                }
+                else
+                {
+                    query.Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-months)));
+                }
+                if (counties != null && counties.Length > 0)
+                {
+                    query.Add(Restrictions.In("c.Description", counties));
+                }
+                if (!string.IsNullOrWhiteSpace(bidStatus))
+                {
+                    query.Add(Restrictions.Eq("pv.BidStatus", bidStatus));
+                }
+                if (!string.IsNullOrWhiteSpace(contractType))
+                {
+                    query.Add(Restrictions.Eq("p.ContractType", contractType));
+                }
+                if (marketCounties != null && marketCounties.Any())
+                {
+                    query.Add(Restrictions.In("c.Description", marketCounties));
+                }
+                if (minRank > 0 && maxRank > 0)
+                {
+                    query.Add(Restrictions.Between("Quantity", minRank, maxRank));
+                }
+
+                query.SetProjection(Projections.ProjectionList()
+                        .Add(Projections.Property("pv.BidStatus"), "BidStatus")
+                        .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
+                        .Add(Projections.Property("ri.Name"), "ri")
+                        .Add(Projections.Property("ri.Id"), "riId")
+                        .Add(Projections.Property("Id"), "Id")
+                        .Add(Projections.Property("Quantity"), "Quantity")
+                        .Add(Projections.Property("b.BidPrice"), "b")
+                        .Add(Projections.Property("prj.ProjectNumber"), "ProjectNumber")
+                        .Add(Projections.Property("prj.Id"), "ProjectId")
+                        .Add(Projections.Property("p.ProposalNumber"), "p")
+                        .Add(Projections.Property("p.ProposalType"), "ProposalType")
+                        .Add(Projections.Property("p.ContractType"), "ContractType")
+                        .Add(Projections.Property("p.ContractWorkType"), "ContractWorkType")
+                        .Add(Projections.Property("c.Description"), "c")
+                        .Add(Projections.Property("d.Description"), "d")
+                        .Add(Projections.Property("rv.VendorName"), "VendorName")
+                        .Add(Projections.Property("l.LettingDate"), "l")
+                        .Add(Projections.Property("ri.Description"), "Description")
+                        .Add(Projections.Property("SupplementalDescription"), "SupplementalDescription")
+                        .Add(Projections.Property("ri.CalculatedUnit"), "CalculatedUnit")
+                        .Add(Projections.Property("m.NumberOfUnits"), "Duration")
+                        .Add(Projections.Property("p.ExecutedDate"), "ExecutedDate")
+                        .Add(Projections.Property("pv.BidType"), "BidType")
+                        .Add(Projections.Property("pv.BidType"), "BidType")
+                        .Add(Projections.Property("pv.VendorRanking"), "VendorRanking")
+                        .Add(Projections.Property("ri.ObsoleteDate"), "ObsoleteDate")
+                         /*.Add(Projections.Property("cat.Description"), "CategoryDescription")*/
+                         .Add(Projections.SubQuery(categorySubquery), "CategoryDescription")
+                         .Add(Projections.SubQuery(workMixSubquery), "WorkMixDescription")
+                        )
+
+                    .SetResultTransformer(NHibernate.Transform.Transformers.AliasToBean<ProposalItemDTO>());
+
+                var res = query.List<ProposalItemDTO>();
+
+                return res.Distinct().ToList();
+            }
+        }
 
         public IEnumerable<CodeTable> GetCodeTables()
         {
@@ -349,7 +531,7 @@ namespace Dqe.Infrastructure.Fdot
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 ProposalItem proposalItem = null;
-                return session
+                var res = session
                     .QueryOver<Proposal>()
                     .Where(i => !i.IsRejected)
                     .Where(i => i.ProposalNumber == number)
@@ -363,6 +545,7 @@ namespace Dqe.Infrastructure.Fdot
                     .Left.JoinQueryOver(() => proposalItem.MyRefItem)
                     .Left.JoinQueryOver(() => proposalItem.ProjectItems)
                     .SingleOrDefault();
+                return res;
             }
         }
 
@@ -1003,7 +1186,7 @@ namespace Dqe.Infrastructure.Fdot
                         }
                         transaction.Commit();
                     }
-                    catch(Exception exception)
+                    catch (Exception exception)
                     {
                         try
                         {
@@ -1218,8 +1401,8 @@ namespace Dqe.Infrastructure.Fdot
                                         records = queryUpdateProjectItem
                                             .SetParameter("price", Math.Round(projectItem.Price, 2))
                                             .SetParameter("isLowCost", categorySet.Included)
-                                            .SetParameter("extendedAmount", Math.Round(projectItem.Quantity*projectItem.Price, 2, MidpointRounding.AwayFromZero))
-                                            .SetParameter("pricingComments", Enum.GetName(typeof (PriceSetType), projectItem.PriceSet))
+                                            .SetParameter("extendedAmount", Math.Round(projectItem.Quantity * projectItem.Price, 2, MidpointRounding.AwayFromZero))
+                                            .SetParameter("pricingComments", Enum.GetName(typeof(PriceSetType), projectItem.PriceSet))
                                             .SetParameter("lastUpdatedDate", DateTime.Now)
                                             .SetParameter("lastUpdatedBy", "DQE")
                                             .SetParameter("id", projectItem.WtId)
@@ -1249,8 +1432,8 @@ namespace Dqe.Infrastructure.Fdot
                                 .SetParameter("id", projectItem.WtId)
                                 .ExecuteUpdate();
                                 if (records == 0) throw new InvalidOperationException("Updated unexpected proposal item");
-                            }    
-                        }  
+                            }
+                        }
                         transaction.Commit();
                     }
                     catch (Exception exception)
@@ -1702,7 +1885,7 @@ namespace Dqe.Infrastructure.Fdot
                     //22 - intent to award
                     //24 - intent to reject
                     //SA - scope alternate rejected
-                  
+
                     .WhereRestrictionOn(() => proposal.ProposalStatus).IsIn(new object[] { "01", "02", "03", "04", "06", "07", "22", "24", "SA" })
                     .OrderBy(() => refItem.Name).Asc
                     .OrderBy(() => letting.LettingDate).Desc
@@ -1874,12 +2057,13 @@ namespace Dqe.Infrastructure.Fdot
                 Letting letting = null;
                 Proposal proposal = null;
 
-                return session
+                var res = session
                     .QueryOver(() => proposal)
                     .Where(() => proposal.ProposalNumber == number)
                     .Left.JoinQueryOver(() => proposal.MyLetting, () => letting)
                     .SingleOrDefault()
                     .MyLetting;
+                return res;
             }
         }
 
