@@ -9,6 +9,7 @@
             $scope.proposals = r.proposals;
             $scope.workingEstimate = r.workingEstimate;
             $scope.versions = r.versions;
+            $scope.hasReviews = r.versions.some(item => item.versionLabel === 'Review');
             $scope.authorizedUsers = r.authorizedUsers;
             document.getElementById("hiddenProjectNumber").value = r.project.number;
         }
@@ -127,6 +128,11 @@
     }
     $scope.createProjectVersionFromEstimate = function (snapshot) {
         $http.post('./projectproposal/CreateProjectVersionFromEstimate', snapshot).success(function (result) {
+            processResult(result);
+        });
+    }
+    $scope.createNewReviewSnapshot = function (snapshot) {
+        $http.post('./projectproposal/CreateReviewProjectVersionFromEstimate', snapshot).success(function (result) {
             processResult(result);
         });
     }

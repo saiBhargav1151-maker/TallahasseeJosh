@@ -1204,6 +1204,18 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        public ActionResult CreateReviewProjectVersionFromEstimate(dynamic snapshot)
+        {
+            var currentUser = (DqeIdentity)User.Identity;
+            var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
+            var p = _projectRepository.GetByEstimateId((int)snapshot.projectSnapshotId);
+            var sourceVersion = p.ProjectVersions.First(i => i.ProjectEstimates.Any(ii => ii.Id == (int)snapshot.projectSnapshotId));
+            var source = sourceVersion.ProjectEstimates.First(i => i.Id == (int)snapshot.projectSnapshotId);
+            p.CreateNewReviewVersionFromSnapshot(string.Empty, source, currentDqeUser);
+            return ResultStructureFromProjectSelection(p, currentDqeUser);
+        }
+
+        [HttpPost]
         public ActionResult SaveComment(dynamic snapshot)
         {
             var currentUser = (DqeIdentity)User.Identity;
@@ -1316,7 +1328,7 @@ namespace Dqe.Web.Controllers
                             ? "Phase III"
                             : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4
                                 ? "Phase IV"
-                                : string.Empty,
+                                    : string.Empty,
                     isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                     removeLabelComment = string.Empty
                 },
@@ -1367,12 +1379,14 @@ namespace Dqe.Web.Controllers
                 versions = project
                     .ProjectVersions
                     .OrderByDescending(i => i.Version)
+                    .ThenByDescending(v => v.ProjectEstimates.OrderByDescending(e => e.LastUpdated))
                     .Select(i => new
                     {
                         projectVersionId = i.Id,
                         owner = i.VersionOwner.Name,
                         isCurrentOwner = i.VersionOwner == currentUser,
                         projectVersion = i.Version,
+                        versionLabel = i.ProjectSource.ToString(),
                         source = i.ProjectSource == ProjectSourceType.Lre
                             ? "LRE"
                             : i.ProjectSource == ProjectSourceType.Wt
@@ -1407,6 +1421,8 @@ namespace Dqe.Web.Controllers
                                                     ? "Authorization"
                                                     : ii.Label == SnapshotLabel.Official
                                                         ? "Official"
+                                                         : ii.Label == SnapshotLabel.Review
+                                                            ? "Review"
                                                         : string.Empty,
                                 isWorkingEstimate = ii.IsWorkingEstimate ? "Yes" : string.Empty
                             })

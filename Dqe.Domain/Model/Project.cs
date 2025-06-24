@@ -360,6 +360,77 @@ namespace Dqe.Domain.Model
             return s;
         }
 
+        public virtual ProjectEstimate CreateNewReviewVersionFromSnapshot(string comment, ProjectEstimate source, DqeUser account)
+        {
+            if (account == null) throw new ArgumentNullException("account");
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator)
+            {
+                throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
+            }
+          
+            var v = new ProjectVersion
+            {
+                MyProject = this,
+                ProjectSource = ProjectSourceType.Review,
+                Version = _projectRepository.GetMaxVersion(ProjectNumber) + 1,
+                VersionOwner = account,
+                EstimateSource = source
+            };
+            _projectVersions.Add(v);
+            var s = new ProjectEstimate(_webTransportService)
+            {
+                Created = DateTime.Now,
+                Label = SnapshotLabel.Review,
+                LastUpdated = DateTime.Now,
+                Estimate = 1,
+                EstimateComment = comment,
+                IsWorkingEstimate = false,
+                
+            };
+            v.AddEstimate(s);
+            foreach (var eg in source.EstimateGroups)
+            {
+                var e = new EstimateGroup
+                {
+                    Name = eg.Name,
+                    Description = eg.Description,
+                    AlternateSet = eg.AlternateSet,
+                    FederalConstructionClass = eg.FederalConstructionClass,
+                    CombineWithLikeItems = eg.CombineWithLikeItems,
+                    WtId = eg.WtId,
+                    IsLsDbSummary = eg.IsLsDbSummary,
+                    AlternateMember = eg.AlternateMember
+                };
+                s.AddEstimateGroup(e);
+                foreach (var pi in eg.ProjectItems)
+                {
+                    var p = new ProjectItem
+                    {
+                        PayItemDescription = pi.PayItemDescription,
+                        AlternateMember = pi.AlternateMember,
+                        //LineNumber = pi.LineNumber,
+                        PayItemNumber = pi.PayItemNumber,
+                        Price = pi.Price,
+                        PreviousPrice = pi.PreviousPrice,
+                        PriceSet = pi.PriceSet,
+                        Quantity = pi.Quantity,
+                        CalculatedUnit = pi.CalculatedUnit,
+                        Unit = pi.Unit,
+                        //IsLumpSum = pi.IsLumpSum,
+                        CombineWithLikeItems = pi.CombineWithLikeItems,
+                        AlternateSet = pi.AlternateSet,
+                        SupplementalDescription = pi.SupplementalDescription,
+                        Fund = pi.Fund,
+                        WtId = pi.WtId
+                    };
+                    e.AddProjectItem(p);
+                }
+            }
+            _commandRepository.Flush();
+            account.MyRecentProjectEstimate = s;
+            return s;
+        }
+
         public virtual void RemoveLabel(SnapshotLabel label, string comment)
         {
             foreach (var projectVersion in ProjectVersions)
