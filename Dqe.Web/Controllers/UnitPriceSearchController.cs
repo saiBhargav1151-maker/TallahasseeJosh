@@ -47,18 +47,35 @@ namespace Dqe.Web.Controllers
                 return new HttpStatusCodeResult(500, "An error occurred while fetching pay item suggestions.");
             }
         }
+
+        [HttpGet]
+        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")]
+        public ActionResult GetWorkMixes()
+        {
+            try
+            {
+                var workMixes = _webTransportService.GetWorkMixes();
+                return Json(workMixes, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetWorkMixes: {ex.Message}");
+                return new HttpStatusCodeResult(500, "An error occurred while fetching work mixes.");
+            }
+        }
+
         /// <summary>
         /// Retrieves detailed historical bid data for a specified pay item number.
         /// </summary>
         /// <param name="number">Pay item number to fetch historical unit price data for.</param>
         /// <returns>JSON result
         [HttpGet]
-        public ActionResult GetPayItemDetails(string number, string contractType, int months, string contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, int? minRank, int? maxRank)
+        public ActionResult GetPayItemDetails(string number, string contractType, int months, string contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames)
         {
             try
             {
                 var selectedCounties = counties?.ToList() ?? new List<string>();
-                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months,  contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank);
+                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months,  contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames);
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
 

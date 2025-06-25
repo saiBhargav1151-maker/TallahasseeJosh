@@ -124,8 +124,14 @@
             "Area 12": ["BROWARD", "PALM BEACH"],
             "Area 13": ["MIAMI-DADE"],
             "Area 14": ["MONROE"],
-            "Area 99": ["DIST/ST-WIDE", "DISTRICT WIDE", "TURNPIKE"]
+            "Area 99": ["DIST/ST-WIDE", "TURNPIKE"]
         };
+        $scope.allWorkMixes = [];
+        $scope.workMixSelected = [];
+        $scope.workMixSearch = '';
+        $scope.filteredWorkMixes = [];
+        $scope.workMixSelected = [];
+        $scope.isWorkMixDropdownOpen = false;
         $scope.selectedMarketArea = "";
         $scope.selectedMarketCounties = [];
         $scope.clearFilters = function () {
@@ -155,7 +161,18 @@
             $scope.items = [];
             $scope.hasError = false;
             $scope.errorMessage = '';
+            $scope.workMixSearch = '';
+            $scope.filterWorkMixes();
         };
+        $scope.loadWorkMixes = function () {
+            $http.get('/UnitPriceSearch/GetWorkMixes').then(function (response) {
+                $scope.allWorkMixes = Array.from(new Set(response.data)).sort(); // Remove duplicates + sort
+                $scope.filteredWorkMixes = angular.copy($scope.allWorkMixes);
+            }, function (error) {
+                console.error("Failed to load work mixes:", error);
+            });
+        };
+        $scope.loadWorkMixes();
         $scope.onRegionTypeChange = function () {
             $scope.selectedRegions = [];
             $scope.relatedCounties = [];
@@ -224,8 +241,36 @@
         $scope.toggleMultiSelectDropdown = function () {
             $scope.isRegionDropdownOpen = !$scope.isRegionDropdownOpen;
         };
+        $scope.filterWorkMixes = function () {
+            const query = ($scope.workMixSearch || '').toLowerCase();
+            $scope.filteredWorkMixes = $scope.allWorkMixes.filter(item =>
+                item.toLowerCase().includes(query)
+            );
+            $scope.isWorkMixDropdownOpen = true;
+        };
 
-       
+        $scope.toggleWorkMixSelection = function (item) {
+            const index = $scope.workMixSelected.indexOf(item);
+            if (index === -1) {
+                $scope.workMixSelected.push(item);
+            } else {
+                $scope.workMixSelected.splice(index, 1);
+            }
+
+        };
+
+        $scope.removeWorkMix = function (item) {
+            const index = $scope.workMixSelected.indexOf(item);
+            if (index !== -1) {
+                $scope.workMixSelected.splice(index, 1);
+            }
+        };
+
+        $scope.clearWorkMixSelection = function () {
+            $scope.workMixSelected = [];
+            $scope.workMixSearch = '';
+            $scope.filterWorkMixes();
+        };
         document.addEventListener('click', function (event) {
             const dropdown = document.querySelector('.multi-select-dropdown');
             if (dropdown && !dropdown.contains(event.target)) {
@@ -410,6 +455,7 @@
                     marketCounties: $scope.selectedMarketCounties,
                     minRank: $scope.selectedMinQuantity || null,
                     maxRank: $scope.selectedMaxQuantity || null,
+                    workTypeNames: $scope.workMixSelected.map(x => typeof x === 'string' ? x : x.label),
                 },
                 traditional: true
             }).success(function (data) {
@@ -492,18 +538,22 @@
         //CSV Export
         $scope.exportClick = function () {
             let headers = [
-                "Contract Number", "Duration", "Project Number", "Letting Date", "Pay Item",
-                "Description", "Supplemental Description", "Units", "Quantity",
-                "Unit Price Bid", "Bid Amount", "Bid Status", "Bid Type", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "Primary County", "Market Area", "District",
-                "Contract Type", "Work Type", "Proposal Type", " Executed Date", "Bidder Rank", "Bidder Name"
+                "Contract Number", "Lead Project", "Pay Item", "Description", "Supplemental Description",
+                "Units", "Quantity", "Unit Price Bid", "Weighted Avg", "Weighted Avg No Outliers",  "Outlier", "Bid Amount", "District", "Market Area",
+                "Primary County", "Bidder Name", "Bid Status", "Bidder Rank"
+                , "Contract Type", "Work Type", "Work Mix", "Project Category",
+                "Letting Date", "Executed Date", "Awarded Days", "Proposal Type", "Bid Type"
             ].join(",") + "\n";
 
             let rows = $scope.bidHistoryData.map(item => [
-                `"${item.p}"`, `"${item.Duration}"`, `"${item.ProjectNumber}"`, `"${formatDotNetDate(item.l)}"`, `"${item.ri}"`,
-                `"${item.Description.replace(/"/g, '""')}"`, `"${item.SupplementalDescription}"`, `"${item.CalculatedUnit}"`, `"${item.Quantity}"`,
-                `"${item.b}"`, `"${item.PvBidTotal}"`, `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`, `"${item.c}"`, `"${item.MarketArea}"`, `"${item.d}"`,
-                `"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`, `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`,
-                `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${formatDotNetDate(item.ExecutedDate)}"`, `"${item.VendorRanking}"`, `"${item.VendorName}"`
+                `"${item.p}"`, `"${item.ProjectNumber}"`, `"${item.ri}"`, `"${item.Description.replace(/"/g, '""')}"`,
+                `"${item.SupplementalDescription}"`,
+                `"${item.CalculatedUnit}"`, `"${item.Quantity}"`, `"${item.b}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`,
+                `"${item.PvBidTotal}"`, `"${item.d}"`, `"${item.MarketArea}"`, `"${item.c}"`, `"${item.VendorName}"`,
+                `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${item.VendorRanking}"`, `"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`,
+                `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`, `"${(item.WorkMixDescription)}"`, `"${(item.CategoryDescription)}"`,
+                `"${formatDotNetDate(item.l)}"`, `"${formatDotNetDate(item.ExecutedDate)}"`,
+                `"${item.Duration}"`, `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`
             ].join(",")).join("\n");
 
             let csvContent = "data:text/csv;charset=utf-8," + headers + rows;

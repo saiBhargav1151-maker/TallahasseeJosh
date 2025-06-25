@@ -77,20 +77,29 @@ namespace Dqe.Infrastructure.Fdot
 
 
         }
+
+        public IList<string> GetWorkMixes()
+        {
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                var results = session.CreateCriteria<CodeValue>()
+                    .CreateAlias("MyCodeTable", "ct") 
+                    .Add(Restrictions.Eq("ct.Id", 203L)) // filter on CODETABLE_ID = 203
+                    .SetProjection(Projections.Property("Description"))
+                    .AddOrder(Order.Asc("Description"))
+                    .List<string>();
+
+                return results.Distinct().ToList();
+            }
+        }
         /// <summary>
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
-        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, string contractType = null, int months = 12, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties = null, string bidStatus = null, string[] marketCounties = null, int? minRank = null, int? maxRank = null)
+        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, string contractType = null, int months = 12, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties = null, string bidStatus = null, string[] marketCounties = null, decimal? minRank = null, decimal? maxRank = null, List<string> workTypeNames = null)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
-                /* var categorySubquery = DetachedCriteria.For<Category>("catSub")
-                     .CreateAlias("catSub.ProjectItems", "piSub")
-                     .CreateAlias("piSub.MyRefItem", "riSub")
-                     .Add(Restrictions.EqProperty("riSub.Id", "ri.Id"))
-                     .Add(Restrictions.EqProperty("piSub.MyProject.Id", "prj.Id"))
-                     .SetProjection(Projections.Property("catSub.Description"));*/
                 var categorySubquery = DetachedCriteria.For<Category>("catSub")
                              .CreateAlias("catSub.ProjectItems", "piSub")
                              .CreateAlias("piSub.MyRefItem", "riSub")
@@ -169,7 +178,15 @@ namespace Dqe.Infrastructure.Fdot
                 {
                     query.Add(Restrictions.Between("Quantity", minRank, maxRank));
                 }
-
+                if (workTypeNames != null && workTypeNames.Any())
+                {
+                    query.Add(Subqueries.PropertyIn(
+           "prj.Pjcde1",
+           DetachedCriteria.For<CodeValue>()
+               .Add(Restrictions.In("Description", workTypeNames))
+               .SetProjection(Projections.Property("CodeValueName"))
+       ));
+                }
                 query.SetProjection(Projections.ProjectionList()
                         .Add(Projections.Property("pv.BidStatus"), "BidStatus")
                         .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
