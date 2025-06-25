@@ -31,7 +31,7 @@
                             </span>
                             &nbsp;&nbsp;
                             <span ng-show="project.userHasCustody == true && security.isAuthorized">
-                                <button type="button" class="btn btn-primary" title="Click to create a new version and estimate from Project Preconstruction" focus-me="confirmCreateNewVersionFromWtReset" ng-show="!confirmCreateNewVersionFromWt && !project.isOfficial" ng-click="confirmCreateNewVersionFromWt = true; confirmCreateNewVersionFromWtReset = false;">Create New Review Version</button>
+                                <button type="button" class="btn btn-primary" title="Click to create a new version and estimate from Project Preconstruction" focus-me="confirmCreateNewVersionFromWtReset" ng-show="!confirmCreateNewVersionFromWt && !project.isOfficial" ng-click="confirmCreateNewVersionFromWt = true; confirmCreateNewVersionFromWtReset = false;">Create New Version from Project Preconstruction</button>
                                 <span class="alert alert-warning" ng-show="confirmCreateNewVersionFromWt">
                                     Click 'Yes' to create a new project version from Project Preconstruction or 'No' to cancel&nbsp;&nbsp;
                                     <button type="button" class="btn btn-default" title="Click to cancel the creation of the new version" focus-me="confirmCreateNewVersionFromWt" ng-click="confirmCreateNewVersionFromWt = false; confirmCreateNewVersionFromWtReset = true;">No</button>
