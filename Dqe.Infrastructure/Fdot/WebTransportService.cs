@@ -108,9 +108,15 @@ namespace Dqe.Infrastructure.Fdot
                              .SetProjection(Projections.Property("catSub.Description"))
                              .SetMaxResults(1);
                 var workMixSubquery = DetachedCriteria.For<CodeValue>("cv")
-    .Add(Restrictions.EqProperty("cv.CodeValueName", "prj.Pjcde1")) // match code name
+    .CreateAlias("cv.MyCodeTable", "ct")
+    .Add(Restrictions.EqProperty("cv.CodeValueName", "prj.Pjcde1"))
+    .Add(Restrictions.Eq("ct.Id", 203L))
     .SetProjection(Projections.Property("cv.Description"))
     .SetMaxResults(1);
+                /*var workMixSubquery = DetachedCriteria.For<CodeValue>("cv")
+     .Add(Restrictions.EqProperty("cv.CodeValueName", "prj.Pjcde1")) // match code name
+     .SetProjection(Projections.Property("cv.Description"))
+     .SetMaxResults(1);*/
                 var query = session.CreateCriteria<ProposalItem>()
                     .CreateAlias("MyRefItem", "ri")
                     .CreateAlias("Bids", "b")
@@ -210,7 +216,6 @@ namespace Dqe.Infrastructure.Fdot
                         .Add(Projections.Property("ri.CalculatedUnit"), "CalculatedUnit")
                         .Add(Projections.Property("m.NumberOfUnits"), "Duration")
                         .Add(Projections.Property("p.ExecutedDate"), "ExecutedDate")
-                        .Add(Projections.Property("pv.BidType"), "BidType")
                         .Add(Projections.Property("pv.BidType"), "BidType")
                         .Add(Projections.Property("pv.VendorRanking"), "VendorRanking")
                         .Add(Projections.Property("ri.ObsoleteDate"), "ObsoleteDate")

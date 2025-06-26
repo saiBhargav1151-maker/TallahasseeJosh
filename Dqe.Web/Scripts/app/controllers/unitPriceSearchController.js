@@ -166,7 +166,7 @@
         };
         $scope.loadWorkMixes = function () {
             $http.get('/UnitPriceSearch/GetWorkMixes').then(function (response) {
-                $scope.allWorkMixes = Array.from(new Set(response.data)).sort(); // Remove duplicates + sort
+                $scope.allWorkMixes = Array.from(new Set(response.data)).sort();
                 $scope.filteredWorkMixes = angular.copy($scope.allWorkMixes);
             }, function (error) {
                 console.error("Failed to load work mixes:", error);
@@ -211,7 +211,7 @@
             } else {
                 $scope.selectedRegions.push(option);
             }
-            $scope.onMultiRegionChange(); // update counties
+            $scope.onMultiRegionChange();
         };
 
         $scope.onMultiRegionChange = function () {
@@ -329,7 +329,6 @@
         $scope.validateQuantity = function () {
             const min = $scope.selectedMinQuantity;
             const max = $scope.selectedMaxQuantity;
-            // Reset error
             $scope.hasError = false;
             $scope.errorMessage = '';
 
@@ -532,7 +531,7 @@
             const match = /\/Date\((\d+)\)\//.exec(msDateString);
             if (!match) return '';
             const date = new Date(parseInt(match[1]));
-            return date.toLocaleDateString('en-US'); // Format: MM/DD/YYYY
+            return date.toLocaleDateString('en-US');
         }
        
         //CSV Export
@@ -580,12 +579,12 @@
                     break;
             }
 
-            // Re-render the chart
+  
             if ($scope.bidHistoryData && $scope.bidHistoryData.length > 0) {
                 waitForCanvasAndRender();
             }
         };
-        // Watch for data update
+      
         $scope.$watch('bidHistoryData', function (newVal) {
             if (newVal && newVal.length > 0) {
                 waitForCanvasAndRender();
