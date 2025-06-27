@@ -381,7 +381,7 @@ namespace Dqe.Domain.Model
             {
                 Created = DateTime.Now,
                 Label = SnapshotLabel.Review,
-                LastUpdated = DateTime.Now,
+                LastUpdated = source.LastUpdated,
                 Estimate = 1,
                 EstimateComment = comment,
                 IsWorkingEstimate = false,

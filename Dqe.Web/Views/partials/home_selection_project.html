@@ -1,9 +1,5 @@
 ﻿
 <style>
-    .panel-heading {
-        font-size: larger;
-        font-weight: bold;
-    }
     input::placeholder {
         color: gray !important; 
         opacity: 75%;
@@ -261,11 +257,10 @@
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-lg-12">
-                                <div ng-repeat="version in versions | filter:{versionLabel:'!Review'}" id="versions">
+                                <div ng-repeat="version in versions | filter:versionLabel:'!Review' | orderBy:'displayOrder':true" id="versions">
                                     <div ng-class="(version.isCurrentOwner && version.hasWorkingEstimate) ? 'panel panel-primary' : 'panel panel-default'">
                                         <div class="panel-heading">
                                             <div class="row">
-
                                                 <div class="col-lg-2" style="max-width:200px">
                                                     <strong>Project:</strong> {{project.number}}
                                                 </div>
@@ -274,13 +269,13 @@
                                                 </div>
                                                 <div style="width: 7%;">
                                                 </div>
-                                                <div class="col-lg-2 col-md-3" style="min-width: 250px;">
+                                                <div class="col-lg-3 col-md-3" style="min-width: 250px;">
                                                     <strong>Source:</strong> {{version.source}}
                                                 </div>
                                                 <div class="col-lg-3">
                                                     <strong>Owner:</strong> {{version.owner}}
                                                 </div>
-                                                <div class="col-lg-1" style="text-align: right;" ng-if="project.userHasCustody == true && version.isCurrentOwner && !version.hasWorkingEstimate && security.isAuthorized && !project.isOfficial">
+                                                <div class="col-lg-2" style="text-align: right;" ng-if="project.userHasCustody == true && version.isCurrentOwner && !version.hasWorkingEstimate && security.isAuthorized && !project.isOfficial">
                                                     <button type="button" title="Click to make this version your current working estimate" class="btn btn-primary" ng-click="assignWorkingEstimate(version)">Make Working Estimate</button>
                                                 </div>
                                             </div>
@@ -373,43 +368,43 @@
                                                         </td>
 
                                                         <!--<td ng-if="project.userHasCustody && version.isCurrentOwner">
-                                                            <div style="text-align: right;">
-                                                                <a href="" title="edit comment" ng-show="!snapshot.isEditingComment" ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
-                                                            </div>
-                                                            <br />
-                                                            <div ng-show="!snapshot.isEditingComment">
-                                                                <div ng-show="!snapshot.showFullComment">
-                                                                    {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
-                                                                    <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
-                                                                    <a href="" ng-show="snapshot.comment != undefined && snapshot.comment.length > 50" ng-click="snapshot.showFullComment = true">[more]</a>
-                                                                </div>
-                                                                <div ng-show="snapshot.showFullComment">
-                                                                    <pre>{{snapshot.comment}}</pre>
-                                                                    <a href="" ng-click="snapshot.showFullComment = false">[less]</a>
-                                                                </div>
-                                                            </div>
-                                                            <div ng-show="snapshot.isEditingComment">
-                                                                <div class="text-muted">({{2000-snapshot.comment.length}} Characters)</div>
-                                                                <textarea class="form-control" title="Notes" ng-model="snapshot.comment" ng-trim="false" my-maxlength="2000" style="height: 100px;" focus-me="snapshot.isEditingComment"></textarea>
-                                                                <br />
-                                                            </div>
-                                                            <div style="text-align: right;">
-                                                                <a href="" title="save comment" ng-show="snapshot.isEditingComment" ng-click="saveComment(snapshot)">Save</a>
-                                                                &nbsp;&nbsp;
-                                                                <a href="" title="cancel comment changes" ng-show="snapshot.isEditingComment" ng-click="cancelEditComment(snapshot)">Cancel</a>
-                                                            </div>
-                                                        </td>
-                                                        <td ng-if="!project.userHasCustody || !version.isCurrentOwner">
-                                                            <div ng-show="!snapshot.showFullComment">
-                                                                {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
-                                                                <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
-                                                                <a href="" ng-show="snapshot.comment != undefined && snapshot.comment.length > 50" ng-click="snapshot.showFullComment = true">[more]</a>
-                                                            </div>
-                                                            <div ng-show="snapshot.showFullComment">
-                                                                <pre>{{snapshot.comment}}</pre>
-                                                                <a href="" ng-click="snapshot.showFullComment = false">[less]</a>
-                                                            </div>
-                                                        </td>-->
+                                <div style="text-align: right;">
+                                    <a href="" title="edit comment" ng-show="!snapshot.isEditingComment" ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
+                                </div>
+                                <br />
+                                <div ng-show="!snapshot.isEditingComment">
+                                    <div ng-show="!snapshot.showFullComment">
+                                        {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
+                                        <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
+                                        <a href="" ng-show="snapshot.comment != undefined && snapshot.comment.length > 50" ng-click="snapshot.showFullComment = true">[more]</a>
+                                    </div>
+                                    <div ng-show="snapshot.showFullComment">
+                                        <pre>{{snapshot.comment}}</pre>
+                                        <a href="" ng-click="snapshot.showFullComment = false">[less]</a>
+                                    </div>
+                                </div>
+                                <div ng-show="snapshot.isEditingComment">
+                                    <div class="text-muted">({{2000-snapshot.comment.length}} Characters)</div>
+                                    <textarea class="form-control" title="Notes" ng-model="snapshot.comment" ng-trim="false" my-maxlength="2000" style="height: 100px;" focus-me="snapshot.isEditingComment"></textarea>
+                                    <br />
+                                </div>
+                                <div style="text-align: right;">
+                                    <a href="" title="save comment" ng-show="snapshot.isEditingComment" ng-click="saveComment(snapshot)">Save</a>
+                                    &nbsp;&nbsp;
+                                    <a href="" title="cancel comment changes" ng-show="snapshot.isEditingComment" ng-click="cancelEditComment(snapshot)">Cancel</a>
+                                </div>
+                            </td>
+                            <td ng-if="!project.userHasCustody || !version.isCurrentOwner">
+                                <div ng-show="!snapshot.showFullComment">
+                                    {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
+                                    <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
+                                    <a href="" ng-show="snapshot.comment != undefined && snapshot.comment.length > 50" ng-click="snapshot.showFullComment = true">[more]</a>
+                                </div>
+                                <div ng-show="snapshot.showFullComment">
+                                    <pre>{{snapshot.comment}}</pre>
+                                    <a href="" ng-click="snapshot.showFullComment = false">[less]</a>
+                                </div>
+                            </td>-->
                                                         <td style="text-align: right;">{{snapshot.estimate.Total | currency}}</td>
                                                         <td>{{snapshot.label}}</td>
                                                         <td><input type="checkbox" title="Select snapshot" name="selected" ng-model="snapshot.selected" ng-change="updateSelection(versions)" ng-disabled="snapshot.disabled"></td>
@@ -430,7 +425,7 @@
                                 <div ng-hide="hasReviews" style="font-style: italic;">No Reviews</div>
                                 <div ng-repeat="version in versions | filter:{versionLabel:'Review'}" id="versions">
                                     <div ng-class="'panel panel-default'" style="border-color: #214c2c;">
-                                        <div class="panel-heading" style="background-color: #70995C; border-color: #214c2c; color: #001900;">
+                                        <div class="panel-heading" style="background-color: #70995C; border-color: #214c2c; color: #000; ">
                                             <div class="row">
                                                 <div class="col-lg-2" style="max-width:200px">
                                                     <strong>Project:</strong> {{project.number}}
@@ -453,7 +448,7 @@
                                                 <thead>
                                                     <tr>
                                                         <td style="width: 10%">Review Created</td>
-                                                        <td style="width: 10%">Last Updated</td>
+                                                        <td style="width: 10%">Source Updated</td>
                                                         <td style="width: 40%" ng-if="project.userHasCustody">Comment</td>
                                                         <td style="width: 40%" ng-if="!project.userHasCustody">Comment</td>
                                                         <td style="width: 10%; text-align: center;">Estimate</td>
@@ -463,22 +458,6 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr ng-repeat="snapshot in version.snapshots">
-                                                        <!--<td ng-if="project.userHasCustody == true && security.isAuthorized && !project.isOfficial">
-                                                            <a href="" title="Click to create a new version from this estimate" ng-show="!confirmCreateVersionFromEstimate" ng-click="confirmCreateVersionFromEstimate = true">Create New Version</a>
-                                                            <div ng-show="confirmCreateVersionFromEstimate">
-                                                                <div>Confirm?</div>
-                                                                <a href="" title="Click to confirm the creation of the new version" ng-click="createProjectVersionFromEstimate(snapshot); confirmCreateVersionFromEstimate = false">Yes</a>&nbsp;&nbsp;
-                                                                <a href="" title="Click to cancel the creation of the new version" ng-click="confirmCreateVersionFromEstimate = false">No</a>
-                                                            </div>
-                                                        </td>
-                                                        <td ng-if="security.isSystemAdmin">
-                                                            <a href="" title="Click to create a new review version from this estimate" ng-show="!confirmCreateReviewVersionFromEstimate" ng-click="confirmCreateReview = true">Create New Review Version</a>
-                                                            <div ng-show="confirmCreateReview">
-                                                                <div>Confirm?</div>
-                                                                <a href="" title="Click to confirm the creation of the new Review version" ng-click="createNewReviewSnapshot(snapshot); confirmCreateReview = false">Yes</a>&nbsp;&nbsp;
-                                                                <a href="" title="Click to cancel the creation of the new Review version" ng-click="confirmCreateReview = false">No</a>
-                                                            </div>
-                                                        </td>-->
                                                         <td>{{snapshot.created}}</td>
                                                         <td>{{snapshot.lastUpdated}}</td>
 

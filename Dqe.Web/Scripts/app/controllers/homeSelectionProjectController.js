@@ -12,8 +12,56 @@
             $scope.hasReviews = r.versions.some(item => item.versionLabel === 'Review');
             $scope.authorizedUsers = r.authorizedUsers;
             document.getElementById("hiddenProjectNumber").value = r.project.number;
+
+
+            //This is for a request to place the latestet modified version at the top of the page.
+            //$scope.reviewOnlyVersions = $scope.versions.filter(v => v.versionLabel === 'Review');
+            //$scope.versionsNonReviews = $scope.versions.find(v => v.versionLabel !== 'Review');
+            angular.forEach($scope.versions, function (version) {
+                version.lastModified = getLatestEstimateModified(version);
+                version.displayOrder = version.projectVersion;
+            });
+
+            var latestModifiedVersion = 0;
+            $scope.versions[0].displayOrder = 999;
+           
+            for (let i = 1; i < ($scope.versions.length - 1); i++) {
+                if ($scope.versions[i].versionLabel !== 'Review') {
+                    const dateA = new Date($scope.versions[latestModifiedVersion].lastModified);
+                    const dateB = new Date($scope.versions[i].lastModified);
+                    if (dateB.getTime() - dateA.getTime() > 0) {
+                        $scope.versions[i].displayOrder = 999;
+                        $scope.versions[latestModifiedVersion].displayOrder = $scope.versions[latestModifiedVersion].projectVersion;
+                        latestModifiedVersion = i;
+                    }
+                }       
+            }
+            
         }
     }
+
+    function formatDotNetDate(msDateString) {
+        if (!msDateString) return '';
+        const match = /\/Date\((\d+)\)\//.exec(msDateString);
+        if (!match) return '';
+        const date = new Date(parseInt(match[1]));
+        return date.toISOString();
+    }
+
+    ///Determines the Estimate in the Versions that has the last modified
+    function getLatestEstimateModified(version) {
+        if (!version.snapshots || version.snapshots.length === 0) {
+            return null; // Or handle as desired
+        }
+        return formatDotNetDate(version.snapshots[0].lastUpdatedRaw);
+    };
+
+    // In your controller
+    $scope.customTimeSort = function (item) {
+        // Assuming 'item.nestedObject.timeString' holds a date string
+        return new Date(item.nestedObject.timeString).getTime();
+    };
+
     $scope.isSynced = null;
     function checkSync(result) {
         if (!containsDqeError(result)) {

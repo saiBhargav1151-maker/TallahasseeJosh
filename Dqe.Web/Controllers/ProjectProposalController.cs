@@ -1379,7 +1379,6 @@ namespace Dqe.Web.Controllers
                 versions = project
                     .ProjectVersions
                     .OrderByDescending(i => i.Version)
-                    .ThenByDescending(v => v.ProjectEstimates.OrderByDescending(e => e.LastUpdated))
                     .Select(i => new
                     {
                         projectVersionId = i.Id,
@@ -1402,6 +1401,7 @@ namespace Dqe.Web.Controllers
                                 projectSnapshot = ii.Estimate,
                                 created = string.Format("{0} @ {1}", ii.Created.ToShortDateString(), ii.Created.ToShortTimeString()),
                                 lastUpdated = string.Format("{0} @ {1}", ii.LastUpdated.ToShortDateString(), ii.LastUpdated.ToShortTimeString()),
+                                lastUpdatedRaw = ii.LastUpdated,
                                 comment = ii.EstimateComment,
                                 estimate = ii.GetEstimateTotal(),
                                 snapshotRemoved = ii.LabelRemovedOn.HasValue,
