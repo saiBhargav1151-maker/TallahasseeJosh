@@ -148,7 +148,6 @@
             $scope.selectedMaxQuantity = null;
             $scope.selectedMinRank = null;
             $scope.selectedMaxRank = null;
-            $scope.monthsOfHistory = 12;
             $scope.selectedBidStatus = "";
             $scope.selectedContractType = "";
             $scope.selectedWorkTypeCode = null;
@@ -216,7 +215,7 @@
             }
             $scope.onMultiRegionChange();
         };
-
+        
         $scope.onMultiRegionChange = function () {
             let combined = [];
 
@@ -436,7 +435,11 @@
                 alert("Please enter a valid Pay Item before searching.");
                 return;
             }
-
+            const months = $scope.monthsOfHistory;
+            if (!months || months < 1 || months > 120) {
+                alert("Please enter a valid Months of Bid History between 1 and 120.");
+                return;
+            }
             $scope.bidHistoryData = [];
             $scope.chartStats = null;
             $scope.isLoading = true;
