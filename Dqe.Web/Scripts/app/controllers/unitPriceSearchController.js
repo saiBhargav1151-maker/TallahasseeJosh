@@ -126,6 +126,7 @@
             "Area 14": ["MONROE"],
             "Area 99": ["DIST/ST-WIDE", "TURNPIKE"]
         };
+       
         $scope.allWorkMixes = [];
         $scope.workMixSelected = [];
         $scope.workMixSearch = '';
@@ -161,8 +162,10 @@
             $scope.items = [];
             $scope.hasError = false;
             $scope.errorMessage = '';
+            $scope.workMixSelected = [];
             $scope.workMixSearch = '';
             $scope.filterWorkMixes();
+            $scope.isWorkMixDropdownOpen = false;
         };
         $scope.loadWorkMixes = function () {
             $http.get('/UnitPriceSearch/GetWorkMixes').then(function (response) {
@@ -256,7 +259,7 @@
             } else {
                 $scope.workMixSelected.splice(index, 1);
             }
-
+            $scope.isWorkMixDropdownOpen = false;
         };
 
         $scope.removeWorkMix = function (item) {
@@ -270,6 +273,7 @@
             $scope.workMixSelected = [];
             $scope.workMixSearch = '';
             $scope.filterWorkMixes();
+            $scope.isWorkMixDropdownOpen = false;
         };
         document.addEventListener('click', function (event) {
             const dropdown = document.querySelector('.multi-select-dropdown');
@@ -590,7 +594,7 @@
                 waitForCanvasAndRender();
             }
         });
-        // Line Graph
+        // Line Graph rendering
         function waitForCanvasAndRender() {
             $scope.isChartLoading = true;
 

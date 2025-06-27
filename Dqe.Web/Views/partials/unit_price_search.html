@@ -9,27 +9,44 @@
 
             <!-- Pay Item Input -->
             <div class="form-group search-input-group">
-                <label for="payItemInput" class="modern-label">
+                <label for="payItemInput" class="modern-label"
+                       data-original-title="A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system.">
                     <i class="fas fa-hammer label-icon"></i>
                     Enter Pay Item Number or Description: <span class="label-hint-compact" style="color: red;"> * required</span>
+                    <!-- Simple Tooltip -->
+                    <div class="info-tooltip-wrapper">
+                        <i class="fas fa-info-circle info-icon"></i>
+                        <div class="tooltip">
+                            <div class="tooltip-item">
+                                <strong>Required Field:</strong> Quickly search and select a specific Pay Item Number or Description (e.g., 'SUPERPAVE ASPHALTIC CONCRETE' or '0334 1 55').
+                            </div>
+                            <div class="tooltip-item">
+                                <strong>Minimum Input:</strong> Type at least <span class="tooltip-highlight">3 characters</span> to see suggestions.
+                            </div>
+                            <div class="tooltip-item">
+                                <strong>Selection Only:</strong> You can only select from the dropdown suggestions.
+                            </div>
+                        </div>
+                    </div>
                 </label>
                 <div class="input-wrapper">
                     <input type="text" id="payItemInput" ng-model="searchText" ng-change="fetchPayItemSuggestions()"
                            placeholder="e.g., 0120 6 or Embankment" autocomplete="off" class="form-control modern-input"
-                           maxlength="180" required />
+                           maxlength="180" required
+                           data-original-title="A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system." />
                     <span ng-if="searchText" ng-click="clearSearchText()" class="clear-button" style="transform: translateY(-50%);">
                         <i class="fas fa-times"></i>
-                    </span>
+                    </span> 
                 </div>
                 <div ng-show="unitPriceForm.payItemInput.$touched && unitPriceForm.payItemInput.$invalid" class="error-message">
                     <div ng-show="unitPriceForm.payItemInput.$error.required">
                         <i class="fas fa-exclamation-circle"></i> Pay Item is required.
                     </div>
                     <div ng-show="unitPriceForm.payItemInput.$error.pattern">
-                        <i class="fas fa-exclamation-circle"></i> Minimum 2 letters/numbers. No special characters allowed.
+                        <i class="fas fa-exclamation-circle"></i> Minimum 3 letters/numbers. No special characters allowed.
                     </div>
                 </div>
-                <ul class="suggestions-dropdown" ng-show="items.length > 0">
+                <ul class="suggestions-dropdown" ng-show="items.length > 0 && searchText.length >= 3">
                     <li class="suggestion-item" ng-repeat="item in items" ng-click="selectPayItem(item)">
                         <i class="fas fa-search suggestion-icon"></i>
                         {{ item.Description }}
@@ -47,13 +64,13 @@
                     <div class="input-group">
                         <label class="modern-label" for="minQuantity">Minimum:</label>
                         <input type="number" id="minQuantity" class="quantity-input" ng-model="selectedMinQuantity"
-                             step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()"  min="1" max="{{maxQuantity}}" placeholder="Min quantity" />
+                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Min quantity" />
                     </div>
                     <div class="separator">to</div>
                     <div class="input-group">
                         <label class="modern-label" for="maxQuantity">Maximum:</label>
                         <input type="number" id="maxQuantity" class="quantity-input" ng-model="selectedMaxQuantity"
-                              step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Max quantity" />
+                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Max quantity" />
                     </div>
                 </div>
                 <div class="error-message" ng-show="hasError">
@@ -309,8 +326,8 @@
                 <i class="fas fa-times-circle"></i> Clear Filters
             </button>
         
-        <div class="export-section" ng-if="bidHistoryData && bidHistoryData.length > 0">
-            <button class="btn btn-success btn-lg export-button" ng-click="exportClick()">
+        <div ng-if="bidHistoryData && bidHistoryData.length > 0">
+            <button class="btn btn-lg export-button"  ng-click="exportClick()">
                 <i class="fas fa-download"></i> Download Bid Data CSV
             </button>
         </div>
@@ -669,6 +686,8 @@
         margin-top: 4px;
         list-style: none;
         padding: 0;
+        max-height: 200px;
+        overflow-y: auto;
     }
 
     .suggestion-item {
@@ -768,12 +787,20 @@
         border-color: #356BCF;
         box-shadow: 0 4px 8px rgba(94, 137, 217, 0.3);
     }
-
+    .export-section {
+        padding: 10px;
+        margin: 20px 0;
+        text-align: center;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #28a745;
+    }
     .export-button {
         background: #28a745;
         color: #ffffff;
         border: 2px solid #28a745;
         box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+        float: right;
     }
 
     .export-button:hover {
@@ -1787,5 +1814,65 @@
         cursor: pointer;
         font-size: 11px;
         opacity: 0.8;
+    }
+    .info-tooltip-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-left: 8px;
+    }
+
+    .info-icon {
+        color: #007bff;
+        cursor: help;
+        font-size: 14px;
+    }
+
+    .tooltip {
+        visibility: hidden;
+        opacity: 0;
+        width: 280px;
+        background-color: #333;
+        color: white;
+        text-align: left;
+        border-radius: 6px;
+        padding: 12px;
+        position: absolute;
+        z-index: 1001;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -140px;
+        font-size: 12px;
+        line-height: 1.4;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+    .info-tooltip-wrapper:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .tooltip-item {
+        margin-bottom: 8px;
+    }
+
+        .tooltip-item:last-child {
+            margin-bottom: 0;
+        }
+
+    .tooltip-highlight {
+        color: #ffd700;
+        font-weight: bold;
     }
 </style>
