@@ -1,5 +1,8 @@
-﻿<div class="panel panel-default modern-panel">
+﻿<div class="modern-panel">
     <!-- Input -->
+   <!-- <div class="info-block" style="font-weight: 600; color: #1F4283; margin-bottom: 12px;">
+        Bid Data Updated Through: <span>{{ latestLettingDate }}</span>
+    </div>-->
     <div class="row input-section">
         <!-- Group 1: Item Filters -->
         <div class="col-md-4">
@@ -36,7 +39,7 @@
                            data-original-title="A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system." />
                     <span ng-if="searchText" ng-click="clearSearchText()" class="clear-button" style="transform: translateY(-50%);">
                         <i class="fas fa-times"></i>
-                    </span> 
+                    </span>
                 </div>
                 <div ng-show="unitPriceForm.payItemInput.$touched && unitPriceForm.payItemInput.$invalid" class="error-message">
                     <div ng-show="unitPriceForm.payItemInput.$error.required">
@@ -101,28 +104,39 @@
                     Contract Type:
                 </label>
                 <div class="select-wrapper">
-                    <select id="contractTypeSelect" class="form-control modern-select compact-select" ng-model="selectedContractType">
-                        <option value="">-- All Contract Types--</option>
-                        <option ng-repeat="type in contractTypes" value="{{type}}">
+                    <select id="contractTypeSelect"
+                            class="form-control modern-select compact-select"
+                            multiple
+                            ng-model="selectedContractTypes">
+                        <!--<option value="">-- All Contract Types --</option>-->
+                        <option ng-repeat="type in contractTypes"
+                                ng-value="type">
                             {{ contractTypeMap[type] }}
                         </option>
                     </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
+                <div class="label-hint-compact">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
-
             <div class="form-group">
                 <label for="contractWorkTypeSelect" class="modern-label">
                     <i class="fas fa-tools label-icon"></i>
                     Work Type:
                 </label>
-                <div class="select-wrapper">
-                    <select id="contractWorkTypeSelect" class="form-control modern-select" ng-model="selectedWorkTypeCode"
-                            ng-options="code as label for (code, label) in workTypeMap">
-                        <option value="">-- All Work Types --</option>
+                <div class="multiselect-wrapper">
+                    <select id="contractWorkTypeSelect"
+                            class="form-control modern-select compact-select"
+                            ng-model="selectedWorkTypeCodes"
+                            
+                            multiple
+                            >
+                        <!--<option value="">-- All Work Types --</option>-->
+                        <option ng-repeat="(code, label) in workTypeMap"
+                                ng-value="code">
+                            {{ label }}
+                        </option>
                     </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
+                <div class="label-hint-compact">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
             <div class="form-group search-input-group">
                 <label class="modern-label">
@@ -183,8 +197,7 @@
                     <select id="bidStatusFilter" class="form-control modern-select" ng-model="selectedBidStatus">
                         <option value="">-- All Statuses--</option>
                         <option value="W">Won</option>
-                        <option value="L">Loss</option>
-                        <option value="I">Irregular</option>
+                        <option value="FMV">Market Value (Top 3 Bidders)</option>
                     </select>
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
@@ -339,12 +352,12 @@
         <button class="btn btn-primary btn-lg search-button" ng-click="searchBids()">
             <i class="fas fa-search"></i> Search Bids
         </button>
-            <button class="btn btn-secondary clear-button" ng-click="clearFilters()">
-                <i class="fas fa-times-circle"></i> Clear Filters
-            </button>
-        
+        <button class="btn btn-secondary clear-button" ng-click="clearFilters()">
+            <i class="fas fa-times-circle"></i> Clear Filters
+        </button>
+
         <div ng-if="bidHistoryData && bidHistoryData.length > 0">
-            <button class="btn btn-lg export-button"  ng-click="exportClick()">
+            <button class="btn btn-lg export-button" ng-click="exportClick()">
                 <i class="fas fa-download"></i> Download Bid Data CSV
             </button>
         </div>
@@ -399,7 +412,7 @@
                         </div>
                     </div>
                     <div class="chart-container-glass" ng-if="!shouldHideGraphForLumpSum()">
- 
+
                         <div class="canvas-wrapper">
                             <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
                         </div>
@@ -423,7 +436,7 @@
                         </div>
 
                     </div>
-                     <div class="text-muted text-center mt-3"  ng-if="shouldHideGraphForLumpSum()">
+                    <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
                         <i class="fas fa-info-circle"></i> Graph is not available for Lump Sum (LS) bids.
                     </div>
                     <!-- Summary stats -->
@@ -434,7 +447,7 @@
                         <i class="fas fa-table"></i> Bid History Data
                     </h4>
                 </div>
-                <div >
+                <div>
                     <div class="table-wrapper">
                         <table class="table bid-table">
                             <thead>
@@ -504,7 +517,7 @@
                 </div>
             </div>
 
-            
+
         </div>
     </div>
 
@@ -534,7 +547,7 @@
     .modern-panel {
         background: #ffffff;
         border: 2px solid #1F4283;
-        padding: 30px;
+        padding: 10px;
         position: relative;
     }
 
@@ -634,7 +647,7 @@
     .date-input-compact {
         max-width: 140px;
         flex: 1;
-        min-width: 125px;
+        min-width: 135px;
     }
 
     .date-separator {
@@ -958,8 +971,6 @@
         .bid-table tbody tr:hover td:first-child {
             background: #D6E1F5;
         }
-
-        /* Better data presentation and spacing */
         .bid-table td {
             position: relative;
         }
@@ -998,15 +1009,11 @@
                 font-weight: 600;
                 text-transform: capitalize;
             }
-
-            /* Improved readability for long content */
             .bid-table td:nth-child(17),
             .bid-table td:nth-child(18) {
                 text-align: left;
                 max-width: 120px;
             }
-
-            /* Project Category column - prevent splitting of long maintenance descriptions */
             .bid-table td:nth-child(19) {
                 text-align: left;
                 min-width: 200px;
@@ -1015,8 +1022,6 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-
-                /* Show full text on hover for Project Category */
                 .bid-table td:nth-child(19):hover {
                     white-space: normal;
                     overflow: visible;

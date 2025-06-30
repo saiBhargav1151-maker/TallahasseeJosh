@@ -96,7 +96,7 @@ namespace Dqe.Infrastructure.Fdot
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
-        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, string contractType = null, int months = 12, string contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties = null, string bidStatus = null, string[] marketCounties = null, decimal? minRank = null, decimal? maxRank = null, List<string> workTypeNames = null)
+        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, List<string> contractType = null, int months = 12, List<string> contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties = null, string bidStatus = null, string[] marketCounties = null, decimal? minRank = null, decimal? maxRank = null, List<string> workTypeNames = null)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
@@ -152,9 +152,9 @@ namespace Dqe.Infrastructure.Fdot
                     .AddOrder(Order.Desc("l.LettingDate"))
                     .AddOrder(Order.Asc("p.ProposalNumber"))
                     .AddOrder(Order.Asc("b.BidPrice"));
-                if (!string.IsNullOrWhiteSpace(contractWorkType))
+                if (contractWorkType != null && contractWorkType.Any())
                 {
-                    query.Add(Restrictions.Eq("p.ContractWorkType", contractWorkType));
+                    query.Add(Restrictions.In("p.ContractWorkType", contractWorkType));
                 }
                 if (startDate.HasValue && endDate.HasValue)
                 {
@@ -168,13 +168,20 @@ namespace Dqe.Infrastructure.Fdot
                 {
                     query.Add(Restrictions.In("c.Description", counties));
                 }
-                if (!string.IsNullOrWhiteSpace(bidStatus))
+                if (!string.IsNullOrEmpty(bidStatus))
                 {
-                    query.Add(Restrictions.Eq("pv.BidStatus", bidStatus));
+                    if (bidStatus == "FMV")
+                    {
+                        query.Add(Restrictions.In("pv.VendorRanking", new[] { 1, 2, 3 }));
+                    }
+                    else
+                    {
+                        query.Add(Restrictions.Eq("pv.BidStatus", bidStatus));
+                    }
                 }
-                if (!string.IsNullOrWhiteSpace(contractType))
+                if (contractType != null && contractType.Any())
                 {
-                    query.Add(Restrictions.Eq("p.ContractType", contractType));
+                    query.Add(Restrictions.In("p.ContractType", contractType));
                 }
                 if (marketCounties != null && marketCounties.Any())
                 {

@@ -15,7 +15,7 @@
         $scope.relatedCounties = [];
         $scope.selectedRegionCounties = [];
         $scope.isRegionDropdownOpen = false;
-        $scope.selectedBidStatus = "";
+        $scope.selectedBidStatus = "FMV";
         $scope.searchAttempted = false;
         $scope.showNormal = true;
         $scope.showOutliers = true;
@@ -66,14 +66,18 @@
             "CENT": "Central Office"
         };
         $scope.bidStatusMap = {
-            "L": "Loss",
             "W": "Wins",
-            "I": "Irregular"
+            "L": "Loss",
+            "I": "Irregular",
+            "FMV": "Fair Market Value (Bidder Rank 1, 2, 3)"
         };
         $scope.isInvalidDateRange = function () {
             return $scope.startDate && $scope.endDate && new Date($scope.startDate) > new Date($scope.endDate);
         };
         $scope.contractTypes = Object.keys($scope.contractTypeMap);
+        $scope.selectedContractTypes = [];
+        $scope.workTypeCodes = Object.keys($scope.workTypeMap);
+        $scope.selectedWorkTypeCodes = [];
         $scope.districtCountyMap = {
             'District 1 (Southwest Florida)': [
                 '01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY',
@@ -148,9 +152,7 @@
             $scope.selectedMaxQuantity = null;
             $scope.selectedMinRank = null;
             $scope.selectedMaxRank = null;
-            $scope.selectedBidStatus = "";
-            $scope.selectedContractType = "";
-            $scope.selectedWorkTypeCode = null;
+            $scope.selectedBidStatus = "FMV";
             $scope.startDate = null;
             $scope.endDate = null;
             $scope.selectedDistrict = "";
@@ -165,6 +167,8 @@
             $scope.workMixSearch = '';
             $scope.filterWorkMixes();
             $scope.isWorkMixDropdownOpen = false;
+            $scope.selectedContractTypes = [];
+            $scope.selectedWorkTypeCodes = [];
         };
         $scope.loadWorkMixes = function () {
             $http.get('/UnitPriceSearch/GetWorkMixes').then(function (response) {
@@ -452,12 +456,16 @@
                 params: {
                     number: $scope.selectedPayItemNumber,
                     months: $scope.monthsOfHistory || 12,
-                    contractWorkType: $scope.selectedWorkTypeCode || null,
+                    contractWorkType: Array.isArray($scope.selectedWorkTypeCodes) && $scope.selectedWorkTypeCodes.length
+                        ? $scope.selectedWorkTypeCodes
+                        : null,
                     startDate: $scope.startDate || null,
                     endDate: $scope.endDate || null,
                     counties: $scope.selectedRegionCounties,
                     bidStatus: $scope.selectedBidStatus || null,
-                    contractType: $scope.selectedContractType || null,
+                    contractType: Array.isArray($scope.selectedContractTypes) && $scope.selectedContractTypes.length
+                        ? $scope.selectedContractTypes
+                        : null,
                     marketCounties: $scope.selectedMarketCounties,
                     minRank: $scope.selectedMinQuantity || null,
                     maxRank: $scope.selectedMaxQuantity || null,
