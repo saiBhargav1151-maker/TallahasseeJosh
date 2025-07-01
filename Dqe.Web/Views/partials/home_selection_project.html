@@ -257,7 +257,7 @@
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-lg-12">
-                                <div ng-repeat="version in versions | filter:versionLabel:'!Review' | orderBy:'displayOrder':true" id="versions">
+                                <div ng-repeat="version in versions | filter:{versionLabel:'!Review'} | orderBy:'displayOrder':true" id="versions">
                                     <div ng-class="(version.isCurrentOwner && version.hasWorkingEstimate) ? 'panel panel-primary' : 'panel panel-default'">
                                         <div class="panel-heading">
                                             <div class="row">
