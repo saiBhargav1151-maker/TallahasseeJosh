@@ -52,32 +52,25 @@
 
             //var reviewOnlyVersions = $scope.versions.filter(v => v.versionLabel === 'Review');
 
-            var latestRunningModifiedVersion = 0;
-            $scope.versions[0].displayOrder = 999;
+            //var latestRunningModifiedVersion = 0;
+            //$scope.versions[0].displayOrder = 999;
            
-            for (let i = 1; i < ($scope.versions.length - 1); i++) {
-                if ($scope.versions[i].versionLabel !== 'Review') {
-                    const dateA = new Date($scope.versions[latestRunningModifiedVersion].lastModified);
-                    const dateB = new Date($scope.versions[i].lastModified);
+            //for (let i = 1; i < ($scope.versions.length - 1); i++) {
+            //    if ($scope.versions[i].versionLabel !== 'Review') {
+            //        const dateA = new Date($scope.versions[latestRunningModifiedVersion].lastModified);
+            //        const dateB = new Date($scope.versions[i].lastModified);
 
-                    if (dateB.getTime() - dateA.getTime() > 0) {
-                        $scope.versions[i].displayOrder = 999;
-                        $scope.versions[latestRunningModifiedVersion].displayOrder = $scope.versions[latestRunningModifiedVersion].projectVersion;
-                        latestRunningModifiedVersion = i;
-                    }
-                }       
-            }
+            //        if (dateB.getTime() - dateA.getTime() > 0) {
+            //            $scope.versions[i].displayOrder = 999;
+            //            $scope.versions[latestRunningModifiedVersion].displayOrder = $scope.versions[latestRunningModifiedVersion].projectVersion;
+            //            latestRunningModifiedVersion = i;
+            //        }
+            //    }       
+            //}
             
         }
     }
 
-
-    //breaks this type of string back down into the version and estimate number
-    //"Version 24 Estimate 1"
-    function breakdownVersioningString(versionString) {
-        //const words = versionString.split(' '); // Splits the string at each single space character
-        //return [words[1], words [4]];
-    }
 
     function formatDotNetDate(msDateString) {
         if (!msDateString) return '';
