@@ -4,7 +4,14 @@
         color: gray !important; 
         opacity: 75%;
     }
+    td {
+        text-align: center;
+    }
+    tr {
+        text-align: center;
+    }
 </style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 <div class="row">
     <div class="col-lg-1">
@@ -258,19 +265,21 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <div ng-repeat="version in versions | filter:{versionLabel:'!Review'} | orderBy:'displayOrder':true" id="versions">
-                                    <div ng-class="(version.isCurrentOwner && version.hasWorkingEstimate) ? 'panel panel-primary' : 'panel panel-default'">
+                                    <div ng-class="(version.isCurrentOwner && version.hasWorkingEstimate) ? 'panel panel-primary' : 'panel panel-default'" >
                                         <div class="panel-heading">
                                             <div class="row">
                                                 <div class="col-lg-2" style="max-width:200px">
                                                     <strong>Project:</strong> {{project.number}}
                                                 </div>
                                                 <div class="col-md-1 col-lg-2">
-                                                    <strong>Version:</strong> {{version.projectVersion}}
+                                                    <strong><i class="fa-solid fa-thumbtack"></i> Version:</strong> {{version.projectVersion}}
+                                                    <span ng-show="version.displayOrder == '999'"> (most recently updated)</span>
+                                                    <span ng-show="version.hasRelatedReview">Related Review</span>
                                                 </div>
                                                 <div style="width: 7%;">
                                                 </div>
                                                 <div class="col-lg-3 col-md-3" style="min-width: 250px;">
-                                                    <strong>Source:</strong> {{version.source}}
+                                                    <strong><i class="fa-solid fa-compass"></i> Source:</strong> {{version.source}}
                                                 </div>
                                                 <div class="col-lg-3">
                                                     <strong>Owner:</strong> {{version.owner}}
@@ -285,14 +294,15 @@
                                                 <thead>
                                                     <tr>
                                                         <td style="width: 5%" ng-if="project.userHasCustody == true && security.isAuthorized && !project.isOfficial"></td>
-                                                        <td style="width: 5%" ng-if="security.isSystemAdmin">Review</td> <!--ng-if="security.isSystemAdmin"-->
+                                                        <td style="width: 5%" ng-if="security.isSystemAdmin"></td> <!--ng-if="security.isSystemAdmin"-->
+                                                        <td style="width: 5%; text-align: center;">Existing Review</td>
                                                         <td style="width: 5%">Estimate</td>
                                                         <td style="width: 5%">Working Estimate</td>
-                                                        <td style="width: 10%">Created</td>
-                                                        <td style="width: 10%">Last Updated</td>
+                                                        <td style="width: 5%">Created</td>
+                                                        <td style="width: 5%">Last Updated</td>
                                                         <td style="width: 40%" ng-if="project.userHasCustody">Comment</td>
                                                         <td style="width: 40%" ng-if="!project.userHasCustody">Comment</td>
-                                                        <td style="width: 10%; text-align: center;">Estimate</td>
+                                                        <td style="width: 10%">Estimate</td>
                                                         <td style="width: 5%">Label</td>
                                                         <td style="width: 5%">Select for Report</td>
                                                     </tr>
@@ -308,19 +318,24 @@
                                                             </div>
                                                         </td>
                                                         <td ng-if="security.isSystemAdmin">
-                                                            <a href="" title="Click to create a new review version from this estimate" ng-show="!confirmCreateReviewVersionFromEstimate" ng-click="confirmCreateReview = true">Create New Review Version</a>
+                                                            <a href="" title="Click to create a new review version from this estimate" ng-show="!confirmCreateReviewVersionFromEstimate" ng-click="confirmCreateReview = true">Create New <b>Review</b></a>
                                                             <div ng-show="confirmCreateReview">
                                                                 <div>Confirm?</div>
                                                                 <a href="" title="Click to confirm the creation of the new Review version" ng-click="createNewReviewSnapshot(snapshot); confirmCreateReview = false">Yes</a>&nbsp;&nbsp;
                                                                 <a href="" title="Click to cancel the creation of the new Review version" ng-click="confirmCreateReview = false">No</a>
                                                             </div>
                                                         </td>
+                                                        <td style="text-align: center;">
+                                                            <span ng-if="snapshot.hasRelatedReview">Yes</span>
+                                                            <span ng-if="!snapshot.hasRelatedReview">No</span>
+                                                        </td>
                                                         <td>{{snapshot.projectSnapshot}}</td>
                                                         <td>{{snapshot.isWorkingEstimate}}</td>
                                                         <td>{{snapshot.created}}</td>
                                                         <td>{{snapshot.lastUpdated}}</td>
 
-                                                        <td>
+
+                                                        <td style="text-align: left;">
                                                             <div ng-if="(project.userHasCustody && version.isCurrentOwner)">
                                                                 <div style="text-align: right;">
                                                                     <a href="" title="edit comment" ng-show="!snapshot.isEditingComment" ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
@@ -368,43 +383,43 @@
                                                         </td>
 
                                                         <!--<td ng-if="project.userHasCustody && version.isCurrentOwner">
-                                <div style="text-align: right;">
-                                    <a href="" title="edit comment" ng-show="!snapshot.isEditingComment" ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
-                                </div>
-                                <br />
-                                <div ng-show="!snapshot.isEditingComment">
-                                    <div ng-show="!snapshot.showFullComment">
-                                        {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
-                                        <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
-                                        <a href="" ng-show="snapshot.comment != undefined && snapshot.comment.length > 50" ng-click="snapshot.showFullComment = true">[more]</a>
-                                    </div>
-                                    <div ng-show="snapshot.showFullComment">
-                                        <pre>{{snapshot.comment}}</pre>
-                                        <a href="" ng-click="snapshot.showFullComment = false">[less]</a>
-                                    </div>
-                                </div>
-                                <div ng-show="snapshot.isEditingComment">
-                                    <div class="text-muted">({{2000-snapshot.comment.length}} Characters)</div>
-                                    <textarea class="form-control" title="Notes" ng-model="snapshot.comment" ng-trim="false" my-maxlength="2000" style="height: 100px;" focus-me="snapshot.isEditingComment"></textarea>
-                                    <br />
-                                </div>
-                                <div style="text-align: right;">
-                                    <a href="" title="save comment" ng-show="snapshot.isEditingComment" ng-click="saveComment(snapshot)">Save</a>
-                                    &nbsp;&nbsp;
-                                    <a href="" title="cancel comment changes" ng-show="snapshot.isEditingComment" ng-click="cancelEditComment(snapshot)">Cancel</a>
-                                </div>
-                            </td>
-                            <td ng-if="!project.userHasCustody || !version.isCurrentOwner">
-                                <div ng-show="!snapshot.showFullComment">
-                                    {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
-                                    <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
-                                    <a href="" ng-show="snapshot.comment != undefined && snapshot.comment.length > 50" ng-click="snapshot.showFullComment = true">[more]</a>
-                                </div>
-                                <div ng-show="snapshot.showFullComment">
-                                    <pre>{{snapshot.comment}}</pre>
-                                    <a href="" ng-click="snapshot.showFullComment = false">[less]</a>
-                                </div>
-                            </td>-->
+        <div style="text-align: right;">
+            <a href="" title="edit comment" ng-show="!snapshot.isEditingComment" ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
+        </div>
+        <br />
+        <div ng-show="!snapshot.isEditingComment">
+            <div ng-show="!snapshot.showFullComment">
+                {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
+                <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
+                <a href="" ng-show="snapshot.comment != undefined && snapshot.comment.length > 50" ng-click="snapshot.showFullComment = true">[more]</a>
+            </div>
+            <div ng-show="snapshot.showFullComment">
+                <pre>{{snapshot.comment}}</pre>
+                <a href="" ng-click="snapshot.showFullComment = false">[less]</a>
+            </div>
+        </div>
+        <div ng-show="snapshot.isEditingComment">
+            <div class="text-muted">({{2000-snapshot.comment.length}} Characters)</div>
+            <textarea class="form-control" title="Notes" ng-model="snapshot.comment" ng-trim="false" my-maxlength="2000" style="height: 100px;" focus-me="snapshot.isEditingComment"></textarea>
+            <br />
+        </div>
+        <div style="text-align: right;">
+            <a href="" title="save comment" ng-show="snapshot.isEditingComment" ng-click="saveComment(snapshot)">Save</a>
+            &nbsp;&nbsp;
+            <a href="" title="cancel comment changes" ng-show="snapshot.isEditingComment" ng-click="cancelEditComment(snapshot)">Cancel</a>
+        </div>
+    </td>
+    <td ng-if="!project.userHasCustody || !version.isCurrentOwner">
+        <div ng-show="!snapshot.showFullComment">
+            {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
+            <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
+            <a href="" ng-show="snapshot.comment != undefined && snapshot.comment.length > 50" ng-click="snapshot.showFullComment = true">[more]</a>
+        </div>
+        <div ng-show="snapshot.showFullComment">
+            <pre>{{snapshot.comment}}</pre>
+            <a href="" ng-click="snapshot.showFullComment = false">[less]</a>
+        </div>
+    </td>-->
                                                         <td style="text-align: right;">{{snapshot.estimate.Total | currency}}</td>
                                                         <td>{{snapshot.label}}</td>
                                                         <td><input type="checkbox" title="Select snapshot" name="selected" ng-model="snapshot.selected" ng-change="updateSelection(versions)" ng-disabled="snapshot.disabled"></td>
@@ -422,7 +437,7 @@
 
                             <div class="col-lg-12">
                                 <h2 style="color:#214c2c">Reviews</h2>
-                                <div ng-hide="hasReviews" style="font-style: italic;">No Reviews</div>
+                                <div ng-hide="hasReviewsInProject" style="font-style: italic;">No Reviews</div>
                                 <div ng-repeat="version in versions | filter:{versionLabel:'Review'}" id="versions">
                                     <div ng-class="'panel panel-default'" style="border-color: #214c2c;">
                                         <div class="panel-heading" style="background-color: #70995C; border-color: #214c2c; color: #000; ">
@@ -431,12 +446,13 @@
                                                     <strong>Project:</strong> {{project.number}}
                                                 </div>
                                                 <div class="col-md-1 col-lg-2">
-                                                    <strong>Version:</strong> {{version.projectVersion}}
+                                                    <strong><i class="fa-solid fa-thumbtack"></i> Version:</strong> {{version.projectVersion}}
+
                                                 </div>
                                                 <div style="width: 7%;">
                                                 </div>
                                                 <div class="col-lg-2 col-md-3" style="min-width: 250px;">
-                                                    <strong>Source:</strong> {{version.source}}
+                                                    <strong><i class="fa-solid fa-compass"></i> Source:</strong> {{version.source}}
                                                 </div>
                                                 <div class="col-lg-3">
                                                     <strong>Reviewer:</strong> {{version.owner}}
@@ -459,7 +475,7 @@
                                                 <tbody>
                                                     <tr ng-repeat="snapshot in version.snapshots">
                                                         <td>{{snapshot.created}}</td>
-                                                        <td>{{snapshot.lastUpdated}}</td>
+                                                        <td>{{snapshot.lastUpdated}} <span ng-show="version.outdated" style="color:red">Outdated</span></td>
 
                                                         <td>
                                                             <div ng-if="version.isCurrentOwner">
