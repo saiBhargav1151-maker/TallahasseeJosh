@@ -71,6 +71,7 @@
         }
     }
 
+
     //breaks this type of string back down into the version and estimate number
     //"Version 24 Estimate 1"
     function breakdownVersioningString(versionString) {
