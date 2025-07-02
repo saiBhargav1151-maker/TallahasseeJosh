@@ -83,7 +83,7 @@ namespace Dqe.Infrastructure.Fdot
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 var results = session.CreateCriteria<CodeValue>()
-                    .CreateAlias("MyCodeTable", "ct") 
+                    .CreateAlias("MyCodeTable", "ct")
                     .Add(Restrictions.Eq("ct.Id", 203L)) // filter on CODETABLE_ID = 203
                     .SetProjection(Projections.Property("Description"))
                     .AddOrder(Order.Asc("Description"))
@@ -96,27 +96,68 @@ namespace Dqe.Infrastructure.Fdot
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
-        public IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, List<string> contractType = null, int months = 12, List<string> contractWorkType = null, DateTime? startDate = null, DateTime? endDate = null, string[] counties = null, string bidStatus = null, string[] marketCounties = null, decimal? minRank = null, decimal? maxRank = null, List<string> workTypeNames = null)
+     public IList<ProposalItemDTO> GetUnitPriceDetails(
+     string payItem,
+     List<string> contractType = null,
+     int months = 12,
+     List<string> contractWorkType = null,
+     DateTime? startDate = null,
+     DateTime? endDate = null,
+     string[] counties = null,
+     string bidStatus = null,
+     string[] marketCounties = null,
+     decimal? minRank = null,
+     decimal? maxRank = null,
+     List<string> workTypeNames = null)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
+                
                 var categorySubquery = DetachedCriteria.For<Category>("catSub")
-                             .CreateAlias("catSub.ProjectItems", "piSub")
-                             .CreateAlias("piSub.MyRefItem", "riSub")
-                             .Add(Restrictions.EqProperty("riSub.Id", "ri.Id"))
-                            .Add(Restrictions.EqProperty("piSub.MyProposalItem.Id", "this.Id"))
-                             .SetProjection(Projections.Property("catSub.Description"))
-                             .SetMaxResults(1);
+                    .CreateAlias("catSub.ProjectItems", "piSub")
+                    .CreateAlias("piSub.MyRefItem", "riSub")
+                    .Add(Restrictions.EqProperty("riSub.Id", "ri.Id"))
+                    .Add(Restrictions.EqProperty("piSub.MyProposalItem.Id", "this.Id"))
+                    .SetProjection(Projections.Property("catSub.Description"))
+                    .SetMaxResults(1);
+
+                
+                var projectNumberSubquery = DetachedCriteria.For<ProjectItem>("pitem")
+                    .CreateAlias("pitem.MyProject", "prjSub")
+                    .Add(Restrictions.EqProperty("pitem.MyProposalItem.Id", "this.Id"))
+                    .Add(Restrictions.EqProperty("pitem.MyRefItem.Id", "ri.Id"))
+                    .SetProjection(Projections.Property("prjSub.ProjectNumber"))
+                    .SetMaxResults(1);
+                /*var leadProjectNumberSubquery = DetachedCriteria.For<ProjectItem>("pitemLead")
+    .CreateAlias("pitemLead.MyProject", "leadPrj")
+    .Add(Restrictions.EqProperty("pitemLead.MyProposalItem.Id", "this.Id"))
+    *//*.Add(Restrictions.EqProperty("pitemLead.MyRefItem.Id", "ri.Id"))*//*
+    .Add(Restrictions.Eq("leadPrj.Controlling", true))
+    .SetProjection(Projections.Property("leadPrj.ProjectNumber"))
+    .SetMaxResults(1);*/
+
+                var projectIdSubquery = DetachedCriteria.For<ProjectItem>("pitem")
+                    .CreateAlias("pitem.MyProject", "prjSub")
+                    .Add(Restrictions.EqProperty("pitem.MyProposalItem.Id", "this.Id"))
+                    .Add(Restrictions.EqProperty("pitem.MyRefItem.Id", "ri.Id"))
+                    .SetProjection(Projections.Property("prjSub.Id"))
+                    .SetMaxResults(1);
+
+                
+                var projectCodeSubquery = DetachedCriteria.For<Project>("prj")
+                    .Add(Subqueries.PropertyEq("prj.Id", projectIdSubquery))
+                    .SetProjection(Projections.Property("prj.Pjcde1"))
+                    .SetMaxResults(1);
+
+                // Subquery: Work Mix Description (for projection)
                 var workMixSubquery = DetachedCriteria.For<CodeValue>("cv")
-    .CreateAlias("cv.MyCodeTable", "ct")
-    .Add(Restrictions.EqProperty("cv.CodeValueName", "prj.Pjcde1"))
-    .Add(Restrictions.Eq("ct.Id", 203L))
-    .SetProjection(Projections.Property("cv.Description"))
-    .SetMaxResults(1);
-                /*var workMixSubquery = DetachedCriteria.For<CodeValue>("cv")
-     .Add(Restrictions.EqProperty("cv.CodeValueName", "prj.Pjcde1")) // match code name
-     .SetProjection(Projections.Property("cv.Description"))
-     .SetMaxResults(1);*/
+                    .CreateAlias("cv.MyCodeTable", "ct")
+                    .Add(Restrictions.Eq("ct.Id", 203L))
+                    .Add(Subqueries.PropertyEq("cv.CodeValueName", projectCodeSubquery))
+                    .SetProjection(Projections.Property("cv.Description"))
+                    .SetMaxResults(1);
+
+                // Main query
                 var query = session.CreateCriteria<ProposalItem>()
                     .CreateAlias("MyRefItem", "ri")
                     .CreateAlias("Bids", "b")
@@ -127,114 +168,97 @@ namespace Dqe.Infrastructure.Fdot
                     .CreateAlias("p.District", "d")
                     .CreateAlias("p.Milestones", "m")
                     .CreateAlias("pv.MyRefVendor", "rv")
-                    .CreateAlias("p.Projects", "prj")
-                    /*.CreateAlias("prj.Categories", "cat")
-                    .CreateAlias("cat.ProjectItems", "catPi")
-                     .CreateAlias("catPi.MyRefItem", "catRi")*/
                     .Add(Restrictions.Eq("ri.Name", payItem))
                     .Add(Restrictions.Or(
                         Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
                         Restrictions.IsNull("pv.BidType")
                     ))
-                    /*.Add(Restrictions.IsNull("pv.BidStatus"))*/
                     .Add(Restrictions.Eq("p.ProposalStatus", "03"))
                     .Add(Restrictions.Or(
                         Restrictions.IsNull("m.Main"),
                         Restrictions.Eq("m.Main", true)
                     ))
                     .Add(Restrictions.Lt("l.LettingDate", DateTime.Today))
-                    /*.Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-months)))*/
                     .Add(Restrictions.Eq("ri.SpecBook", "13"))
                     .Add(GetProjectValidRestriction())
-                    .Add(Restrictions.Eq("prj.Controlling", true))
-                    .Add(Restrictions.Eq("prj.IsLatestVersion", true))
                     .AddOrder(Order.Asc("ri.Name"))
                     .AddOrder(Order.Desc("l.LettingDate"))
                     .AddOrder(Order.Asc("p.ProposalNumber"))
                     .AddOrder(Order.Asc("b.BidPrice"));
+
+                // Optional filters
                 if (contractWorkType != null && contractWorkType.Any())
-                {
                     query.Add(Restrictions.In("p.ContractWorkType", contractWorkType));
-                }
+
                 if (startDate.HasValue && endDate.HasValue)
-                {
                     query.Add(Restrictions.Between("l.LettingDate", startDate.Value, endDate.Value));
-                }
                 else
-                {
                     query.Add(Restrictions.Ge("l.LettingDate", DateTime.Today.AddMonths(-months)));
-                }
+
                 if (counties != null && counties.Length > 0)
-                {
                     query.Add(Restrictions.In("c.Description", counties));
-                }
+
                 if (!string.IsNullOrEmpty(bidStatus))
                 {
                     if (bidStatus == "FMV")
-                    {
                         query.Add(Restrictions.In("pv.VendorRanking", new[] { 1, 2, 3 }));
-                    }
                     else
-                    {
                         query.Add(Restrictions.Eq("pv.BidStatus", bidStatus));
-                    }
                 }
+
                 if (contractType != null && contractType.Any())
-                {
                     query.Add(Restrictions.In("p.ContractType", contractType));
-                }
+
                 if (marketCounties != null && marketCounties.Any())
-                {
                     query.Add(Restrictions.In("c.Description", marketCounties));
-                }
+
                 if (minRank > 0 && maxRank > 0)
-                {
                     query.Add(Restrictions.Between("Quantity", minRank, maxRank));
-                }
                 if (workTypeNames != null && workTypeNames.Any())
                 {
-                    query.Add(Subqueries.PropertyIn(
-           "prj.Pjcde1",
-           DetachedCriteria.For<CodeValue>()
-               .Add(Restrictions.In("Description", workTypeNames))
-               .SetProjection(Projections.Property("CodeValueName"))
-       ));
-                }
-                query.SetProjection(Projections.ProjectionList()
-                        .Add(Projections.Property("pv.BidStatus"), "BidStatus")
-                        .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
-                        .Add(Projections.Property("ri.Name"), "ri")
-                        .Add(Projections.Property("ri.Id"), "riId")
-                        .Add(Projections.Property("Id"), "Id")
-                        .Add(Projections.Property("Quantity"), "Quantity")
-                        .Add(Projections.Property("b.BidPrice"), "b")
-                        .Add(Projections.Property("prj.ProjectNumber"), "ProjectNumber")
-                        .Add(Projections.Property("prj.Id"), "ProjectId")
-                        .Add(Projections.Property("p.ProposalNumber"), "p")
-                        .Add(Projections.Property("p.ProposalType"), "ProposalType")
-                        .Add(Projections.Property("p.ContractType"), "ContractType")
-                        .Add(Projections.Property("p.ContractWorkType"), "ContractWorkType")
-                        .Add(Projections.Property("c.Description"), "c")
-                        .Add(Projections.Property("d.Description"), "d")
-                        .Add(Projections.Property("rv.VendorName"), "VendorName")
-                        .Add(Projections.Property("l.LettingDate"), "l")
-                        .Add(Projections.Property("ri.Description"), "Description")
-                        .Add(Projections.Property("SupplementalDescription"), "SupplementalDescription")
-                        .Add(Projections.Property("ri.CalculatedUnit"), "CalculatedUnit")
-                        .Add(Projections.Property("m.NumberOfUnits"), "Duration")
-                        .Add(Projections.Property("p.ExecutedDate"), "ExecutedDate")
-                        .Add(Projections.Property("pv.BidType"), "BidType")
-                        .Add(Projections.Property("pv.VendorRanking"), "VendorRanking")
-                        .Add(Projections.Property("ri.ObsoleteDate"), "ObsoleteDate")
-                         /*.Add(Projections.Property("cat.Description"), "CategoryDescription")*/
-                         .Add(Projections.SubQuery(categorySubquery), "CategoryDescription")
-                         .Add(Projections.SubQuery(workMixSubquery), "WorkMixDescription")
-                        )
+                    var workMixFilterSubquery = DetachedCriteria.For<CodeValue>("cv")
+                        .CreateAlias("cv.MyCodeTable", "ct")
+                        .Add(Restrictions.Eq("ct.Id", 203L))
+                        .Add(Restrictions.In("cv.Description", workTypeNames))
+                        .Add(Subqueries.PropertyEq("cv.CodeValueName", projectCodeSubquery))
+                        .SetProjection(Projections.Id());
 
+                    // Apply EXISTS filter
+                    query.Add(Subqueries.Exists(workMixFilterSubquery));
+                }
+                // Projection
+                query.SetProjection(Projections.ProjectionList()
+                    .Add(Projections.Property("pv.BidStatus"), "BidStatus")
+                    .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
+                    .Add(Projections.Property("ri.Name"), "ri")
+                    .Add(Projections.Property("ri.Id"), "riId")
+                    .Add(Projections.Property("Id"), "Id")
+                    .Add(Projections.Property("Quantity"), "Quantity")
+                    .Add(Projections.Property("b.BidPrice"), "b")
+                    .Add(Projections.SubQuery(projectNumberSubquery), "ProjectNumber")
+                    .Add(Projections.SubQuery(projectIdSubquery), "ProjectId")
+                    /*.Add(Projections.SubQuery(leadProjectNumberSubquery), "LeadProjectNumber")*/
+                    .Add(Projections.Property("p.ProposalNumber"), "p")
+                    .Add(Projections.Property("p.ProposalType"), "ProposalType")
+                    .Add(Projections.Property("p.ContractType"), "ContractType")
+                    .Add(Projections.Property("p.ContractWorkType"), "ContractWorkType")
+                    .Add(Projections.Property("c.Description"), "c")
+                    .Add(Projections.Property("d.Description"), "d")
+                    .Add(Projections.Property("rv.VendorName"), "VendorName")
+                    .Add(Projections.Property("l.LettingDate"), "l")
+                    .Add(Projections.Property("ri.Description"), "Description")
+                    .Add(Projections.Property("SupplementalDescription"), "SupplementalDescription")
+                    .Add(Projections.Property("ri.CalculatedUnit"), "CalculatedUnit")
+                    .Add(Projections.Property("m.NumberOfUnits"), "Duration")
+                    .Add(Projections.Property("p.ExecutedDate"), "ExecutedDate")
+                    .Add(Projections.Property("pv.BidType"), "BidType")
+                    .Add(Projections.Property("pv.VendorRanking"), "VendorRanking")
+                    .Add(Projections.Property("ri.ObsoleteDate"), "ObsoleteDate")
+                    .Add(Projections.SubQuery(categorySubquery), "CategoryDescription")
+                    .Add(Projections.SubQuery(workMixSubquery), "WorkMixDescription"))
                     .SetResultTransformer(NHibernate.Transform.Transformers.AliasToBean<ProposalItemDTO>());
 
                 var res = query.List<ProposalItemDTO>();
-
                 return res.Distinct().ToList();
             }
         }

@@ -552,7 +552,7 @@
         //CSV Export
         $scope.exportClick = function () {
             let headers = [
-                "Contract Number", "Lead Project", "Pay Item", "Description", "Supplemental Description",
+                "Contract Number", "Project Number", "Pay Item", "Description", "Supplemental Description",
                 "Units", "Quantity", "Unit Price Bid", "Weighted Avg", "Weighted Avg No Outliers",  "Outlier", "Bid Amount", "District", "Market Area",
                 "Primary County", "Bidder Name", "Bid Status", "Bidder Rank"
                 , "Contract Type", "Work Type", "Work Mix", "Project Category",

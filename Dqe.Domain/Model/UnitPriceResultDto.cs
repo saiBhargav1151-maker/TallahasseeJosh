@@ -39,6 +39,7 @@ namespace Dqe.Domain.Model
         public string WorkMixDescription { get; set; }
         public long riId { get; set; }
         public long ProjectId { get; set; }
+        public string LeadProjectNumber { get; set; }
 
     }
     public class PayItemDTO
