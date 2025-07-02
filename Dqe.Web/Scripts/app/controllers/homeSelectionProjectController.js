@@ -17,56 +17,56 @@
             angular.forEach($scope.versions, function (version) {
                 version.lastModified = getLatestEstimateModified(version);
                 version.displayOrder = version.projectVersion;
-                //version.outdated = false;
-                //if (version.versionLabel == 'Review') {
-                //    var words = version.source.toString().split(" "); 
+                version.outdated = false;
+                if (version.versionLabel == 'Review') {
+                    var words = version.source.toString().split(" "); 
 
-                //    var versionSrc = words[1];
-                //    var estimateNumSrc = words[3];
-                //    version.versionSrc = versionSrc;
-                //    version.estimateSrc = estimateNumSrc;
+                    var versionSrc = words[1];
+                    var estimateNumSrc = words[3];
+                    version.versionSrc = versionSrc;
+                    version.estimateSrc = estimateNumSrc;
 
-                //    /* if ($scope.versions[versionSrc].)*/
-                //    //find the version/est last modified date
+                    /* if ($scope.versions[versionSrc].)*/
+                    //find the version/est last modified date
                     
-                //    var srcSnapshot = $scope.versions.find(v => v.projectVersion == versionSrc)?.snapshots?.find(s => s.projectSnapshot == version.estimateSrc);
+                    var srcSnapshot = $scope.versions.find(v => v.projectVersion == versionSrc)?.snapshots?.find(s => s.projectSnapshot == version.estimateSrc);
 
-                //    if (srcSnapshot != null) {
-                //        srcSnapshot.hasRelatedReview = true;
-                //        //commented this out as it might not represent accurate data if there are multiple reviews on an individual estimate.MB.
-                //        //srcSnapshot.relatedReviewVersionNumber = version.projectVersion;
-                //        const dateA = new Date(formatDotNetDate(version.snapshots[0].lastUpdatedRaw));
-                //        const dateB = new Date(formatDotNetDate(srcSnapshot.lastUpdatedRaw));
+                    if (srcSnapshot != null) {
+                        srcSnapshot.hasRelatedReview = true;
+                        //commented this out as it might not represent accurate data if there are multiple reviews on an individual estimate.MB.
+                        //srcSnapshot.relatedReviewVersionNumber = version.projectVersion;
+                        const dateA = new Date(formatDotNetDate(version.snapshots[0].lastUpdatedRaw));
+                        const dateB = new Date(formatDotNetDate(srcSnapshot.lastUpdatedRaw));
 
-                //        //if the version/est last modified date of this review is earlier than that vers/est last modified date 
-                //        //then add a field to that review version named "outdated"
-                //        if (dateB.getTime() - dateA.getTime() > 0) {
-                //            version.outdated = true;
-                //        }
-                //        else {
-                //            version.outdated = false;
-                //        }
-                //    }
-                //}
+                        //if the version/est last modified date of this review is earlier than that vers/est last modified date 
+                        //then add a field to that review version named "outdated"
+                        if (dateB.getTime() - dateA.getTime() > 0) {
+                            version.outdated = true;
+                        }
+                        else {
+                            version.outdated = false;
+                        }
+                    }
+                }
             });
 
-            //var reviewOnlyVersions = $scope.versions.filter(v => v.versionLabel === 'Review');
+            var reviewOnlyVersions = $scope.versions.filter(v => v.versionLabel === 'Review');
 
-            //var latestRunningModifiedVersion = 0;
-            //$scope.versions[0].displayOrder = 999;
+            var latestRunningModifiedVersion = 0;
+            $scope.versions[0].displayOrder = 999;
            
-            //for (let i = 1; i < ($scope.versions.length - 1); i++) {
-            //    if ($scope.versions[i].versionLabel !== 'Review') {
-            //        const dateA = new Date($scope.versions[latestRunningModifiedVersion].lastModified);
-            //        const dateB = new Date($scope.versions[i].lastModified);
+            for (let i = 1; i < ($scope.versions.length - 1); i++) {
+                if ($scope.versions[i].versionLabel !== 'Review') {
+                    const dateA = new Date($scope.versions[latestRunningModifiedVersion].lastModified);
+                    const dateB = new Date($scope.versions[i].lastModified);
 
-            //        if (dateB.getTime() - dateA.getTime() > 0) {
-            //            $scope.versions[i].displayOrder = 999;
-            //            $scope.versions[latestRunningModifiedVersion].displayOrder = $scope.versions[latestRunningModifiedVersion].projectVersion;
-            //            latestRunningModifiedVersion = i;
-            //        }
-            //    }       
-            //}
+                    if (dateB.getTime() - dateA.getTime() > 0) {
+                        $scope.versions[i].displayOrder = 999;
+                        $scope.versions[latestRunningModifiedVersion].displayOrder = $scope.versions[latestRunningModifiedVersion].projectVersion;
+                        latestRunningModifiedVersion = i;
+                    }
+                }       
+            }
             
         }
     }
