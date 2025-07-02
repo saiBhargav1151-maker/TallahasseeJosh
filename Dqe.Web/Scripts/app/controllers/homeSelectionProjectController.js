@@ -9,7 +9,7 @@
             $scope.proposals = r.proposals;
             $scope.workingEstimate = r.workingEstimate;
             $scope.versions = r.versions;
-            $scope.hasReviewsInProject = r.versions.some(item => item.versionLabel === 'Review');
+            //$scope.hasReviewsInProject = r.versions.some(item => item.versionLabel === 'Review');
             $scope.authorizedUsers = r.authorizedUsers;
             document.getElementById("hiddenProjectNumber").value = r.project.number;
 
@@ -28,8 +28,22 @@
 
                     /* if ($scope.versions[versionSrc].)*/
                     //find the version/est last modified date
-                    
-                    var srcSnapshot = $scope.versions.find(v => v.projectVersion == versionSrc)?.snapshots?.find(s => s.projectSnapshot == version.estimateSrc);
+
+                    var srcSnapshot = null;
+                    for (var i = 0; i < $scope.versions.length; i++) {
+                        if ($scope.versions[i].projectVersion == versionSrc) {
+                            var snapshots = $scope.versions[i].snapshots;
+                            if (snapshots) {
+                                for (var j = 0; j < snapshots.length; j++) {
+                                    if (snapshots[j].projectSnapshot == version.estimateSrc) {
+                                        srcSnapshot = snapshots[j];
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
 
                     if (srcSnapshot != null) {
                         srcSnapshot.hasRelatedReview = true;
@@ -49,8 +63,6 @@
                     }
                 }
             });
-
-            var reviewOnlyVersions = $scope.versions.filter(v => v.versionLabel === 'Review');
 
             var latestRunningModifiedVersion = 0;
             $scope.versions[0].displayOrder = 999;
