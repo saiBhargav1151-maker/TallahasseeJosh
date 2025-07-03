@@ -9,7 +9,16 @@
             $scope.proposals = r.proposals;
             $scope.workingEstimate = r.workingEstimate;
             $scope.versions = r.versions;
-            //$scope.hasReviewsInProject = r.versions.some(item => item.versionLabel === 'Review');
+            $scope.hasReviewsInProject = false;
+
+            for (var i = 0; i < $scope.versions.length; i++) {
+                if ($scope.versions[i].versionLabel == 'Review') {
+                    $scope.hasReviewsInProject = true;
+                    break;
+                }
+            }
+            
+            
             $scope.authorizedUsers = r.authorizedUsers;
             document.getElementById("hiddenProjectNumber").value = r.project.number;
 
@@ -65,21 +74,22 @@
             });
 
             var latestRunningModifiedVersion = 0;
-            $scope.versions[0].displayOrder = 999;
-           
-            for (let i = 1; i < ($scope.versions.length - 1); i++) {
-                if ($scope.versions[i].versionLabel !== 'Review') {
-                    const dateA = new Date($scope.versions[latestRunningModifiedVersion].lastModified);
-                    const dateB = new Date($scope.versions[i].lastModified);
+            if ($scope.versions[0]) {
+                $scope.versions[0].displayOrder = 999;
+                for (let i = 1; i < ($scope.versions.length - 1); i++) {
+                    if ($scope.versions[i].versionLabel !== 'Review') {
+                        const dateA = new Date($scope.versions[latestRunningModifiedVersion].lastModified);
+                        const dateB = new Date($scope.versions[i].lastModified);
 
-                    if (dateB.getTime() - dateA.getTime() > 0) {
-                        $scope.versions[i].displayOrder = 999;
-                        $scope.versions[latestRunningModifiedVersion].displayOrder = $scope.versions[latestRunningModifiedVersion].projectVersion;
-                        latestRunningModifiedVersion = i;
+                        if (dateB.getTime() - dateA.getTime() > 0) {
+                            $scope.versions[i].displayOrder = 999;
+                            $scope.versions[latestRunningModifiedVersion].displayOrder = $scope.versions[latestRunningModifiedVersion].projectVersion;
+                            latestRunningModifiedVersion = i;
+                        }
                     }
-                }       
+                }
             }
-            
+
         }
     }
 
