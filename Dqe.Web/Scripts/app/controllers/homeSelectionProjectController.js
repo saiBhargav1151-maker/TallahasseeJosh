@@ -1,4 +1,4 @@
-﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', function ($scope, $rootScope, $http, $route, stateService) {
+﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', '$location', '$anchorScroll', 'stateService', function ($scope, $rootScope, $http, $route, $location, $anchorScroll, stateService) {
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
         if (!containsDqeError(result)) {
@@ -114,6 +114,20 @@
     $scope.customTimeSort = function (item) {
         // Assuming 'item.nestedObject.timeString' holds a date string
         return new Date(item.nestedObject.timeString).getTime();
+    };
+
+    $scope.scrollTo = function (id, versionHeader = null) {
+        var element = null;
+        if (versionHeader == "versionHeader") {
+            element = document.getElementById('versionHeader' + id);
+        }
+        else {
+            element = document.getElementById(id);
+        }
+        if (element) {
+            window.scrollBy(0,-150)
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     };
 
     $scope.isSynced = null;
