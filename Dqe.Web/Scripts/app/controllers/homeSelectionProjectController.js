@@ -1,4 +1,5 @@
-﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', '$location', '$anchorScroll', 'stateService', function ($scope, $rootScope, $http, $route, $location, $anchorScroll, stateService) {
+﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', function ($scope, $rootScope, $http, $route,stateService) {
+    //'$location', '$anchorScroll',
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
         if (!containsDqeError(result)) {
