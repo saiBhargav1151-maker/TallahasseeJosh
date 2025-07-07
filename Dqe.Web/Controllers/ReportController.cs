@@ -327,7 +327,7 @@ namespace Dqe.Web.Controllers
             var reportFormat = form["reportFormat"];
             var projectNumber = form["hiddenProjectNumber"];
 
-            var targetUrl = string.Format(_serviceUrl + "/ReviewTrackingGraph&rs:Command=Render&rs:Format={0}&ProjectNumber={1}", reportFormat, projectNumber);
+            var targetUrl = string.Format(_serviceUrl + "/ScopeReviewTrackingGraph&rs:Command=Render&rs:Format={0}&ProjectNumber={1}", reportFormat, projectNumber);
 
             var fileBytes = CallSsrsWebService(targetUrl);
 
