@@ -315,6 +315,27 @@ namespace Dqe.Web.Controllers
             return File(fileBytes, _contentType, string.Format("ScopeTrackingGraph{0}.{1}", projectNumber, _extension));
         }
 
+        /// <summary>
+        /// This returns a report with Reviews included
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        public ActionResult ViewReviewTrackingGraph(FormCollection form)
+        {
+            var reportFormat = form["reportFormat"];
+            var projectNumber = form["hiddenProjectNumber"];
+
+            var targetUrl = string.Format(_serviceUrl + "/ReviewTrackingGraph&rs:Command=Render&rs:Format={0}&ProjectNumber={1}", reportFormat, projectNumber);
+
+            var fileBytes = CallSsrsWebService(targetUrl);
+
+            FillReportFormat(reportFormat);
+
+            return File(fileBytes, _contentType, string.Format("ScopeTrackingGraph{0}.{1}", projectNumber, _extension));
+        }
+
         [HttpPost]
         [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
         public ActionResult SetupProposalSummaryReport(string proposalNumber)

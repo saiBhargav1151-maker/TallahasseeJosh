@@ -12,10 +12,12 @@
     tr {
         text-align: center;
     }
-    .scroll-offset{
-        padding-top:80px;
-        margin-top:-80px;
+
+    /* Adds a 50px offset for all items that you want to scroll to. This is needed b/c the header overlaps the intended position */
+    .scroll-item {
+        scroll-margin-top: 100px;
     }
+    
 </style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -98,12 +100,14 @@
                     </div>
                     <form method="POST" id="ViewScopeTrackingGraph" autocomplete="off">
                         <div class="row">
+
                             <div class="col-lg-12" style="text-align: right;">
                                 Output Format:
                                 <input type="radio" name="reportFormat" title="Output - PDF" ng-model="reportFormat.type" value="PDF"> PDF
                                 <input type="radio" name="reportFormat" title="Output - Excel" ng-model="reportFormat.type" value="EXCELOPENXML"> Excel
                                 &nbsp;&nbsp;
                                 <button type="button" title="Click to download the report - file type: {{reportFormat.type}} file size: unknown" class="btn btn-primary" ng-click="viewScopeTrackingGraph()">View Scope Tracking Graph</button>
+                                <button type="button" title="Click to download the report - file type: {{reportFormat.type}} file size: unknown" class="btn btn-primary" ng-click="viewReviewTrackingGraph()">View Review Tracking Graph</button>
                             </div>
                         </div>
                         <input type="hidden" id="hiddenProjectNumber" name="hiddenProjectNumber" value="">
@@ -278,8 +282,7 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <div ng-repeat="version in versions | filter:{versionLabel:'!Review'} | orderBy:'displayOrder':true" >
-                                    <div id="versionHeader{{version.projectVersion}}" class="scroll-offset" style="visibility:hidden"></div>
-                                    <div ng-class="(version.isCurrentOwner && version.hasWorkingEstimate) ? 'panel panel-primary' : 'panel panel-default'" >
+                                    <div id="versionHeader{{version.projectVersion}}" ng-class="(version.isCurrentOwner && version.hasWorkingEstimate) ? 'panel panel-primary' : 'panel panel-default'" class="scroll-item" >
                                         <div class="panel-heading">
                                             <div class="row">
                                                 <div class="col-lg-2" style="max-width:200px">
@@ -410,10 +413,10 @@
                             *************Review Versions*************
                             ***************************************-->
 
-                            <div id="reviewSectionHeader" class="scroll-offset col-lg-12" >
+                            <div id="reviewSectionHeader" class="col-lg-12 scroll-item" >
                                 <h2  style="color:#214c2c">Reviews</h2>
                                 <div ng-hide="hasReviewsInProject" style="font-style: italic;">No Reviews</div>
-                                <div ng-repeat="version in versions | filter:{versionLabel:'Review'}" id="reviewVersions">
+                                <div ng-repeat="version in versions | filter:{versionLabel:'Review'}" id="reviewVersions" class="scroll-item">
                                     <div ng-class="'panel panel-default'" style="border-color: #214c2c;">
                                         <div class="panel-heading" style="background-color: #70995C; border-color: #214c2c; color: #000; ">
                                             <div class="row">

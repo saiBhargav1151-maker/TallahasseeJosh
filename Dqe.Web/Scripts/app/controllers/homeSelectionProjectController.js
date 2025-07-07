@@ -1,5 +1,5 @@
 ﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', function ($scope, $rootScope, $http, $route,stateService) {
-    //'$location', '$anchorScroll',
+ 
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
         if (!containsDqeError(result)) {
@@ -117,6 +117,10 @@
         return new Date(item.nestedObject.timeString).getTime();
     };
 
+    ///Used for scrolling to a given id of an element on a page. 
+    ///Just adding a regular inline html anchor tag to #ElementID does not work
+    ///Our AngularJS vrsn doesn't play well with scrollTo or 
+    // Also tried adding these two and did not work well - '$location', '$anchorScroll',
     $scope.scrollTo = function (id, versionHeader = null) {
         var element = null;
         if (versionHeader == "versionHeader") {
@@ -126,7 +130,6 @@
             element = document.getElementById(id);
         }
         if (element) {
-            window.scrollBy(0,-150)
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     };
@@ -343,8 +346,14 @@
     };
 
     $scope.viewScopeTrackingGraph = function () {
-        $.download('./report/ViewScopeTrackingGraph', $('form#ViewScopeTrackingGraph').serialize());
+        $.download('./report/ViewScopeTrackingGraph', $('form#ViewScopeTrackingGraph').serialize(), "");
     };
+
+    $scope.viewReviewTrackingGraph = function () {
+        $.download('./report/ViewReviewTrackingGraph', $('form#ViewScopeTrackingGraph').serialize(), "");
+    };
+
+    
 
     jQuery.download = function (url, data, method) {
         //url and data options required

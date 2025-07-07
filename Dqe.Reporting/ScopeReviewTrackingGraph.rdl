@@ -1,0 +1,562 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DQE">
+      <DataSourceReference>DQE</DataSourceReference>
+      <rd:SecurityType>None</rd:SecurityType>
+      <rd:DataSourceID>4e63ff8a-e255-4d96-88ce-3244e3774e3a</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="DataSet1">
+      <Query>
+        <DataSourceName>DQE</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@ProjectNumber">
+            <Value>=Parameters!ProjectNumber.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>SELECT        pj.ESTM_INIT_AMT AS Estimate, 'Initial Estimate' AS ProposalLevel, 1 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)
+UNION
+SELECT        pj.ESTM_SCOP_AMT AS Estimate, 'Scope Estimate' AS ProposalLevel, 2 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)
+UNION
+SELECT        pj.ESTM_PHAS_1_AMT AS Estimate, 'Phase 1' AS ProposalLevel, 3 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)
+UNION
+SELECT        pj.ESTM_PHAS_2_AMT AS Estimate, 'Phase 2' AS ProposalLevel, 4 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)
+UNION
+SELECT        pj.ESTM_PHAS_3_AMT AS Estimate, 'Phase 3' AS ProposalLevel, 5 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)
+UNION
+SELECT        pj.ESTM_PHAS_4_AMT AS Estimate, 'Phase 4' AS ProposalLevel, 6 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)
+UNION
+SELECT        repproj.TOT_AMT AS Estimate, 'Authorization' AS ProposalLevel, 7 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)
+UNION
+SELECT        repproj2.TOT_AMT AS Estimate, 'Official' AS ProposalLevel, 8 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)
+UNION
+SELECT        repproj2.TOT_AMT AS Estimate, 'Review' AS ProposalLevel, 9 AS ColumnOrder
+FROM            DQET020_PROJ AS pj LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj ON pj.PROJ_NM = repproj.PROJ_NM AND repproj.RPT_PROJ_SQ = 1 LEFT OUTER JOIN
+                         DQET033_RPT_PROJ AS repproj2 ON pj.PROJ_NM = repproj2.PROJ_NM AND repproj2.RPT_PROJ_SQ = 2
+WHERE        (pj.PROJ_NM = @ProjectNumber)</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Estimate">
+          <DataField>Estimate</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="ProposalLevel">
+          <DataField>ProposalLevel</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ColumnOrder">
+          <DataField>ColumnOrder</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Chart Name="Chart4">
+            <ChartCategoryHierarchy>
+              <ChartMembers>
+                <ChartMember>
+                  <Group Name="Chart4_CategoryGroup">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!ProposalLevel.Value</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!ColumnOrder.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
+                  <Label>=Fields!ProposalLevel.Value</Label>
+                </ChartMember>
+              </ChartMembers>
+            </ChartCategoryHierarchy>
+            <ChartSeriesHierarchy>
+              <ChartMembers>
+                <ChartMember>
+                  <Label>Estimate</Label>
+                </ChartMember>
+              </ChartMembers>
+            </ChartSeriesHierarchy>
+            <ChartData>
+              <ChartSeriesCollection>
+                <ChartSeries Name="Estimate">
+                  <ChartDataPoints>
+                    <ChartDataPoint>
+                      <ChartDataPointValues>
+                        <Y>=Sum(Fields!Estimate.Value)</Y>
+                      </ChartDataPointValues>
+                      <ChartDataLabel>
+                        <Style>
+                          <FontSize>8pt</FontSize>
+                          <Format>'$'#,0.00;('$'#,0.00)</Format>
+                          <rd:FormatSymbolCulture>en-US</rd:FormatSymbolCulture>
+                        </Style>
+                        <UseValueAsLabel>true</UseValueAsLabel>
+                        <Visible>true</Visible>
+                      </ChartDataLabel>
+                      <Style />
+                      <ChartMarker>
+                        <Type>Auto</Type>
+                        <Style />
+                      </ChartMarker>
+                      <DataElementOutput>Output</DataElementOutput>
+                    </ChartDataPoint>
+                  </ChartDataPoints>
+                  <Type>Line</Type>
+                  <Style />
+                  <ChartEmptyPoints>
+                    <Style />
+                    <ChartMarker>
+                      <Style />
+                    </ChartMarker>
+                    <ChartDataLabel>
+                      <Style />
+                    </ChartDataLabel>
+                  </ChartEmptyPoints>
+                  <ValueAxisName>Primary</ValueAxisName>
+                  <CategoryAxisName>Primary</CategoryAxisName>
+                  <ChartSmartLabel>
+                    <CalloutLineColor>Black</CalloutLineColor>
+                    <MinMovingDistance>0pt</MinMovingDistance>
+                  </ChartSmartLabel>
+                </ChartSeries>
+              </ChartSeriesCollection>
+            </ChartData>
+            <ChartAreas>
+              <ChartArea Name="Default">
+                <ChartCategoryAxes>
+                  <ChartAxis Name="Primary">
+                    <Style>
+                      <FontSize>8pt</FontSize>
+                    </Style>
+                    <ChartAxisTitle>
+                      <Caption>Axis Title</Caption>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </ChartAxisTitle>
+                    <Interval>1</Interval>
+                    <ChartMajorGridLines>
+                      <Enabled>False</Enabled>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                    </ChartMajorGridLines>
+                    <ChartMinorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>Dotted</Style>
+                        </Border>
+                      </Style>
+                    </ChartMinorGridLines>
+                    <ChartMinorTickMarks>
+                      <Length>0.5</Length>
+                    </ChartMinorTickMarks>
+                    <CrossAt>NaN</CrossAt>
+                    <Minimum>NaN</Minimum>
+                    <Maximum>NaN</Maximum>
+                    <ChartAxisScaleBreak>
+                      <Style />
+                    </ChartAxisScaleBreak>
+                  </ChartAxis>
+                  <ChartAxis Name="Secondary">
+                    <Style>
+                      <FontSize>8pt</FontSize>
+                    </Style>
+                    <ChartAxisTitle>
+                      <Caption>Axis Title</Caption>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </ChartAxisTitle>
+                    <ChartMajorGridLines>
+                      <Enabled>False</Enabled>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                    </ChartMajorGridLines>
+                    <ChartMinorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>Dotted</Style>
+                        </Border>
+                      </Style>
+                    </ChartMinorGridLines>
+                    <ChartMinorTickMarks>
+                      <Length>0.5</Length>
+                    </ChartMinorTickMarks>
+                    <CrossAt>NaN</CrossAt>
+                    <Location>Opposite</Location>
+                    <Minimum>NaN</Minimum>
+                    <Maximum>NaN</Maximum>
+                    <ChartAxisScaleBreak>
+                      <Style />
+                    </ChartAxisScaleBreak>
+                  </ChartAxis>
+                </ChartCategoryAxes>
+                <ChartValueAxes>
+                  <ChartAxis Name="Primary">
+                    <Style>
+                      <FontSize>8pt</FontSize>
+                      <Format>'$'#,0.00;('$'#,0.00)</Format>
+                      <rd:FormatSymbolCulture>en-US</rd:FormatSymbolCulture>
+                    </Style>
+                    <ChartAxisTitle>
+                      <Caption>Axis Title</Caption>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </ChartAxisTitle>
+                    <ChartMajorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                    </ChartMajorGridLines>
+                    <ChartMinorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>Dotted</Style>
+                        </Border>
+                      </Style>
+                    </ChartMinorGridLines>
+                    <ChartMinorTickMarks>
+                      <Length>0.5</Length>
+                    </ChartMinorTickMarks>
+                    <CrossAt>NaN</CrossAt>
+                    <Minimum>NaN</Minimum>
+                    <Maximum>NaN</Maximum>
+                    <ChartAxisScaleBreak>
+                      <Style />
+                    </ChartAxisScaleBreak>
+                  </ChartAxis>
+                  <ChartAxis Name="Secondary">
+                    <Style>
+                      <FontSize>8pt</FontSize>
+                    </Style>
+                    <ChartAxisTitle>
+                      <Caption>Axis Title</Caption>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </ChartAxisTitle>
+                    <ChartMajorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                    </ChartMajorGridLines>
+                    <ChartMinorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>Dotted</Style>
+                        </Border>
+                      </Style>
+                    </ChartMinorGridLines>
+                    <ChartMinorTickMarks>
+                      <Length>0.5</Length>
+                    </ChartMinorTickMarks>
+                    <CrossAt>NaN</CrossAt>
+                    <Location>Opposite</Location>
+                    <Minimum>NaN</Minimum>
+                    <Maximum>NaN</Maximum>
+                    <ChartAxisScaleBreak>
+                      <Style />
+                    </ChartAxisScaleBreak>
+                  </ChartAxis>
+                </ChartValueAxes>
+                <ChartThreeDProperties>
+                  <Rotation>20</Rotation>
+                </ChartThreeDProperties>
+                <Style>
+                  <BackgroundGradientType>None</BackgroundGradientType>
+                  <ShadowOffset>0pt</ShadowOffset>
+                </Style>
+              </ChartArea>
+            </ChartAreas>
+            <ChartLegends>
+              <ChartLegend Name="Default">
+                <Style>
+                  <BackgroundGradientType>None</BackgroundGradientType>
+                  <FontSize>8pt</FontSize>
+                </Style>
+                <ChartLegendTitle>
+                  <Caption />
+                  <Style>
+                    <FontSize>8pt</FontSize>
+                    <FontWeight>Bold</FontWeight>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </ChartLegendTitle>
+                <HeaderSeparatorColor>Black</HeaderSeparatorColor>
+                <ColumnSeparatorColor>Black</ColumnSeparatorColor>
+              </ChartLegend>
+            </ChartLegends>
+            <ChartTitles>
+              <ChartTitle Name="Default">
+                <Caption />
+                <Style>
+                  <BackgroundGradientType>None</BackgroundGradientType>
+                  <FontWeight>Bold</FontWeight>
+                  <TextAlign>General</TextAlign>
+                  <VerticalAlign>Top</VerticalAlign>
+                </Style>
+              </ChartTitle>
+            </ChartTitles>
+            <Palette>BrightPastel</Palette>
+            <ChartBorderSkin>
+              <Style>
+                <BackgroundColor>Gray</BackgroundColor>
+                <BackgroundGradientType>None</BackgroundGradientType>
+                <Color>White</Color>
+              </Style>
+            </ChartBorderSkin>
+            <ChartNoDataMessage Name="NoDataMessage">
+              <Caption>No Data Available</Caption>
+              <Style>
+                <BackgroundGradientType>None</BackgroundGradientType>
+                <TextAlign>General</TextAlign>
+                <VerticalAlign>Top</VerticalAlign>
+              </Style>
+            </ChartNoDataMessage>
+            <DataSetName>DataSet1</DataSetName>
+            <Top>0.12375in</Top>
+            <Height>2in</Height>
+            <Width>10.37501in</Width>
+            <Style>
+              <Border>
+                <Color>LightGrey</Color>
+                <Style>Solid</Style>
+              </Border>
+              <BackgroundColor>White</BackgroundColor>
+              <BackgroundGradientType>None</BackgroundGradientType>
+            </Style>
+          </Chart>
+        </ReportItems>
+        <Height>2.2275in</Height>
+        <Style />
+      </Body>
+      <Width>10.43751in</Width>
+      <Page>
+        <PageHeader>
+          <Height>0.54167in</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <ReportItems>
+            <Textbox Name="Textbox1">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>Scope Tracking Graph</Value>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                        <Color>SteelBlue</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>for Project Number </Value>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                        <Color>SteelBlue</Color>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value>=Parameters!ProjectNumber.Value</Value>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                        <Color>SteelBlue</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>Textbox1</rd:DefaultName>
+              <Top>0.05417in</Top>
+              <Left>3.74875in</Left>
+              <Height>0.42708in</Height>
+              <Width>2.82292in</Width>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+            <Textbox Name="Textbox7">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>** CONFIDENTIAL **</Value>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                        <Color>SteelBlue</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>Textbox5</rd:DefaultName>
+              <Top>0.05417in</Top>
+              <Height>0.25in</Height>
+              <Width>2in</Width>
+              <ZIndex>1</ZIndex>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+            <Textbox Name="Textbox8">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>** CONFIDENTIAL **</Value>
+                      <Style>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                        <Color>SteelBlue</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>Textbox5</rd:DefaultName>
+              <Top>0.05417in</Top>
+              <Left>8.25001in</Left>
+              <Height>0.25in</Height>
+              <Width>2.125in</Width>
+              <ZIndex>2</ZIndex>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+          </ReportItems>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+        </PageHeader>
+        <PageHeight>8.5in</PageHeight>
+        <PageWidth>11in</PageWidth>
+        <LeftMargin>0.25in</LeftMargin>
+        <RightMargin>0.25in</RightMargin>
+        <TopMargin>0.5in</TopMargin>
+        <BottomMargin>0.75in</BottomMargin>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="ProjectNumber">
+      <DataType>String</DataType>
+      <Prompt>Project Number</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>1</NumberOfColumns>
+      <NumberOfRows>1</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>ProjectNumber</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <Language>en-US</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>f971b7cc-5140-44df-b044-8c8c00ce708e</rd:ReportID>
+</Report>

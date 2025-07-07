@@ -73,6 +73,7 @@
     <Report Include="ProposalDetailSubReport.rdl" />
     <Report Include="ProposalSummaryLog.rdl" />
     <Report Include="ProposalSummarySubReport.rdl" />
+    <Report Include="ScopeReviewTrackingGraph.rdl" />
     <Report Include="ScopeTrackingGraph.rdl" />
     <Report Include="SnapshotComparison.rdl" />
     <Report Include="SnapshotReport.rdl" />
