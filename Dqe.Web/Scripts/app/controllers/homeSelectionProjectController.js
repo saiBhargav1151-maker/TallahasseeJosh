@@ -252,6 +252,7 @@
         $http.post('./projectproposal/CreateReviewProjectVersionFromEstimate', snapshot).success(function (result) {
             processResult(result);
         });
+        $scope.scrollTo('reviewSectionHeader');
     }
     //$scope.saveComment = function (project) {
     //    $http.post('./projectproposal/SaveComment', project).success(function (result) {
