@@ -9,13 +9,39 @@
             <div>
                 <h4 class="section-title">Item Filters</h4>
             </div>
+            <!-- Proposal Input -->
+            <div class="form-group search-input-group">
+                <label for="projectNumberInput" class="modern-label"
+                       data-original-title="Enter a valid FDOT Proposal Number (e.g., E2R22, 43633015201).">
+                    <i class="fas fa-file-signature label-icon"></i>
+                    Enter Contract Number:
+                    <span class="label-hint-compact" style="color: red;">* required</span>
+                </label>
 
+                <div class="input-wrapper">
+                    <input type="text" id="projectNumberInput"
+                           ng-model="searchProjectNumber"
+                           placeholder="e.g., T6514"
+                           autocomplete="off"
+                           class="form-control modern-input"
+                           maxlength="20" />
+
+                    <span ng-if="searchProjectNumber"
+                          ng-click="clearProjectNumberSearch()"
+                          class="clear-button"
+                          style="transform: translateY(-50%);">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </div>
+            </div>
             <!-- Pay Item Input -->
             <div class="form-group search-input-group">
                 <label for="payItemInput" class="modern-label"
                        data-original-title="A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system.">
                     <i class="fas fa-hammer label-icon"></i>
-                    Enter Pay Item Number or Description: <span class="label-hint-compact" style="color: red;"> * required</span>
+                    Enter Pay Item Number or Description: <span class="label-hint-compact" style="color: red;">
+                        * optional
+                    </span>
                     <!-- Simple Tooltip -->
                     <div class="info-tooltip-wrapper">
                         <i class="fas fa-info-circle info-icon"></i>
@@ -56,6 +82,8 @@
                     </li>
                 </ul>
             </div>
+
+
 
             <!-- Quantity Range -->
             <div class="form-group">
@@ -138,7 +166,7 @@
                 </div>
                 <div class="label-hint-compact">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
-            <div class="form-group search-input-group">
+            <!--<div class="form-group search-input-group">
                 <label class="modern-label">
                     <i class="fas fa-layer-group label-icon"></i>
                     Search Work Mix(es):
@@ -156,10 +184,10 @@
                           style="transform: translateY(-50%);">
                         <i class="fas fa-times-circle"></i>
                     </span>
-                </div>
+                </div>-->
 
                 <!-- Suggestion dropdown -->
-                <div class="suggestions-dropdown" ng-show="isWorkMixDropdownOpen && filteredWorkMixes.length">
+                <!--<div class="suggestions-dropdown" ng-show="isWorkMixDropdownOpen && filteredWorkMixes.length">
                     <div class="suggestion-item"
                          ng-repeat="item in filteredWorkMixes"
                          ng-click="toggleWorkMixSelection(item)"
@@ -167,16 +195,16 @@
                         <i class="fas fa-check-circle" ng-if="workMixSelected.indexOf(item) !== -1"></i>
                         {{ item }}
                     </div>
-                </div>
+                </div>-->
 
                 <!-- Selected chips -->
-                <div class="selected-chips mt-2" ng-if="workMixSelected.length > 0">
+                <!--<div class="selected-chips mt-2" ng-if="workMixSelected.length > 0">
                     <span class="chip" ng-repeat="type in workMixSelected track by type">
                         {{ type }}
                         <i class="fas fa-times remove-chip" ng-click="removeWorkMix(type)"></i>
                     </span>
                 </div>
-            </div>
+            </div>-->
 
 
 

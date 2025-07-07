@@ -108,7 +108,9 @@ namespace Dqe.Infrastructure.Fdot
      string[] marketCounties = null,
      decimal? minRank = null,
      decimal? maxRank = null,
-     List<string> workTypeNames = null)
+     List<string> workTypeNames = null,
+     string projectNumber=null
+         )
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
@@ -168,7 +170,7 @@ namespace Dqe.Infrastructure.Fdot
                     .CreateAlias("p.District", "d")
                     .CreateAlias("p.Milestones", "m")
                     .CreateAlias("pv.MyRefVendor", "rv")
-                    .Add(Restrictions.Eq("ri.Name", payItem))
+                    
                     .Add(Restrictions.Or(
                         Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
                         Restrictions.IsNull("pv.BidType")
@@ -187,6 +189,22 @@ namespace Dqe.Infrastructure.Fdot
                     .AddOrder(Order.Asc("b.BidPrice"));
 
                 // Optional filters
+                /*if (!string.IsNullOrEmpty(projectNumber))
+                {
+                    var projectNumberFilterSubquery = DetachedCriteria.For<ProjectItem>("pitem")
+                        .CreateAlias("pitem.MyProject", "prjSub")
+                        .Add(Restrictions.EqProperty("pitem.MyProposalItem.Id", "this.Id")) // Matches outer ProposalItem
+                        .Add(Restrictions.Eq("prjSub.ProjectNumber", projectNumber))
+                        .SetProjection(Projections.Id());
+
+                    query.Add(Subqueries.Exists(projectNumberFilterSubquery));
+                }*/
+                if (!string.IsNullOrEmpty(projectNumber))
+                {
+                    query.Add(Restrictions.Eq("p.ProposalNumber", projectNumber));
+                }
+                if (!string.IsNullOrEmpty(payItem))
+                    query.Add(Restrictions.Eq("ri.Name", payItem));
                 if (contractWorkType != null && contractWorkType.Any())
                     query.Add(Restrictions.In("p.ContractWorkType", contractWorkType));
 

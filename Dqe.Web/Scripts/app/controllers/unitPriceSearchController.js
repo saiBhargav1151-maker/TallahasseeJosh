@@ -130,7 +130,7 @@
             "Area 14": ["MONROE"],
             "Area 99": ["DIST/ST-WIDE", "TURNPIKE"]
         };
-       
+        $scope.searchProjectNumber = '';
         $scope.allWorkMixes = [];
         $scope.workMixSelected = [];
         $scope.workMixSearch = '';
@@ -177,6 +177,15 @@
             }, function (error) {
                 console.error("Failed to load work mixes:", error);
             });
+        };
+        $scope.searchBids = function () {
+            if (!$scope.searchProjectNumber || $scope.searchProjectNumber.trim() === '') {
+                alert("Please enter a valid Proposal Number before searching.");
+                return;
+            }
+        };
+        $scope.clearProjectNumberSearch = function () {
+            $scope.searchProjectNumber = '';
         };
         $scope.loadWorkMixes();
         $scope.onRegionTypeChange = function () {
@@ -435,8 +444,8 @@
         };
         // Search Bids
         $scope.searchBids = function () {
-            if (!$scope.selectedPayItemNumber) {
-                alert("Please enter a valid Pay Item before searching.");
+            if (!$scope.searchProjectNumber || $scope.searchProjectNumber.trim() === '') {
+                alert("Please enter a valid Proposal Number before searching.");
                 return;
             }
             const months = $scope.monthsOfHistory;
@@ -470,6 +479,7 @@
                     minRank: $scope.selectedMinQuantity || null,
                     maxRank: $scope.selectedMaxQuantity || null,
                     workTypeNames: $scope.workMixSelected.map(x => typeof x === 'string' ? x : x.label),
+                    projectNumber: $scope.searchProjectNumber || null
                 },
                 traditional: true
             }).success(function (data) {
