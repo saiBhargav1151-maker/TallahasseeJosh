@@ -15,7 +15,7 @@
                        data-original-title="Enter a valid FDOT Proposal Number (e.g., E2R22, 43633015201).">
                     <i class="fas fa-file-signature label-icon"></i>
                     Enter Contract Number:
-                    <span class="label-hint-compact" style="color: red;">* required</span>
+                    <span class="label-hint-compact" style="color: red;">* required (if Pay Item is empty)</span>
                 </label>
 
                 <div class="input-wrapper">
@@ -39,15 +39,15 @@
                 <label for="payItemInput" class="modern-label"
                        data-original-title="A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system.">
                     <i class="fas fa-hammer label-icon"></i>
-                    Enter Pay Item Number or Description: <span class="label-hint-compact" style="color: red;">
-                        * optional
-                    </span>
+                    Enter Pay Item Number or Des: <span class="label-hint-compact" style="color: red;">
+    * required (if Contract Number is empty)
+</span>
                     <!-- Simple Tooltip -->
                     <div class="info-tooltip-wrapper">
                         <i class="fas fa-info-circle info-icon"></i>
                         <div class="tooltip">
                             <div class="tooltip-item">
-                                <strong>Required Field:</strong> Quickly search and select a specific Pay Item Number or Description (e.g., 'SUPERPAVE ASPHALTIC CONCRETE' or '0334 1 55').
+                                <strong>Conditional Requirement:</strong> You must enter either a valid Pay Item or Contract Number before searching.
                             </div>
                             <div class="tooltip-item">
                                 <strong>Minimum Input:</strong> Type at least <span class="tooltip-highlight">3 characters</span> to see suggestions.

@@ -444,7 +444,8 @@
         };
         // Search Bids
         $scope.searchBids = function () {
-            if (!$scope.searchProjectNumber || $scope.searchProjectNumber.trim() === '') {
+            if ((!$scope.searchProjectNumber || $scope.searchProjectNumber.trim() === '') &&
+                (!$scope.selectedPayItemNumber || $scope.selectedPayItemNumber.trim() === '')) {
                 alert("Please enter a valid Proposal Number before searching.");
                 return;
             }
