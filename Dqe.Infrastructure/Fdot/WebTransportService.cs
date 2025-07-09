@@ -232,6 +232,14 @@ namespace Dqe.Infrastructure.Fdot
 
                 if (minRank > 0 && maxRank > 0)
                     query.Add(Restrictions.Between("Quantity", minRank, maxRank));
+                else if (minRank > 0)
+                {
+                    query.Add(Restrictions.Ge("Quantity", minRank));
+                }
+                else if (maxRank > 0)
+                {
+                    query.Add(Restrictions.Le("Quantity", maxRank));
+                }
                 if (workTypeNames != null && workTypeNames.Any())
                 {
                     var workMixFilterSubquery = DetachedCriteria.For<CodeValue>("cv")
