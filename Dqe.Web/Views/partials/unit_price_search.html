@@ -95,13 +95,13 @@
                     <div class="input-group">
                         <label class="modern-label" for="minQuantity">Minimum:</label>
                         <input type="number" id="minQuantity" class="quantity-input" ng-model="selectedMinQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Min quantity" />
+                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" ng-attr-max="{{maxQuantity || ''}}" placeholder="Min quantity" />
                     </div>
                     <div class="separator">to</div>
                     <div class="input-group">
                         <label class="modern-label" for="maxQuantity">Maximum:</label>
                         <input type="number" id="maxQuantity" class="quantity-input" ng-model="selectedMaxQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" max="{{maxQuantity}}" placeholder="Max quantity" />
+                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" ng-attr-max="{{maxQuantity || ''}}" placeholder="Leave blank for max quantity" />
                     </div>
                 </div>
                 <div class="error-message" ng-show="hasError">
@@ -136,7 +136,7 @@
                             class="form-control modern-select compact-select"
                             multiple
                             ng-model="selectedContractTypes">
-                        <!--<option value="">-- All Contract Types --</option>-->
+                        <option value="ALL">-- All Contract Types --</option>
                         <option ng-repeat="type in contractTypes"
                                 ng-value="type">
                             {{ contractTypeMap[type] }}
@@ -157,7 +157,7 @@
                             
                             multiple
                             >
-                        <!--<option value="">-- All Work Types --</option>-->
+                        <option value="ALL">-- All Work Types --</option>
                         <option ng-repeat="(code, label) in workTypeMap"
                                 ng-value="code">
                             {{ label }}
@@ -311,6 +311,35 @@
             <div class="form-group" ng-show="regionType === 'district' || regionType === 'market' || regionType === 'county'">
                 <label class="sub-label">
                     {{ regionType === 'district' ? 'Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
+
+                    <!-- Show tooltip only when regionType is market -->
+                    <span ng-if="regionType === 'market'" class="hover-card-trigger">
+                        <i class="fas fa-info-circle info-icon"></i>
+                        <div class="hover-card">
+                            <div class="hover-card-title"><strong>Market Area to Counties</strong></div>
+                            <div class="hover-card-columns">
+                                <div class="hover-card-column">
+                                    <strong>Area 01:</strong> BAY, ESCAMBIA, OKALOOSA, SANTA ROSA, WALTON<br>
+                                    <strong>Area 02:</strong> CALHOUN, FRANKLIN, GULF, HOLMES, JACKSON, LIBERTY, WASHINGTON<br>
+                                    <strong>Area 03:</strong> GADSDEN, JEFFERSON, LEON, WAKULLA<br>
+                                    <strong>Area 04:</strong> BAKER, BRADFORD, COLUMBIA, DIXIE, GILCHRIST, HAMILTON, LAFAYETTE, LEVY, MADISON, PUTNAM, SUWANNEE, TAYLOR, UNION<br>
+                                    <strong>Area 05:</strong> CLAY, DUVAL, NASSAU, ST JOHNS<br>
+                                    <strong>Area 06:</strong> ALACHUA, MARION, VOLUSIA<br>
+                                    <strong>Area 07:</strong> CITRUS, FLAGLER, HERNANDO, LAKE, PASCO, SUMTER
+                                </div>
+                                <div class="hover-card-column">
+                                    <strong>Area 08:</strong> BREVARD, HILLSBOROUGH, ORANGE, OSCEOLA, PINELLAS, POLK, SEMINOLE<br>
+                                    <strong>Area 09:</strong> DESOTO, GLADES, HARDEE, HENDRY, HIGHLANDS, OKEECHOBEE<br>
+                                    <strong>Area 10:</strong> CHARLOTTE, COLLIER, LEE, MANATEE, SARASOTA<br>
+                                    <strong>Area 11:</strong> INDIAN RIVER, MARTIN, ST LUCIE<br>
+                                    <strong>Area 12:</strong> BROWARD, PALM BEACH<br>
+                                    <strong>Area 13:</strong> MIAMI-DADE<br>
+                                    <strong>Area 14:</strong> MONROE<br>
+                                    <strong>Area 99:</strong> DIST/ST-WIDE, TURNPIKE
+                                </div>
+                            </div>
+                        </div>
+                    </span>
                 </label>
                 <div class="multi-select-wrapper">
                     <div class="multi-select-dropdown" ng-click="toggleMultiSelectDropdown()">
@@ -434,13 +463,22 @@
                                 <div class="stat-value">{{ chartStats.totalQuantity | number:2 }}</div>
                             </div>
                             <div class="stat-card">
+                                <div class="stat-label">Average Quantity</div>
+                                <div class="stat-value">{{ chartStats.avgQty | number:2 }}</div>
+                            </div>
+                            <div class="stat-card">
                                 <div class="stat-label">Total Bids</div>
                                 <div class="stat-value">{{ chartStats.count }}</div>
                             </div>
+
                         </div>
                     </div>
                     <div class="chart-container-glass" ng-if="!shouldHideGraphForLumpSum()">
-
+                        <div class="stats-overlay">
+                            <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
+                            <div class="stat-item"><span class="stat-label">Total Bids:</span><span class="stat-value">{{ chartStats.count }}</span></div>
+                            <div class="stat-item"><span class="stat-label">Total Outliers:</span><span class="stat-value">{{ chartStats.outlierCount }}</span></div>
+                        </div>
                         <div class="canvas-wrapper">
                             <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
                         </div>
@@ -454,7 +492,7 @@
                                 <span>Outliers</span>
                             </div>
                             <div class="legend-item" ng-click="toggleLegend('trend')">
-                                <div class="legend-color" style="background: #dc3545;"></div>
+                                <div class="legend-color" style="background: #050A15;"></div>
                                 <span>Trend Line</span>
                             </div>
                             <div class="legend-item" ng-click="toggleLegend('avg')">
@@ -468,83 +506,94 @@
                         <i class="fas fa-info-circle"></i> Graph is not available for Lump Sum (LS) bids.
                     </div>
                     <!-- Summary stats -->
-
                 </div>
                 <div class="table-header">
                     <h4 class="section-title">
                         <i class="fas fa-table"></i> Bid History Data
                     </h4>
                 </div>
-                <div>
-                    <div class="table-wrapper">
-                        <table class="table bid-table">
-                            <thead>
-                                <tr>
-                                    <th>Contract</th>
-                                    <th>Project Number</th>
-                                   <!-- <th>Lead Project</th>-->
-                                    <th>Pay Item</th>
-                                    <th>Description</th>
-                                     <th>Supp Desc</th>
-                                    <th>Units</th>
-                                    <th>Quantity</th>
-                                    <th>Unit Price Bid</th>
-                                    <th>Outlier</th>
-                                    <th>Bid Amount</th>
-                                    <th>District</th>
-                                    <th>Market Area</th>
-                                    <th>Primary County</th>
-                                    <th>Bidder Name</th>
-                                    <th>Bidder Status</th>
-                                    <th>Bidder Rank</th>
-                                    <th>Contract Type</th>
-                                    <th>Work Type</th>
-                                    <th>Work Mix</th>
-                                    <th>Project Category</th>
-                                    <th>Letting Date</th>
-                                    <th>Executed Date</th>
-                                    <th>Awarded Days</th>
-                                    <th>Proposal Type</th>
-                                    <th>Bid Type</th>
-                                    <!--<th>Weighted Avg</th>-->
-                                    <!--<th>Weighted Avg (No Outliers)</th>-->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="item in bidHistoryData">
-                                    <td>{{ item.p }}</td>
-                                    <td>{{ item.ProjectNumber }}</td>
-                                    <!--<td>{{ item.LeadProjectNumber }}</td>-->
-                                    <td>{{ item.ri }}</td>
-                                    <td>{{ item.Description }}</td>
-                                    <td>{{ item.SupplementalDescription }}</td>
-                                    <td>{{ item.CalculatedUnit }}</td>
-                                    <td>{{ item.Quantity }}</td>
-                                    <td>{{ item.b | currency }}</td>
-                                    <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
-                                    <td>{{ item.PvBidTotal | currency }}</td>
-                                    <td>{{ item.d }}</td>
-                                    <td>{{ item.MarketArea }}</td>
-                                    <td>{{ item.c }}</td>
-                                    <td>{{ item.VendorName }}</td>
-                                    <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
-                                    <td>{{ item.VendorRanking }}</td>
-                                    <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
-                                    <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
-                                    <td>{{ item.WorkMixDescription }}</td>
-                                    <td>{{ item.CategoryDescription }}</td>
-                                    <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
-                                    <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
-                                    <td>{{ item.Duration }}</td>
-                                    <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
-                                    <td>{{ getBidTypeLabel(item.BidType) }}</td>
-                                    <!--<td>{{ item.WeightedAvg | currency : '$' : 2 }}</td>-->
-                                    <!--<td>{{ item.WeightedAvgNoOutliers | currency : '$' : 2 }}</td>-->
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
+                <div class="table-wrapper">
+                    <table class="table bid-table">
+                        <thead>
+                            <tr>
+                                <th ng-click="setSort('p')">
+                                    Contract <i class="fas" ng-class="getSortClass('p')"></i>
+                                </th>
+                                <th ng-click="setSort('ProjectNumber')">
+                                    Project Number <i class="fas" ng-class="getSortClass('ProjectNumber')"></i>
+                                </th>
+                                <th ng-click="setSort('ri')">
+                                    Pay Item <i class="fas" ng-class="getSortClass('ri')"></i>
+                                </th>
+                                <th>Description</th>
+                                <th>Supp Desc</th>
+                                <th>Units</th>
+                                <th ng-click="setSort('Quantity')">
+                                    Quantity <i class="fas" ng-class="getSortClass('Quantity')"></i>
+                                </th>
+                                <th ng-click="setSort('b')">
+                                    Unit Price Bid <i class="fas" ng-class="getSortClass('b')"></i>
+                                </th>
+                                <th>Outlier</th>
+                                <th ng-click="setSort('PvBidTotal')">
+                                    Bid Amount <i class="fas" ng-class="getSortClass('PvBidTotal')"></i>
+                                </th>
+                                <th ng-click="setSort('d')">District <i class="fas" ng-class="getSortClass('d')"></i></th>
+                                <th ng-click="setSort('MarketArea')">Market Area <i class="fas" ng-class="getSortClass('MarketArea')"></i> </th>
+                                <th ng-click="setSort('c')">County <i class="fas" ng-class="getSortClass('c')"></i></th>
+                                <th>Bidder Name</th>
+                                <th ng-click="setSort('BidStatus')">
+                                    Bidder Status <i class="fas" ng-class="getSortClass('BidStatus')"></i>
+                                </th>
+                                <th ng-click="setSort('VendorRanking')">
+                                    Bidder Rank <i class="fas" ng-class="getSortClass('VendorRanking')"></i>
+                                </th>
+                                <th>Contract Type</th>
+                                <th>Work Type</th>
+                                <th>Work Mix</th>
+                                <th>Project Category</th>
+                                <th ng-click="setSort('l')">
+                                    Letting Date <i class="fas" ng-class="getSortClass('l')"></i>
+                                </th>
+                                <th>Executed Date</th>
+                                <th>Awarded Days</th>
+                                <th>Proposal Type</th>
+                                <th>Bid Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in bidHistoryData | orderBy:sortColumn:reverseSort">
+                                <td>{{ item.p }}</td>
+                                <td>{{ item.ProjectNumber }}</td>
+                                <td>{{ item.ri }}</td>
+                                <td>{{ item.Description }}</td>
+                                <td>{{ item.SupplementalDescription }}</td>
+                                <td>{{ item.CalculatedUnit }}</td>
+                                <td>{{ item.Quantity }}</td>
+                                <td>{{ item.b | currency }}</td>
+                                <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
+                                <td>{{ item.PvBidTotal | currency }}</td>
+                                <td>{{ item.d }}</td>
+                                <td>{{ item.MarketArea }}</td>
+                                <td>{{ item.c }}</td>
+                                <td>{{ item.VendorName }}</td>
+                                <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
+                                <td>{{ item.VendorRanking }}</td>
+                                <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
+                                <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
+                                <td>{{ item.WorkMixDescription }}</td>
+                                <td>{{ item.CategoryDescription }}</td>
+                                <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                                <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                                <td>{{ item.Duration }}</td>
+                                <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
+                                <td>{{ getBidTypeLabel(item.BidType) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+
             </div>
 
 
@@ -1923,5 +1972,54 @@
     .tooltip-highlight {
         color: #ffd700;
         font-weight: bold;
+    }
+    th[ng-click] {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    fa-sort, .fa-sort-up, .fa-sort-down {
+        margin-left: 6px;
+    }
+    .hover-card-trigger {
+        position: relative;
+        display: inline-block;
+        margin-left: 6px;
+        cursor: pointer;
+    }
+
+    .hover-card {
+        position: absolute;
+        top: 24px;
+        left: 0;
+        z-index: 999;
+        width: 550px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 1.4;
+        display: none;
+        white-space: normal;
+    }
+
+    .hover-card-columns {
+        display: flex;
+        gap: 20px;
+        margin-top: 5px;
+    }
+
+    .hover-card-column {
+        flex: 1;
+    }
+
+    .hover-card-title {
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
+
+    .hover-card-trigger:hover .hover-card {
+        display: block;
     }
 </style>

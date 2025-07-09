@@ -21,6 +21,8 @@
         $scope.showOutliers = true;
         $scope.showTrendLine = true;
         $scope.showWeightedAvg = true;
+        $scope.sortColumn = 'p'; // Default sort by Contract
+        $scope.reverseSort = false;
         let debounceTimer;
         $scope.isChartLoading = false;
         const today = new Date();
@@ -66,7 +68,7 @@
             "CENT": "Central Office"
         };
         $scope.bidStatusMap = {
-            "W": "Wins",
+            "W": "Won",
             "L": "Loss",
             "I": "Irregular",
             "FMV": "Fair Market Value (Bidder Rank 1, 2, 3)"
@@ -183,6 +185,21 @@
                 alert("Please enter a valid Proposal Number before searching.");
                 return;
             }
+        };
+        $scope.setSort = function (column) {
+            if ($scope.sortColumn === column) {
+                $scope.reverseSort = !$scope.reverseSort;
+            } else {
+                $scope.sortColumn = column;
+                $scope.reverseSort = false;
+            }
+        };
+
+        $scope.getSortClass = function (column) {
+            if ($scope.sortColumn === column) {
+                return $scope.reverseSort ? 'fa-sort-down' : 'fa-sort-up';
+            }
+            return 'fa-sort';
         };
         $scope.clearProjectNumberSearch = function () {
             $scope.searchProjectNumber = '';
@@ -343,28 +360,21 @@
         };
 
         $scope.validateQuantity = function () {
-            const min = $scope.selectedMinQuantity;
-            const max = $scope.selectedMaxQuantity;
+            const min = parseFloat($scope.selectedMinQuantity);
+            const max = parseFloat($scope.selectedMaxQuantity);
+
             $scope.hasError = false;
             $scope.errorMessage = '';
 
-            if (min === undefined || min === null || min < 1) {
-                $scope.hasError = true;
-                $scope.errorMessage = 'Minimum quantity must be at least 1.';
-                return;
-            }
-
-            if (max === undefined || max === null || max < 1) {
-                $scope.hasError = true;
-                $scope.errorMessage = 'Maximum quantity must be at least 1.';
-                return;
-            }
-
-            if (min !== null && max !== null && min > max) {
+            if (!isNaN(min) && !isNaN(max) && min > max) {
                 $scope.hasError = true;
                 $scope.errorMessage = 'Minimum quantity cannot be greater than maximum quantity.';
-                return;
             }
+        };
+        $scope.getQuantityRange = function () {
+            const min = parseFloat($scope.selectedMinQuantity) || 0;
+            const max = parseFloat($scope.selectedMaxQuantity) || $scope.maxQuantity || Infinity;
+            return max - min;
         };
         $scope.toggleCounty = function (county) {
             const index = $scope.selectedCounties.indexOf(county.name);
@@ -478,7 +488,7 @@
                         : null,
                     marketCounties: $scope.selectedMarketCounties,
                     minRank: $scope.selectedMinQuantity || null,
-                    maxRank: $scope.selectedMaxQuantity || null,
+                    maxRank: $scope.selectedMaxQuantity || $scope.maxQuantity || Infinity,
                     workTypeNames: $scope.workMixSelected.map(x => typeof x === 'string' ? x : x.label),
                     projectNumber: $scope.searchProjectNumber || null
                 },
@@ -604,13 +614,21 @@
                     $scope.showWeightedAvg = !$scope.showWeightedAvg;
                     break;
             }
-
-  
             if ($scope.bidHistoryData && $scope.bidHistoryData.length > 0) {
                 waitForCanvasAndRender();
             }
         };
-      
+        $scope.$watch('selectedContractTypes', function (newVal) {
+            if (newVal.includes("ALL")) {
+                $scope.selectedContractTypes = angular.copy($scope.contractTypes);
+            }
+        }, true);
+
+        $scope.$watch('selectedWorkTypeCodes', function (newVal) {
+            if (newVal.includes("ALL")) {
+                $scope.selectedWorkTypeCodes = angular.copy($scope.workTypeCodes);
+            }
+        }, true);
         $scope.$watch('bidHistoryData', function (newVal) {
             if (newVal && newVal.length > 0) {
                 waitForCanvasAndRender();
@@ -727,7 +745,7 @@
                                     label: 'Trend Line',
                                     data: regressionLine,
                                     type: 'line',
-                                    borderColor: '#dc3545',
+                                    borderColor: '#050A15',
                                     fill: false,
                                     tension: 0.5,
                                     hidden: !$scope.showTrendLine
@@ -780,7 +798,9 @@
                         totalContracts: new Set($scope.bidHistoryData.map(item => item.p)).size,
                         totalBidAmount: $scope.bidHistoryData.reduce((sum, item) => sum + (item.PvBidTotal || 0), 0),
                         totalQuantity: $scope.bidHistoryData.reduce((sum, item) => sum + (item.Quantity || 0), 0),
-                        count: $scope.bidHistoryData.length
+                        count: $scope.bidHistoryData.length,
+                        avgQty: $scope.bidHistoryData.reduce((sum, item) => sum + (item.Quantity || 0), 0) / $scope.bidHistoryData.length,
+                        outlierCount: $scope.bidHistoryData.filter(item => item.IsOutlier).length
                     };
 
                     $scope.isChartLoading = false;
