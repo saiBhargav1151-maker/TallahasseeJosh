@@ -1021,7 +1021,7 @@ namespace Dqe.Web.Controllers
             var loadPrices = _systemParametersRepository.Get().LoadPrices;
             var ss = project.CreateNewVersionFromWt(string.Empty, wtProjectEstimate, loadPrices
                 , currentDqeUser);
-            return ResultStructureFromSnapshot(ss, currentDqeUser);
+            return ResultStructureFromProjectSelection(project, currentDqeUser);
         }
 
         [HttpPost]

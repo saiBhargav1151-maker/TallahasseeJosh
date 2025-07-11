@@ -18,8 +18,7 @@
                     break;
                 }
             }
-            
-            
+
             $scope.authorizedUsers = r.authorizedUsers;
             document.getElementById("hiddenProjectNumber").value = r.project.number;
 
@@ -230,6 +229,7 @@
         $http.post('./projectproposal/CreateProjectVersionFromWt', project).success(function (result) {
             processResult(result);
             checkSync(result);
+            processResult(result);
         });
     }
     $scope.createProjectVersionFromLre = function (project) {
