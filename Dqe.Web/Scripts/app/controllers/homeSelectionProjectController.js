@@ -38,7 +38,7 @@
 
                     /* if ($scope.versions[versionSrc].)*/
                     //find the version/est last modified date
-
+                    //var srcSnapshotTemp = $scope.versions.find(v => v.projectVersion == versionSrc)?.snapshots?.find(s => s.projectSnapshot == version.estimateSrc);
                     var srcSnapshot = null;
                     for (var i = 0; i < $scope.versions.length; i++) {
                         if ($scope.versions[i].projectVersion == versionSrc) {
@@ -74,23 +74,33 @@
                 }
             });
 
-            var latestRunningModifiedVersion = 0;
-            if ($scope.versions[0]) {
-                $scope.versions[0].displayOrder = 999;
-                for (let i = 1; i < ($scope.versions.length - 1); i++) {
-                    if ($scope.versions[i].versionLabel !== 'Review') {
-                        const dateA = new Date($scope.versions[latestRunningModifiedVersion].lastModified);
-                        const dateB = new Date($scope.versions[i].lastModified);
+            //Setting the Display Order of the versions. Requested that we place the most recently modified non-review version at the very top, the rest will be by version number. MB.
+            var latestRunningModifiedVersion = -1;
+            const topDisplayNumber = 9999;
 
-                        if (dateB.getTime() - dateA.getTime() > 0) {
-                            $scope.versions[i].displayOrder = 999;
-                            $scope.versions[latestRunningModifiedVersion].displayOrder = $scope.versions[latestRunningModifiedVersion].projectVersion;
-                            latestRunningModifiedVersion = i;
-                        }
+            for (let i = 0; i < ($scope.versions.length); i++) {
+                //only look at the versions that are not review versions
+                if ($scope.versions[i].versionLabel !== 'Review') {
+                    //go ahead and set seed starting data for the first Non-Review version we hit. And move to next iteration.MB.
+                    if ((latestRunningModifiedVersion == -1)) {
+                        $scope.versions[i].displayOrder = topDisplayNumber;
+                        latestRunningModifiedVersion = i;
+                        //break;
+                    }
+
+                    //set some dates for comparrison
+                    const dateA = new Date($scope.versions[latestRunningModifiedVersion].lastModified);
+                    const dateB = new Date($scope.versions[i].lastModified);
+
+                    ///IF we are looking at a version that has more recently been modified then make it the new topDisplay
+                    if ((dateB.getTime() - dateA.getTime() > 0)) {
+                        $scope.versions[i].displayOrder = topDisplayNumber;
+                        $scope.versions[latestRunningModifiedVersion].displayOrder = $scope.versions[latestRunningModifiedVersion].projectVersion;
+                        latestRunningModifiedVersion = i;
                     }
                 }
             }
-
+            
         }
     }
 
