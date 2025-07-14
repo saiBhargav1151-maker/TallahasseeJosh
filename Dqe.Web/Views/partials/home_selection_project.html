@@ -31,8 +31,8 @@
     <div class="col-lg-7">
        
     </div>
-    <div class="col-lg-2" ng-show="project != undefined && project != null">
-        <button ng-click="scrollTo('reviewSectionHeader')" style="float:right">Go to Reviews</button>
+    <div class="col-lg-2" ng-show="project != undefined && project != null && versions.length > 0">
+        <button ng-click="scrollTo('reviewSectionHeader')" style="float:right" title="Scroll to Reviews section">Go to Reviews</button>
     </div>
 </div>
 
@@ -431,7 +431,7 @@
                                                 </div>
                                                 <div class="col-lg-2 col-md-3" style="min-width: 250px;">
                                                     <strong><i class="fa-solid fa-compass"></i> Source:</strong>
-                                                    <a href="#" ng-click="scrollTo(version.versionSrc, 'versionHeader')" style="color: #000 !important;">
+                                                    <a href="#" ng-click="scrollTo(version.versionSrc, 'versionHeader')" style="color: #000 !important;" title="Go to version {{version.versionSrc}}">
                                                         {{version.source}}
                                                     </a>
                                                 </div>
