@@ -12,6 +12,7 @@
             $scope.versions = r.versions;
             $scope.hasReviewsInProject = false;
 
+            ///checking the first estimate of every version to see if it is a review, if so marking a bool field as true.
             for (var i = 0; i < $scope.versions.length; i++) {
                 if ($scope.versions[i].versionLabel == 'Review') {
                     $scope.hasReviewsInProject = true;
@@ -22,21 +23,23 @@
             $scope.authorizedUsers = r.authorizedUsers;
             document.getElementById("hiddenProjectNumber").value = r.project.number;
 
-            //$scope.versionsNonReviews = $scope.versions.find(v => v.versionLabel !== 'Review');
+            ////Iterates through each version
             angular.forEach($scope.versions, function (version) {
-                version.lastModified = getLatestEstimateModified(version);
-                version.displayOrder = version.projectVersion;
-                version.outdated = false;
-                if (version.versionLabel == 'Review') {
-                    var words = version.source.toString().split(" "); 
+                version.lastModified = getLatestEstimateModified(version); //getting a more transferable date format
+                version.displayOrder = version.projectVersion; //seeding each displayOrder as it's version number (will be adjusted)
+                version.outdated = false; //outdated field to indicate if the 
 
-                    var versionSrc = words[1];
-                    var estimateNumSrc = words[3];
-                    version.versionSrc = versionSrc;
+                //now only looking at Review type Versions
+                if (version.versionLabel == 'Review') {
+                    var words = version.source.toString().split(" "); ///splitting the version display string back out to read
+
+                    var versionSrc = words[1]; //Version # of the Source
+                    var estimateNumSrc = words[3]; //Estimate # of the Source
+                    version.versionSrc = versionSrc; 
                     version.estimateSrc = estimateNumSrc;
 
                     /* if ($scope.versions[versionSrc].)*/
-                    //find the version/est last modified date
+                    //finds the last modified date of the source version/estimate 
                     //var srcSnapshotTemp = $scope.versions.find(v => v.projectVersion == versionSrc)?.snapshots?.find(s => s.projectSnapshot == version.estimateSrc);
                     var srcSnapshot = null;
                     for (var i = 0; i < $scope.versions.length; i++) {
@@ -103,7 +106,7 @@
         }
     }
 
-
+    //matches the wierd date format from AngularJS
     function formatDotNetDate(msDateString) {
         if (!msDateString) return '';
         const match = /\/Date\((\d+)\)\//.exec(msDateString);
@@ -261,6 +264,7 @@
             processResult(result);
         });
     }
+    //creates a new Snapshot with an estimate of type Review
     $scope.createNewReviewSnapshot = function (snapshot) {
         $http.post('./projectproposal/CreateReviewProjectVersionFromEstimate', snapshot).success(function (result) {
             processResult(result);

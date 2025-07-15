@@ -360,6 +360,14 @@ namespace Dqe.Domain.Model
             return s;
         }
 
+        /// <summary>
+        /// This creates a new Version with a single estimate of type Review 'R'. 
+        /// This does NOT update info to LRE, this is intended to be read only (except the notes). MB. 
+        /// </summary>
+        /// <param name="comment"></param>
+        /// <param name="source"></param>
+        /// <param name="account"></param>
+        /// <returns><see cref="ProjectEstimate"/></returns>
         public virtual ProjectEstimate CreateNewReviewVersionFromSnapshot(string comment, ProjectEstimate source, DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");

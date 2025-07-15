@@ -1203,6 +1203,12 @@ namespace Dqe.Web.Controllers
             return ResultStructureFromProjectSelection(p, currentDqeUser);
         }
 
+        /// <summary>
+        /// This creates a new Version with a single estimate of type Review 'R'. 
+        /// This does NOT update info to LRE, this is intended to be read only (except the notes). MB. 
+        /// </summary>
+        /// <param name="snapshot">The snapshot in which the review will be based upon</param>
+        /// <returns><returns><see cref="ActionResult"/></returns></returns>
         [HttpPost]
         public ActionResult CreateReviewProjectVersionFromEstimate(dynamic snapshot)
         {
@@ -1422,7 +1428,7 @@ namespace Dqe.Web.Controllers
                                                     : ii.Label == SnapshotLabel.Official
                                                         ? "Official"
                                                          : ii.Label == SnapshotLabel.Review
-                                                            ? "Review"
+                                                            ? "Review"  
                                                         : string.Empty,
                                 isWorkingEstimate = ii.IsWorkingEstimate ? "Yes" : string.Empty
                             })

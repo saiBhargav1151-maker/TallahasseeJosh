@@ -316,10 +316,11 @@ namespace Dqe.Web.Controllers
         }
 
         /// <summary>
-        /// This returns a report with Reviews included
+        /// NOT YET IMPLEMENTED. The graphing got moved to the next phase of enhancements. MB.
+        /// This returns a report with Reviews included. 
         /// </summary>
         /// <param name="form"></param>
-        /// <returns></returns>
+        /// <returns><returns><see cref="ActionResult"/></returns>
         [HttpPost]
         [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
         public ActionResult ViewReviewTrackingGraph(FormCollection form)
