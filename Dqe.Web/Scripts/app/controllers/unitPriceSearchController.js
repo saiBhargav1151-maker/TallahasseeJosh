@@ -109,7 +109,7 @@
                 '02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS'
             ],
             "Turnpike ": [
-                'TURNPIKE', 
+                'TURNPIKE',
             ], "DIST/ST-WIDE": ['99 - DIST/ST-WIDE']
         };
         $scope.marketAreaToCountiesMap = {
@@ -245,7 +245,7 @@
             }
             $scope.onMultiRegionChange();
         };
-        
+
         $scope.onMultiRegionChange = function () {
             let combined = [];
 
@@ -569,12 +569,12 @@
             const date = new Date(parseInt(match[1]));
             return date.toLocaleDateString('en-US');
         }
-       
+
         //CSV Export
         $scope.exportClick = function () {
             let headers = [
                 "Contract Number", "Project Number", "Pay Item", "Description", "Supplemental Description",
-                "Units", "Quantity", "Unit Price Bid", "Weighted Avg", "Weighted Avg No Outliers",  "Outlier", "Bid Amount", "District", "Market Area",
+                "Units", "Quantity", "Unit Price Bid", "Weighted Avg", "Weighted Avg No Outliers", "Outlier", "Bid Amount", "District", "Market Area",
                 "Primary County", "Bidder Name", "Bid Status", "Bidder Rank"
                 , "Contract Type", "Work Type", "Work Mix", "Project Category",
                 "Letting Date", "Executed Date", "Awarded Days", "Proposal Type", "Bid Type"
@@ -634,6 +634,65 @@
                 waitForCanvasAndRender();
             }
         });
+        function computeWeightedStats(prices, quantities) {
+            const totalQty = d3.sum(quantities);
+            const weightedMean = d3.sum(prices.map((p, i) => p * quantities[i])) / totalQty;
+            const weightedStd = Math.sqrt(d3.sum(prices.map((p, i) =>
+                quantities[i] * Math.pow(p - weightedMean, 2)
+            )) / totalQty);
+            return { weightedMean, weightedStd };
+        }
+
+        function filterOutliers(prices, quantities, weightedMean, weightedStd) {
+            return prices
+                .map((p, i) => ({ p, q: quantities[i] }))
+                .filter(d => Math.abs(d.p - weightedMean) <= weightedStd);
+        }
+
+        function loessSmooth(x, y, bandwidth, range) {
+            const loess = science.stats.loess().bandwidth(bandwidth);
+            return loess(x, y, range);
+        }
+
+        function bootstrapCI(x, y, xvals, frac = 0.3, nBoot = 200) {
+            if (!x.length || !y.length || x.length !== y.length) {
+                return {
+                    lower: xvals.map(() => null),
+                    upper: xvals.map(() => null),
+                };
+            }
+
+            const preds = [];
+
+            for (let b = 0; b < nBoot; b++) {
+                const indices = _.sampleSize(_.range(x.length), x.length);
+                const xBoot = indices.map(i => x[i]);
+                const yBoot = indices.map(i => y[i]);
+
+                const smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
+                const smoothedY = smoothed.map(pt => pt.y ?? null);
+
+                preds.push(smoothedY);
+            }
+
+            const lower = [];
+            const upper = [];
+
+            for (let i = 0; i < xvals.length; i++) {
+                const valuesAtPoint = preds.map(row => row[i]).filter(v => v !== null && !isNaN(v));
+                if (valuesAtPoint.length) {
+                    lower[i] = d3.quantile(valuesAtPoint, 0.025);
+                    upper[i] = d3.quantile(valuesAtPoint, 0.975);
+                } else {
+                    lower[i] = null;
+                    upper[i] = null;
+                }
+            }
+
+            return { lower, upper };
+        }
+
+
         // Line Graph rendering
         function waitForCanvasAndRender() {
             $scope.isChartLoading = true;
@@ -656,6 +715,34 @@
                     const quantities = $scope.bidHistoryData.map(item => item.Quantity || 0);
                     const prices = $scope.bidHistoryData.map(item => item.b || 0);
 
+                    const { weightedMean, weightedStd } = computeWeightedStats(prices, quantities);
+                    const filtered = filterOutliers(prices, quantities, weightedMean, weightedStd);
+                    const QuantityFiltered = filtered.map(d => d.q);
+                    const PriceFiltered = filtered.map(d => d.p);
+
+                    // Common range
+                    const quantityRange = d3.range(d3.min(quantities), d3.max(quantities), (d3.max(quantities) - d3.min(quantities)) / 50);
+
+                    // LOESS fits
+                    const loessUnfiltered = loessSmooth(quantities, prices, 0.3, quantityRange);
+                    const loessFiltered = loessSmooth(QuantityFiltered, PriceFiltered, 0.9, quantityRange);
+
+                    // Bootstrap CI
+                    const ciUnfiltered = bootstrapCI(quantities, prices, quantityRange, 0.3);
+                    const ciFiltered = bootstrapCI(QuantityFiltered, PriceFiltered, quantityRange, 0.9);
+
+                    // Convert data to Chart.js format
+                    const originalPoints = quantities.map((q, i) => ({ x: q, y: prices[i] }));
+                    const filteredPoints = QuantityFiltered.map((q, i) => ({ x: q, y: PriceFiltered[i] }));
+                    const loessLineUnfiltered = quantityRange.map((q, i) => ({ x: q, y: loessUnfiltered[i] }));
+                    const loessLineFiltered = quantityRange.map((q, i) => ({ x: q, y: loessFiltered[i] }));
+                    console.log("Loess Band Filtered value", loessLineFiltered);
+                    const ciBandUnfiltered = [...quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.lower[i] })),
+                    ...quantityRange.slice().reverse().map((q, i) => ({ x: quantityRange[quantityRange.length - 1 - i], y: ciUnfiltered.upper[i] }))];
+                    
+                    const ciBandFiltered = [...quantityRange.map((q, i) => ({ x: q, y: ciFiltered.lower[i] })),
+                    ...quantityRange.slice().reverse().map((q, i) => ({ x: quantityRange[quantityRange.length - 1 - i], y: ciFiltered.upper[i] }))];
+                    console.log("Ci Band Filtered value",ciBandFiltered);
                     if (quantities.length === 0 || prices.length === 0) {
                         $scope.isChartLoading = false;
                         return;
@@ -692,7 +779,14 @@
                             normalPoints.push(formattedPoint);
                         }
                     });
-
+                    console.log({
+                        originalPoints,
+                        filteredPoints,
+                        loessLineFiltered,
+                        loessLineUnfiltered,
+                        ciBandFiltered,
+                        ciBandUnfiltered,
+                    });
                     const numPoints = quantities.length;
                     const meanX = quantities.reduce((a, b) => a + b, 0) / numPoints;
                     const meanY = prices.reduce((a, b) => a + b, 0) / numPoints;
@@ -724,43 +818,68 @@
                         data: {
                             datasets: [
                                 {
-                                    label: 'Non-Outlier Bid Points',
-                                    data: normalPoints,
-                                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                                    pointRadius: 5,
-                                    pointHoverRadius: 8,
-                                    showLine: false,
-                                    hidden: !$scope.showNormal
+                                    label: 'Original Data',
+                                    data: originalPoints,
+                                    backgroundColor: 'rgba(128, 128, 128, 0.3)',
+                                    pointRadius: 3,
                                 },
                                 {
-                                    label: 'Outlier Bid Points',
-                                    data: outlierPoints,
-                                    backgroundColor: 'red',
-                                    pointRadius: 5,
-                                    pointHoverRadius: 8,
-                                    showLine: false,
-                                    hidden: !$scope.showOutliers
+                                    label: 'Filtered Data',
+                                    data: filteredPoints,
+                                    backgroundColor: 'rgba(0, 128, 0, 0.5)',
+                                    pointRadius: 3,
                                 },
                                 {
-                                    label: 'Trend Line',
-                                    data: regressionLine,
+                                    label: 'LOESS Unfiltered',
+                                    data: loessLineUnfiltered,
                                     type: 'line',
-                                    borderColor: '#050A15',
+                                    borderColor: 'red',
+                                    borderWidth: 2,
                                     fill: false,
-                                    tension: 0.5,
-                                    hidden: !$scope.showTrendLine
                                 },
                                 {
-                                    label: `Weighted Avg: $${weightedAvg.toFixed(2)}`,
-                                    data: weightedAvgLine,
+                                    label: '95% CI Unfiltered',
+                                    data: ciBandUnfiltered,
                                     type: 'line',
-                                    borderColor: 'green',
-                                    borderWidth: 1,
+                                    showLine: false,
+                                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                                    fill: true,
+                                    pointRadius: 0,
+                                    borderWidth: 0,
+                                },
+                                {
+                                    label: 'LOESS Filtered',
+                                    data: loessLineFiltered,
+                                    type: 'line',
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
                                     fill: false,
+                                },
+                                
+                                {
+                                    label: '95% CI Filtered',
+                                    data: ciBandFiltered,
+                                    type: 'line',
+                                    showLine: false,
+                                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                                    fill: true,
+                                    pointRadius: 0,
+                                    borderWidth: 0,
+                                },
+                                {
+                                    label: `Weighted Avg: $${weightedMean.toFixed(2)}`,
+                                    data: [
+                                        { x: d3.min(quantities), y: weightedMean },
+                                        { x: d3.max(quantities), y: weightedMean }
+                                    ],
+                                    type: 'line',
+                                    borderColor: 'black',
                                     borderDash: [5, 5],
-                                    hidden: !$scope.showWeightedAvg
+                                    fill: false,
+                                    borderWidth: 1
                                 }
                             ]
+
                         },
                         options: {
                             responsive: true,
@@ -785,7 +904,7 @@
                                     }
                                 },
                                 legend: {
-                                    display: false
+                                    display: true
                                 }
                             }
                         }

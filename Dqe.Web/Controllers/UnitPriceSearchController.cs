@@ -65,7 +65,7 @@ namespace Dqe.Web.Controllers
         }
 
         /// <summary>
-        /// Retrieves detailed historical bid data for a specified pay item number.
+        /// Retrieves detailed historical bid data for a specified Pay Item.
         /// </summary>
         /// <param name="number">Pay item number to fetch historical unit price data for.</param>
         /// <returns>JSON result

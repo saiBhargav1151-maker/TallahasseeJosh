@@ -1,8 +1,8 @@
 ﻿<div class="modern-panel">
     <!-- Input -->
-   <!-- <div class="info-block" style="font-weight: 600; color: #1F4283; margin-bottom: 12px;">
-        Bid Data Updated Through: <span>{{ latestLettingDate }}</span>
-    </div>-->
+    <!-- <div class="info-block" style="font-weight: 600; color: #1F4283; margin-bottom: 12px;">
+         Bid Data Updated Through: <span>{{ latestLettingDate }}</span>
+     </div>-->
     <div class="row input-section">
         <!-- Group 1: Item Filters -->
         <div class="col-md-4">
@@ -40,8 +40,8 @@
                        data-original-title="A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system.">
                     <i class="fas fa-hammer label-icon"></i>
                     Enter Pay Item Number or Des: <span class="label-hint-compact" style="color: red;">
-    * required (if Contract Number is empty)
-</span>
+                        * required (if Contract Number is empty)
+                    </span>
                     <!-- Simple Tooltip -->
                     <div class="info-tooltip-wrapper">
                         <i class="fas fa-info-circle info-icon"></i>
@@ -154,9 +154,7 @@
                     <select id="contractWorkTypeSelect"
                             class="form-control modern-select compact-select"
                             ng-model="selectedWorkTypeCodes"
-                            
-                            multiple
-                            >
+                            multiple>
                         <option value="ALL">-- All Work Types --</option>
                         <option ng-repeat="(code, label) in workTypeMap"
                                 ng-value="code">
@@ -185,20 +183,18 @@
                         <i class="fas fa-times-circle"></i>
                     </span>
                 </div>-->
-
-                <!-- Suggestion dropdown -->
-                <!--<div class="suggestions-dropdown" ng-show="isWorkMixDropdownOpen && filteredWorkMixes.length">
-                    <div class="suggestion-item"
-                         ng-repeat="item in filteredWorkMixes"
-                         ng-click="toggleWorkMixSelection(item)"
-                         ng-class="{ 'selected': workMixSelected.indexOf(item) !== -1 }">
-                        <i class="fas fa-check-circle" ng-if="workMixSelected.indexOf(item) !== -1"></i>
-                        {{ item }}
-                    </div>
-                </div>-->
-
-                <!-- Selected chips -->
-                <!--<div class="selected-chips mt-2" ng-if="workMixSelected.length > 0">
+            <!-- Suggestion dropdown -->
+            <!--<div class="suggestions-dropdown" ng-show="isWorkMixDropdownOpen && filteredWorkMixes.length">
+                <div class="suggestion-item"
+                     ng-repeat="item in filteredWorkMixes"
+                     ng-click="toggleWorkMixSelection(item)"
+                     ng-class="{ 'selected': workMixSelected.indexOf(item) !== -1 }">
+                    <i class="fas fa-check-circle" ng-if="workMixSelected.indexOf(item) !== -1"></i>
+                    {{ item }}
+                </div>
+            </div>-->
+            <!-- Selected chips -->
+            <!--<div class="selected-chips mt-2" ng-if="workMixSelected.length > 0">
                     <span class="chip" ng-repeat="type in workMixSelected track by type">
                         {{ type }}
                         <i class="fas fa-times remove-chip" ng-click="removeWorkMix(type)"></i>
@@ -475,14 +471,14 @@
                     </div>
                     <div class="chart-container-glass" ng-if="!shouldHideGraphForLumpSum()">
                         <div class="stats-overlay">
-                            <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
+                           <!-- <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
                             <div class="stat-item"><span class="stat-label">Total Bids:</span><span class="stat-value">{{ chartStats.count }}</span></div>
-                            <div class="stat-item"><span class="stat-label">Total Outliers:</span><span class="stat-value">{{ chartStats.outlierCount }}</span></div>
+                            --><div class="stat-item"><span class="stat-label">Total Outliers:</span><span class="stat-value">{{ chartStats.outlierCount }}</span></div>
                         </div>
                         <div class="canvas-wrapper">
                             <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
                         </div>
-                        <div class="interactive-legend">
+                       <!-- <div class="interactive-legend">
                             <div class="legend-item" ng-click="toggleLegend('normal')">
                                 <div class="legend-color" style="background: rgba(54, 162, 235, 0.8);"></div>
                                 <span>Normal Bids</span>
@@ -499,7 +495,7 @@
                                 <div class="legend-color" style="background: green;"></div>
                                 <span>Weighted Avg</span>
                             </div>
-                        </div>
+                        </div>-->
 
                     </div>
                     <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
@@ -611,12 +607,17 @@
         </div>
     </div>
 </div>
-
+<script src="
+https://cdn.jsdelivr.net/npm/science@1.9.3/science.v1.min.js
+"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 
 <style>
-    body {   
+    body {
         min-height: 100vh;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
         color: #0B172D;
@@ -630,15 +631,15 @@
         position: relative;
     }
 
-    .modern-panel::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: #1F4283;
-    }
+        .modern-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #1F4283;
+        }
 
     /* Input Section */
     .input-section {
@@ -688,12 +689,12 @@
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
     }
 
-    .modern-input:focus {
-        outline: none;
-        border-color: #1F4283;
-        background: #ffffff;
-        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
-    }
+        .modern-input:focus {
+            outline: none;
+            border-color: #1F4283;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+        }
 
     .search-input-group {
         position: relative;
@@ -752,11 +753,11 @@
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
     }
 
-    .modern-select:focus {
-        border-color: #1F4283;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
-    }
+        .modern-select:focus {
+            border-color: #1F4283;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+        }
 
     .compact-select {
         padding: 6px 30px 6px 10px;
@@ -806,13 +807,13 @@
         gap: 8px;
     }
 
-    .suggestion-item:hover {
-        background: #EAF0FA;
-    }
+        .suggestion-item:hover {
+            background: #EAF0FA;
+        }
 
-    .suggestion-item:last-child {
-        border-bottom: none;
-    }
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
 
     .suggestion-icon {
         color: #1F4283;
@@ -829,16 +830,16 @@
         font-size: 12px;
     }
 
-    .error-message div {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 2px;
-    }
+        .error-message div {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
 
-    .error-message div:last-child {
-        margin-bottom: 0;
-    }
+            .error-message div:last-child {
+                margin-bottom: 0;
+            }
 
     /* Action Buttons */
     .action-buttons {
@@ -875,11 +876,11 @@
         box-shadow: 0 2px 4px rgba(31, 66, 131, 0.2);
     }
 
-    .search-button:hover {
-        background: #152C57;
-        border-color: #152C57;
-        box-shadow: 0 4px 8px rgba(31, 66, 131, 0.3);
-    }
+        .search-button:hover {
+            background: #152C57;
+            border-color: #152C57;
+            box-shadow: 0 4px 8px rgba(31, 66, 131, 0.3);
+        }
 
     .btn-secondary {
         background: #5E89D9;
@@ -888,11 +889,12 @@
         box-shadow: 0 2px 4px rgba(94, 137, 217, 0.2);
     }
 
-  .btn-secondary:hover {
-        background: #356BCF;
-        border-color: #356BCF;
-        box-shadow: 0 4px 8px rgba(94, 137, 217, 0.3);
-    }
+        .btn-secondary:hover {
+            background: #356BCF;
+            border-color: #356BCF;
+            box-shadow: 0 4px 8px rgba(94, 137, 217, 0.3);
+        }
+
     .export-section {
         padding: 10px;
         margin: 20px 0;
@@ -901,6 +903,7 @@
         border-radius: 8px;
         background-color: #28a745;
     }
+
     .export-button {
         background: #28a745;
         color: #ffffff;
@@ -909,11 +912,11 @@
         float: right;
     }
 
-    .export-button:hover {
-        background: #218838;
-        border-color: #218838;
-        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-    }
+        .export-button:hover {
+            background: #218838;
+            border-color: #218838;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
 
     /* Loading Section */
     .loading-section {
@@ -1050,6 +1053,7 @@
         .bid-table tbody tr:hover td:first-child {
             background: #D6E1F5;
         }
+
         .bid-table td {
             position: relative;
         }
@@ -1088,11 +1092,13 @@
                 font-weight: 600;
                 text-transform: capitalize;
             }
+
             .bid-table td:nth-child(17),
             .bid-table td:nth-child(18) {
                 text-align: left;
                 max-width: 120px;
             }
+
             .bid-table td:nth-child(19) {
                 text-align: left;
                 min-width: 200px;
@@ -1101,6 +1107,7 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+
                 .bid-table td:nth-child(19):hover {
                     white-space: normal;
                     overflow: visible;
@@ -1158,12 +1165,14 @@
         position: relative;
         margin-bottom: 15px;
     }
+
     .canvas-wrapper {
         position: relative;
         border-radius: 15px;
         overflow: hidden;
         background: linear-gradient(45deg, #f0f2f5, #ffffff);
     }
+
     .chart-container-glass {
         background: rgba(255, 255, 255, 0.25);
         backdrop-filter: blur(10px);
@@ -1174,7 +1183,7 @@
         position: relative;
         box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
     }
-    <!--.chart-type-badge {
+    <!-- .chart-type-badge {
         position: absolute;
         top: 15px;
         left: 20px;
@@ -1186,7 +1195,8 @@
         font-weight: 600;
         z-index: 10;
         margin-bottom: 5px;
-    }-->
+    }
+    -->
     .stats-overlay {
         position: absolute;
         top: 20px;
@@ -1216,6 +1226,7 @@
         color: #2d3748;
         font-weight: 600;
     }
+
     .interactive-legend {
         display: flex;
         flex-wrap: wrap;
@@ -1280,9 +1291,9 @@
         transition: transform 0.2s ease;
     }
 
-    .stat-card:hover {
-        box-shadow: 0 2px 8px rgba(31, 66, 131, 0.15);
-    }
+        .stat-card:hover {
+            box-shadow: 0 2px 8px rgba(31, 66, 131, 0.15);
+        }
 
     .stat-label {
         font-weight: 600;
@@ -1333,14 +1344,15 @@
         border: 2px solid #B1C6EC;
         padding: 10px;
     }
+
     .district-county-group {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(20px);
         border-radius: 20px;
         padding: 10px;
-        
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
+
     .district-county-row {
         display: flex;
         gap: 15px;
@@ -1393,20 +1405,20 @@
         border-color: #1F4283;
     }
 
-    .btn-outline-primary:hover {
-        background: #1F4283;
-        color: #ffffff;
-    }
+        .btn-outline-primary:hover {
+            background: #1F4283;
+            color: #ffffff;
+        }
 
     .btn-outline-secondary {
         color: #5E89D9;
         border-color: #5E89D9;
     }
 
-    .btn-outline-secondary:hover {
-        background: #5E89D9;
-        color: #ffffff;
-    }
+        .btn-outline-secondary:hover {
+            background: #5E89D9;
+            color: #ffffff;
+        }
 
     .selected-count-compact {
         color: #5E89D9;
@@ -1452,9 +1464,9 @@
         font-size: 12px;
     }
 
-    .county-checkbox-label-compact:hover {
-        background-color: #D6E1F5;
-    }
+        .county-checkbox-label-compact:hover {
+            background-color: #D6E1F5;
+        }
 
     .county-name-compact {
         font-size: 12px;
@@ -1495,9 +1507,9 @@
         transition: opacity 0.2s ease;
     }
 
-    .remove-tag-compact:hover {
-        opacity: 1;
-    }
+        .remove-tag-compact:hover {
+            opacity: 1;
+        }
 
     .form-control:focus {
         border-color: #1F4283;
@@ -1526,13 +1538,13 @@
         flex: 1;
     }
 
-    .input-group label {
-        display: block;
-        font-size: 14px;
-        font-weight: 500;
-        color: #152C57;
-        margin-bottom: 5px;
-    }
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #152C57;
+            margin-bottom: 5px;
+        }
 
     .quantity-input {
         width: 100%;
@@ -1545,15 +1557,15 @@
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
     }
 
-    .quantity-input:focus {
-        outline: none;
-        border-color: #1F4283;
-        box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
-    }
+        .quantity-input:focus {
+            outline: none;
+            border-color: #1F4283;
+            box-shadow: 0 0 0 3px rgba(31, 66, 131, 0.1);
+        }
 
-    .quantity-input:invalid {
-        border-color: #D72E2A;
-    }
+        .quantity-input:invalid {
+            border-color: #D72E2A;
+        }
 
     .separator {
         font-size: 15px;
@@ -1574,18 +1586,18 @@
         line-height: 1.4;
     }
 
-    .quantity-preview i {
-        margin-right: 6px;
-    }
+        .quantity-preview i {
+            margin-right: 6px;
+        }
 
     .form-group {
         margin-bottom: 20px;
         position: relative;
     }
 
-    .form-group:last-child {
-        margin-bottom: 0;
-    }
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
 
     .months-input-container {
         display: flex;
@@ -1836,6 +1848,7 @@
         box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         max-width: 400px;
     }
+
     .category-header {
         background: #ecf0f1;
         padding: 8px 16px;
@@ -1848,6 +1861,7 @@
         position: sticky;
         top: 0;
     }
+
     .categorized-dropdown {
         background: white;
         border: 1px solid #ddd;
@@ -1913,6 +1927,7 @@
         font-size: 11px;
         opacity: 0.8;
     }
+
     .info-tooltip-wrapper {
         position: relative;
         display: inline-block;
@@ -1973,13 +1988,16 @@
         color: #ffd700;
         font-weight: bold;
     }
+
     th[ng-click] {
         cursor: pointer;
         text-decoration: underline;
     }
+
     fa-sort, .fa-sort-up, .fa-sort-down {
         margin-left: 6px;
     }
+
     .hover-card-trigger {
         position: relative;
         display: inline-block;
