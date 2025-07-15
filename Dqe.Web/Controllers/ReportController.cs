@@ -221,7 +221,7 @@ namespace Dqe.Web.Controllers
                 estimates = estimates.OrderByDescending(i => i.LastUpdated).ToList();
 
                 targetUrl = string.Format(_serviceUrl + "/SnapshotComparison&rs:Command=Render&rs:Format={0}&NewestProjectEstimateId={1}&OldestProjectEstimateId={2}&NewOwner={3}&OldestOwner={4}",
-                                            reportFormat, estimates.First().Id, estimates.Last().Id, staffMemberNames.First(), staffMemberNames.Last());
+                                            reportFormat, estimates.First().Id, estimates.Last().Id, estimates.First().MyProjectVersion.VersionOwner.Name, estimates.Last().MyProjectVersion.VersionOwner.Name);
                 fileName = string.Format("SnapshotComparisonReport_P{0}_V{1}_E{2}-{3}_V{4}_E{5}.{6}", estimates.First().MyProjectVersion.MyProject.ProjectNumber, estimates.First().MyProjectVersion.Version, estimates.First().Estimate,
                                                                                                     estimates.Last().MyProjectVersion.MyProject.ProjectNumber, estimates.Last().MyProjectVersion.Version, estimates.Last().Estimate, _extension);
             }
