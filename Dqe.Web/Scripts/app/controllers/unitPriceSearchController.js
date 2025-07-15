@@ -416,12 +416,7 @@
                 $scope.selectedPayItemNumber = null;
                 return;
             }
-            $scope.getBidTypeLabel = function (code) {
-                return code ? ($scope.bidTypeMap[code] || "Unknown") : "Unknown";
-            };
-            $scope.getBidStatusLabel = function (code) {
-                return code ? ($scope.bidStatusMap[code] || "Unknown") : "Unknown";
-            };
+            
             debounceTimer = $timeout(function () {
                 $http.get('/UnitPriceSearch/GetPayItemSuggestions', {
                     params: { input: $scope.searchText }
@@ -585,7 +580,7 @@
                 `"${item.SupplementalDescription}"`,
                 `"${item.CalculatedUnit}"`, `"${item.Quantity}"`, `"${item.b}"`, `"${item.WeightedAvg}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`,
                 `"${item.PvBidTotal}"`, `"${item.d}"`, `"${item.MarketArea}"`, `"${item.c}"`, `"${item.VendorName}"`,
-                `"${$scope.getBidStatusLabel(item.BidStatus)}"`, `"${item.VendorRanking}"`, `"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`,
+                `"${$scope.getBidTypeLabel(item.BidStatus)}"`, `"${item.VendorRanking}"`, `"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`,
                 `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`, `"${(item.WorkMixDescription)}"`, `"${(item.CategoryDescription)}"`,
                 `"${formatDotNetDate(item.l)}"`, `"${formatDotNetDate(item.ExecutedDate)}"`,
                 `"${item.Duration}"`, `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`
@@ -634,52 +629,62 @@
                 waitForCanvasAndRender();
             }
         });
+
         function computeWeightedStats(prices, quantities) {
-            const totalQty = d3.sum(quantities);
-            const weightedMean = d3.sum(prices.map((p, i) => p * quantities[i])) / totalQty;
-            const weightedStd = Math.sqrt(d3.sum(prices.map((p, i) =>
-                quantities[i] * Math.pow(p - weightedMean, 2)
-            )) / totalQty);
-            return { weightedMean, weightedStd };
+            var totalQty = d3.sum(quantities);
+            var weightedMean = d3.sum(prices.map(function (p, i) {
+                return p * quantities[i];
+            })) / totalQty;
+            var weightedStd = Math.sqrt(d3.sum(prices.map(function (p, i) {
+                return quantities[i] * Math.pow(p - weightedMean, 2);
+            })) / totalQty);
+            return { weightedMean: weightedMean, weightedStd: weightedStd };
         }
 
         function filterOutliers(prices, quantities, weightedMean, weightedStd) {
             return prices
-                .map((p, i) => ({ p, q: quantities[i] }))
-                .filter(d => Math.abs(d.p - weightedMean) <= weightedStd);
+                .map(function (p, i) {
+                    return { p: p, q: quantities[i] };
+                })
+                .filter(function (d) {
+                    return Math.abs(d.p - weightedMean) <= weightedStd;
+                });
         }
 
         function loessSmooth(x, y, bandwidth, range) {
-            const loess = science.stats.loess().bandwidth(bandwidth);
+            var loess = science.stats.loess().bandwidth(bandwidth);
             return loess(x, y, range);
         }
 
-        function bootstrapCI(x, y, xvals, frac = 0.3, nBoot = 200) {
+        function bootstrapCI(x, y, xvals, frac, nBoot) {
+            if (frac === undefined) frac = 0.3;
+            if (nBoot === undefined) nBoot = 200;
+
             if (!x.length || !y.length || x.length !== y.length) {
                 return {
-                    lower: xvals.map(() => null),
-                    upper: xvals.map(() => null),
+                    lower: xvals.map(function () { return null; }),
+                    upper: xvals.map(function () { return null; }),
                 };
             }
 
-            const preds = [];
+            var preds = [];
 
-            for (let b = 0; b < nBoot; b++) {
-                const indices = _.sampleSize(_.range(x.length), x.length);
-                const xBoot = indices.map(i => x[i]);
-                const yBoot = indices.map(i => y[i]);
+            for (var b = 0; b < nBoot; b++) {
+                var indices = _.sampleSize(_.range(x.length), x.length);
+                var xBoot = indices.map(function (i) { return x[i]; });
+                var yBoot = indices.map(function (i) { return y[i]; });
 
-                const smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
-                const smoothedY = smoothed.map(pt => pt.y ?? null);
+                var smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
+                var smoothedY = smoothed.map(function (pt) { return pt.y !== undefined ? pt.y : null; });
 
                 preds.push(smoothedY);
             }
 
-            const lower = [];
-            const upper = [];
+            var lower = [];
+            var upper = [];
 
-            for (let i = 0; i < xvals.length; i++) {
-                const valuesAtPoint = preds.map(row => row[i]).filter(v => v !== null && !isNaN(v));
+            for (var i = 0; i < xvals.length; i++) {
+                var valuesAtPoint = preds.map(function (row) { return row[i]; }).filter(function (v) { return v !== null && !isNaN(v); });
                 if (valuesAtPoint.length) {
                     lower[i] = d3.quantile(valuesAtPoint, 0.025);
                     upper[i] = d3.quantile(valuesAtPoint, 0.975);
@@ -689,8 +694,9 @@
                 }
             }
 
-            return { lower, upper };
+            return { lower: lower, upper: upper };
         }
+
 
 
         // Line Graph rendering
