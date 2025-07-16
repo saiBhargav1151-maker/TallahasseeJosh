@@ -416,7 +416,7 @@
                 $scope.selectedPayItemNumber = null;
                 return;
             }
-            
+
             debounceTimer = $timeout(function () {
                 $http.get('/UnitPriceSearch/GetPayItemSuggestions', {
                     params: { input: $scope.searchText }
@@ -651,31 +651,216 @@
                 });
         }
 
-        function loessSmooth(x, y, bandwidth, range) {
-            var loess = science.stats.loess().bandwidth(bandwidth);
-            return loess(x, y, range);
+        /*function loessSmooth(x, y, bandwidth, xvals) {
+            if (!Array.isArray(x) || !Array.isArray(y) || !Array.isArray(xvals) ||
+                x.length === 0 || y.length === 0 || x.length !== y.length) {
+                console.warn("Invalid input to loessSmooth");
+                return xvals.map(() => NaN);
+            }
+
+            try {
+                const data = x.map((xi, i) => [xi, y[i]]);
+
+                if (typeof science === "undefined" || typeof science.stats.loess !== "function") {
+                    throw new Error("Science.js loess function not available");
+                }
+
+                const loess = science.stats.loess().bandwidth(bandwidth);
+                const smoothingFunction = loess(x,y); // returns function(x) => y
+
+                return xvals.map(xval => {
+                    try {
+                        return smoothingFunction(xval);
+                    } catch {
+                        return interpolateValue(data, xval);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Science.js LOESS error:", error);
+
+                if (x && y && xvals && x.length === y.length && x.length > 0) {
+                    return manualLoessSmooth(x, y, bandwidth, xvals);
+                } else {
+                    return xvals.map(() => NaN);
+                }
+            }
+        }*/
+
+        function loessSmooth(x, y, bandwidth, xvals) {
+            if (!Array.isArray(x) || !Array.isArray(y) || !Array.isArray(xvals) ||
+                x.length === 0 || y.length === 0 || x.length !== y.length) {
+                console.warn("Invalid input to loessSmooth");
+                return xvals.map(() => NaN);
+            }
+
+            try {
+                // Step 1: Handle multiple y-values per x by aggregating
+                const aggregatedData = aggregateDataByX(x, y);
+                const uniqueX = aggregatedData.map(d => d.x);
+                const uniqueY = aggregatedData.map(d => d.y);
+
+                console.log("Aggregated data:", aggregatedData);
+                console.log("Unique X:", uniqueX);
+                console.log("Unique Y:", uniqueY);
+
+                // Step 2: Check if we have enough data points
+                if (uniqueX.length < 3) {
+                    console.warn("Not enough unique x-values for LOESS (need at least 3)");
+                    return xvals.map(xval => interpolateLinear(uniqueX, uniqueY, xval));
+                }
+
+                // Step 3: Sort data by x-values (LOESS requires sorted data)
+                const sortedIndices = uniqueX.map((_, i) => i)
+                    .sort((a, b) => uniqueX[a] - uniqueX[b]);
+                const sortedX = sortedIndices.map(i => uniqueX[i]);
+                const sortedY = sortedIndices.map(i => uniqueY[i]);
+
+                // Step 4: Adjust bandwidth for small datasets
+                const adjustedBandwidth = Math.max(bandwidth, 2 / sortedX.length);
+
+                // Step 5: Try Science.js LOESS
+                if (typeof science !== "undefined" && typeof science.stats.loess === "function") {
+                    const loess = science.stats.loess().bandwidth(adjustedBandwidth);
+
+                    // IMPORTANT: Science.js returns an ARRAY of smoothed values, not a function!
+                    const smoothedValues = loess(sortedX, sortedY);
+
+                    console.log("LOESS smoothed values:", smoothedValues);
+
+                    // Step 6: Interpolate smoothed values for requested x-values
+                    return xvals.map(xval => {
+                        return interpolateLinear(sortedX, smoothedValues, xval);
+                    });
+                } else {
+                    throw new Error("Science.js not available");
+                }
+
+            } catch (error) {
+                console.error("Science.js LOESS error:", error);
+
+                // Fallback to manual smoothing
+                return manualLoessSmooth(x, y, bandwidth, xvals);
+            }
         }
 
+
+        function interpolateValue(data, xval) {
+            // Sort data by x values
+            var sortedData = data.slice().sort((a, b) => a[0] - b[0]);
+
+            // Find surrounding points
+            for (var i = 0; i < sortedData.length - 1; i++) {
+                if (xval >= sortedData[i][0] && xval <= sortedData[i + 1][0]) {
+                    var x1 = sortedData[i][0], y1 = sortedData[i][1];
+                    var x2 = sortedData[i + 1][0], y2 = sortedData[i + 1][1];
+
+                    // Linear interpolation
+                    return y1 + (y2 - y1) * (xval - x1) / (x2 - x1);
+                }
+            }
+
+            // If outside range, return nearest value
+            if (xval < sortedData[0][0]) return sortedData[0][1];
+            if (xval > sortedData[sortedData.length - 1][0]) return sortedData[sortedData.length - 1][1];
+
+            return NaN;
+        }
+
+        // Manual LOESS implementation as fallback
+        function manualLoessSmooth(x, y, bandwidth, xvals) {
+            const n = x.length;
+            const result = [];
+
+            for (let i = 0; i < xvals.length; i++) {
+                const xi = xvals[i];
+                const distances = x.map((xj, idx) => ({ dist: Math.abs(xi - xj), idx }))
+                    .sort((a, b) => a.dist - b.dist);
+
+                const windowSize = Math.max(1, Math.floor(bandwidth * n));
+                const neighbors = distances.slice(0, windowSize);
+
+                if (neighbors.length === 0) {
+                    result.push(NaN);
+                    continue;
+                }
+
+                const maxDist = neighbors[neighbors.length - 1].dist;
+                const weights = neighbors.map(n => {
+                    const u = n.dist / maxDist;
+                    return u >= 1 ? 0 : Math.pow(1 - Math.pow(u, 3), 3);
+                });
+
+                let sumW = 0, sumWX = 0, sumWY = 0, sumWXX = 0, sumWXY = 0;
+
+                for (let j = 0; j < neighbors.length; j++) {
+                    const idx = neighbors[j].idx;
+                    const w = weights[j];
+                    const xj = x[idx], yj = y[idx];
+                    sumW += w;
+                    sumWX += w * xj;
+                    sumWY += w * yj;
+                    sumWXX += w * xj * xj;
+                    sumWXY += w * xj * yj;
+                }
+
+                if (sumW > 0) {
+                    const meanX = sumWX / sumW;
+                    const meanY = sumWY / sumW;
+                    const denom = sumWXX - sumWX * meanX;
+
+                    if (Math.abs(denom) > 1e-10) {
+                        const slope = (sumWXY - sumWX * meanY) / denom;
+                        const intercept = meanY - slope * meanX;
+                        result.push(slope * xi + intercept);
+                    } else {
+                        result.push(meanY);
+                    }
+                } else {
+                    result.push(NaN);
+                }
+            }
+
+            return result;
+        }
+
+
+        // Corrected Bootstrap CI function
         function bootstrapCI(x, y, xvals, frac, nBoot) {
             if (frac === undefined) frac = 0.3;
             if (nBoot === undefined) nBoot = 200;
 
             if (!x.length || !y.length || x.length !== y.length) {
                 return {
-                    lower: xvals.map(function () { return null; }),
-                    upper: xvals.map(function () { return null; }),
+                    lower: xvals.map(() => null),
+                    upper: xvals.map(() => null),
                 };
             }
 
             var preds = [];
 
             for (var b = 0; b < nBoot; b++) {
+                // Fixed lodash reference
                 var indices = _.sampleSize(_.range(x.length), x.length);
                 var xBoot = indices.map(function (i) { return x[i]; });
                 var yBoot = indices.map(function (i) { return y[i]; });
 
+                // Get smoothed values
                 var smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
-                var smoothedY = smoothed.map(function (pt) { return pt.y !== undefined ? pt.y : null; });
+
+                // Handle different return formats
+                var smoothedY;
+                if (Array.isArray(smoothed)) {
+                    // If smoothed is already an array of numbers
+                    smoothedY = smoothed.map(function (val) {
+                        return (val !== null && !isNaN(val)) ? val : null;
+                    });
+                } else {
+                    // If smoothed returns objects with .y property
+                    smoothedY = smoothed.map(function (pt) {
+                        return (pt && pt.y !== undefined) ? pt.y : null;
+                    });
+                }
 
                 preds.push(smoothedY);
             }
@@ -684,10 +869,27 @@
             var upper = [];
 
             for (var i = 0; i < xvals.length; i++) {
-                var valuesAtPoint = preds.map(function (row) { return row[i]; }).filter(function (v) { return v !== null && !isNaN(v); });
-                if (valuesAtPoint.length) {
-                    lower[i] = d3.quantile(valuesAtPoint, 0.025);
-                    upper[i] = d3.quantile(valuesAtPoint, 0.975);
+                var valuesAtPoint = preds.map(function (row) {
+                    return row[i];
+                }).filter(function (v) {
+                    return v !== null && !isNaN(v);
+                });
+
+                if (valuesAtPoint.length > 0) {
+                    // Sort values for quantile calculation
+                    valuesAtPoint.sort(function (a, b) { return a - b; });
+
+                    // Use d3.quantile if available, otherwise manual calculation
+                    if (typeof d3 !== 'undefined' && d3.quantile) {
+                        lower[i] = d3.quantile(valuesAtPoint, 0.025);
+                        upper[i] = d3.quantile(valuesAtPoint, 0.975);
+                    } else {
+                        // Manual quantile calculation
+                        var lowerIdx = Math.floor(valuesAtPoint.length * 0.025);
+                        var upperIdx = Math.floor(valuesAtPoint.length * 0.975);
+                        lower[i] = valuesAtPoint[lowerIdx];
+                        upper[i] = valuesAtPoint[upperIdx];
+                    }
                 } else {
                     lower[i] = null;
                     upper[i] = null;
@@ -727,7 +929,8 @@
                     const PriceFiltered = filtered.map(d => d.p);
 
                     // Common range
-                    const quantityRange = d3.range(d3.min(quantities), d3.max(quantities), (d3.max(quantities) - d3.min(quantities)) / 50);
+                    const quantityRange = Array.from(new Set(quantities)).sort((a, b) => a - b);
+
 
                     // LOESS fits
                     const loessUnfiltered = loessSmooth(quantities, prices, 0.3, quantityRange);
@@ -742,13 +945,11 @@
                     const filteredPoints = QuantityFiltered.map((q, i) => ({ x: q, y: PriceFiltered[i] }));
                     const loessLineUnfiltered = quantityRange.map((q, i) => ({ x: q, y: loessUnfiltered[i] }));
                     const loessLineFiltered = quantityRange.map((q, i) => ({ x: q, y: loessFiltered[i] }));
-                    console.log("Loess Band Filtered value", loessLineFiltered);
                     const ciBandUnfiltered = [...quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.lower[i] })),
                     ...quantityRange.slice().reverse().map((q, i) => ({ x: quantityRange[quantityRange.length - 1 - i], y: ciUnfiltered.upper[i] }))];
-                    
                     const ciBandFiltered = [...quantityRange.map((q, i) => ({ x: q, y: ciFiltered.lower[i] })),
                     ...quantityRange.slice().reverse().map((q, i) => ({ x: quantityRange[quantityRange.length - 1 - i], y: ciFiltered.upper[i] }))];
-                    console.log("Ci Band Filtered value",ciBandFiltered);
+                    console.log("Ci Band Filtered value", ciBandFiltered);
                     if (quantities.length === 0 || prices.length === 0) {
                         $scope.isChartLoading = false;
                         return;
@@ -824,19 +1025,19 @@
                         data: {
                             datasets: [
                                 {
-                                    label: 'Original Data',
+                                    label: 'Outliers',
                                     data: originalPoints,
                                     backgroundColor: 'rgba(128, 128, 128, 0.3)',
-                                    pointRadius: 3,
+                                    pointRadius: 5,
                                 },
                                 {
-                                    label: 'Filtered Data',
+                                    label: 'No Outliers',
                                     data: filteredPoints,
                                     backgroundColor: 'rgba(0, 128, 0, 0.5)',
-                                    pointRadius: 3,
+                                    pointRadius: 5,
                                 },
                                 {
-                                    label: 'LOESS Unfiltered',
+                                    label: 'LOESS (w/ Outliers)',
                                     data: loessLineUnfiltered,
                                     type: 'line',
                                     borderColor: 'red',
@@ -844,25 +1045,37 @@
                                     fill: false,
                                 },
                                 {
-                                    label: '95% CI Unfiltered',
+                                   /* label: '95% CI Unfiltered',
                                     data: ciBandUnfiltered,
                                     type: 'line',
-                                    showLine: false,
+                                    showLine: true,
                                     backgroundColor: 'rgba(255, 0, 0, 0.1)',
                                     fill: true,
                                     pointRadius: 0,
                                     borderWidth: 0,
+                                },*/
+                                label: '95% CI Unfiltered (Upper)',
+                                data: ciBandUnfiltered,
+                                type: 'line',
+                                showLine: true,
+                                backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                                borderColor: 'transparent', // Hide the border line
+                                fill: '+1', // Fill to the next dataset (lower bound)
+                                pointRadius: 0,
+                                borderWidth: 0,
+                                tension: 0.4, // Smooth curves
+                                order: 10 // Render behind other lines
                                 },
                                 {
-                                    label: 'LOESS Filtered',
+                                    label: 'LOESS (w/o Outliers)',
                                     data: loessLineFiltered,
                                     type: 'line',
                                     borderColor: 'blue',
                                     borderWidth: 2,
                                     fill: false,
                                 },
-                                
-                                {
+
+                                /*{
                                     label: '95% CI Filtered',
                                     data: ciBandFiltered,
                                     type: 'line',
@@ -871,6 +1084,19 @@
                                     fill: true,
                                     pointRadius: 0,
                                     borderWidth: 0,
+                                },*/
+                                {
+                                    label: '95% CI Filtered',
+                                    data: ciBandFiltered,
+                                    type: 'line',
+                                    showLine: true,
+                                    backgroundColor: 'rgba(0, 0, 255, 0.1)',  // Blue with 0.1 alpha (same as Python)
+                                    borderColor: 'transparent',
+                                    fill: true,
+                                    pointRadius: 0,
+                                    borderWidth: 0,
+                                    tension: 0.4,
+                                    order: 10
                                 },
                                 {
                                     label: `Weighted Avg: $${weightedMean.toFixed(2)}`,

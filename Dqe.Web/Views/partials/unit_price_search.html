@@ -471,31 +471,32 @@
                     </div>
                     <div class="chart-container-glass" ng-if="!shouldHideGraphForLumpSum()">
                         <div class="stats-overlay">
-                           <!-- <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
-                            <div class="stat-item"><span class="stat-label">Total Bids:</span><span class="stat-value">{{ chartStats.count }}</span></div>
-                            --><div class="stat-item"><span class="stat-label">Total Outliers:</span><span class="stat-value">{{ chartStats.outlierCount }}</span></div>
+                            <!-- <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
+                             <div class="stat-item"><span class="stat-label">Total Bids:</span><span class="stat-value">{{ chartStats.count }}</span></div>
+                             -->
+                            <div class="stat-item"><span class="stat-label">Total Outliers:</span><span class="stat-value">{{ chartStats.outlierCount }}</span></div>
                         </div>
                         <div class="canvas-wrapper">
                             <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
                         </div>
-                       <!-- <div class="interactive-legend">
-                            <div class="legend-item" ng-click="toggleLegend('normal')">
-                                <div class="legend-color" style="background: rgba(54, 162, 235, 0.8);"></div>
-                                <span>Normal Bids</span>
-                            </div>
-                            <div class="legend-item" ng-click="toggleLegend('outlier')">
-                                <div class="legend-color" style="background: red;"></div>
-                                <span>Outliers</span>
-                            </div>
-                            <div class="legend-item" ng-click="toggleLegend('trend')">
-                                <div class="legend-color" style="background: #050A15;"></div>
-                                <span>Trend Line</span>
-                            </div>
-                            <div class="legend-item" ng-click="toggleLegend('avg')">
-                                <div class="legend-color" style="background: green;"></div>
-                                <span>Weighted Avg</span>
-                            </div>
-                        </div>-->
+                        <!-- <div class="interactive-legend">
+                             <div class="legend-item" ng-click="toggleLegend('normal')">
+                                 <div class="legend-color" style="background: rgba(54, 162, 235, 0.8);"></div>
+                                 <span>Normal Bids</span>
+                             </div>
+                             <div class="legend-item" ng-click="toggleLegend('outlier')">
+                                 <div class="legend-color" style="background: red;"></div>
+                                 <span>Outliers</span>
+                             </div>
+                             <div class="legend-item" ng-click="toggleLegend('trend')">
+                                 <div class="legend-color" style="background: #050A15;"></div>
+                                 <span>Trend Line</span>
+                             </div>
+                             <div class="legend-item" ng-click="toggleLegend('avg')">
+                                 <div class="legend-color" style="background: green;"></div>
+                                 <span>Weighted Avg</span>
+                             </div>
+                         </div>-->
 
                     </div>
                     <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
