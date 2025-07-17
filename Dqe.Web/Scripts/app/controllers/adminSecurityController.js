@@ -68,8 +68,9 @@
     var payItemAdminRole = { name: 'Pay Item Administrator', value: 'P' };
     var costBasedTemplateAdminRole = { name: 'Cost-Based Template Administrator', value: 'T' };
     var estimatorRole = { name: 'Estimator', value: 'E' };
-    var coRoles = [systemAdminRole, payItemAdminRole, costBasedTemplateAdminRole, estimatorRole];
-    var districtRoles = [districtAdminRole, estimatorRole];
+    var reviewerRole = { name: 'Reviewer', value: 'R' };
+    var coRoles = [systemAdminRole, payItemAdminRole, costBasedTemplateAdminRole, estimatorRole, reviewerRole];
+    var districtRoles = [districtAdminRole, estimatorRole, reviewerRole];
     $scope.sysRoles = function() {
         if ($scope.thisUser == undefined) {
             return emptyRoles();
@@ -96,7 +97,7 @@
         return ($scope.district.startsWith('D') || $scope.district == 'TP');
     }
     function validCoRoles() {
-        if ($scope.role != systemAdminRole.value && $scope.role != payItemAdminRole.value && $scope.role != costBasedTemplateAdminRole.value && $scope.role != estimatorRole.value) {
+        if ($scope.role != systemAdminRole.value && $scope.role != payItemAdminRole.value && $scope.role != costBasedTemplateAdminRole.value && $scope.role != estimatorRole.value && $scope.role != reviewerRole.value) {
             $scope.role = undefined;
         }
         return coRoles;

@@ -35,6 +35,10 @@ namespace Dqe.ApplicationServices
             var user = _dqeUserRepository.Get(((DqeIdentity) _identity).Id);
             if (user == null) return false;
             var decodedRole = Enum.GetName(typeof (DqeRole), user.Role);
+            //if (user.RacfId == "KNAKNMQ" && role == "Administrator")
+            //{
+            //    return true;
+            //}
             return decodedRole != null && String.Equals(decodedRole, role, StringComparison.CurrentCultureIgnoreCase);
         }
 

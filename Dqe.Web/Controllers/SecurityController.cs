@@ -119,7 +119,9 @@ namespace Dqe.Web.Controllers
                             ? "E"
                             : user.Role == DqeRole.PayItemAdministrator
                                 ? "P"
-                                : string.Empty;
+                                : user.Role == DqeRole.Reviewer
+                                    ? "R"
+                                    : string.Empty;
             var roleName = user.Role == DqeRole.Administrator
                 ? "Administrator"
                 : user.Role == DqeRole.DistrictAdministrator
@@ -130,7 +132,17 @@ namespace Dqe.Web.Controllers
                             ? "Estimator"
                             : user.Role == DqeRole.PayItemAdministrator
                                 ? "Pay Item Administrator"
+                                : user.Role == DqeRole.Reviewer
+                                    ? "Reviewer"
                                 : string.Empty;
+
+            //!!NEEDS TO BE REMOVED, THIS IS FORCING USER  Marcus Barnes TO BE A REVIEWER ROLE!!!!
+            //if (user.RacfId == "KNAKNMQ")
+            //{
+            //    role = "A";
+            //    roleName = "Administrator";
+            //}
+
             return
                 Json(
                     new
@@ -284,6 +296,8 @@ namespace Dqe.Web.Controllers
                             ? DqeRole.PayItemAdministrator
                             : user.role == "T"
                                 ? DqeRole.CostBasedTemplateAdministrator
+                                : user.role == "R"
+                                ? DqeRole.Reviewer
                                 : DqeRole.Estimator;
                 u.Transform(t, sys);
             }

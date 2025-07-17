@@ -59,6 +59,9 @@ namespace Dqe.Domain.Model
 
         public virtual int? PseeContactSrsId { get; protected internal set; }
 
+        /// <summary>
+        /// holds the estimate amounts grabbed from LRE snapshots
+        /// </summary>
         public virtual decimal? EstimateInitial { get; protected internal set; }
 
         public virtual decimal? EstimateScope { get; protected internal set; }
@@ -371,7 +374,7 @@ namespace Dqe.Domain.Model
         public virtual ProjectEstimate CreateNewReviewVersionFromSnapshot(string comment, ProjectEstimate source, DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.Reviewer)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -785,7 +788,7 @@ namespace Dqe.Domain.Model
         {
             if (transformer == null) throw new ArgumentNullException("transformer");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Reviewer)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

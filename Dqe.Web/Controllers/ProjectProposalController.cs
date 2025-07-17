@@ -18,7 +18,7 @@ using Proposal = Dqe.Domain.Model.Proposal;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Reviewer })]
     public class ProjectProposalController : Controller
     {
         private readonly IWebTransportService _webTransportService;

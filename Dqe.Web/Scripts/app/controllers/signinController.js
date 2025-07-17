@@ -42,12 +42,14 @@
             user.district = $scope.impersonateUser.district;
             securityService.impersonateUser(user, function () {
                 securityService.getCurrentUser(function(u) {
-                    if (u.role == 'A' || u.role == 'D' || u.role == 'E') {
+                    if (u.role == 'A' || u.role == 'D' || u.role == 'E' || u.role == 'R') {
                         $location.url('/home_estimates');
                     }else if (u.role == 'P') {
                         $location.url('/admin_payitems_maintain');
                     } else if (u.role == 'T') {
                         $location.url('/admin_costbasedtemplates');
+                    } else if (u.role == 'R') {
+                        $location.url('/home_estimates');
                     } else {
                         $location.url('/signin');
                     }
@@ -75,7 +77,7 @@
         user.confirmPassword = confirmPassword == undefined ? '' : confirmPassword;
         securityService.authenticateUser(user, function () {
             securityService.getCurrentUser(function (u) {
-                if (u.role == 'A' || u.role == 'D' || u.role == 'E') {
+                if (u.role == 'A' || u.role == 'D' || u.role == 'E' || u.role == 'R') {
                     $location.url('/home_estimates');
                 } else if (u.role == 'P') {
                     $location.url('/admin_payitems_maintain');

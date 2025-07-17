@@ -7,6 +7,11 @@ namespace Dqe.Domain.Model
         DistrictAdministrator = 'D',
         PayItemAdministrator = 'P',
         CostBasedTemplateAdministrator = 'T',
-        Estimator = 'E'
+        Estimator = 'E',
+        Reviewer = 'R',
+        Engineer = 'E',
+        Maintenance = 'M',
+        AdminReadOnly = 'O'
+
     }
 }

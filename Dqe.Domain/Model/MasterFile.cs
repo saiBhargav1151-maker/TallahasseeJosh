@@ -48,7 +48,7 @@ namespace Dqe.Domain.Model
         {
             if (project == null) throw new ArgumentNullException("project");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Reviewer)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

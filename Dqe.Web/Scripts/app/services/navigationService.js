@@ -54,7 +54,7 @@
                             active: $location.url().startsWith('/payitems') ? 'active' : ''
                         }
                     ];
-                } else if (currentUser.role == 'E') {
+                } else if (currentUser.role == 'E' || currentUser.role == 'R') {
                     //estimators
                     return [
                         {

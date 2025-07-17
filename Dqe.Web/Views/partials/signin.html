@@ -30,12 +30,14 @@
             <option value="P">Pay Item Administrator</option>
             <option value="T">Cost-Based Template Administrator</option>
             <option value="E">Estimator</option>
+            <option value="R">Reviewer</option>
         </select>
     </div>
     <div class="col-lg-2" ng-show="impersonateUser.district.startsWith('D') || impersonateUser.district == 'TP'">
         <select class="form-control" ng-model="impersonateUser.role">
             <option value="D">District Administrator</option>
             <option value="E">Estimator</option>
+            <!--<option value="R">Reviewer</option>-->
         </select>
     </div>
     <div class="col-lg-4">

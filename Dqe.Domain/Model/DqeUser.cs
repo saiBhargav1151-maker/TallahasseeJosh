@@ -220,6 +220,23 @@ namespace Dqe.Domain.Model
 
         public virtual bool IsActive { get; protected internal set; }
 
+        /// <summary>
+        /// Given an abbreviation, return the Role name as a string
+        /// </summary>
+        /// <param name="abbreviation">Char</param>
+        /// <returns></returns>
+        public static string GetRoleNameString(string abbreviation)
+        {
+            if (Enum.TryParse<DqeRole>(abbreviation, out DqeRole result))
+            {
+                string tempstring = Enum.Parse(typeof(DqeRole), abbreviation, true).ToString();
+                return tempstring;
+            }
+            return string.Empty;
+        }
+
+      
+
         public override Transformers.DqeUser GetTransformer()
         {
             return new Transformers.DqeUser
@@ -232,17 +249,14 @@ namespace Dqe.Domain.Model
                 FullName = Name,
                 CostGroupAuthorization = CostGroupAuthorization,
                 RoleAsString =
-                    Role == DqeRole.System
-                        ? "System"
-                        : Role == DqeRole.Administrator
-                            ? "System Administrator"
-                            : Role == DqeRole.DistrictAdministrator
-                                ? "District Administrator"
-                                : Role == DqeRole.PayItemAdministrator
-                                    ? "Pay Item Administrator"
-                                    : Role == DqeRole.CostBasedTemplateAdministrator
-                                        ? "Cost-Based Template Administrator"
-                                        : Role == DqeRole.Estimator ? "Estimator" : "No Role"
+                    Role == DqeRole.System ? "System"
+                    : Role == DqeRole.Administrator ? "System Administrator"
+                    : Role == DqeRole.DistrictAdministrator ? "District Administrator"
+                    : Role == DqeRole.PayItemAdministrator ? "Pay Item Administrator"
+                    : Role == DqeRole.CostBasedTemplateAdministrator ? "Cost-Based Template Administrator"
+                    : Role == DqeRole.Estimator ? "Estimator"
+                    : Role == DqeRole.Reviewer ? "Reviewer"
+                    : "No Role"
             };
         }
 
@@ -265,7 +279,8 @@ namespace Dqe.Domain.Model
             }
             if (account.Role != DqeRole.System 
                 && account.Role != DqeRole.Administrator 
-                && account.Role != DqeRole.DistrictAdministrator)
+                && account.Role != DqeRole.DistrictAdministrator
+                && transformer.Role != DqeRole.Administrator)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -285,14 +300,15 @@ namespace Dqe.Domain.Model
                 if (transformer.Role != DqeRole.Administrator 
                     && transformer.Role != DqeRole.CostBasedTemplateAdministrator 
                     && transformer.Role != DqeRole.PayItemAdministrator
-                    && transformer.Role != DqeRole.Estimator)
+                    && transformer.Role != DqeRole.Estimator
+                    && transformer.Role != DqeRole.Reviewer)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for CO.", transformer.Role));
                 }
             }
             else
             {
-                if (transformer.Role != DqeRole.DistrictAdministrator && transformer.Role != DqeRole.Estimator)
+                if (transformer.Role != DqeRole.DistrictAdministrator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.Estimator)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for district {1}.", transformer.Role, transformer.District));
                 }

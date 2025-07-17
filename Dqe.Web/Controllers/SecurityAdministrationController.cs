@@ -37,6 +37,10 @@ namespace Dqe.Web.Controllers
             _projectRepository = projectRepository;
         }
 
+        /// <summary>
+        /// Gets all users
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public ActionResult GetAllUsers()
         {
@@ -45,7 +49,7 @@ namespace Dqe.Web.Controllers
             if (district == "CO") district = string.Empty;
             return
                 new DqeResult(
-                    _dqeUserRepository.GetAll(currentUser.Id, district)
+                    _dqeUserRepository.GetAll(currentUser.Id, district, true)
                         .Select(i => i.GetTransformer())
                         .Select(i =>
                             new
@@ -61,6 +65,8 @@ namespace Dqe.Web.Controllers
                                         ? "E"
                                         : i.Role == DqeRole.PayItemAdministrator
                                             ? "P"
+                                            : i.Role == DqeRole.Reviewer
+                                                ? "R"
                                             : "T",
                                 costGroupAuthorization = i.CostGroupAuthorization,
                                 roleAsString = i.RoleAsString,
@@ -89,7 +95,9 @@ namespace Dqe.Web.Controllers
                             ? DqeRole.CostBasedTemplateAdministrator
                             : user.role == "P"
                                 ? DqeRole.PayItemAdministrator
-                                : DqeRole.Estimator;
+                                 : user.role == "R"
+                                    ? DqeRole.Reviewer
+                                    : DqeRole.Estimator;
                 t.CostGroupAuthorization = user.costGroupAuthorization;
                 u.Transform(t, currentDqeUser);
                 _commandRepository.Add(u);
@@ -107,6 +115,8 @@ namespace Dqe.Web.Controllers
                             ? DqeRole.CostBasedTemplateAdministrator
                             : user.role == "P"
                                 ? DqeRole.PayItemAdministrator
+                                : user.role == "R"
+                                    ? DqeRole.Reviewer
                                 : DqeRole.Estimator;
                 t.CostGroupAuthorization = user.costGroupAuthorization;
                 u.Transform(t, currentDqeUser);
