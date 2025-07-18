@@ -361,7 +361,9 @@ namespace Dqe.Domain.Model
         }
 
         /// <summary>
-        /// This creates a new Version with a single estimate of type Review 'R'. 
+        /// This creates a new ReadOnly Version with a single estimate of type Review 'R' and 
+        /// clones all estimate groups and items from the source estimate.
+        /// Only System Admins (CO Admins) can create a review.
         /// This does NOT update info to LRE, this is intended to be read only (except the notes). MB. 
         /// </summary>
         /// <param name="comment"></param>
@@ -396,44 +398,48 @@ namespace Dqe.Domain.Model
                 
             };
             v.AddEstimate(s);
-            foreach (var eg in source.EstimateGroups)
+            if(source.EstimateGroups != null)
             {
-                var e = new EstimateGroup
+                foreach (var eg in source.EstimateGroups)
                 {
-                    Name = eg.Name,
-                    Description = eg.Description,
-                    AlternateSet = eg.AlternateSet,
-                    FederalConstructionClass = eg.FederalConstructionClass,
-                    CombineWithLikeItems = eg.CombineWithLikeItems,
-                    WtId = eg.WtId,
-                    IsLsDbSummary = eg.IsLsDbSummary,
-                    AlternateMember = eg.AlternateMember
-                };
-                s.AddEstimateGroup(e);
-                foreach (var pi in eg.ProjectItems)
-                {
-                    var p = new ProjectItem
+                    var e = new EstimateGroup
                     {
-                        PayItemDescription = pi.PayItemDescription,
-                        AlternateMember = pi.AlternateMember,
-                        //LineNumber = pi.LineNumber,
-                        PayItemNumber = pi.PayItemNumber,
-                        Price = pi.Price,
-                        PreviousPrice = pi.PreviousPrice,
-                        PriceSet = pi.PriceSet,
-                        Quantity = pi.Quantity,
-                        CalculatedUnit = pi.CalculatedUnit,
-                        Unit = pi.Unit,
-                        //IsLumpSum = pi.IsLumpSum,
-                        CombineWithLikeItems = pi.CombineWithLikeItems,
-                        AlternateSet = pi.AlternateSet,
-                        SupplementalDescription = pi.SupplementalDescription,
-                        Fund = pi.Fund,
-                        WtId = pi.WtId
+                        Name = eg.Name,
+                        Description = eg.Description,
+                        AlternateSet = eg.AlternateSet,
+                        FederalConstructionClass = eg.FederalConstructionClass,
+                        CombineWithLikeItems = eg.CombineWithLikeItems,
+                        WtId = eg.WtId,
+                        IsLsDbSummary = eg.IsLsDbSummary,
+                        AlternateMember = eg.AlternateMember
                     };
-                    e.AddProjectItem(p);
+                    s.AddEstimateGroup(e);
+                    foreach (var pi in eg.ProjectItems)
+                    {
+                        var p = new ProjectItem
+                        {
+                            PayItemDescription = pi.PayItemDescription,
+                            AlternateMember = pi.AlternateMember,
+                            //LineNumber = pi.LineNumber,
+                            PayItemNumber = pi.PayItemNumber,
+                            Price = pi.Price,
+                            PreviousPrice = pi.PreviousPrice,
+                            PriceSet = pi.PriceSet,
+                            Quantity = pi.Quantity,
+                            CalculatedUnit = pi.CalculatedUnit,
+                            Unit = pi.Unit,
+                            //IsLumpSum = pi.IsLumpSum,
+                            CombineWithLikeItems = pi.CombineWithLikeItems,
+                            AlternateSet = pi.AlternateSet,
+                            SupplementalDescription = pi.SupplementalDescription,
+                            Fund = pi.Fund,
+                            WtId = pi.WtId
+                        };
+                        e.AddProjectItem(p);
+                    }
                 }
             }
+            
             _commandRepository.Flush();
             account.MyRecentProjectEstimate = s;
             return s;

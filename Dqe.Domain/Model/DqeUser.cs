@@ -98,7 +98,7 @@ namespace Dqe.Domain.Model
             //check each version for a working estimate flag, get the latest occurance
             foreach(var v in versions.OrderBy(v=> v.Version))
             {
-                if(v.ProjectEstimates.Any(ii => ii.IsWorkingEstimate))
+                if(v.ProjectEstimates.Any(i => i.IsWorkingEstimate))
                 {
                     //mark
                     estimate = v.ProjectEstimates.FirstOrDefault(e => e.IsWorkingEstimate);
