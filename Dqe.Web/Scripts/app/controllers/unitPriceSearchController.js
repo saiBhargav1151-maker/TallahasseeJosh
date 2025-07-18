@@ -432,8 +432,6 @@
             $scope.items = [];
             $scope.selectedPayItemNumber = null;
         };
-
-
         $scope.selectPayItem = function (item) {
             $scope.searchText = item.Description;
             $scope.selectedPayItemNumber = item.Name;
@@ -651,42 +649,99 @@
                 });
         }
 
-        /*function loessSmooth(x, y, bandwidth, xvals) {
-            if (!Array.isArray(x) || !Array.isArray(y) || !Array.isArray(xvals) ||
-                x.length === 0 || y.length === 0 || x.length !== y.length) {
-                console.warn("Invalid input to loessSmooth");
-                return xvals.map(() => NaN);
+        // Helper function to aggregate multiple y-values per x
+        function aggregateDataByX(x, y, method = 'mean') {
+            const groups = {};
+
+            // y-values by x
+            for (let i = 0; i < x.length; i++) {
+                const xVal = x[i];
+                if (!groups[xVal]) {
+                    groups[xVal] = [];
+                }
+                groups[xVal].push(y[i]);
             }
+            const result = [];
+            for (const [xVal, yVals] of Object.entries(groups)) {
+                let aggregatedY;
 
-            try {
-                const data = x.map((xi, i) => [xi, y[i]]);
-
-                if (typeof science === "undefined" || typeof science.stats.loess !== "function") {
-                    throw new Error("Science.js loess function not available");
+                switch (method) {
+                    case 'mean':
+                        aggregatedY = yVals.reduce((sum, val) => sum + val, 0) / yVals.length;
+                        break;
+                    case 'median':
+                        yVals.sort((a, b) => a - b);
+                        const mid = Math.floor(yVals.length / 2);
+                        aggregatedY = yVals.length % 2 === 0
+                            ? (yVals[mid - 1] + yVals[mid]) / 2
+                            : yVals[mid];
+                        break;
+                    case 'first':
+                        aggregatedY = yVals[0];
+                        break;
+                    case 'last':
+                        aggregatedY = yVals[yVals.length - 1];
+                        break;
+                    default:
+                        aggregatedY = yVals.reduce((sum, val) => sum + val, 0) / yVals.length;
                 }
 
-                const loess = science.stats.loess().bandwidth(bandwidth);
-                const smoothingFunction = loess(x,y); // returns function(x) => y
+                result.push({ x: parseFloat(xVal), y: aggregatedY });
+            }
 
-                return xvals.map(xval => {
-                    try {
-                        return smoothingFunction(xval);
-                    } catch {
-                        return interpolateValue(data, xval);
-                    }
-                });
+            return result.sort((a, b) => a.x - b.x);
+        }
 
-            } catch (error) {
-                console.error("Science.js LOESS error:", error);
+        // linear interpolation with extrapolation
+        function interpolateLinear(xArr, yArr, targetX) {
+            if (xArr.length === 0 || yArr.length === 0) return NaN;
+            if (xArr.length !== yArr.length) return NaN;
+            if (xArr.length === 1) return yArr[0];
 
-                if (x && y && xvals && x.length === y.length && x.length > 0) {
-                    return manualLoessSmooth(x, y, bandwidth, xvals);
+            // exact matches
+            const exactIndex = xArr.indexOf(targetX);
+            if (exactIndex !== -1) return yArr[exactIndex];
+
+            // interpolation points
+            let leftIndex = -1;
+            let rightIndex = -1;
+
+            for (let i = 0; i < xArr.length - 1; i++) {
+                if (targetX >= xArr[i] && targetX <= xArr[i + 1]) {
+                    leftIndex = i;
+                    rightIndex = i + 1;
+                    break;
+                }
+            }
+
+            // Extrapolation cases
+            if (leftIndex === -1) {
+                if (targetX < xArr[0]) {
+                    
+                    leftIndex = 0;
+                    rightIndex = 1;
+                } else if (targetX > xArr[xArr.length - 1]) {
+                  
+                    leftIndex = xArr.length - 2;
+                    rightIndex = xArr.length - 1;
                 } else {
-                    return xvals.map(() => NaN);
+                    return NaN;
                 }
             }
-        }*/
 
+            // Linear interpolation/extrapolation
+            const x1 = xArr[leftIndex];
+            const x2 = xArr[rightIndex];
+            const y1 = yArr[leftIndex];
+            const y2 = yArr[rightIndex];
+
+            if (x2 === x1) return y1;
+
+            const slope = (y2 - y1) / (x2 - x1);
+            const result = y1 + slope * (targetX - x1);
+
+            return result;
+        }
         function loessSmooth(x, y, bandwidth, xvals) {
             if (!Array.isArray(x) || !Array.isArray(y) || !Array.isArray(xvals) ||
                 x.length === 0 || y.length === 0 || x.length !== y.length) {
@@ -744,88 +799,44 @@
             }
         }
 
-
-        function interpolateValue(data, xval) {
-            // Sort data by x values
-            var sortedData = data.slice().sort((a, b) => a[0] - b[0]);
-
-            // Find surrounding points
-            for (var i = 0; i < sortedData.length - 1; i++) {
-                if (xval >= sortedData[i][0] && xval <= sortedData[i + 1][0]) {
-                    var x1 = sortedData[i][0], y1 = sortedData[i][1];
-                    var x2 = sortedData[i + 1][0], y2 = sortedData[i + 1][1];
-
-                    // Linear interpolation
-                    return y1 + (y2 - y1) * (xval - x1) / (x2 - x1);
-                }
-            }
-
-            // If outside range, return nearest value
-            if (xval < sortedData[0][0]) return sortedData[0][1];
-            if (xval > sortedData[sortedData.length - 1][0]) return sortedData[sortedData.length - 1][1];
-
-            return NaN;
-        }
-
-        // Manual LOESS implementation as fallback
+        // adding the manualLoessSmooth function if you don't have it
         function manualLoessSmooth(x, y, bandwidth, xvals) {
-            const n = x.length;
-            const result = [];
+            console.log("Using manual LOESS fallback");
 
-            for (let i = 0; i < xvals.length; i++) {
-                const xi = xvals[i];
-                const distances = x.map((xj, idx) => ({ dist: Math.abs(xi - xj), idx }))
-                    .sort((a, b) => a.dist - b.dist);
+            // Aggregate data first
+            const aggregatedData = aggregateDataByX(x, y);
+            const uniqueX = aggregatedData.map(d => d.x);
+            const uniqueY = aggregatedData.map(d => d.y);
 
-                const windowSize = Math.max(1, Math.floor(bandwidth * n));
-                const neighbors = distances.slice(0, windowSize);
-
-                if (neighbors.length === 0) {
-                    result.push(NaN);
-                    continue;
-                }
-
-                const maxDist = neighbors[neighbors.length - 1].dist;
-                const weights = neighbors.map(n => {
-                    const u = n.dist / maxDist;
-                    return u >= 1 ? 0 : Math.pow(1 - Math.pow(u, 3), 3);
-                });
-
-                let sumW = 0, sumWX = 0, sumWY = 0, sumWXX = 0, sumWXY = 0;
-
-                for (let j = 0; j < neighbors.length; j++) {
-                    const idx = neighbors[j].idx;
-                    const w = weights[j];
-                    const xj = x[idx], yj = y[idx];
-                    sumW += w;
-                    sumWX += w * xj;
-                    sumWY += w * yj;
-                    sumWXX += w * xj * xj;
-                    sumWXY += w * xj * yj;
-                }
-
-                if (sumW > 0) {
-                    const meanX = sumWX / sumW;
-                    const meanY = sumWY / sumW;
-                    const denom = sumWXX - sumWX * meanX;
-
-                    if (Math.abs(denom) > 1e-10) {
-                        const slope = (sumWXY - sumWX * meanY) / denom;
-                        const intercept = meanY - slope * meanX;
-                        result.push(slope * xi + intercept);
-                    } else {
-                        result.push(meanY);
-                    }
-                } else {
-                    result.push(NaN);
-                }
+            if (uniqueX.length < 3) {
+                
+                return xvals.map(xval => interpolateLinear(uniqueX, uniqueY, xval));
             }
+            const windowSize = Math.max(2, Math.floor(bandwidth * uniqueX.length));
 
-            return result;
+            return xvals.map(xval => {
+                // nearest points
+                const distances = uniqueX.map((xi, i) => ({ dist: Math.abs(xi - xval), index: i }));
+                distances.sort((a, b) => a.dist - b.dist);
+
+                const nearestPoints = distances.slice(0, Math.min(windowSize, distances.length));
+
+                // Weighted average based on inverse distance
+                let weightedSum = 0;
+                let totalWeight = 0;
+
+                for (const point of nearestPoints) {
+                    const weight = point.dist === 0 ? 1 : 1 / (1 + point.dist);
+                    weightedSum += uniqueY[point.index] * weight;
+                    totalWeight += weight;
+                }
+
+                return totalWeight > 0 ? weightedSum / totalWeight : NaN;
+            });
         }
 
 
-        // Corrected Bootstrap CI function
+        //Bootstrap CI function
         function bootstrapCI(x, y, xvals, frac, nBoot) {
             if (frac === undefined) frac = 0.3;
             if (nBoot === undefined) nBoot = 200;
@@ -840,15 +851,13 @@
             var preds = [];
 
             for (var b = 0; b < nBoot; b++) {
-                // Fixed lodash reference
+               
                 var indices = _.sampleSize(_.range(x.length), x.length);
                 var xBoot = indices.map(function (i) { return x[i]; });
                 var yBoot = indices.map(function (i) { return y[i]; });
 
                 // Get smoothed values
                 var smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
-
-                // Handle different return formats
                 var smoothedY;
                 if (Array.isArray(smoothed)) {
                     // If smoothed is already an array of numbers
@@ -986,14 +995,14 @@
                             normalPoints.push(formattedPoint);
                         }
                     });
-                    console.log({
+                    /*console.log({
                         originalPoints,
                         filteredPoints,
                         loessLineFiltered,
                         loessLineUnfiltered,
                         ciBandFiltered,
                         ciBandUnfiltered,
-                    });
+                    });*/
                     const numPoints = quantities.length;
                     const meanX = quantities.reduce((a, b) => a + b, 0) / numPoints;
                     const meanY = prices.reduce((a, b) => a + b, 0) / numPoints;
@@ -1002,17 +1011,17 @@
                     const denominator = quantities.map(x => Math.pow(x - meanX, 2)).reduce((a, b) => a + b, 0);
 
                     const slope = denominator !== 0 ? numerator / denominator : 0;
-                    const intercept = meanY - slope * meanX;
+                    /*const intercept = meanY - slope * meanX;
 
-                    const uniqueQuantities = [...new Set(quantities)].sort((a, b) => a - b);
-                    const regressionLine = uniqueQuantities.map(q => ({ x: q, y: slope * q + intercept }));
+                    const uniqueQuantities = [...new Set(quantities)].sort((a, b) => a - b);*/
+                    /*const regressionLine = uniqueQuantities.map(q => ({ x: q, y: slope * q + intercept }));*/
 
-                    const minQty = Math.min(...quantities);
-                    const maxQty = Math.max(...quantities);
-                    const weightedAvgLine = [
+                   /* const minQty = Math.min(...quantities);
+                    const maxQty = Math.max(...quantities);*/
+                    /*const weightedAvgLine = [
                         { x: minQty, y: weightedAvg },
                         { x: maxQty, y: weightedAvg }
-                    ];
+                    ];*/
 
                     // Destroy existing chart
                     if ($scope.chartInstance) {
@@ -1024,6 +1033,29 @@
                         type: 'scatter',
                         data: {
                             datasets: [
+
+                                {
+                                    label: 'LOESS (w/o Outliers)',
+                                    data: loessLineFiltered,
+                                    type: 'line',
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
+                                    fill: false,
+                                    tension: 0.4,
+                                    cubicInterpolationMode: 'monotone',
+                                    stepped: false
+
+                                }, {
+                                    label: 'LOESS (w/ Outliers)',
+                                    data: loessLineUnfiltered,
+                                    type: 'line',
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    fill: false,
+                                    tension: 0.4,
+                                    cubicInterpolationMode: 'monotone',
+                                    stepped: false
+                                },
                                 {
                                     label: 'Outliers',
                                     data: originalPoints,
@@ -1036,24 +1068,9 @@
                                     backgroundColor: 'rgba(0, 128, 0, 0.5)',
                                     pointRadius: 5,
                                 },
-                                {
-                                    label: 'LOESS (w/ Outliers)',
-                                    data: loessLineUnfiltered,
-                                    type: 'line',
-                                    borderColor: 'red',
-                                    borderWidth: 2,
-                                    fill: false,
-                                },
-                                {
-                                   /* label: '95% CI Unfiltered',
-                                    data: ciBandUnfiltered,
-                                    type: 'line',
-                                    showLine: true,
-                                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                                    fill: true,
-                                    pointRadius: 0,
-                                    borderWidth: 0,
-                                },*/
+                               
+                                /*{
+                                 
                                 label: '95% CI Unfiltered (Upper)',
                                 data: ciBandUnfiltered,
                                 type: 'line',
@@ -1065,27 +1082,9 @@
                                 borderWidth: 0,
                                 tension: 0.4, // Smooth curves
                                 order: 10 // Render behind other lines
-                                },
-                                {
-                                    label: 'LOESS (w/o Outliers)',
-                                    data: loessLineFiltered,
-                                    type: 'line',
-                                    borderColor: 'blue',
-                                    borderWidth: 2,
-                                    fill: false,
-                                },
-
-                                /*{
-                                    label: '95% CI Filtered',
-                                    data: ciBandFiltered,
-                                    type: 'line',
-                                    showLine: false,
-                                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                                    fill: true,
-                                    pointRadius: 0,
-                                    borderWidth: 0,
                                 },*/
-                                {
+                                
+                                /*{
                                     label: '95% CI Filtered',
                                     data: ciBandFiltered,
                                     type: 'line',
@@ -1097,7 +1096,7 @@
                                     borderWidth: 0,
                                     tension: 0.4,
                                     order: 10
-                                },
+                                },*/
                                 {
                                     label: `Weighted Avg: $${weightedMean.toFixed(2)}`,
                                     data: [
@@ -1118,14 +1117,81 @@
                             maintainAspectRatio: false,
                             scales: {
                                 x: {
-                                    title: { display: true, text: 'Quantity' },
-                                    beginAtZero: true
+                                    type: 'logarithmic',
+                                    title: { display: true, text: 'Quantity (log scale)' },
+                                    grid: {
+                                        display: true,
+                                        drawTicks: true,
+                                        tickLength: 8,
+                                        color: 'rgba(0,0,0,0.1)',
+                                        maxTicksLimit: 6
+                                    },
+                                    ticks: {
+                                        maxTicksLimit: 6,
+                                        callback: function (value) {
+                                            // Format numbers nicely for log scale
+                                            if (value >= 1000000) {
+                                                return (value / 1000000).toFixed(1) + 'M';
+                                            } else if (value >= 1000) {
+                                                return (value / 1000).toFixed(1) + 'K';
+                                            } else {
+                                                return Number(value.toString());
+                                            }
+                                        }
+                                    }
                                 },
                                 y: {
-                                    title: { display: true, text: 'Unit Price ($)' },
-                                    beginAtZero: true
+                                    type: 'logarithmic',
+                                    title: { display: true, text: 'Unit Price ($, log scale)' },
+                                    grid: {
+                                        display: true,
+                                        drawTicks: true,
+                                        tickLength: 8,
+                                        color: 'rgba(0,0,0,0.1)',
+                                        maxTicksLimit: 6
+                                    },
+                                    ticks: {
+                                        maxTicksLimit: 6,
+                                        callback: function (value) {
+                                            // Format currency nicely for log scale
+                                            if (value >= 1000) {
+                                                return '$' + (value / 1000).toFixed(1) + 'K';
+                                            } else if (value >= 1) {
+                                                return '$' + value.toFixed(0);
+                                            } else {
+                                                return '$' + value.toFixed(2);
+                                            }
+                                        }
+                                    }
                                 }
                             },
+                           /* scales: {
+                                x: {
+                                    type: 'logarithmic',
+                                    title: {
+                                        display: true,
+                                        text: 'Quantity (log scale)'
+                                    },
+                                    ticks: {
+                                        callback: function (value) {
+                                            return Number(value.toString());
+                                        }
+                                    }
+                                },
+                                y: {
+                                    type: 'logarithmic',
+                                    title: {
+                                        display: true,
+                                        text: 'Unit Price ($, log scale)'
+                                    },
+                                    ticks: {
+                                        callback: function (value) {
+                                            return '$' + value;
+                                        }
+                                    }
+                                }
+                            },*/
+
                             plugins: {
                                 tooltip: {
                                     callbacks: {
