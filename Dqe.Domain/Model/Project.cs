@@ -462,6 +462,18 @@ namespace Dqe.Domain.Model
                         {
                             EstimatePhase2 = null;
                         }
+                        if (label == SnapshotLabel.Phase1)
+                        {
+                            EstimatePhase1= null;
+                        }
+                        if (label == SnapshotLabel.Scope)
+                        {
+                            EstimateScope = null;
+                        }
+                        if (label == SnapshotLabel.Initial)
+                        {
+                            EstimateInitial= null;
+                        }
                         estimate.Label = SnapshotLabel.Estimator;
                         estimate.LabelRemovedOn = DateTime.Now;
                         if (!string.IsNullOrWhiteSpace(comment))
@@ -538,6 +550,22 @@ namespace Dqe.Domain.Model
                 }
                 if (labelSnapshot)
                 {
+                    if (source.Label == SnapshotLabel.Initial)
+                    {
+                        EstimateInitial = source.GetEstimateTotal().Total;
+                        lreService.SetDqeSnapshotInLre(this, account, SnapshotLabel.Initial, EstimateInitial.Value);
+                    }
+                    if (source.Label == SnapshotLabel.Scope)
+                    {
+                        EstimateScope= source.GetEstimateTotal().Total;
+                        lreService.SetDqeSnapshotInLre(this, account, SnapshotLabel.Scope, EstimateScope.Value);
+                    }
+                    if (source.Label == SnapshotLabel.Phase1)
+                    {
+                        EstimatePhase1 = source.GetEstimateTotal().Total;
+                        lreService.SetDqeSnapshotInLre(this, account, SnapshotLabel.Phase1, EstimatePhase1.Value);
+                    }
+
                     if (source.Label == SnapshotLabel.Phase2)
                     {
                         EstimatePhase2 = source.GetEstimateTotal().Total;
@@ -626,35 +654,62 @@ namespace Dqe.Domain.Model
 
         public virtual SnapshotLabel GetNextSnapshotLabel()
         {
+            //checks exhisting mileston have price totals and sets variable true if so
+            var hasInitial = EstimateInitial.HasValue;
+            var hasScope = EstimateScope.HasValue;
+            var hasPhase1 = EstimatePhase1.HasValue;
+
             var hasPhase2 = EstimatePhase2.HasValue;
             var hasPhase3 = EstimatePhase3.HasValue;
             var hasPhase4 = EstimatePhase4.HasValue;
+
+            //checks all version estimates for milestones and sets variables true if found
             foreach (var v in _projectVersions)
             {
                 foreach (var ps in v.ProjectEstimates)
                 {
+                    if (ps.Label == SnapshotLabel.Initial) hasInitial = true;
+                    if (ps.Label == SnapshotLabel.Scope) hasScope = true;
+                    if (ps.Label == SnapshotLabel.Phase1) hasPhase1 = true;
+
                     if (ps.Label == SnapshotLabel.Phase2) hasPhase2 = true;
                     if (ps.Label == SnapshotLabel.Phase3) hasPhase3 = true;
                     if (ps.Label == SnapshotLabel.Phase4) hasPhase4 = true;
                 }
             }
+
+            //From highest milestone bool down we check to see if that milestone exhist then return the next milestone.
             if (hasPhase4) return SnapshotLabel.Estimator;
             if (hasPhase3) return SnapshotLabel.Phase4;
             if (hasPhase2) return SnapshotLabel.Phase3;
-            return SnapshotLabel.Phase2;
+
+            if (hasPhase1) return SnapshotLabel.Phase2;
+            if (hasScope) return SnapshotLabel.Phase1;
+            if (hasInitial) return SnapshotLabel.Scope;
+            return SnapshotLabel.Initial;
         }
 
         protected internal virtual SnapshotLabel GetNextProposalSnapshotLabel()
         {
+            //checks exhisting milestone flags and sets variables if flags have value
+            var hasInitial = EstimateInitial.HasValue;
+            var hasScope = EstimateScope.HasValue;
+            var hasPhase1 = EstimatePhase1.HasValue;
+
             var hasPhase2 = EstimatePhase2.HasValue;
             var hasPhase3 = EstimatePhase3.HasValue;
             var hasPhase4 = EstimatePhase4.HasValue;
             var hasAuthorization = false;
             var hasOfficial = false;
+            //checks all version estimates for milestones and sets variables true if found
             foreach (var v in _projectVersions)
             {
                 foreach (var ps in v.ProjectEstimates)
                 {
+                    if (ps.Label == SnapshotLabel.Initial) hasInitial = true;
+                    if (ps.Label == SnapshotLabel.Scope) hasScope = true;
+                    if (ps.Label == SnapshotLabel.Phase1) hasPhase1 = true;
+
                     if (ps.Label == SnapshotLabel.Phase2) hasPhase2 = true;
                     if (ps.Label == SnapshotLabel.Phase3) hasPhase3 = true;
                     if (ps.Label == SnapshotLabel.Phase4) hasPhase4 = true;
@@ -662,25 +717,41 @@ namespace Dqe.Domain.Model
                     if (ps.Label == SnapshotLabel.Official) hasOfficial = true;
                 }
             }
+            //From highest milestone bool down we check to see if that milestone exhist then return the next milestone.
             if (hasOfficial) return SnapshotLabel.Estimator;
             if (hasAuthorization) return SnapshotLabel.Official;
             if (hasPhase4) return SnapshotLabel.Authorization;
             if (hasPhase3) return SnapshotLabel.Phase4;
             if (hasPhase2) return SnapshotLabel.Phase3;
-            return SnapshotLabel.Phase2;
+
+            if (hasPhase1) return SnapshotLabel.Phase2;
+            if (hasScope) return SnapshotLabel.Phase1;
+            if (hasInitial) return SnapshotLabel.Scope;
+            return SnapshotLabel.Initial;
+
         }
 
         public virtual SnapshotLabel GetCurrentSnapshotLabel()
         {
+            //checks exhisting milestone flags and sets variables if flags have value
+            var hasInitial = EstimateInitial.HasValue;
+            var hasScope = EstimateScope.HasValue;
+            var hasPhase1 = EstimatePhase1.HasValue;
+
             var hasPhase2 = EstimatePhase2.HasValue;
             var hasPhase3 = EstimatePhase3.HasValue;
             var hasPhase4 = EstimatePhase4.HasValue;
             var hasAuthorization = false;
             var hasOfficial = false;
+            //From highest milestone bool down we check to see if that milestone exhist then return the next milestone.
             foreach (var v in _projectVersions)
             {
                 foreach (var ps in v.ProjectEstimates)
                 {
+                    if (ps.Label == SnapshotLabel.Initial) hasInitial = true;
+                    if (ps.Label == SnapshotLabel.Scope) hasScope = true;
+                    if (ps.Label == SnapshotLabel.Phase1) hasPhase1 = true;
+
                     if (ps.Label == SnapshotLabel.Phase2) hasPhase2 = true;
                     if (ps.Label == SnapshotLabel.Phase3) hasPhase3 = true;
                     if (ps.Label == SnapshotLabel.Phase4) hasPhase4 = true;
@@ -688,13 +759,31 @@ namespace Dqe.Domain.Model
                     if (ps.Label == SnapshotLabel.Official) hasOfficial = true;
                 }
             }
+            //From highest milestone bool down we check to see if that milestone exhist then return THAT milestone.
             if (hasOfficial) return SnapshotLabel.Official;
             if (hasAuthorization) return SnapshotLabel.Authorization;
             if (hasPhase4) return SnapshotLabel.Phase4;
             if (hasPhase3) return SnapshotLabel.Phase3;
             if (hasPhase2) return SnapshotLabel.Phase2;
+
+            if (hasPhase1) return SnapshotLabel.Phase1;
+            if (hasScope) return SnapshotLabel.Scope;
+            if (hasInitial) return SnapshotLabel.Initial;
             return SnapshotLabel.Estimator;
-        } 
+        }
+
+        public virtual string GetSnapshotLabelString(SnapshotLabel label)
+        {
+            return label == SnapshotLabel.Official ? "Official"
+                    : label == SnapshotLabel.Authorization ? "Authorization"
+                    : label == SnapshotLabel.Phase4 ? "Phase IV"
+                    : label == SnapshotLabel.Phase3 ? "Phase III"
+                    : label == SnapshotLabel.Phase2 ? "Phase II"
+                    : label == SnapshotLabel.Phase1 ? "Phase I"
+                    : label == SnapshotLabel.Scope ? "Scope"
+                    : label == SnapshotLabel.Initial ? "Initial"
+                    : string.Empty;
+        }
 
         public virtual void AssignWorkingEstimate(ProjectVersion version, DqeUser account)
         {

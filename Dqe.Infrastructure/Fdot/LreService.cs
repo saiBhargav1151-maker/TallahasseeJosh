@@ -276,6 +276,15 @@ namespace Dqe.Infrastructure.Fdot
                     VersionSnapshot version = null;
                     switch (label)
                     {
+                        case SnapshotLabel.Initial:
+                            version = ps.Versions.FirstOrDefault(i => i.ProjectVersionNumber == 0 && i.LabelCode == "10");
+                            break;
+                        case SnapshotLabel.Scope:
+                            version = ps.Versions.FirstOrDefault(i => i.ProjectVersionNumber == 0 && i.LabelCode == "20");
+                            break;
+                        case SnapshotLabel.Phase1:
+                            version = ps.Versions.FirstOrDefault(i => i.ProjectVersionNumber == 0 && i.LabelCode == "30");
+                            break;
                         case SnapshotLabel.Phase2:
                             version = ps.Versions.FirstOrDefault(i => i.ProjectVersionNumber == 0 && i.LabelCode == "40");
                             break;
@@ -310,6 +319,15 @@ namespace Dqe.Infrastructure.Fdot
                         };
                         switch (label)
                         {
+                            case SnapshotLabel.Initial:
+                                version.LabelCode = "10";
+                                break;
+                            case SnapshotLabel.Scope:
+                                version.LabelCode = "20";
+                                break;
+                            case SnapshotLabel.Phase1:
+                                version.LabelCode = "30";
+                                break;
                             case SnapshotLabel.Phase2:
                                 version.LabelCode = "40";
                                 break;

@@ -229,7 +229,7 @@ namespace Dqe.Web.Controllers
             if (p != null)
             {
                 var cl = p.GetCurrentSnapshotLabel();
-                if (cl == SnapshotLabel.Phase4 || cl == SnapshotLabel.Phase3 || cl == SnapshotLabel.Phase2)
+                if (cl == SnapshotLabel.Phase4 || cl == SnapshotLabel.Phase3 || cl == SnapshotLabel.Phase2 || cl == SnapshotLabel.Phase1 || cl == SnapshotLabel.Scope || cl == SnapshotLabel.Initial)
                 {
                     p.RemoveLabel(cl, project.removeLabelComment);
                     return GetProject(p.ProjectNumber, "Project snapshot was removed from DQE");
@@ -487,17 +487,7 @@ namespace Dqe.Web.Controllers
                     comment = prop.Comment,
                     hasCustody = prop.Projects.All(i => i.CustodyOwner == currentDqeUser),
                     canSnapshot = prop.Projects.All(i => i.ProjectHasWorkingEstimateForUser(currentDqeUser)),
-                    nextEstimate = nextSnapshot == SnapshotLabel.Official
-                        ? "Official"
-                        : nextSnapshot == SnapshotLabel.Authorization
-                            ? "Authorization"
-                            : nextSnapshot == SnapshotLabel.Phase4
-                                ? "Phase IV"
-                                : nextSnapshot == SnapshotLabel.Phase3
-                                    ? "Phase III"
-                                    : nextSnapshot == SnapshotLabel.Phase2
-                                        ? "Phase II"
-                                        : string.Empty,
+                    nextEstimate = DynamicHelper.GetSnapshotLabelString(nextSnapshot),
                     isOfficial = prop.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                     authorizationTotal = authorizationTotal,
                     officialTotal = officialTotal,
@@ -514,17 +504,7 @@ namespace Dqe.Web.Controllers
                     county = i.MyCounty.Name,
                     owner = i.CustodyOwner == null ? string.Empty : i.CustodyOwner.Name,
                     hasCustody = i.CustodyOwner == currentDqeUser,
-                    label = i.GetCurrentSnapshotLabel() == SnapshotLabel.Official
-                        ? "Official"
-                        : i.GetCurrentSnapshotLabel() == SnapshotLabel.Authorization
-                            ? "Authorization"
-                            : i.GetCurrentSnapshotLabel() == SnapshotLabel.Phase4
-                                ? "Phase IV"
-                                : i.GetCurrentSnapshotLabel() == SnapshotLabel.Phase3
-                                    ? "Phase III"
-                                    : i.GetCurrentSnapshotLabel() == SnapshotLabel.Phase2
-                                        ? "Phase II"
-                                        : string.Empty,
+                    label = DynamicHelper.GetSnapshotLabelString(i.GetCurrentSnapshotLabel()),
                     hasWorkingEstimate = i.ProjectHasWorkingEstimateForUser(currentDqeUser)
                 })
             },
@@ -1162,17 +1142,15 @@ namespace Dqe.Web.Controllers
             var nextLabel = p == null ? SnapshotLabel.Estimator : p.GetNextSnapshotLabel();
             return new DqeResult(new
             {
-                label = nextLabel == SnapshotLabel.Phase2
-                    ? "Phase II"
-                    : nextLabel == SnapshotLabel.Phase3
-                        ? "Phase III"
-                        : nextLabel == SnapshotLabel.Phase4
-                            ? "Phase IV"
-                            : nextLabel == SnapshotLabel.Authorization
-                                ? "Authorization"
-                                : nextLabel == SnapshotLabel.Official
-                                    ? "Official"
-                                    : string.Empty,
+                label = nextLabel == SnapshotLabel.Phase2 ? "Intial"
+                : nextLabel == SnapshotLabel.Scope ? "Scope"
+                : nextLabel == SnapshotLabel.Phase1 ? "Phase I"
+                : nextLabel == SnapshotLabel.Phase2 ? "Phase II"
+                : nextLabel == SnapshotLabel.Phase3 ? "Phase III"
+                : nextLabel == SnapshotLabel.Phase4 ? "Phase IV"
+                : nextLabel == SnapshotLabel.Authorization ? "Authorization"
+                : nextLabel == SnapshotLabel.Official ? "Official"
+                : string.Empty,
                 isOfficial = p != null && p.GetCurrentSnapshotLabel() == SnapshotLabel.Official
             });
         }
@@ -1329,13 +1307,13 @@ namespace Dqe.Web.Controllers
                     isAvailable = project.CustodyOwner == null,
                     userHasCustody = project.CustodyOwner == currentUser,
                     custodyOwner = project.CustodyOwner == null ? string.Empty : project.CustodyOwner.Name,
-                    nextLabel = project.GetNextSnapshotLabel() == SnapshotLabel.Phase2 
-                        ? "Phase II" 
-                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase3 
-                            ? "Phase III"
-                            : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4
-                                ? "Phase IV"
-                                    : string.Empty,
+                    nextLabel = project.GetNextSnapshotLabel() == SnapshotLabel.Initial ? "Initial"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Scope ? "Scope"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase1 ? "Phase1"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase2 ? "Phase II"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase3 ? "Phase III"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4 ? "Phase IV"
+                        : string.Empty,
                     isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                     removeLabelComment = string.Empty
                 },
@@ -1418,19 +1396,7 @@ namespace Dqe.Web.Controllers
                                 snapshotRemovedComment = string.IsNullOrWhiteSpace(ii.LabelRemovedComment)
                                     ? string.Empty
                                     : ii.LabelRemovedComment,
-                                label = ii.Label == SnapshotLabel.Phase2
-                                        ? "Phase II"
-                                        : ii.Label == SnapshotLabel.Phase3
-                                            ? "Phase III"
-                                            : ii.Label == SnapshotLabel.Phase4
-                                                ? "Phase IV"
-                                                : ii.Label == SnapshotLabel.Authorization
-                                                    ? "Authorization"
-                                                    : ii.Label == SnapshotLabel.Official
-                                                        ? "Official"
-                                                         : ii.Label == SnapshotLabel.Review
-                                                            ? "Review"  
-                                                        : string.Empty,
+                                label = DynamicHelper.GetSnapshotLabelString(ii.Label),
                                 isWorkingEstimate = ii.IsWorkingEstimate ? "Yes" : string.Empty
                             })
                     })
@@ -1486,14 +1452,7 @@ namespace Dqe.Web.Controllers
                     isAvailable = snapshot.MyProjectVersion.MyProject.CustodyOwner == null,
                     userHasCustody = snapshot.MyProjectVersion.MyProject.CustodyOwner == currentUser,
                     custodyOwner = snapshot.MyProjectVersion.MyProject.CustodyOwner == null ? string.Empty : snapshot.MyProjectVersion.MyProject.CustodyOwner.Name,
-                    nextLabel = snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel() == SnapshotLabel.Phase2 
-                        ? "Phase II" 
-                        : snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel() == SnapshotLabel.Phase3 
-                            ? "Phase III"
-                            : snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel() == SnapshotLabel.Phase4
-                                ? "Phase IV"
-                                : string.Empty,
-                    isOfficial = snapshot.MyProjectVersion.MyProject.GetCurrentSnapshotLabel() == SnapshotLabel.Official
+                    nextLabel =  DynamicHelper.GetSnapshotLabelString(snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel())
                 },
                 proposals = snapshot.MyProjectVersion.MyProject.Proposals.Select(i => new
                 {
@@ -1559,17 +1518,7 @@ namespace Dqe.Web.Controllers
                                 snapshotRemovedComment = string.IsNullOrWhiteSpace(ii.LabelRemovedComment)
                                     ? string.Empty
                                     : ii.LabelRemovedComment,
-                                label = ii.Label == SnapshotLabel.Phase2
-                                        ? "Phase II"
-                                        : ii.Label == SnapshotLabel.Phase3 
-                                            ? "Phase III"
-                                            : ii.Label == SnapshotLabel.Phase4
-                                                ? "Phase IV"
-                                                : ii.Label == SnapshotLabel.Authorization
-                                                    ? "Authorization"
-                                                    : ii.Label == SnapshotLabel.Official
-                                                        ? "Official"
-                                                        : string.Empty,
+                                label = DynamicHelper.GetSnapshotLabelString(ii.Label),
                                 isWorkingEstimate = ii.IsWorkingEstimate ? "Yes" : string.Empty
                             })
                     })
