@@ -280,7 +280,7 @@ namespace Dqe.Domain.Model
             if (account.Role != DqeRole.System 
                 && account.Role != DqeRole.Administrator 
                 && account.Role != DqeRole.DistrictAdministrator
-                && transformer.Role != DqeRole.Administrator)
+                )
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
