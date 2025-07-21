@@ -312,7 +312,7 @@
                                                 <thead>
                                                     <tr>
                                                         <td style="width: 5%" ng-if="project.userHasCustody == true && security.isAuthorized && !project.isOfficial"></td>
-                                                        <td style="width: 5%" ng-if="security.isSystemAdmin"></td> <!--ng-if="security.isSystemAdmin"-->
+                                                        <td style="width: 5%" ng-if="security.isSystemAdmin || security.isReviewRole"></td> <!--ng-if="security.isSystemAdmin"-->
                                                         <td style="width: 5%; text-align: center;">Existing Review</td>
                                                         <td style="width: 5%">Estimate</td>
                                                         <td style="width: 5%">Working Estimate</td>
@@ -335,7 +335,7 @@
                                                                 <a href="" title="Click to cancel the creation of the new version" ng-click="confirmCreateVersionFromEstimate = false">No</a>
                                                             </div>
                                                         </td>
-                                                        <td ng-if="security.isSystemAdmin">
+                                                        <td ng-if="security.isSystemAdmin|| security.isReviewRole">
                                                             <a href="" title="Click to create a new review version from this estimate" ng-show="!confirmCreateReviewVersionFromEstimate" ng-click="confirmCreateReview = true">Create New <b>Review</b></a>
                                                             <div ng-show="confirmCreateReview">
                                                                 <div>Confirm?</div>
