@@ -48,22 +48,7 @@ namespace Dqe.Web.Controllers
             }
         }
 
-        [HttpGet]
-        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")]
-        public ActionResult GetWorkMixes()
-        {
-            try
-            {
-                var workMixes = _webTransportService.GetWorkMixes();
-                return Json(workMixes, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error in GetWorkMixes: {ex.Message}");
-                return new HttpStatusCodeResult(500, "An error occurred while fetching work mixes.");
-            }
-        }
-
+        
         /// <summary>
         /// Retrieves detailed historical bid data for a specified Pay Item.
         /// </summary>

@@ -77,7 +77,9 @@
             return $scope.startDate && $scope.endDate && new Date($scope.startDate) > new Date($scope.endDate);
         };
         $scope.contractTypes = Object.keys($scope.contractTypeMap);
-        $scope.selectedContractTypes = [];
+        $timeout(function() {
+            $scope.selectedContractTypes = ['CC'];
+        });
         $scope.workTypeCodes = Object.keys($scope.workTypeMap);
         $scope.selectedWorkTypeCodes = [];
         $scope.districtCountyMap = {
@@ -133,12 +135,6 @@
             "Area 99": ["DIST/ST-WIDE", "TURNPIKE"]
         };
         $scope.searchProjectNumber = '';
-        $scope.allWorkMixes = [];
-        $scope.workMixSelected = [];
-        $scope.workMixSearch = '';
-        $scope.filteredWorkMixes = [];
-        $scope.workMixSelected = [];
-        $scope.isWorkMixDropdownOpen = false;
         $scope.selectedMarketArea = "";
         $scope.selectedMarketCounties = [];
         $scope.clearFilters = function () {
@@ -165,21 +161,11 @@
             $scope.items = [];
             $scope.hasError = false;
             $scope.errorMessage = '';
-            $scope.workMixSelected = [];
-            $scope.workMixSearch = '';
-            $scope.filterWorkMixes();
-            $scope.isWorkMixDropdownOpen = false;
-            $scope.selectedContractTypes = [];
+            
+            $scope.selectedContractTypes = ["CC"];
             $scope.selectedWorkTypeCodes = [];
         };
-        $scope.loadWorkMixes = function () {
-            $http.get('/UnitPriceSearch/GetWorkMixes').then(function (response) {
-                $scope.allWorkMixes = Array.from(new Set(response.data)).sort();
-                $scope.filteredWorkMixes = angular.copy($scope.allWorkMixes);
-            }, function (error) {
-                console.error("Failed to load work mixes:", error);
-            });
-        };
+       
         $scope.searchBids = function () {
             if (!$scope.searchProjectNumber || $scope.searchProjectNumber.trim() === '') {
                 alert("Please enter a valid Proposal Number before searching.");
@@ -204,7 +190,7 @@
         $scope.clearProjectNumberSearch = function () {
             $scope.searchProjectNumber = '';
         };
-        $scope.loadWorkMixes();
+        
         $scope.onRegionTypeChange = function () {
             $scope.selectedRegions = [];
             $scope.relatedCounties = [];
@@ -273,37 +259,7 @@
         $scope.toggleMultiSelectDropdown = function () {
             $scope.isRegionDropdownOpen = !$scope.isRegionDropdownOpen;
         };
-        $scope.filterWorkMixes = function () {
-            const query = ($scope.workMixSearch || '').toLowerCase();
-            $scope.filteredWorkMixes = $scope.allWorkMixes.filter(item =>
-                item.toLowerCase().includes(query)
-            );
-            $scope.isWorkMixDropdownOpen = true;
-        };
-
-        $scope.toggleWorkMixSelection = function (item) {
-            const index = $scope.workMixSelected.indexOf(item);
-            if (index === -1) {
-                $scope.workMixSelected.push(item);
-            } else {
-                $scope.workMixSelected.splice(index, 1);
-            }
-            $scope.isWorkMixDropdownOpen = false;
-        };
-
-        $scope.removeWorkMix = function (item) {
-            const index = $scope.workMixSelected.indexOf(item);
-            if (index !== -1) {
-                $scope.workMixSelected.splice(index, 1);
-            }
-        };
-
-        $scope.clearWorkMixSelection = function () {
-            $scope.workMixSelected = [];
-            $scope.workMixSearch = '';
-            $scope.filterWorkMixes();
-            $scope.isWorkMixDropdownOpen = false;
-        };
+        
         document.addEventListener('click', function (event) {
             const dropdown = document.querySelector('.multi-select-dropdown');
             if (dropdown && !dropdown.contains(event.target)) {
@@ -482,7 +438,7 @@
                     marketCounties: $scope.selectedMarketCounties,
                     minRank: $scope.selectedMinQuantity || null,
                     maxRank: $scope.selectedMaxQuantity || $scope.maxQuantity || Infinity,
-                    workTypeNames: $scope.workMixSelected.map(x => typeof x === 'string' ? x : x.label),
+                   
                     projectNumber: $scope.searchProjectNumber || null
                 },
                 traditional: true
@@ -520,6 +476,7 @@
                 });
 
                 $scope.bidHistoryData = data;
+                
                 $scope.bidHistoryData.forEach(function (bidItem) {
                     var itemCounty = bidItem.c;
                     var normalizedItemCounty = itemCounty ? itemCounty.trim().toUpperCase() : '';
@@ -554,6 +511,7 @@
             }).finally(function () {
                 $scope.isLoading = false;
             });
+            $scope.isChartStale = false;
         };
         function formatDotNetDate(msDateString) {
             if (!msDateString) return '';
@@ -612,16 +570,44 @@
             }
         };
         $scope.$watch('selectedContractTypes', function (newVal) {
-            if (newVal.includes("ALL")) {
+            if (Array.isArray(newVal) && newVal.includes("ALL")) {
                 $scope.selectedContractTypes = angular.copy($scope.contractTypes);
             }
         }, true);
 
         $scope.$watch('selectedWorkTypeCodes', function (newVal) {
-            if (newVal.includes("ALL")) {
+            if (Array.isArray(newVal) && newVal.includes("ALL")) {
                 $scope.selectedWorkTypeCodes = angular.copy($scope.workTypeCodes);
             }
         }, true);
+        // Remove $scope.$watchGroup and replace with manual watchers for AngularJS 1.2.x
+        var filterWatchList = [
+            'searchText',
+            'searchProjectNumber',
+            'selectedContractTypes',
+            'selectedWorkTypeCodes',
+            'selectedBidStatus',
+            'monthsOfHistory',
+            'startDate',
+            'endDate',
+            'regionType',
+            'selectedRegions',
+            'selectedRegionCounties',
+            'selectedMarketArea',
+            'selectedMarketCounties',
+            'selectedDistrict',
+            'selectedCounties',
+            'selectedMinQuantity',
+            'selectedMaxQuantity'
+        ];
+
+        angular.forEach(filterWatchList, function (filter) {
+            $scope.$watch(filter, function (newVal, oldVal) {
+                if (newVal !== oldVal && !$scope.isLoading && $scope.bidHistoryData && $scope.bidHistoryData.length > 0) {
+                    $scope.isChartStale = true;
+                }
+            }, true);
+        });
         $scope.$watch('bidHistoryData', function (newVal) {
             if (newVal && newVal.length > 0) {
                 waitForCanvasAndRender();
@@ -640,13 +626,15 @@
         }
 
         function filterOutliers(prices, quantities, weightedMean, weightedStd) {
-            return prices
-                .map(function (p, i) {
-                    return { p: p, q: quantities[i] };
-                })
-                .filter(function (d) {
-                    return Math.abs(d.p - weightedMean) <= weightedStd;
-                });
+            return $scope.bidHistoryData.map((item, i) => {
+                const isOutlier = Math.abs(prices[i] - weightedMean) > weightedStd;
+                return !isOutlier ? {
+                    q: quantities[i],
+                    p: prices[i],
+                    l: item.l,
+                    pn: item.p // rename to pn to avoid conflict with price
+                } : null;
+            }).filter(d => d !== null);
         }
 
         // Helper function to aggregate multiple y-values per x
@@ -745,7 +733,7 @@
         function loessSmooth(x, y, bandwidth, xvals) {
             if (!Array.isArray(x) || !Array.isArray(y) || !Array.isArray(xvals) ||
                 x.length === 0 || y.length === 0 || x.length !== y.length) {
-                console.warn("Invalid input to loessSmooth");
+               
                 return xvals.map(() => NaN);
             }
 
@@ -754,10 +742,6 @@
                 const aggregatedData = aggregateDataByX(x, y);
                 const uniqueX = aggregatedData.map(d => d.x);
                 const uniqueY = aggregatedData.map(d => d.y);
-
-                console.log("Aggregated data:", aggregatedData);
-                console.log("Unique X:", uniqueX);
-                console.log("Unique Y:", uniqueY);
 
                 // Step 2: Check if we have enough data points
                 if (uniqueX.length < 3) {
@@ -780,9 +764,6 @@
 
                     // IMPORTANT: Science.js returns an ARRAY of smoothed values, not a function!
                     const smoothedValues = loess(sortedX, sortedY);
-
-                    console.log("LOESS smoothed values:", smoothedValues);
-
                     // Step 6: Interpolate smoothed values for requested x-values
                     return xvals.map(xval => {
                         return interpolateLinear(sortedX, smoothedValues, xval);
@@ -801,7 +782,6 @@
 
         // adding the manualLoessSmooth function if you don't have it
         function manualLoessSmooth(x, y, bandwidth, xvals) {
-            console.log("Using manual LOESS fallback");
 
             // Aggregate data first
             const aggregatedData = aggregateDataByX(x, y);
@@ -837,7 +817,7 @@
 
 
         //Bootstrap CI function
-        function bootstrapCI(x, y, xvals, frac, nBoot) {
+       /* function bootstrapCI(x, y, xvals, frac, nBoot) {
             if (frac === undefined) frac = 0.3;
             if (nBoot === undefined) nBoot = 200;
 
@@ -906,7 +886,7 @@
             }
 
             return { lower: lower, upper: upper };
-        }
+        }*/
 
 
 
@@ -946,19 +926,25 @@
                     const loessFiltered = loessSmooth(QuantityFiltered, PriceFiltered, 0.9, quantityRange);
 
                     // Bootstrap CI
-                    const ciUnfiltered = bootstrapCI(quantities, prices, quantityRange, 0.3);
+                   /* const ciUnfiltered = bootstrapCI(quantities, prices, quantityRange, 0.3);
                     const ciFiltered = bootstrapCI(QuantityFiltered, PriceFiltered, quantityRange, 0.9);
-
+*/
                     // Convert data to Chart.js format
-                    const originalPoints = quantities.map((q, i) => ({ x: q, y: prices[i] }));
-                    const filteredPoints = QuantityFiltered.map((q, i) => ({ x: q, y: PriceFiltered[i] }));
+                    // Convert data to Chart.js format
+                    // const originalPoints = quantities.map((q, i) => ({ x: q, y: prices[i] }));
+                    const filteredPoints = filtered.map(d => ({
+                        x: d.q,
+                        y: d.p,
+                        l: d.l,  // Letting Date
+                        p: d.pn // Contract Number (renamed to avoid key clash with price 'p')
+                    }));
                     const loessLineUnfiltered = quantityRange.map((q, i) => ({ x: q, y: loessUnfiltered[i] }));
                     const loessLineFiltered = quantityRange.map((q, i) => ({ x: q, y: loessFiltered[i] }));
-                    const ciBandUnfiltered = [...quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.lower[i] })),
+                    /*const ciBandUnfiltered = [...quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.lower[i] })),
                     ...quantityRange.slice().reverse().map((q, i) => ({ x: quantityRange[quantityRange.length - 1 - i], y: ciUnfiltered.upper[i] }))];
                     const ciBandFiltered = [...quantityRange.map((q, i) => ({ x: q, y: ciFiltered.lower[i] })),
                     ...quantityRange.slice().reverse().map((q, i) => ({ x: quantityRange[quantityRange.length - 1 - i], y: ciFiltered.upper[i] }))];
-                    console.log("Ci Band Filtered value", ciBandFiltered);
+                   */
                     if (quantities.length === 0 || prices.length === 0) {
                         $scope.isChartLoading = false;
                         return;
@@ -968,8 +954,16 @@
                     const normalPoints = [];
                     const bidPoints = [];
 
-                    for (let i = 0; i < quantities.length; i++) {
-                        bidPoints.push({ x: quantities[i], y: prices[i] });
+                    for (let i = 0; i < $scope.bidHistoryData.length; i++) {
+                        const item = $scope.bidHistoryData[i];
+                        const quantity = item.Quantity || 0;
+                        const price = item.b || 0;
+                        bidPoints.push({
+                            x: quantity,
+                            y: price,
+                            l: item.l || "N/A", // Letting Date
+                            p: item.p || "N/A"  // Contract Number
+                        });
                     }
 
                     const totalQty = quantities.reduce((sum, q) => sum + q, 0);
@@ -987,12 +981,27 @@
 
                     bidPoints.forEach(point => {
                         const isOutlier = Math.abs(point.y - weightedAvg) > weightedStdDev;
-                        const formattedPoint = { x: point.x, y: point.y };
+                        /*const formattedPoint = {
+                            x: point.x,
+                            y: point.y,
+                            l: point.l,
+                            p: point.p
+                        };*/
 
                         if (isOutlier) {
-                            outlierPoints.push(formattedPoint);
+                            outlierPoints.push({
+                                x: point.x,
+                                y: point.y,
+                                l: point.l,
+                                p: point.p
+                            });
                         } else {
-                            normalPoints.push(formattedPoint);
+                            normalPoints.push({
+                                x: point.x,
+                                y: point.y,
+                                l: point.l,
+                                p: point.p
+                            });
                         }
                     });
                     /*console.log({
@@ -1035,7 +1044,7 @@
                             datasets: [
 
                                 {
-                                    label: 'LOESS (w/o Outliers)',
+                                    label: 'LOESS (No Outliers)',
                                     data: loessLineFiltered,
                                     type: 'line',
                                     borderColor: 'blue',
@@ -1046,7 +1055,7 @@
                                     stepped: false
 
                                 }, {
-                                    label: 'LOESS (w/ Outliers)',
+                                    label: 'LOESS',
                                     data: loessLineUnfiltered,
                                     type: 'line',
                                     borderColor: 'red',
@@ -1057,13 +1066,37 @@
                                     stepped: false
                                 },
                                 {
-                                    label: 'Outliers',
-                                    data: originalPoints,
+                                    label: 'Weighted Avg',
+                                    data: [
+                                        { x: d3.min(quantities), y: weightedMean },
+                                        { x: d3.max(quantities), y: weightedMean }
+                                    ],
+                                    type: 'line',
+                                    borderColor: 'black',
+                                    borderDash: [5, 5],
+                                    fill: false,
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Weighted Avg (No Outliers)',
+                                    data: [
+                                        { x: d3.min(QuantityFiltered), y: $scope.weightedAvgNoOutliers },
+                                        { x: d3.max(QuantityFiltered), y: $scope.weightedAvgNoOutliers }
+                                    ],
+                                    type: 'line',
+                                    borderColor: '#6366f1',
+                                    borderDash: [8, 8],
+                                    fill: false,
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Bid Point Outlier',
+                                    data: outlierPoints,
                                     backgroundColor: 'rgba(128, 128, 128, 0.3)',
                                     pointRadius: 5,
                                 },
                                 {
-                                    label: 'No Outliers',
+                                    label: 'Bid Point',
                                     data: filteredPoints,
                                     backgroundColor: 'rgba(0, 128, 0, 0.5)',
                                     pointRadius: 5,
@@ -1097,18 +1130,7 @@
                                     tension: 0.4,
                                     order: 10
                                 },*/
-                                {
-                                    label: `Weighted Avg: $${weightedMean.toFixed(2)}`,
-                                    data: [
-                                        { x: d3.min(quantities), y: weightedMean },
-                                        { x: d3.max(quantities), y: weightedMean }
-                                    ],
-                                    type: 'line',
-                                    borderColor: 'black',
-                                    borderDash: [5, 5],
-                                    fill: false,
-                                    borderWidth: 1
-                                }
+                               
                             ]
 
                         },
@@ -1142,7 +1164,7 @@
                                 },
                                 y: {
                                     type: 'logarithmic',
-                                    title: { display: true, text: 'Unit Price ($, log scale)' },
+                                    title: { display: true, text: 'Unit Price (log scale)' },
                                     grid: {
                                         display: true,
                                         drawTicks: true,
@@ -1194,13 +1216,59 @@
 
                             plugins: {
                                 tooltip: {
+                                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                    titleColor: '#ffffff',
+                                    bodyColor: '#ffffff',
+                                    borderColor: '#3b82f6',
+                                    borderWidth: 2,
+                                    cornerRadius: 10,
+                                    displayColors: false,
+                                    titleFont: {
+                                        size: 14,
+                                        weight: 'bold',
+                                        family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                                    },
+                                    bodyFont: {
+                                        size: 12,
+                                        weight: 'normal',
+                                        family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                                    },
+                                    padding: {
+                                        top: 14,
+                                        right: 18,
+                                        bottom: 14,
+                                        left: 18
+                                    },
+                                    titleMarginBottom: 10,
+                                    bodySpacing: 6,
                                     callbacks: {
+                                        title: function (context) {
+                                            return context[0].dataset.label || 'Data Point';
+                                        },
                                         label: function (context) {
+                                            
                                             const label = context.dataset.label || '';
-                                            return `${label} - Qty: ${context.parsed.x}, Price: $${context.parsed.y.toFixed(2)}`;
+                                            const point = context.raw;
+                                            const qty = point.x;
+                                            const price = point.y;
+                                            const lines = [
+                                                `📊 Qty: ${qty.toLocaleString()}`,
+                                                `💰 Price: ${"$" + price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
+                                            ];
+
+                                            if (label === 'Bid Point Outlier' || label === 'Bid Point') {
+                                                const lettingDate = point.l || 'N/A';
+                                                const contract = point.p || 'N/A';
+                                                lines.push(`📅 Letting Date: ${formatDotNetDate(lettingDate)}`);
+                                                lines.push(`📄 Contract #: ${contract}`);
+                                            }
+
+                                            return lines;
                                         }
                                     }
-                                },
+                                }
+
+,
                                 legend: {
                                     display: true
                                 }
@@ -1232,25 +1300,6 @@
 
         $scope.getBidStatusLabel = function (code) {
             return code ? ($scope.bidStatusMap[code] || "Unknown") : "Unknown";
-        };
-        $scope.fetchPayItemSuggestions = function () {
-            if (debounceTimer) $timeout.cancel(debounceTimer);
-
-            if (!$scope.searchText || $scope.searchText.length < 2) {
-                $scope.items = [];
-                $scope.selectedPayItemNumber = null;
-                return;
-            }
-
-            debounceTimer = $timeout(function () {
-                $http.get('/UnitPriceSearch/GetPayItemSuggestions', {
-                    params: { input: $scope.searchText }
-                }).success(function (data) {
-                    $scope.items = data;
-                }).error(function (err) {
-                    console.error("Error fetching pay item suggestions:", err);
-                });
-            }, 300);
         };
     }
 ]);

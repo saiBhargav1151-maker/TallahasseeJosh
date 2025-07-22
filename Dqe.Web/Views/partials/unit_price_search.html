@@ -136,6 +136,7 @@
                             class="form-control modern-select compact-select"
                             multiple
                             ng-model="selectedContractTypes">
+                        
                         <option value="ALL">-- All Contract Types --</option>
                         <option ng-repeat="type in contractTypes"
                                 ng-value="type">
@@ -164,35 +165,6 @@
                 </div>
                 <div class="label-hint-compact">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
-            <!--<div class="form-group search-input-group">
-                <label class="modern-label">
-                    <i class="fas fa-layer-group label-icon"></i>
-                    Search Work Mix(es):
-                </label>
-                <div class="input-wrapper">
-                    <input type="text"
-                           class="form-control modern-input"
-                           ng-model="workMixSearch"
-                           ng-change="filterWorkMixes()"
-                           placeholder="e.g., Bridge Replacement or Resurfacing"
-                           autocomplete="off" />
-                    <span class="clear-button"
-                          ng-show="workMixSelected.length || workMixSearch"
-                          ng-click="clearWorkMixSelection()"
-                          style="transform: translateY(-50%);">
-                        <i class="fas fa-times-circle"></i>
-                    </span>
-                </div>-->
-            <!-- Suggestion dropdown -->
-            <!--<div class="suggestions-dropdown" ng-show="isWorkMixDropdownOpen && filteredWorkMixes.length">
-                <div class="suggestion-item"
-                     ng-repeat="item in filteredWorkMixes"
-                     ng-click="toggleWorkMixSelection(item)"
-                     ng-class="{ 'selected': workMixSelected.indexOf(item) !== -1 }">
-                    <i class="fas fa-check-circle" ng-if="workMixSelected.indexOf(item) !== -1"></i>
-                    {{ item }}
-                </div>
-            </div>-->
             <!-- Selected chips -->
             <!--<div class="selected-chips mt-2" ng-if="workMixSelected.length > 0">
                     <span class="chip" ng-repeat="type in workMixSelected track by type">
@@ -424,179 +396,205 @@
         <div class="loading-text">Loading bid data...</div>
     </div>
 
-    <div ng-if="bidHistoryData && bidHistoryData.length > 0" class="results-section">
-        <div class="container-fluid results-container">
-            <div class="table-section">
-                <div class="chart-section">
-                    <div class="chart-header">
+    <!-- Wrap the results section for blurring and overlay -->
+    <div class="results-section-wrapper" ng-if="bidHistoryData && bidHistoryData.length > 0">
+        <div class="results-section" ng-class="{ 'blurred': isChartStale }">
+            <div class="container-fluid results-container">
+                <div class="table-section">
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h4 class="section-title">
+                                <i class="fas fa-chart-line"></i> Unit Price Bid Analysis
+                            </h4>
+                        </div>
+                        <div ng-if="chartStats" class="stats-section">
+                            <h5 class="stats-title">
+                                <i class="fas fa-calculator"></i> Summary Statistics
+                            </h5>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-label">Weighted Average Unit Price</div>
+                                    <div class="stat-value">${{ chartStats.avg | number:2 }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Weighted Avg (No Outliers)</div>
+                                    <div class="stat-value">${{ chartStats.weightedAvgNoOutliers | number:2 }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Total Contracts</div>
+                                    <div class="stat-value">{{ chartStats.totalContracts }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Total Amount</div>
+                                    <div class="stat-value">${{ chartStats.totalBidAmount | number:2 }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Total Quantity</div>
+                                    <div class="stat-value">{{ chartStats.totalQuantity | number:2 }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Average Quantity</div>
+                                    <div class="stat-value">{{ chartStats.avgQty | number:2 }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Total Bids</div>
+                                    <div class="stat-value">{{ chartStats.count }}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Total Outliers</div>
+                                    <div class="stat-value">{{ chartStats.outlierCount }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container-glass" ng-if="!shouldHideGraphForLumpSum()">
+                            <!--<div class="stats-overlay">-->
+                                <!-- <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
+                                 <div class="stat-item"><span class="stat-label">Total Bids:</span><span class="stat-value">{{ chartStats.count }}</span></div>
+                                 -->
+                                <!--<div class="stat-item"><span class="stat-label">Total Outliers:</span><span class="stat-value">{{ chartStats.outlierCount }}</span></div>
+                            </div>-->
+                            <div class="canvas-wrapper" ng-class="{ 'blurred': isChartStale }">
+                                <div class="chart-loader" ng-show="isChartLoading">
+                                    <div class="loading-spinner">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                    <p class="loading-text">Loading chart data...</p>
+                                </div>
+                                <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
+                            </div>
+                            <!-- <div class="interactive-legend">
+                                 <div class="legend-item" ng-click="toggleLegend('normal')">
+                                     <div class="legend-color" style="background: rgba(54, 162, 235, 0.8);"></div>
+                                     <span>Normal Bids</span>
+                                 </div>
+                                 <div class="legend-item" ng-click="toggleLegend('outlier')">
+                                     <div class="legend-color" style="background: red;"></div>
+                                     <span>Outliers</span>
+                                 </div>
+                                 <div class="legend-item" ng-click="toggleLegend('trend')">
+                                     <div class="legend-color" style="background: #050A15;"></div>
+                                     <span>Trend Line</span>
+                                 </div>
+                                 <div class="legend-item" ng-click="toggleLegend('avg')">
+                                     <div class="legend-color" style="background: green;"></div>
+                                     <span>Weighted Avg</span>
+                                 </div>
+                             </div>-->
+
+                        </div>
+                        <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
+                            <i class="fas fa-info-circle"></i> Graph is not available for Lump Sum (LS) bids.
+                        </div>
+                        <!-- Summary stats -->
+                    </div>
+                    <div class="table-header">
                         <h4 class="section-title">
-                            <i class="fas fa-chart-line"></i> Unit Price Bid Analysis
+                            <i class="fas fa-table"></i> Bid History Data
                         </h4>
                     </div>
-                    <div ng-if="chartStats" class="stats-section">
-                        <h5 class="stats-title">
-                            <i class="fas fa-calculator"></i> Summary Statistics
-                        </h5>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-label">Weighted Average Unit Price</div>
-                                <div class="stat-value">${{ chartStats.avg | number:2 }}</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Weighted Avg (No Outliers)</div>
-                                <div class="stat-value">${{ chartStats.weightedAvgNoOutliers | number:2 }}</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Total Contracts</div>
-                                <div class="stat-value">{{ chartStats.totalContracts }}</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Total Amount</div>
-                                <div class="stat-value">${{ chartStats.totalBidAmount | number:2 }}</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Total Quantity</div>
-                                <div class="stat-value">{{ chartStats.totalQuantity | number:2 }}</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Average Quantity</div>
-                                <div class="stat-value">{{ chartStats.avgQty | number:2 }}</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Total Bids</div>
-                                <div class="stat-value">{{ chartStats.count }}</div>
-                            </div>
-                           <!-- <div class="stat-card">
-                                <div class="stat-label">Total Outliers</div>
-                                <div class="stat-value">{{ chartStats.outlierCount }}</div>
-                            </div>-->
-                        </div>
-                    </div>
-                    <div class="chart-container-glass" ng-if="!shouldHideGraphForLumpSum()">
-                        <!--<div class="stats-overlay">-->
-                            <!-- <div class="stat-item"><span class="stat-label">Avg Unit Price:</span><span class="stat-value">${{ chartStats.avg | number:2 }}</span></div>
-                             <div class="stat-item"><span class="stat-label">Total Bids:</span><span class="stat-value">{{ chartStats.count }}</span></div>
-                             -->
-                            <!--<div class="stat-item"><span class="stat-label">Total Outliers:</span><span class="stat-value">{{ chartStats.outlierCount }}</span></div>
-                        </div>-->
-                        <div class="canvas-wrapper">
-                            <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
-                        </div>
-                        <!-- <div class="interactive-legend">
-                             <div class="legend-item" ng-click="toggleLegend('normal')">
-                                 <div class="legend-color" style="background: rgba(54, 162, 235, 0.8);"></div>
-                                 <span>Normal Bids</span>
-                             </div>
-                             <div class="legend-item" ng-click="toggleLegend('outlier')">
-                                 <div class="legend-color" style="background: red;"></div>
-                                 <span>Outliers</span>
-                             </div>
-                             <div class="legend-item" ng-click="toggleLegend('trend')">
-                                 <div class="legend-color" style="background: #050A15;"></div>
-                                 <span>Trend Line</span>
-                             </div>
-                             <div class="legend-item" ng-click="toggleLegend('avg')">
-                                 <div class="legend-color" style="background: green;"></div>
-                                 <span>Weighted Avg</span>
-                             </div>
-                         </div>-->
 
+                    <div class="table-wrapper">
+                        <table class="table bid-table">
+                            <thead>
+                                <tr>
+                                    <th ng-click="setSort('p')">
+                                        Contract <i class="fas" ng-class="getSortClass('p')"></i>
+                                    </th>
+                                    <th class="sticky-col sticky-col-1" ng-click="setSort('ProjectNumber')">
+                                        Project Number <i class="fas" ng-class="getSortClass('ProjectNumber')"></i>
+                                    </th>
+                                    <th ng-click="setSort('ri')">
+                                        Pay Item <i class="fas" ng-class="getSortClass('ri')"></i>
+                                    </th>
+                                    <th>Description</th>
+                                    <th>Supp Desc</th>
+                                    <th>Units</th>
+                                    <th ng-click="setSort('Quantity')">
+                                        Quantity <i class="fas" ng-class="getSortClass('Quantity')"></i>
+                                    </th>
+                                    <th ng-click="setSort('b')">
+                                        Unit Price Bid <i class="fas" ng-class="getSortClass('b')"></i>
+                                    </th>
+                                    <th>Outlier</th>
+                                    <th ng-click="setSort('PvBidTotal')">
+                                        Bid Amount <i class="fas" ng-class="getSortClass('PvBidTotal')"></i>
+                                    </th>
+                                    <th ng-click="setSort('d')">District <i class="fas" ng-class="getSortClass('d')"></i></th>
+                                    <th ng-click="setSort('MarketArea')">Market Area <i class="fas" ng-class="getSortClass('MarketArea')"></i> </th>
+                                    <th ng-click="setSort('c')">County <i class="fas" ng-class="getSortClass('c')"></i></th>
+                                    <th>Bidder Name</th>
+                                    <th ng-click="setSort('BidStatus')">
+                                        Bidder Status <i class="fas" ng-class="getSortClass('BidStatus')"></i>
+                                    </th>
+                                    <th ng-click="setSort('VendorRanking')">
+                                        Bidder Rank <i class="fas" ng-class="getSortClass('VendorRanking')"></i>
+                                    </th>
+                                    <th>Contract Type</th>
+                                    <th>Work Type</th>
+                                    <th>Work Mix</th>
+                                    <th>Project Category</th>
+                                    <th ng-click="setSort('l')">
+                                        Letting Date <i class="fas" ng-class="getSortClass('l')"></i>
+                                    </th>
+                                    <th>Executed Date</th>
+                                    <th>Awarded Days</th>
+                                    <th>Proposal Type</th>
+                                    <th>Bid Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in bidHistoryData | orderBy:sortColumn:reverseSort">
+                                    <td>{{ item.p }}</td>
+                                    <td class="sticky-col sticky-col-1">
+                                        <a ng-if="item.ProjectNumber && item.ProjectNumber.length >= 7"
+                                           ng-href="https://owpbstandardmap.fdot.gov/?query=WorkProgram_Tbl15_Dissolved_2004,itemseg,{{ item.ProjectNumber.substring(0,7) }}"
+                                           target="_blank"
+                                           rel="noopener">
+                                            {{ item.ProjectNumber }}
+                                        </a>
+                                        <span ng-if="!item.ProjectNumber || item.ProjectNumber.length < 7">
+                                            {{ item.ProjectNumber }}
+                                        </span>
+                                    </td>
+                                    <td>{{ item.ri }}</td>
+                                    <td>{{ item.Description }}</td>
+                                    <td>{{ item.SupplementalDescription }}</td>
+                                    <td>{{ item.CalculatedUnit }}</td>
+                                    <td>{{ item.Quantity }}</td>
+                                    <td>{{ item.b | currency }}</td>
+                                    <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
+                                    <td>{{ item.PvBidTotal | currency }}</td>
+                                    <td>{{ item.d }}</td>
+                                    <td>{{ item.MarketArea }}</td>
+                                    <td>{{ item.c }}</td>
+                                    <td>{{ item.VendorName }}</td>
+                                    <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
+                                    <td>{{ item.VendorRanking }}</td>
+                                    <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
+                                    <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
+                                    <td>{{ item.WorkMixDescription }}</td>
+                                    <td>{{ item.CategoryDescription }}</td>
+                                    <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                                    <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
+                                    <td>{{ item.Duration }}</td>
+                                    <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
+                                    <td>{{ getBidTypeLabel(item.BidType) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
-                        <i class="fas fa-info-circle"></i> Graph is not available for Lump Sum (LS) bids.
-                    </div>
-                    <!-- Summary stats -->
-                </div>
-                <div class="table-header">
-                    <h4 class="section-title">
-                        <i class="fas fa-table"></i> Bid History Data
-                    </h4>
+
                 </div>
 
-                <div class="table-wrapper">
-                    <table class="table bid-table">
-                        <thead>
-                            <tr>
-                                <th ng-click="setSort('p')">
-                                    Contract <i class="fas" ng-class="getSortClass('p')"></i>
-                                </th>
-                                <th ng-click="setSort('ProjectNumber')">
-                                    Project Number <i class="fas" ng-class="getSortClass('ProjectNumber')"></i>
-                                </th>
-                                <th ng-click="setSort('ri')">
-                                    Pay Item <i class="fas" ng-class="getSortClass('ri')"></i>
-                                </th>
-                                <th>Description</th>
-                                <th>Supp Desc</th>
-                                <th>Units</th>
-                                <th ng-click="setSort('Quantity')">
-                                    Quantity <i class="fas" ng-class="getSortClass('Quantity')"></i>
-                                </th>
-                                <th ng-click="setSort('b')">
-                                    Unit Price Bid <i class="fas" ng-class="getSortClass('b')"></i>
-                                </th>
-                                <th>Outlier</th>
-                                <th ng-click="setSort('PvBidTotal')">
-                                    Bid Amount <i class="fas" ng-class="getSortClass('PvBidTotal')"></i>
-                                </th>
-                                <th ng-click="setSort('d')">District <i class="fas" ng-class="getSortClass('d')"></i></th>
-                                <th ng-click="setSort('MarketArea')">Market Area <i class="fas" ng-class="getSortClass('MarketArea')"></i> </th>
-                                <th ng-click="setSort('c')">County <i class="fas" ng-class="getSortClass('c')"></i></th>
-                                <th>Bidder Name</th>
-                                <th ng-click="setSort('BidStatus')">
-                                    Bidder Status <i class="fas" ng-class="getSortClass('BidStatus')"></i>
-                                </th>
-                                <th ng-click="setSort('VendorRanking')">
-                                    Bidder Rank <i class="fas" ng-class="getSortClass('VendorRanking')"></i>
-                                </th>
-                                <th>Contract Type</th>
-                                <th>Work Type</th>
-                                <th>Work Mix</th>
-                                <th>Project Category</th>
-                                <th ng-click="setSort('l')">
-                                    Letting Date <i class="fas" ng-class="getSortClass('l')"></i>
-                                </th>
-                                <th>Executed Date</th>
-                                <th>Awarded Days</th>
-                                <th>Proposal Type</th>
-                                <th>Bid Type</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="item in bidHistoryData | orderBy:sortColumn:reverseSort">
-                                <td>{{ item.p }}</td>
-                                <td>{{ item.ProjectNumber }}</td>
-                                <td>{{ item.ri }}</td>
-                                <td>{{ item.Description }}</td>
-                                <td>{{ item.SupplementalDescription }}</td>
-                                <td>{{ item.CalculatedUnit }}</td>
-                                <td>{{ item.Quantity }}</td>
-                                <td>{{ item.b | currency }}</td>
-                                <td>{{ item.IsOutlier ? 'Yes' : 'No' }}</td>
-                                <td>{{ item.PvBidTotal | currency }}</td>
-                                <td>{{ item.d }}</td>
-                                <td>{{ item.MarketArea }}</td>
-                                <td>{{ item.c }}</td>
-                                <td>{{ item.VendorName }}</td>
-                                <td>{{ getBidStatusLabel(item.BidStatus) }}</td>
-                                <td>{{ item.VendorRanking }}</td>
-                                <td>{{ contractTypeMap[item.ContractType] || item.ContractType }}</td>
-                                <td>{{ workTypeMap[item.ContractWorkType] || item.ContractWorkType }}</td>
-                                <td>{{ item.WorkMixDescription }}</td>
-                                <td>{{ item.CategoryDescription }}</td>
-                                <td>{{ item.l | msDateToJS | date:'MM/dd/yyyy' }}</td>
-                                <td>{{ item.ExecutedDate | msDateToJS | date:'MM/dd/yyyy' }}</td>
-                                <td>{{ item.Duration }}</td>
-                                <td>{{ proposalTypeMap[item.ProposalType] || item.ProposalType }}</td>
-                                <td>{{ getBidTypeLabel(item.BidType) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
 
             </div>
-
-
+        </div>
+        <div class="chart-stale-overlay" ng-if="isChartStale">
+            <div>
+                <i class="fas fa-exclamation-triangle"></i>
+                Filters changed. Click <b>Search Bids</b> to update results.
+            </div>
         </div>
     </div>
 
@@ -1282,12 +1280,15 @@ https://cdn.jsdelivr.net/npm/science@1.9.3/science.v1.min.js
     }
 
     .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        overflow-x: auto;
         gap: 16px;
     }
 
     .stat-card {
+        flex: 0 0 auto;
         background: #ffffff;
         padding: 16px 12px;
         border-radius: 8px;
@@ -1309,7 +1310,7 @@ https://cdn.jsdelivr.net/npm/science@1.9.3/science.v1.min.js
     .stat-label {
         font-weight: 600;
         color: #152C57;
-        font-size: 11px;
+        font-size: 12px;
         margin-bottom: 8px;
         line-height: 1.3;
         text-transform: uppercase;
@@ -2056,4 +2057,76 @@ https://cdn.jsdelivr.net/npm/science@1.9.3/science.v1.min.js
     .hover-card-trigger:hover .hover-card {
         display: block;
     }
+.chart-stale-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.85);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    color: #1F4283;
+    font-weight: bold;
+    pointer-events: all;
+}
+.blurred {
+    filter: blur(2px) grayscale(0.5);
+    pointer-events: none;
+    user-select: none;
+}
+
+
+.bid-table th:nth-child(2) {
+    position: sticky;
+    left: 100px;
+    z-index: 11;
+    background: #1F4283;
+    color: #ffffff;
+    box-shadow: 3px 0 6px rgba(0, 0, 0, 0.15);
+    border-right: 1px solid #ccc;
+}
+
+.bid-table td:nth-child(2) {
+    position: sticky;
+    left: 100px;
+    z-index: 9;
+    background-color: #ffffff;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+    color: #152C57;
+}
+
+.bid-table tbody tr:nth-child(even) td:nth-child(2) {
+    background-color: #EAF0FA;
+}
+
+.bid-table tbody tr:hover td:nth-child(2) {
+    background: #D6E1F5;
+}
+
+/* Add/Update CSS for wrapper, blur, and overlay */
+.results-section-wrapper {
+    position: relative;
+}
+
+.blurred {
+    filter: blur(2px) grayscale(0.5);
+    pointer-events: none;
+    user-select: none;
+}
+
+.chart-stale-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.85);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    color: #1F4283;
+    font-weight: bold;
+    pointer-events: all;
+}
 </style>

@@ -78,7 +78,7 @@ namespace Dqe.Infrastructure.Fdot
 
         }
 
-        public IList<string> GetWorkMixes()
+        /*public IList<string> GetWorkMixes()
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
@@ -91,7 +91,7 @@ namespace Dqe.Infrastructure.Fdot
 
                 return results.Distinct().ToList();
             }
-        }
+        }*/
         /// <summary>
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
