@@ -817,76 +817,41 @@
 
 
         //Bootstrap CI function
-       /* function bootstrapCI(x, y, xvals, frac, nBoot) {
-            if (frac === undefined) frac = 0.3;
-            if (nBoot === undefined) nBoot = 200;
-
+        function bootstrapCI(x, y, xvals, frac, nBoot = 200) {
             if (!x.length || !y.length || x.length !== y.length) {
                 return {
                     lower: xvals.map(() => null),
                     upper: xvals.map(() => null),
                 };
             }
-
-            var preds = [];
-
-            for (var b = 0; b < nBoot; b++) {
-               
-                var indices = _.sampleSize(_.range(x.length), x.length);
-                var xBoot = indices.map(function (i) { return x[i]; });
-                var yBoot = indices.map(function (i) { return y[i]; });
-
-                // Get smoothed values
-                var smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
-                var smoothedY;
-                if (Array.isArray(smoothed)) {
-                    // If smoothed is already an array of numbers
-                    smoothedY = smoothed.map(function (val) {
-                        return (val !== null && !isNaN(val)) ? val : null;
-                    });
-                } else {
-                    // If smoothed returns objects with .y property
-                    smoothedY = smoothed.map(function (pt) {
-                        return (pt && pt.y !== undefined) ? pt.y : null;
-                    });
+            let preds = [];
+            for (let b = 0; b < nBoot; b++) {
+                let indices = [];
+                for (let i = 0; i < x.length; i++) {
+                    indices.push(Math.floor(Math.random() * x.length));
                 }
-
-                preds.push(smoothedY);
+                let xBoot = indices.map(i => x[i]);
+                let yBoot = indices.map(i => y[i]);
+                let smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
+                preds.push(smoothed);
             }
-
-            var lower = [];
-            var upper = [];
-
-            for (var i = 0; i < xvals.length; i++) {
-                var valuesAtPoint = preds.map(function (row) {
-                    return row[i];
-                }).filter(function (v) {
-                    return v !== null && !isNaN(v);
-                });
-
+            let lower = [];
+            let upper = [];
+            for (let i = 0; i < xvals.length; i++) {
+                let valuesAtPoint = preds.map(row => row[i]).filter(v => v !== null && !isNaN(v));
+                valuesAtPoint.sort((a, b) => a - b);
                 if (valuesAtPoint.length > 0) {
-                    // Sort values for quantile calculation
-                    valuesAtPoint.sort(function (a, b) { return a - b; });
-
-                    // Use d3.quantile if available, otherwise manual calculation
-                    if (typeof d3 !== 'undefined' && d3.quantile) {
-                        lower[i] = d3.quantile(valuesAtPoint, 0.025);
-                        upper[i] = d3.quantile(valuesAtPoint, 0.975);
-                    } else {
-                        // Manual quantile calculation
-                        var lowerIdx = Math.floor(valuesAtPoint.length * 0.025);
-                        var upperIdx = Math.floor(valuesAtPoint.length * 0.975);
-                        lower[i] = valuesAtPoint[lowerIdx];
-                        upper[i] = valuesAtPoint[upperIdx];
-                    }
+                    let lowerIdx = Math.floor(valuesAtPoint.length * 0.025);
+                    let upperIdx = Math.floor(valuesAtPoint.length * 0.975);
+                    lower[i] = valuesAtPoint[lowerIdx];
+                    upper[i] = valuesAtPoint[upperIdx];
                 } else {
                     lower[i] = null;
                     upper[i] = null;
                 }
             }
-
-            return { lower: lower, upper: upper };
-        }*/
+            return { lower, upper };
+        }
 
 
 
@@ -926,9 +891,17 @@
                     const loessFiltered = loessSmooth(QuantityFiltered, PriceFiltered, 0.9, quantityRange);
 
                     // Bootstrap CI
-                   /* const ciUnfiltered = bootstrapCI(quantities, prices, quantityRange, 0.3);
-                    const ciFiltered = bootstrapCI(QuantityFiltered, PriceFiltered, quantityRange, 0.9);
-*/
+                    const ciUnfiltered = bootstrapCI(quantities, prices, quantityRange, 0.3, 200);
+                    const ciFiltered = bootstrapCI(QuantityFiltered, PriceFiltered, quantityRange, 0.9, 200);
+                    const ciBandUnfiltered = [
+                        ...quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.lower[i] })),
+                        ...quantityRange.slice().reverse().map((q, i) => ({ x: quantityRange[quantityRange.length - 1 - i], y: ciUnfiltered.upper[quantityRange.length - 1 - i] }))
+                    ];
+                    const ciBandFiltered = [
+                        ...quantityRange.map((q, i) => ({ x: q, y: ciFiltered.lower[i] })),
+                        ...quantityRange.slice().reverse().map((q, i) => ({ x: quantityRange[quantityRange.length - 1 - i], y: ciFiltered.upper[quantityRange.length - 1 - i] }))
+                    ];
+
                     // Convert data to Chart.js format
                     // Convert data to Chart.js format
                     // const originalPoints = quantities.map((q, i) => ({ x: q, y: prices[i] }));
@@ -1090,6 +1063,33 @@
                                     borderWidth: 1
                                 },
                                 {
+
+                                    label: '95% CI Unfiltered',
+                                    data: ciBandUnfiltered,
+                                    type: 'line',
+                                    showLine: true,
+                                    backgroundColor: 'rgba(255, 0, 0, 0.1)', // Red with alpha
+                                    borderColor: 'transparent',
+                                    fill: true,
+                                    pointRadius: 0,
+                                    borderWidth: 0,
+                                    tension: 0.4,
+                                    order: 10
+                                },
+                                {
+                                    label: '95% CI Filtered',
+                                    data: ciBandFiltered,
+                                    type: 'line',
+                                    showLine: true,
+                                    backgroundColor: 'rgba(0, 0, 255, 0.1)', // Blue with alpha
+                                    borderColor: 'transparent',
+                                    fill: true,
+                                    pointRadius: 0,
+                                    borderWidth: 0,
+                                    tension: 0.4,
+                                    order: 10
+                                },
+                                {
                                     label: 'Bid Point Outlier',
                                     data: outlierPoints,
                                     backgroundColor: 'rgba(128, 128, 128, 0.3)',
@@ -1101,35 +1101,6 @@
                                     backgroundColor: 'rgba(0, 128, 0, 0.5)',
                                     pointRadius: 5,
                                 },
-                               
-                                /*{
-                                 
-                                label: '95% CI Unfiltered (Upper)',
-                                data: ciBandUnfiltered,
-                                type: 'line',
-                                showLine: true,
-                                backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                                borderColor: 'transparent', // Hide the border line
-                                fill: '+1', // Fill to the next dataset (lower bound)
-                                pointRadius: 0,
-                                borderWidth: 0,
-                                tension: 0.4, // Smooth curves
-                                order: 10 // Render behind other lines
-                                },*/
-                                
-                                /*{
-                                    label: '95% CI Filtered',
-                                    data: ciBandFiltered,
-                                    type: 'line',
-                                    showLine: true,
-                                    backgroundColor: 'rgba(0, 0, 255, 0.1)',  // Blue with 0.1 alpha (same as Python)
-                                    borderColor: 'transparent',
-                                    fill: true,
-                                    pointRadius: 0,
-                                    borderWidth: 0,
-                                    tension: 0.4,
-                                    order: 10
-                                },*/
                                
                             ]
 
