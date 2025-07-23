@@ -37,7 +37,7 @@
                 //now only looking at Review type Versions
                 if (version.versionLabel == 'Review') {
                     var words = version.source.toString().split(" "); ///splitting the version display string back out to read
-                    if (word.length >= 4) {
+                    if (words.length >= 4) {
                         version.versionSrc = words[1]; //Version # of the Source
                         version.estimateSrc = words[3]; //Estimate # of the Source
                     }
@@ -52,7 +52,7 @@
                     //var srcSnapshotTemp = $scope.versions.find(v => v.projectVersion == versionSrc)?.snapshots?.find(s => s.projectSnapshot == version.estimateSrc);
                     var srcSnapshot = null;
                     for (var i = 0; i < $scope.versions.length; i++) {
-                        if ($scope.versions[i].projectVersion == versionSrc) {
+                        if ($scope.versions[i].projectVersion == version.versionSrc) {
                             var snapshots = $scope.versions[i].snapshots;
                             if (snapshots) {
                                 for (var j = 0; j < snapshots.length; j++) {
