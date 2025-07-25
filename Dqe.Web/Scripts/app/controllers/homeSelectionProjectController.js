@@ -14,7 +14,7 @@
 
             ///checking the first estimate of every version to see if it is a review, if so marking a bool field as true.
             for (var i = 0; i < $scope.versions.length; i++) {
-                if ($scope.versions[i].versionLabel == 'Review') {
+                if ($scope.versions[i].versionLabel.trim() === 'Review') {
                     $scope.hasReviewsInProject = true;
                     break;
                 }
@@ -25,25 +25,34 @@
 
             ////Iterates through each version
             angular.forEach($scope.versions, function (version) {
-                version.lastModified = getLatestEstimateModified(version); //getting a more transferable date format
-                version.displayOrder = version.projectVersion; //seeding each displayOrder as it's version number (will be adjusted)
-                version.outdated = false; //outdated field to indicate if the 
+                //getting a more transferable date format
+                version.lastModified = getLatestEstimateModified(version);
+                //seeding each displayOrder as it's version number (will be adjusted)
+                version.displayOrder = version.projectVersion; 
+                //outdated field to indicate if the Review version/estimates source estimate's prices
+                //have been modified after this review was created. Defaulting to false.
+                version.outdated = false; 
+   
 
                 //now only looking at Review type Versions
                 if (version.versionLabel == 'Review') {
                     var words = version.source.toString().split(" "); ///splitting the version display string back out to read
-
-                    var versionSrc = words[1]; //Version # of the Source
-                    var estimateNumSrc = words[3]; //Estimate # of the Source
-                    version.versionSrc = versionSrc; 
-                    version.estimateSrc = estimateNumSrc;
-
+                    if (words.length >= 4) {
+                        version.versionSrc = words[1]; //Version # of the Source
+                        version.estimateSrc = words[3]; //Estimate # of the Source
+                    }
+                    else {
+                        console.warn('Unexpected version.source format:', version.source);
+                        version.versionSrc = null;
+                        version.estimateSrc = null;
+                    }
+                  
                     /* if ($scope.versions[versionSrc].)*/
-                    //finds the last modified date of the source version/estimate 
+                    //finds the source version/estimate 
                     //var srcSnapshotTemp = $scope.versions.find(v => v.projectVersion == versionSrc)?.snapshots?.find(s => s.projectSnapshot == version.estimateSrc);
                     var srcSnapshot = null;
                     for (var i = 0; i < $scope.versions.length; i++) {
-                        if ($scope.versions[i].projectVersion == versionSrc) {
+                        if ($scope.versions[i].projectVersion == version.versionSrc) {
                             var snapshots = $scope.versions[i].snapshots;
                             if (snapshots) {
                                 for (var j = 0; j < snapshots.length; j++) {
@@ -61,20 +70,21 @@
                         srcSnapshot.hasRelatedReview = true;
                         //commented this out as it might not represent accurate data if there are multiple reviews on an individual estimate.MB.
                         //srcSnapshot.relatedReviewVersionNumber = version.projectVersion;
-                        const dateA = new Date(formatDotNetDate(version.snapshots[0].lastUpdatedRaw));
-                        const dateB = new Date(formatDotNetDate(srcSnapshot.lastUpdatedRaw));
+                        const reviewDate = new Date(formatDotNetDate(version.snapshots[0].lastUpdatedRaw));
+                        const sourceDate = new Date(formatDotNetDate(srcSnapshot.lastUpdatedRaw));
 
                         //if the version/est last modified date of this review is earlier than that vers/est last modified date 
                         //then add a field to that review version named "outdated"
-                        if (dateB.getTime() - dateA.getTime() > 0) {
+                        if (sourceDate.getTime() - reviewDate.getTime() > 0) {
                             version.outdated = true;
                         }
                         else {
                             version.outdated = false;
                         }
                     }
-                }
-            });
+                }//end of loop over Review type 
+            });//end of loop over all versions 
+            
 
             //Setting the Display Order of the versions. Requested that we place the most recently modified non-review version at the very top, the rest will be by version number. MB.
             var latestRunningModifiedVersion = -1;
@@ -121,12 +131,6 @@
             return null; // Or handle as desired
         }
         return formatDotNetDate(version.snapshots[0].lastUpdatedRaw);
-    };
-
-    // In your controller
-    $scope.customTimeSort = function (item) {
-        // Assuming 'item.nestedObject.timeString' holds a date string
-        return new Date(item.nestedObject.timeString).getTime();
     };
 
     ///Used for scrolling to a given id of an element on a page. 
