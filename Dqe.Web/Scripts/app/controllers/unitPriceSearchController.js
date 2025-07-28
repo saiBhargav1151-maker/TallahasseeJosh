@@ -938,13 +938,6 @@
             'selectedMinQuantity',
             'selectedMaxQuantity'
         ];
-        angular.forEach(filterWatchList, function (filter) {
-            $scope.$watch(filter, function (newVal, oldVal) {
-                if (newVal !== oldVal && !$scope.isLoading && $scope.bidHistoryData && $scope.bidHistoryData.length > 0 && $scope.searchAttempted && $scope.chartStats && $scope.chartInstance) {
-                    $scope.isChartStale = true;
-                }
-            }, true);
-        });
         $scope.$watch('bidHistoryData', function (newVal) {
             if (newVal && newVal.length > 0) {
                 waitForCanvasAndRender();
@@ -1603,7 +1596,6 @@
                     };
 
                     $scope.isChartLoading = false;
-                    $scope.isChartStale = false;
                     $scope.$apply();
                 });
             }, 0);
