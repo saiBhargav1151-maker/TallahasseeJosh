@@ -343,7 +343,6 @@
             }).finally(function () {
                 $scope.isLoading = false;
             });
-            $scope.isChartStale = false;
         };
         $scope.setSort = function (column) {
             if ($scope.sortColumn === column) {
@@ -941,7 +940,7 @@
         ];
         angular.forEach(filterWatchList, function (filter) {
             $scope.$watch(filter, function (newVal, oldVal) {
-                if (newVal !== oldVal && !$scope.isLoading && $scope.bidHistoryData && $scope.bidHistoryData.length > 0) {
+                if (newVal !== oldVal && !$scope.isLoading && $scope.bidHistoryData && $scope.bidHistoryData.length > 0 && $scope.searchAttempted && $scope.chartStats && $scope.chartInstance) {
                     $scope.isChartStale = true;
                 }
             }, true);
@@ -1604,6 +1603,7 @@
                     };
 
                     $scope.isChartLoading = false;
+                    $scope.isChartStale = false;
                     $scope.$apply();
                 });
             }, 0);

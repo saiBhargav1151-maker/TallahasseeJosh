@@ -418,8 +418,8 @@
         </div>
 
         <!-- Wrap the results section for blurring and overlay -->
-        <div class="results-section-wrapper" ng-if="bidHistoryData && bidHistoryData.length > 0">
-            <div class="results-section" ng-class="{ 'blurred': isChartStale }">
+        <div class="results-section" ng-if="bidHistoryData && bidHistoryData.length > 0">
+            <div class="results-section">
                 <div class="container-fluid results-container">
                     <div class="table-section">
                         <div class="chart-section">
@@ -476,7 +476,7 @@
                                 <!--<div class="stat-item"><span class="stat-label">Total Outliers:</span><span class="stat-value">{{ chartStats.outlierCount }}</span></div>
                             </div>-->
         
-                                <div class="canvas-wrapper" ng-class="{ 'blurred': isChartStale }">
+                                <div class="canvas-wrapper">
                                   
                                     <div class="chart-loader" ng-show="isChartLoading">
                                         <div class="loading-spinner">
@@ -605,12 +605,6 @@
                     </div>
 
 
-                </div>
-            </div>
-            <div class="chart-stale-overlay" ng-if="isChartStale">
-                <div>
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Filters changed. Click <b>Search Bids</b> to update results.
                 </div>
             </div>
         </div>
@@ -963,7 +957,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
 
     /* Results Section */
     .results-section {
-        margin-top: 40px;
+        position: relative;
     }
 
     .results-container {
@@ -1583,36 +1577,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    .chart-stale-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(5px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-        border-radius: 15px;
-    }
-
-    .chart-stale-overlay div {
-        background: #1F4283;
-        color: white;
-        padding: 15px 25px;
-        border-radius: 25px;
-        font-weight: 600;
-        box-shadow: 0 4px 15px rgba(31, 66, 131, 0.3);
-        text-align: center;
-    }
-
-    .chart-stale-overlay i {
-        margin-right: 8px;
-        color: #FFD700;
-    }
-
     /* Loading States */
     .loading-spinner {
         display: inline-block;
@@ -1724,12 +1688,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
     /* Results Section */
     .results-section {
         position: relative;
-        transition: filter 0.3s ease;
-    }
-
-    .results-section.blurred {
-        filter: blur(2px);
-        pointer-events: none;
     }
 
     .results-container {
