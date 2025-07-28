@@ -73,7 +73,6 @@ namespace Dqe.Web.Controllers
             }
             catch (Exception ex)
             {
-            
                 return new HttpStatusCodeResult(500, "An error occurred: " + ex.Message);
             }
         }
