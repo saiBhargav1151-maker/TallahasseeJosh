@@ -109,7 +109,8 @@ namespace Dqe.Infrastructure.Fdot
      decimal? minRank = null,
      decimal? maxRank = null,
      List<string> workTypeNames = null,
-     string projectNumber=null
+     string projectNumber=null,
+     decimal? minBidAmount = null, decimal? maxBidAmount = null
          )
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
@@ -239,6 +240,18 @@ namespace Dqe.Infrastructure.Fdot
                 else if (maxRank > 0)
                 {
                     query.Add(Restrictions.Le("Quantity", maxRank));
+                }
+                if (minBidAmount.HasValue && maxBidAmount.HasValue && minBidAmount > 0 && maxBidAmount > 0)
+                {
+                    query.Add(Restrictions.Between("pv.BidTotal", minBidAmount.Value, maxBidAmount.Value));
+                }
+                else if (minBidAmount.HasValue && minBidAmount > 0)
+                {
+                    query.Add(Restrictions.Ge("pv.BidTotal", minBidAmount.Value));
+                }
+                else if (maxBidAmount.HasValue && maxBidAmount > 0)
+                {
+                    query.Add(Restrictions.Le("pv.BidTotal", maxBidAmount.Value));
                 }
                 if (workTypeNames != null && workTypeNames.Any())
                 {
