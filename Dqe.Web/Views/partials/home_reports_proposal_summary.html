@@ -1,4 +1,10 @@
-﻿<div class="row">
+﻿<style>
+    input::placeholder {
+        color: gray !important;
+        opacity: 75%;
+    }
+</style>
+<div class="row">
     <div class="col-lg-12">
         <form method="POST" id="ViewProposalSummaryReport" autocomplete="off">
             <div class="panel panel-default">
@@ -23,7 +29,7 @@
                         </div>
                         <div class="col-lg-3">
                             <input name="proposalNumber" id="proposalNumber" type="text" title="Proposal number"
-                                   ng-model="selectedProposal" placeholder="123451" typeahead-min-length="3" typeahead-wait-ms="500"
+                                   ng-model="selectedProposal" placeholder="12345" typeahead-min-length="3" typeahead-wait-ms="500"
                                    typeahead="proposal as proposal.number for proposal in getProposals($viewValue)"
                                    typeahead-editable="false" class="form-control" autocomplete="off">
                         </div>

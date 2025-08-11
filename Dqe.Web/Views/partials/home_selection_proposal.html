@@ -1,9 +1,16 @@
-﻿<div class="row">
+﻿<style>
+    input::placeholder {
+        color: gray !important;
+        opacity: 75%;
+    }
+</style>
+
+<div class="row">
     <div class="col-lg-1">
         <h4>Search:</h4>
     </div>
     <div class="col-lg-2">
-        <input id="proposalNumber" title="Proposal number" type="text" ng-model="selectedProposal" placeholder="123451" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="proposal as proposal.number for proposal in getProposals($viewValue)" typeahead-editable="false" typeahead-on-select="loadProposal()" class="form-control">
+        <input id="proposalNumber" title="Proposal number" type="text" ng-model="selectedProposal" placeholder="12345" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="proposal as proposal.number for proposal in getProposals($viewValue)" typeahead-editable="false" typeahead-on-select="loadProposal()" class="form-control">
     </div>
 </div>
 <div ng-show="proposal != undefined && proposal != null">

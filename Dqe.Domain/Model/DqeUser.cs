@@ -93,7 +93,19 @@ namespace Dqe.Domain.Model
             }
             var versions = project.ProjectVersions.Where(i => i.VersionOwner == this).ToList();
             if (versions.Count <= 0) return;
-            var estimate = versions.First(i => i.ProjectEstimates.Any(ii => ii.IsWorkingEstimate)).ProjectEstimates.First(i => i.IsWorkingEstimate);
+            ProjectEstimate estimate = null;
+
+            //check each version for a working estimate flag, get the latest occurance
+            foreach(var v in versions.OrderBy(v=> v.Version))
+            {
+                if(v.ProjectEstimates.Any(i => i.IsWorkingEstimate))
+                {
+                    //mark
+                    estimate = v.ProjectEstimates.FirstOrDefault(e => e.IsWorkingEstimate);
+                    break;
+                }
+            }
+
             MyRecentProjectEstimate = estimate;
         }
 

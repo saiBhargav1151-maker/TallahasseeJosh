@@ -5,6 +5,7 @@ namespace Dqe.Domain.Model
         NotSet = 'N',
         Wt = 'T',
         Lre = 'L',
-        Snapshot = 'S'
+        Snapshot = 'S',
+        Review = 'R'
     }
 }
