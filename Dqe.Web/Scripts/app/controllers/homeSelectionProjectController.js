@@ -264,6 +264,9 @@
             else if (project.quantityComplete.toUpperCase() === 'Y') {
                 result.data.project.quantityComplete = 'Y';
             }
+            else if (project.quantityComplete.toUpperCase() === 'N') {
+                result.data.project.quantityComplete = 'N';
+            }
             processResult(result);
         });
     }
