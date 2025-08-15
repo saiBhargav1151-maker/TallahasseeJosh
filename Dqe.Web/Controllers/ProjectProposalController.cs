@@ -952,7 +952,7 @@ namespace Dqe.Web.Controllers
                     {
                         initialEstimate = 0;
                     }
-                    p.SetSeedEstimateValues(initialEstimate, scopeEstimate, phase1Estimate, phase2Estimate, phase3Estimate, phase4Estimate, lreProject.QuantitiesComplete);
+                    p.SetSeedEstimateValues(initialEstimate, scopeEstimate, phase1Estimate, phase2Estimate, phase3Estimate, phase4Estimate, lreProject.QuantityComplete);
                 }
             }
             return null;

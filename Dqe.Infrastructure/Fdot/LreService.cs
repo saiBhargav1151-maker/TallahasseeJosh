@@ -35,7 +35,7 @@ namespace Dqe.Infrastructure.Fdot
         }
 
         /// <summary>
-        /// Updates the field "QuantitiesComplete" in LRE project table. 
+        /// Updates the field "Quantity Complete" in LRE project table. 
         /// This indicates to users if they should use DQE or LRE.MB.
         /// </summary>
         /// <param name="projectId"></param>
@@ -53,7 +53,7 @@ namespace Dqe.Infrastructure.Fdot
                         return;
                     }
 
-                    pjt.QuantitiesComplete = "Y";
+                    pjt.QuantityComplete = "Y";
 
                     session.SaveOrUpdate(pjt);
                     t.Commit();
@@ -267,7 +267,7 @@ namespace Dqe.Infrastructure.Fdot
                 {
                     //elminate LS/DB from project number
                     var projectNumber = p.ProjectNumber.Trim();
-                    //if (projectNumber.Length > 11) return;
+                    if (projectNumber.Length > 11) return;
                     var pl = session.QueryOver<Domain.Model.Lre.Project>()
                         .Where(i => i.ProjectName == projectNumber)
                         .List();
@@ -396,7 +396,6 @@ namespace Dqe.Infrastructure.Fdot
             {
                 using (var t = session.BeginTransaction())
                 {
-
                     var isInLre = false;
                     var ps = session.QueryOver<PayItem>()
                     .Where(i => i.Id == payItemMaster.RefItemName.PadRight(10))
