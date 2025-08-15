@@ -9,7 +9,8 @@
     <many-to-one name="MyCategory" column="CATEGORY_ID" class="Category" not-null="false"/>
     <many-to-one name="MyProposalItem" column="PROPOSALITEM_ID" class="ProposalItem" not-null="false"/>
     <many-to-one name="MyAlternate" column="ALTERNATESET_ID" class="Alternate" not-null="false"/>
-    <many-to-one name="MyFundPackage" column="FUNDPACKAGE_ID" class="FundPackage" not-null="false"/>
+	  <many-to-one name="MyProject" column="PROJECT_ID" class="Project" not-null="false"/>
+	  <many-to-one name="MyFundPackage" column="FUNDPACKAGE_ID" class="FundPackage" not-null="false"/>
     <property name="CombineLikeItems" >
       <column name="COMBINELIKEITEMS" not-null="true" sql-type="bit" />
     </property>

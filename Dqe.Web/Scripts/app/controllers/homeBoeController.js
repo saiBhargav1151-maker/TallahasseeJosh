@@ -167,6 +167,7 @@
         });
     };
 
+
     jQuery.download = function (url, data, method) {
         //url and data options required
         if (url && data) {

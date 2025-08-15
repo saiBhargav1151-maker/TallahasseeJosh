@@ -20,6 +20,9 @@
     <property name="Description" type="String" >
       <column name="DESCR" not-null="true" length="256" sql-type="varchar" />
     </property>
+	  <property name="ExecutedDate">
+		  <column name="LPDT2" not-null="false" sql-type="datetime2" />
+	  </property>
     <property name="IsRejected" >
       <column name="REJECTED" not-null="true" sql-type="bit" />
     </property>

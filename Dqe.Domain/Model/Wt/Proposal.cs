@@ -45,7 +45,7 @@ namespace Dqe.Domain.Model.Wt
         public virtual string PassToDss { get; set; }
 
         public virtual DateTime? PassToDssDate { get; set; }
-
+        public virtual DateTime? ExecutedDate { get; set; }
         public virtual RefCounty County { get; set; }
 
         public virtual RefDistrict District { get; set; }
@@ -55,7 +55,7 @@ namespace Dqe.Domain.Model.Wt
         public virtual decimal? ProposalItemTotal { get; set; }
 
         public virtual DateTime? LastUpdatedDate { get; set; }
-
+        
         public virtual string LastUpdatedBy { get; set; }
 
         #endregion

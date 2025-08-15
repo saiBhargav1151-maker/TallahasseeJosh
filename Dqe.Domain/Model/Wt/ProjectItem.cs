@@ -41,6 +41,8 @@ namespace Dqe.Domain.Model.Wt
         public virtual DateTime? LastUpdatedDate { get; set; }
 
         public virtual string LastUpdatedBy { get; set; }
+        public virtual Project MyProject { get; set; }
+
 
         #endregion
 
