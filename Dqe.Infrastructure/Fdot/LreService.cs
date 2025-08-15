@@ -11,8 +11,7 @@ namespace Dqe.Infrastructure.Fdot
 {
     public class LreService : ILreService
     {
-
-        public IEnumerable<Domain.Model.Lre.Project> GetProjects(string projectName)
+          public IEnumerable<Domain.Model.Lre.Project> GetProjects(string projectName)
         {
             using (var session = Initializer.LreSessionFactory.OpenSession())
             {
@@ -35,6 +34,32 @@ namespace Dqe.Infrastructure.Fdot
             }
         }
 
+        /// <summary>
+        /// Updates the field "QuantitiesComplete" in LRE project table. 
+        /// This indicates to users if they should use DQE or LRE.MB.
+        /// </summary>
+        /// <param name="projectId"></param>
+        public void UpdateLreProjectSetDQEDefaultPlatform(string projectId)
+        {
+            using (var session = Initializer.LreSessionFactory.OpenSession())
+            {
+                using (var t = session.BeginTransaction())
+                {
+                    var pjtList = session.QueryOver<Domain.Model.Lre.Project>().Where(p => p.ProjectName == projectId.ToString()).List();
+                    var pjt = pjtList.FirstOrDefault();
+                    if (pjt == null)
+                    {
+                        Console.WriteLine("Project not found in LRE", DateTime.Now);
+                        return;
+                    }
+
+                    pjt.QuantitiesComplete = "Y";
+
+                    session.SaveOrUpdate(pjt);
+                    t.Commit();
+                }
+            }
+        }
         public void UpdateLrePrices(IEnumerable<PayItemMaster> items)
         {
             /*
@@ -242,7 +267,7 @@ namespace Dqe.Infrastructure.Fdot
                 {
                     //elminate LS/DB from project number
                     var projectNumber = p.ProjectNumber.Trim();
-                    if (projectNumber.Length > 11) return;
+                    //if (projectNumber.Length > 11) return;
                     var pl = session.QueryOver<Domain.Model.Lre.Project>()
                         .Where(i => i.ProjectName == projectNumber)
                         .List();
@@ -371,6 +396,7 @@ namespace Dqe.Infrastructure.Fdot
             {
                 using (var t = session.BeginTransaction())
                 {
+
                     var isInLre = false;
                     var ps = session.QueryOver<PayItem>()
                     .Where(i => i.Id == payItemMaster.RefItemName.PadRight(10))
