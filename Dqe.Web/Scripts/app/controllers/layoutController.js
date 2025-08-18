@@ -1,4 +1,7 @@
 ﻿dqeControllers.controller('LayoutController', ['$scope', '$rootScope', '$http', '$location', '$cookieStore', '$window', 'securityService', 'navigationService', 'stateService', '$interval', '$cookies', function ($scope, $rootScope, $http, $location, $cookieStore, $window, securityService, navigationService, stateService, $interval, $cookies) {
+    // Initialize Statistics Details flag to false
+    $rootScope.showStatisticsDetails = false;
+    
     var cb = function configureForUser(user) {
         $scope.currentUser = user;
         $scope.subTabs = navigationService.getSubTabs($scope.currentUser);

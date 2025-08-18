@@ -96,26 +96,26 @@ namespace Dqe.Infrastructure.Fdot
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
-     public IList<ProposalItemDTO> GetUnitPriceDetails(
-     string payItem,
-     List<string> contractType = null,
-     int months = 12,
-     List<string> contractWorkType = null,
-     DateTime? startDate = null,
-     DateTime? endDate = null,
-     string[] counties = null,
-     string bidStatus = null,
-     string[] marketCounties = null,
-     decimal? minRank = null,
-     decimal? maxRank = null,
-     List<string> workTypeNames = null,
-     string projectNumber=null,
-     decimal? minBidAmount = null, decimal? maxBidAmount = null
-         )
+        public IList<ProposalItemDTO> GetUnitPriceDetails(
+        string payItem,
+        List<string> contractType = null,
+        int months = 12,
+        List<string> contractWorkType = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string[] counties = null,
+        string bidStatus = null,
+        string[] marketCounties = null,
+        decimal? minRank = null,
+        decimal? maxRank = null,
+        List<string> workTypeNames = null,
+        string projectNumber = null,
+        decimal? minBidAmount = null, decimal? maxBidAmount = null
+            )
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
-                
+
                 var categorySubquery = DetachedCriteria.For<Category>("catSub")
                     .CreateAlias("catSub.ProjectItems", "piSub")
                     .CreateAlias("piSub.MyRefItem", "riSub")
@@ -124,7 +124,7 @@ namespace Dqe.Infrastructure.Fdot
                     .SetProjection(Projections.Property("catSub.Description"))
                     .SetMaxResults(1);
 
-                
+
                 var projectNumberSubquery = DetachedCriteria.For<ProjectItem>("pitem")
                     .CreateAlias("pitem.MyProject", "prjSub")
                     .Add(Restrictions.EqProperty("pitem.MyProposalItem.Id", "this.Id"))
@@ -146,7 +146,7 @@ namespace Dqe.Infrastructure.Fdot
                     .SetProjection(Projections.Property("prjSub.Id"))
                     .SetMaxResults(1);
 
-                
+
                 var projectCodeSubquery = DetachedCriteria.For<Project>("prj")
                     .Add(Subqueries.PropertyEq("prj.Id", projectIdSubquery))
                     .SetProjection(Projections.Property("prj.Pjcde1"))
@@ -171,7 +171,7 @@ namespace Dqe.Infrastructure.Fdot
                     .CreateAlias("p.District", "d")
                     .CreateAlias("p.Milestones", "m")
                     .CreateAlias("pv.MyRefVendor", "rv")
-                    
+
                     .Add(Restrictions.Or(
                         Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
                         Restrictions.IsNull("pv.BidType")
