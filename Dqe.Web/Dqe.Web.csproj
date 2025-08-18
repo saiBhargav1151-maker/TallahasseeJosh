@@ -177,6 +177,7 @@
   <ItemGroup>
     <Folder Include="Areas\" />
     <Folder Include="Views\homeReportsProposalSummary\" />
+    <Folder Include="Views\NHCCIData\" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -191,6 +192,7 @@
     <Compile Include="Controllers\EstimateController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MasterFileAdministrationController.cs" />
+    <Compile Include="Controllers\NHCCIData.cs" />
     <Compile Include="Controllers\PayItemAdministrationController.cs" />
     <Compile Include="Controllers\PayItemStructureAdministrationController.cs" />
     <Compile Include="Controllers\MarketAreaController.cs" />

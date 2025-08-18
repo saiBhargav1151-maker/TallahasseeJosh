@@ -41,6 +41,11 @@ namespace Dqe.Domain.Model
         public long ProjectId { get; set; }
         public string LeadProjectNumber { get; set; }
 
+        // NHCCI Inflation Adjustment Properties
+        public decimal? InflationAdjustedPrice { get; set; }  // Inflation-adjusted unit price
+        public decimal? InflationFactor { get; set; }  // Inflation factor (Latest Index / Letting Date Index)
+        public decimal? InflationPercentIncrease { get; set; }  // Percentage increase due to inflation
+        public string NHCCIQuarter { get; set; }  // NHCCI quarter for the letting date
     }
     public class PayItemDTO
     {

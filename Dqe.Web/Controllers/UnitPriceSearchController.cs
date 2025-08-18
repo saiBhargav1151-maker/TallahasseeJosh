@@ -18,7 +18,7 @@ namespace Dqe.Web.Controllers
         /// Initializes a new instance of the <see cref="UnitPriceSearchController"/> class.
         /// </summary>
         private readonly IWebTransportService _webTransportService;
-        public UnitPriceSearchController(IWebTransportService webTransportService)        
+        public UnitPriceSearchController(IWebTransportService webTransportService)
         {
             _webTransportService = webTransportService;
         }
@@ -48,7 +48,7 @@ namespace Dqe.Web.Controllers
             }
         }
 
-        
+
         /// <summary>
         /// Retrieves detailed historical bid data for a specified Pay Item.
         /// </summary>
@@ -60,9 +60,57 @@ namespace Dqe.Web.Controllers
             try
             {
                 var selectedCounties = counties?.ToList() ?? new List<string>();
-                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months,  contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames,projectNumber, minBidAmount, maxBidAmount);
+                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months, contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames, projectNumber, minBidAmount, maxBidAmount);
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
+
+                // Calculate inflation-adjusted prices for each bid item
+                foreach (var item in historyData)
+                {
+                    if (item.l.HasValue)
+                    {
+                        try
+                        {
+                            // Parse the letting date from the .NET date format
+                            DateTime lettingDate = item.l.Value;
+
+                            // Calculate inflation-adjusted price
+                            decimal adjustedPrice = NHCCIData.CalculateInflationAdjustedPrice(item.b, lettingDate);
+                            item.InflationAdjustedPrice = adjustedPrice;
+
+                            // Calculate inflation factor and percentage
+                            string quarterKey = NHCCIData.GetQuarterKey(lettingDate);
+                            if (NHCCIData.IndexByQuarter.ContainsKey(quarterKey))
+                            {
+                                decimal lettingDateIndex = NHCCIData.IndexByQuarter[quarterKey];
+                                decimal latestIndex = NHCCIData.GetLatestIndex();
+                                decimal inflationFactor = latestIndex / lettingDateIndex;
+                                decimal percentIncrease = (inflationFactor - 1) * 100;
+
+                                item.InflationFactor = inflationFactor;
+                                item.InflationPercentIncrease = percentIncrease;
+                                item.NHCCIQuarter = quarterKey;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // If calculation fails, set default values
+                            item.InflationAdjustedPrice = item.b;
+                            item.InflationFactor = 1.0m;
+                            item.InflationPercentIncrease = 0.0m;
+                            item.NHCCIQuarter = "Unknown";
+                            System.Diagnostics.Debug.WriteLine($"Error calculating inflation adjustment: {ex.Message}");
+                        }
+                    }
+                    else
+                    {
+                        // Set default values if date is missing
+                        item.InflationAdjustedPrice = item.b;
+                        item.InflationFactor = 1.0m;
+                        item.InflationPercentIncrease = 0.0m;
+                        item.NHCCIQuarter = "Unknown";
+                    }
+                }
 
                 return new JsonResult
                 {
