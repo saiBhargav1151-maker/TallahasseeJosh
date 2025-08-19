@@ -18,6 +18,8 @@ namespace Dqe.Domain.Model.Wt
 
         public virtual DateTime LettingDate { get; set; }
 
+        public virtual string LettingStatus { get; set; }
+
         public virtual string LettingName { get; set; }
 
         public virtual IEnumerable<Proposal> Proposals

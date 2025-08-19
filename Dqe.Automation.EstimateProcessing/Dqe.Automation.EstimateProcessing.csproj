@@ -51,6 +51,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommandLine, Version=2.7.82.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommandLineParser.2.7.82\lib\net40\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="FDOT.Enterprise.Architecture.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a11df4d9086030a8, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dqe.Infrastructure\_Dependencies\FDOT.Enterprise.Architecture.Core.dll</HintPath>
@@ -82,6 +85,7 @@
     <None Include="DQEBJS2.bat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dqe.ApplicationServices\Dqe.ApplicationServices.csproj">
