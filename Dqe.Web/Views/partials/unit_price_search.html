@@ -102,7 +102,6 @@
                                id="minBidAmount"
                                class="modern-input"
                                ng-model="selectedMinBidAmount"
-                               ng-change="validateBidAmount()"
                                placeholder="$0.00"
                                ng-blur="formatBidAmount('min')"
                                ng-focus="unformatBidAmount('min')"
@@ -119,30 +118,14 @@
                                id="maxBidAmount" 
                                class="modern-input" 
                                ng-model="selectedMaxBidAmount"
-                               ng-change="validateBidAmount()" 
                                placeholder="Leave blank for max val"
                                ng-blur="formatBidAmount('max')" 
                                ng-focus="unformatBidAmount('max')"
                                maxlength="20" />
                     </div>
                 </div>
-                <div class="error-message" ng-show="hasBidAmountError">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    {{bidAmountErrorMessage}}
-                </div>
-                <div class="error-message" ng-show="hasBidAmountFormatError">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    {{bidAmountFormatErrorMessage}}
-                </div>
-                <div class="quantity-preview" ng-show="!hasBidAmountError && selectedMinBidAmount && selectedMaxBidAmount">
-                    <i class="fas fa-eye"></i>
-                    <span ng-if="selectedMinBidAmount === selectedMaxBidAmount">
-                        Preview: Showing exactly ${{selectedMinBidAmount}}
-                    </span>
-                    <span ng-if="selectedMinBidAmount !== selectedMaxBidAmount">
-                        Preview: Showing ${{selectedMinBidAmount}} to ${{selectedMaxBidAmount}} (${{getBidAmountRange() | number:2}} total range)
-                    </span>
-                </div>
+
+
             </div>
 
             <!-- Quantity Range -->
@@ -155,26 +138,18 @@
                     <div class="input-group">
                         <label class="modern-label" for="minQuantity">Minimum:</label>
                         <input type="number" id="minQuantity" class="modern-input" ng-model="selectedMinQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" ng-attr-max="{{maxQuantity || ''}}" placeholder="Min quantity"
+                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" min="1" placeholder="Min quantity"
                                maxlength="15" />
                     </div>
                     <div class="separator">to</div>
                     <div class="input-group">
                         <label class="modern-label" for="maxQuantity">Maximum:</label>
                         <input type="number" id="maxQuantity" class="modern-input" ng-model="selectedMaxQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" ng-change="validateQuantity()" min="1" ng-attr-max="{{maxQuantity || ''}}" placeholder="Leave blank for max"
+                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" min="1" placeholder="Leave blank for max"
                                maxlength="15" />
                     </div>
                 </div>
-                <div class="error-message" ng-show="hasError">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    {{errorMessage}}
-                </div>
-                <div class="error-message" ng-show="hasQuantityFormatError">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    {{quantityFormatErrorMessage}}
-                </div>
-                <div class="quantity-preview" ng-show="!hasError && selectedMinQuantity && selectedMaxQuantity">
+                <div class="quantity-preview" ng-show="selectedMinQuantity && selectedMaxQuantity">
                     <i class="fas fa-eye"></i>
                     <span ng-if="selectedMinQuantity === selectedMaxQuantity">
                         Preview: Showing exactly {{selectedMinQuantity}} item<span ng-if="selectedMinQuantity > 1">s</span>
@@ -322,18 +297,13 @@
                 <div class="date-inputs-compact">
                     <input type="date" class="form-control modern-input date-input-compact" ng-model="startDate"
                            max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}"
-                           ng-change="validateDateRange()" />
+                           />
                     <span class="separator">to</span>
                     <input type="date" class="form-control modern-input date-input-compact" ng-model="endDate"
                            max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}"
-                           ng-change="validateDateRange()" />
+                           />
                 </div>
-                <div class="error-message" ng-show="isInvalidDateRange()">
-                    <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
-                </div>
-                <div class="error-message" ng-show="hasDateRangeError">
-                    <i class="fas fa-exclamation-circle"></i> {{dateRangeErrorMessage}}
-                </div>
+
                 <small class="form-text text-muted months-hint">
                     <i class="fas fa-info-circle"></i>
                     Use months filter OR date range (date range overrides months)
@@ -562,11 +532,11 @@
                             <div class="stats-grid">
                                 <div class="stat-card">
                                     <div class="stat-label">Weighted Avg Unit Price</div>
-                                    <div class="stat-value">${{ chartStats.avg | number:2 }}</div>
+                                    <div class="stat-value">{{ chartStats.avg | smartCurrency }}</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-label">Weighted Avg (No Outliers)</div>
-                                    <div class="stat-value">${{ chartStats.weightedAvgNoOutliers | number:2 }}</div>
+                                    <div class="stat-value">{{ chartStats.weightedAvgNoOutliers | smartCurrency }}</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-label">Total Contracts</div>
@@ -574,7 +544,7 @@
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-label">Total Amount</div>
-                                    <div class="stat-value">${{ chartStats.totalBidAmount | number:2 }}</div>
+                                    <div class="stat-value">{{ chartStats.totalBidAmount | smartCurrency }}</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-label">Total Quantity</div>
@@ -705,51 +675,54 @@
                                     <div class="prediction-grid">
                                         <div class="stat-card">
                                             <div class="stat-label">LOESS (All Data)</div>
-                                            <div class="stat-value">${{ customQuantityPrediction.loessUnfiltered | number:2 }}</div>
-                                            <div class="stat-total-cost">Total Cost: ${{ customQuantityPrediction.loessUnfilteredTotal | number:2 }}</div>
+                                            <div class="stat-value">{{ customQuantityPrediction.loessUnfiltered | smartCurrency }}</div>
+                                            <div class="stat-total-cost">Total Cost: {{ customQuantityPrediction.loessUnfilteredTotal | smartCurrency }}</div>
                                             <div class="stat-confidence-bands">
                                                 <div class="confidence-band">
                                                     <span class="band-label">Upper:</span>
-                                                    <span class="band-value">${{ customQuantityPrediction.loessUnfilteredUpper | number:2 }}</span>
+                                                    <span class="band-value">{{ customQuantityPrediction.loessUnfilteredUpper | smartCurrency }}</span>
                                                 </div>
                                                 <div class="confidence-band">
                                                     <span class="band-label">Lower:</span>
-                                                    <span class="band-value">${{ customQuantityPrediction.loessUnfilteredLower | number:2 }}</span>
+                                                    <span class="band-value">{{ customQuantityPrediction.loessUnfilteredLower | smartCurrency }}</span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="stat-card">
                                             <div class="stat-label">LOESS (No Outliers)</div>
-                                            <div class="stat-value">${{ customQuantityPrediction.loessFiltered | number:2 }}</div>
-                                            <div class="stat-total-cost">Total Cost: ${{ customQuantityPrediction.loessFilteredTotal | number:2 }}</div>
+                                            <div class="stat-value">{{ customQuantityPrediction.loessFiltered | smartCurrency }}</div>
+                                            <div class="stat-total-cost">Total Cost: {{ customQuantityPrediction.loessFilteredTotal | smartCurrency }}</div>
                                             <div class="stat-confidence-bands">
                                                 <div class="confidence-band">
                                                     <span class="band-label">Upper:</span>
-                                                    <span class="band-value">${{ customQuantityPrediction.loessFilteredUpper | number:2 }}</span>
+                                                    <span class="band-value">{{ customQuantityPrediction.loessFilteredUpper | smartCurrency }}</span>
                                                 </div>
                                                 <div class="confidence-band">
                                                     <span class="band-label">Lower:</span>
-                                                    <span class="band-value">${{ customQuantityPrediction.loessFilteredLower | number:2 }}</span>
+                                                    <span class="band-value">{{ customQuantityPrediction.loessFilteredLower | smartCurrency }}</span>
                                                 </div>
                                                 
                                             </div>
                                         </div>
                                         <div class="stat-card">
                                             <div class="stat-label">Weighted Average</div>
-                                            <div class="stat-value">${{ customQuantityPrediction.weightedAvg | number:2 }}</div>
-                                            <div class="stat-total-cost">Total Cost: ${{ customQuantityPrediction.weightedAvgTotal | number:2 }}</div>
+                                            <div class="stat-value">{{ customQuantityPrediction.weightedAvg | smartCurrency }}</div>
+                                            <div class="stat-total-cost">Total Cost: {{ customQuantityPrediction.weightedAvgTotal | smartCurrency }}</div>
                                         </div>
                                         <div class="stat-card">
                                             <div class="stat-label">Weighted Avg (No Outliers)</div>
-                                            <div class="stat-value">${{ customQuantityPrediction.weightedAvgNoOutliers | number:2 }}</div>
-                                            <div class="stat-total-cost">Total Cost: ${{ customQuantityPrediction.weightedAvgNoOutliersTotal | number:2 }}</div>
+                                            <div class="stat-value">{{ customQuantityPrediction.weightedAvgNoOutliers | smartCurrency }}</div>
+                                            <div class="stat-total-cost">Total Cost: {{ customQuantityPrediction.weightedAvgNoOutliersTotal | smartCurrency }}</div>
                                         </div>
                                     </div>
                                     <div class="inflation-description">
                                         <i class="fas fa-info-circle"></i>
-                                        <strong>Note:</strong> This prediction uses LOESS smoothing based on {{ customQuantityPrediction.dataPoints }} historical data points. 
+                                        <strong>Note:</strong> This prediction uses LOESS smoothing based on {{ customQuantityPrediction.dataPoints }} historical data points 
+                                        ({{ customQuantityPrediction.dataPointsNoOutliers }} after outlier removal). 
                                         Multiple calculation methods are shown for comparison.
                                     </div>
+                                    
+
                                 </div>
                                 
                                 <div ng-if="!customQuantityPrediction.success" class="prediction-error">
@@ -776,7 +749,7 @@
                             </div>
                             <!-- Summary stats -->
                         </div>
-                        <div class="table-header" ng-if="!showLargeResultWarning && !isLargeDataset">
+                        <div class="table-header" ng-if="!isLargeDataset">
                             <h4 class="section-title">
                                 <i class="fas fa-table"></i> Bid History Data
                             </h4>
@@ -788,7 +761,7 @@
                             </div>
                         </div>
                         <!-- Column Selector Dropdown -->
-                        <div class="column-selector" ng-if="showColumnSelector && !showLargeResultWarning && !isLargeDataset">
+                        <div class="column-selector" ng-if="showColumnSelector && !isLargeDataset">
                             <div class="column-selector-header">
                                 <h5>Select Columns to Display</h5>
                                 <div class="column-actions">
@@ -809,7 +782,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="table-wrapper" ng-if="!showLargeResultWarning && !isLargeDataset">
+                        <div class="table-wrapper" ng-if="!isLargeDataset">
                             <table class="table bid-table">
                                 <thead>
                                     <tr>
@@ -822,7 +795,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="item in bidHistoryData | orderBy:sortColumn:reverseSort track by $index">
+                                    <tr ng-repeat="item in bidHistoryData | orderBy:customSort:reverseSort track by $index">
                                         <td ng-repeat="column in visibleColumns()"
                                             ng-class="{
                                                 'sticky-col': column.key === 'p' || column.key === 'ProjectNumber',
@@ -852,29 +825,29 @@
                                             <span ng-if="column.key === 'Quantity'">{{ item.Quantity }}</span>
                                             <span ng-if="column.key === 'b'">
                                                 <span ng-if="item.CalculatedUnit === 'LS - Lump Sum'" 
-                                                      title="Calculated Unit Price: {{ item.b | currency }} ÷ {{ item.Quantity }} = {{ (item.b / item.Quantity) | currency }}">
-                                                    {{ (item.b / item.Quantity) | currency }}
+                                                      title="Calculated Unit Price: {{ item.b | smartCurrency }} ÷ {{ item.Quantity }} = {{ (item.b / item.Quantity) | smartCurrency }}">
+                                                    {{ (item.b / item.Quantity) | smartCurrency }}
                                                     <i class="fas fa-calculator" style="color: #6c757d; font-size: 10px; margin-left: 4px;" 
                                                        title="Calculated from Lump Sum bid"></i>
                                                 </span>
                                                 <span ng-if="item.CalculatedUnit !== 'LS - Lump Sum'">
-                                                    {{ item.b | currency }}
+                                                    {{ item.b | smartCurrency }}
                                                 </span>
                                             </span>
                                             <span ng-if="column.key === 'InflationAdjustedPrice'"
                                                   title="{{ getInflationInfo(item) }}"
                                                   style="cursor: help;">
                                                 <span ng-if="item.CalculatedUnit === 'LS - Lump Sum' && item.InflationAdjustedPrice">
-                                                    {{ (item.InflationAdjustedPrice / item.Quantity) | currency }}
+                                                    {{ (item.InflationAdjustedPrice / item.Quantity) | smartCurrency }}
                                                     <i class="fas fa-calculator" style="color: #6c757d; font-size: 10px; margin-left: 4px;" 
                                                        title="Calculated from inflation-adjusted Lump Sum bid"></i>
                                                 </span>
                                                 <span ng-if="item.CalculatedUnit !== 'LS - Lump Sum' || !item.InflationAdjustedPrice">
-                                                    {{ item.InflationAdjustedPrice | currency }}
+                                                    {{ item.InflationAdjustedPrice | smartCurrency }}
                                                 </span>
                                             </span>
                                             <span ng-if="column.key === 'IsOutlier'">{{ item.IsOutlier ? 'Yes' : 'No' }}</span>
-                                            <span ng-if="column.key === 'PvBidTotal'">{{ item.PvBidTotal | currency }}</span>
+                                            <span ng-if="column.key === 'PvBidTotal'">{{ item.PvBidTotal | smartCurrency }}</span>
                                             <span ng-if="column.key === 'd'">{{ item.d }}</span>
                                             <span ng-if="column.key === 'MarketArea'">{{ item.MarketArea }}</span>
                                             <span ng-if="column.key === 'c'">{{ item.c }}</span>
@@ -3504,24 +3477,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             margin-right: 5px;
         }
         
-        .lump-sum-warning {
-            margin-bottom: 20px;
-        }
-        
-        .lump-sum-warning .alert {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        .lump-sum-warning .alert i {
-            margin-right: 8px;
-            color: #f39c12;
-        }
+
         
   
         
@@ -3544,21 +3500,5 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             color: #2196f3;
             font-size: 12px;
         }
-        
-        /* Simple Data Info Display */
-        .simple-data-info {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            padding: 10px 15px;
-            margin: 10px 0;
-            border-radius: 6px;
-            display: flex;
-            gap: 20px;
-            font-size: 13px;
-            color: #495057;
-        }
-        
-        .simple-data-info span {
-            display: inline-block;
-        }
+      
     </style>

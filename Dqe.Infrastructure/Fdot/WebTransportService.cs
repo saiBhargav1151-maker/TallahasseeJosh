@@ -73,25 +73,7 @@ namespace Dqe.Infrastructure.Fdot
 
                 return finalResults;
             }
-
-
-
         }
-
-        /*public IList<string> GetWorkMixes()
-        {
-            using (var session = Initializer.TransportSessionFactory.OpenSession())
-            {
-                var results = session.CreateCriteria<CodeValue>()
-                    .CreateAlias("MyCodeTable", "ct")
-                    .Add(Restrictions.Eq("ct.Id", 203L)) // filter on CODETABLE_ID = 203
-                    .SetProjection(Projections.Property("Description"))
-                    .AddOrder(Order.Asc("Description"))
-                    .List<string>();
-
-                return results.Distinct().ToList();
-            }
-        }*/
         /// <summary>
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
@@ -131,22 +113,12 @@ namespace Dqe.Infrastructure.Fdot
                     .Add(Restrictions.EqProperty("pitem.MyRefItem.Id", "ri.Id"))
                     .SetProjection(Projections.Property("prjSub.ProjectNumber"))
                     .SetMaxResults(1);
-                /*var leadProjectNumberSubquery = DetachedCriteria.For<ProjectItem>("pitemLead")
-    .CreateAlias("pitemLead.MyProject", "leadPrj")
-    .Add(Restrictions.EqProperty("pitemLead.MyProposalItem.Id", "this.Id"))
-    *//*.Add(Restrictions.EqProperty("pitemLead.MyRefItem.Id", "ri.Id"))*//*
-    .Add(Restrictions.Eq("leadPrj.Controlling", true))
-    .SetProjection(Projections.Property("leadPrj.ProjectNumber"))
-    .SetMaxResults(1);*/
-
                 var projectIdSubquery = DetachedCriteria.For<ProjectItem>("pitem")
                     .CreateAlias("pitem.MyProject", "prjSub")
                     .Add(Restrictions.EqProperty("pitem.MyProposalItem.Id", "this.Id"))
                     .Add(Restrictions.EqProperty("pitem.MyRefItem.Id", "ri.Id"))
                     .SetProjection(Projections.Property("prjSub.Id"))
                     .SetMaxResults(1);
-
-
                 var projectCodeSubquery = DetachedCriteria.For<Project>("prj")
                     .Add(Subqueries.PropertyEq("prj.Id", projectIdSubquery))
                     .SetProjection(Projections.Property("prj.Pjcde1"))
@@ -188,18 +160,6 @@ namespace Dqe.Infrastructure.Fdot
                     .AddOrder(Order.Desc("l.LettingDate"))
                     .AddOrder(Order.Asc("p.ProposalNumber"))
                     .AddOrder(Order.Asc("b.BidPrice"));
-
-                // Optional filters
-                /*if (!string.IsNullOrEmpty(projectNumber))
-                {
-                    var projectNumberFilterSubquery = DetachedCriteria.For<ProjectItem>("pitem")
-                        .CreateAlias("pitem.MyProject", "prjSub")
-                        .Add(Restrictions.EqProperty("pitem.MyProposalItem.Id", "this.Id")) // Matches outer ProposalItem
-                        .Add(Restrictions.Eq("prjSub.ProjectNumber", projectNumber))
-                        .SetProjection(Projections.Id());
-
-                    query.Add(Subqueries.Exists(projectNumberFilterSubquery));
-                }*/
                 if (!string.IsNullOrEmpty(projectNumber))
                 {
                     query.Add(Restrictions.Eq("p.ProposalNumber", projectNumber));
@@ -276,7 +236,6 @@ namespace Dqe.Infrastructure.Fdot
                     .Add(Projections.Property("b.BidPrice"), "b")
                     .Add(Projections.SubQuery(projectNumberSubquery), "ProjectNumber")
                     .Add(Projections.SubQuery(projectIdSubquery), "ProjectId")
-                    /*.Add(Projections.SubQuery(leadProjectNumberSubquery), "LeadProjectNumber")*/
                     .Add(Projections.Property("p.ProposalNumber"), "p")
                     .Add(Projections.Property("p.ProposalType"), "ProposalType")
                     .Add(Projections.Property("p.ContractType"), "ContractType")
