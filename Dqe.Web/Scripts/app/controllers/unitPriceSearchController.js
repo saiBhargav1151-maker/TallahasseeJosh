@@ -8,7 +8,6 @@
         $scope.bidHistoryData = [];
         $scope.lastSearchedPayItem = $scope.searchText;
         $scope.isLoading = false;
-
         $scope.monthsOfHistory = 36;
         $scope.regionType = '';
         $scope.regionOptions = [];
@@ -169,9 +168,7 @@
             "I": "Irregular",
             "FMV": "Fair Market Value (Bidder Rank 1, 2, 3)"
         };
-        $scope.isInvalidDateRange = function () {
-            return $scope.startDate && $scope.endDate && new Date($scope.startDate) > new Date($scope.endDate);
-        };
+
         $scope.contractTypes = Object.keys($scope.contractTypeMap);
         $timeout(function () {
             $scope.selectedContractTypes = ['CC'];
@@ -231,8 +228,6 @@
             "Area 99": ["DIST/ST-WIDE", "TURNPIKE"]
         };
         $scope.searchProjectNumber = '';
-        $scope.selectedMarketArea = "";
-        
         $scope.clearFilters = function () {
             $scope.regionType = '';
             $scope.regionOptions = [];
@@ -251,15 +246,8 @@
             $scope.startDate = null;
             $scope.endDate = null;
 
-            $scope.selectedMarketArea = "";
-
             $scope.items = [];
-            $scope.hasError = false;
-            $scope.errorMessage = '';
-            $scope.hasBidAmountError = false;
-            $scope.bidAmountErrorMessage = '';
-            $scope.hasBidAmountFormatError = false;
-            $scope.bidAmountFormatErrorMessage = '';
+
             $scope.selectedContractTypes = ["CC"];
             $scope.selectedWorkTypeCodes = [];
             $scope.showTrendChart = false;
@@ -358,12 +346,10 @@
                 alert("Please enter a valid Months of Bid History between 1 and 120.");
                 return;
             }
-            
             // Reset Custom Quantity Analysis state
             $scope.customQuantityData.userQuantity = null;
             $scope.customQuantityPrediction = null;
             $scope.isCalculatingPrediction = false;
-            
             $scope.bidHistoryData = [];
             $scope.chartStats = null;
             $scope.isLoading = true;
@@ -509,6 +495,51 @@
                 $scope.reverseSort = false;
             }
         };
+
+        // Custom sorting function to handle filtered columns
+        $scope.customSort = function (item) {
+            if (!$scope.sortColumn) return 0;
+            
+            let value = item[$scope.sortColumn];
+            
+            switch ($scope.sortColumn) {
+                case 'b': 
+                    if (item.CalculatedUnit === 'LS - Lump Sum') {
+                        value = item.Quantity > 0 ? item.b / item.Quantity : 0;
+                    } else {
+                        value = item.b;
+                    }
+                    break;
+                case 'InflationAdjustedPrice':
+                    if (item.CalculatedUnit === 'LS - Lump Sum' && item.InflationAdjustedPrice) {
+                        value = item.Quantity > 0 ? item.InflationAdjustedPrice / item.Quantity : 0;
+                    } else {
+                        value = item.InflationAdjustedPrice || 0;
+                    }
+                    break;
+                case 'PvBidTotal':
+                    value = item.PvBidTotal || 0;
+                    break;
+                case 'l': 
+                    if (item.l) {
+                        value = new Date(parseInt(item.l.replace(/\/Date\((\d+)\)\//, '$1')));
+                    } else {
+                        value = new Date(0);
+                    }
+                    break;
+                case 'ExecutedDate':
+                    if (item.ExecutedDate) {
+                        value = new Date(parseInt(item.ExecutedDate.replace(/\/Date\((\d+)\)\//, '$1')));
+                    } else {
+                        value = new Date(0);
+                    }
+                    break;
+                default:
+                    value = item[$scope.sortColumn] || '';
+            }
+            
+            return value;
+        };
         $scope.getSortClass = function (column) {
             if ($scope.sortColumn === column) {
                 return $scope.reverseSort ? 'fa-sort-down' : 'fa-sort-up';
@@ -628,42 +659,14 @@
 
         // Call on load
         $scope.onRegionTypeChange();
-        $scope.hasError = false;
-        $scope.errorMessage = '';
-        $scope.hasBidAmountError = false;
-        $scope.bidAmountErrorMessage = '';
-        $scope.hasBidAmountFormatError = false;
-        $scope.bidAmountFormatErrorMessage = '';
+
         
         
 
 
-        $scope.validateQuantity = function () {
-            const min = parseFloat($scope.selectedMinQuantity);
-            const max = parseFloat($scope.selectedMaxQuantity);
 
-            $scope.hasError = false;
-            $scope.errorMessage = '';
 
-            if (!isNaN(min) && !isNaN(max) && min > max) {
-                $scope.hasError = true;
-                $scope.errorMessage = 'Minimum quantity cannot be greater than maximum quantity.';
-            }
-        };
 
-        // Bid Amount validation and formatting
-        $scope.validateBidAmount = function () {
-            const min = parseFloat($scope.selectedMinBidAmount ? $scope.selectedMinBidAmount.toString().replace(/,/g, '') : null);
-            const max = parseFloat($scope.selectedMaxBidAmount ? $scope.selectedMaxBidAmount.toString().replace(/,/g, '') : null);
-
-            $scope.hasBidAmountError = false;
-            $scope.bidAmountErrorMessage = '';
-
-            if (!isNaN(min) && !isNaN(max) && min > max) {
-                $scope.hasBidAmountError = true;
-                $scope.bidAmountErrorMessage = 'Minimum bid amount cannot be greater than maximum bid amount.';
-            }
-        };
 
         $scope.formatBidAmount = function (type) {
             if (type === 'min' && $scope.selectedMinBidAmount) {
@@ -700,11 +703,13 @@
             const max = parseFloat($scope.selectedMaxBidAmount ? $scope.selectedMaxBidAmount.toString().replace(/,/g, '') : 0);
             return max - min;
         };
+
         $scope.getQuantityRange = function () {
             const min = parseFloat($scope.selectedMinQuantity) || 0;
-                                const max = parseFloat($scope.selectedMaxQuantity) || Infinity;
+            const max = parseFloat($scope.selectedMaxQuantity) || Infinity;
             return max - min;
         };
+
 
 
         $scope.removeCounty = function (countyName) {
@@ -802,7 +807,7 @@
             try {
                 let headers = [
                     "Contract Number", "Project Number", "Pay Item", "Description", "Supplemental Description",
-                    "Units", "Quantity", "Unit Price Bid", "Inflation-Adjusted Unit Price", "Current Price (" + ($scope.useInflationAdjustedPrices ? "Inflation-Adjusted" : "Raw") + ")", "Weighted Avg No Outliers", "Outlier", "Bid Amount", "District",
+                    "Units", "Quantity", "Unit Price Bid", "Inflation-Adjusted Unit Price", "Weighted Avg No Outliers", "Outlier", "Bid Amount", "District",
                     "Primary County", "Bidder Name", "Bid Status", "Bidder Rank", "Number of Bidders"
                     , "Contract Type", "Work Type", "Work Mix", "Project Category",
                     "Letting Date", "Executed Date", "Awarded Days", "Proposal Type", "Bid Type"
@@ -820,7 +825,7 @@
                     return [
                         `"${item.p}"`, `"${item.ProjectNumber}"`, `"${item.ri}"`, `"${item.Description.replace(/"/g, '""')}"`,
                         `"${item.SupplementalDescription}"`,
-                        `"${item.CalculatedUnit}"`, `"${item.Quantity}"`, `"${unitPrice}"`, `"${inflationAdjustedUnitPrice}"`, `"${$scope.getPriceField(item)}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`,
+                        `"${item.CalculatedUnit}"`, `"${item.Quantity}"`, `"${unitPrice}"`, `"${inflationAdjustedUnitPrice}"`,  `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`,
                         `"${item.PvBidTotal}"`, `"${item.d}"`, `"${item.c}"`, `"${item.VendorName}"`,
                         `"${(item.BidStatus)}"`, `"${item.VendorRanking}"`, `"${item.NumberOfBidders}"`, `"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`,
                         `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`, `"${(item.WorkMixDescription)}"`, `"${(item.CategoryDescription)}"`,
@@ -883,7 +888,6 @@
         }
 
         $scope.downloadPDF = function () {
-    
             setTimeout(function () {
                 var jsPDF = window.jspdf && window.jspdf.jsPDF;
                 if (typeof jsPDF !== 'function') {
@@ -1069,7 +1073,6 @@
             'regionType',
             'selectedRegions',
             'selectedRegionCounties',
-            'selectedMarketArea',
 
 
             'selectedMinQuantity',
@@ -1086,7 +1089,6 @@
                     $scope.searchAttempted && 
                     $scope.chartStats && 
                     $scope.chartInstance &&
-                    // Don't mark as stale for inflation toggle changes since they update immediately
                     filter !== 'useInflationAdjustedPrices') {
                     $scope.isChartStale = true;
                 }
@@ -1268,7 +1270,6 @@
 
                 const nearestPoints = distances.slice(0, Math.min(windowSize, distances.length));
 
-                // Weighted average based on inverse distance
                 let weightedSum = 0;
                 let totalWeight = 0;
 
@@ -1303,12 +1304,15 @@
             let lower = [];
             let upper = [];
             for (let i = 0; i < xvals.length; i++) {
-                let valuesAtPoint = preds.map(row => row[i]).filter(v => v !== null && !isNaN(v));
+                // Filter out null, NaN, and negative values for unit prices
+                let valuesAtPoint = preds.map(row => row[i]).filter(v => v !== null && !isNaN(v) && v >= 0);
                 valuesAtPoint.sort((a, b) => a - b);
                 if (valuesAtPoint.length > 0) {
                     let lowerIdx = Math.floor(valuesAtPoint.length * 0.025);
                     let upperIdx = Math.floor(valuesAtPoint.length * 0.975);
-                    lower[i] = valuesAtPoint[lowerIdx];
+                    
+                    // Ensure lower bound is non-negative (minimum 0)
+                    lower[i] = Math.max(0, valuesAtPoint[lowerIdx]);
                     upper[i] = valuesAtPoint[upperIdx];
                 } else {
                     lower[i] = null;
@@ -1353,23 +1357,43 @@
                     const quantityRange = Array.from(new Set(quantities)).sort((a, b) => a - b);
                     // LOESS fits
                     const loessUnfiltered = loessSmooth(quantities, prices, 0.3, quantityRange);
-                    const loessFiltered = loessSmooth(QuantityFiltered, PriceFiltered, 0.9, quantityRange);
+                    const loessFiltered = loessSmooth(QuantityFiltered, PriceFiltered, 0.3, quantityRange);
 
                     // Bootstrap CI
                     const ciUnfiltered = bootstrapCI(quantities, prices, quantityRange, 0.3, 200);
-                    const ciFiltered = bootstrapCI(QuantityFiltered, PriceFiltered, quantityRange, 0.9, 200);
+                    const ciFiltered = bootstrapCI(QuantityFiltered, PriceFiltered, quantityRange, 0.3, 200);
                     const lowerUnfiltered = quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.lower[i] })).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
                     const upperUnfiltered = quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.upper[i] })).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
                     const lowerFiltered = quantityRange.map((q, i) => ({ x: q, y: ciFiltered.lower[i] })).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
                     const upperFiltered = quantityRange.map((q, i) => ({ x: q, y: ciFiltered.upper[i] })).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
-                    const filteredPoints = filtered.map(d => ({
-                        x: d.q,
-                        y: d.p,
-                        l: d.l,
-                        p: d.pn
-                    }));
-                    const loessLineUnfiltered = quantityRange.map((q, i) => ({ x: q, y: loessUnfiltered[i] }));
-                    const loessLineFiltered = quantityRange.map((q, i) => ({ x: q, y: loessFiltered[i] }));
+                    const filteredPoints = filtered.map(d => {
+                        let price = d.p;
+                        if (price > 0 && price < 0.01) {
+                            price = 0.01;
+                        }
+                        return {
+                            x: d.q,
+                            y: price,
+                            l: d.l,
+                            p: d.pn
+                        };
+                    });
+                    const loessLineUnfiltered = quantityRange.map((q, i) => {
+                        let price = loessUnfiltered[i];
+                        // Force values less than $0.01 (but greater than 0) to be $0.01 for chart display
+                        if (price > 0 && price < 0.01) {
+                            price = 0.01;
+                        }
+                        return { x: q, y: price };
+                    });
+                    const loessLineFiltered = quantityRange.map((q, i) => {
+                        let price = loessFiltered[i];
+                        
+                        if (price > 0 && price < 0.01) {
+                            price = 0.01;
+                        }
+                        return { x: q, y: price };
+                    });
 
                     if (quantities.length === 0 || prices.length === 0) {
                         $scope.isChartLoading = false;
@@ -1383,7 +1407,12 @@
                     for (let i = 0; i < $scope.bidHistoryData.length; i++) {
                         const item = $scope.bidHistoryData[i];
                         const quantity = item.Quantity || 0;
-                        const price = $scope.getPriceField(item) || 0;
+                        let price = $scope.getPriceField(item) || 0;
+                        
+                        if (price > 0 && price < 0.01) {
+                            price = 0.01;
+                        }
+                        
                         bidPoints.push({
                             x: quantity, // Quantity
                             y: price, // Price
@@ -1476,8 +1505,8 @@
                                 {
                                     label: 'Weighted Avg',
                                     data: [
-                                        { x: Math.min(...quantities), y: weightedMean },
-                                        { x: Math.max(...quantities), y: weightedMean }
+                                        { x: Math.min(...quantities), y: weightedMean > 0 && weightedMean < 0.01 ? 0.01 : weightedMean },
+                                        { x: Math.max(...quantities), y: weightedMean > 0 && weightedMean < 0.01 ? 0.01 : weightedMean }
                                     ],
                                     type: 'line',
                                     borderColor: 'black',
@@ -1488,8 +1517,8 @@
                                 {
                                     label: 'Weighted Avg (No Outliers)',
                                     data: [
-                                        { x: Math.min(...QuantityFiltered), y: $scope.weightedAvgNoOutliers },
-                                        { x: Math.max(...QuantityFiltered), y: $scope.weightedAvgNoOutliers }
+                                        { x: Math.min(...QuantityFiltered), y: $scope.weightedAvgNoOutliers > 0 && $scope.weightedAvgNoOutliers < 0.01 ? 0.01 : $scope.weightedAvgNoOutliers },
+                                        { x: Math.max(...QuantityFiltered), y: $scope.weightedAvgNoOutliers > 0 && $scope.weightedAvgNoOutliers < 0.01 ? 0.01 : $scope.weightedAvgNoOutliers }
                                     ],
                                     type: 'line',
                                     borderColor: '#6366f1',
@@ -1602,14 +1631,16 @@
                                     },
                                     ticks: {
                                         maxTicksLimit: 6,
-                                        callback: function (value) {
+                                        callback: function (value, index, values) {
                                             // Format currency nicely for log scale
                                             if (value >= 1000) {
                                                 return '$' + (value / 1000).toFixed(1) + 'K';
                                             } else if (value >= 1) {
                                                 return '$' + value.toFixed(0);
-                                            } else {
+                                            } else if (value > 0) {
                                                 return '$' + value.toFixed(2);
+                                            } else {
+                                                return '$0.00';
                                             }
                                         }
                                     }
@@ -1675,7 +1706,22 @@
                                                 lines.push(`📋 ${label}`);
                                             }
                                             lines.push(`📊 Quantity: ${qty.toLocaleString()}`);
-                                            lines.push(`💰 Price: ${"$" + price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
+                                            // Format price appropriately based on its size
+                                            let formattedPrice;
+                                            if (price >= 1000) {
+                                                formattedPrice = "$" + (price / 1000).toFixed(1) + "K";
+                                            } else if (price >= 1) {
+                                                formattedPrice = "$" + price.toFixed(2);
+                                            } else if (price >= 0.01) {
+                                                formattedPrice = "$" + price.toFixed(2);
+                                            } else if (price > 0 && price < 0.01) {
+                                               
+                                                formattedPrice = "$" + price.toFixed(4);
+                                            } else {
+                                             
+                                                formattedPrice = "$" + price.toFixed(2);
+                                            }
+                                            lines.push(`💰 Price: ${formattedPrice}`);
                                             if (label === 'Bid Point Outlier' || label === 'Bid Point') {
                                                 const lettingDate = point.l || 'N/A';
                                                 const contract = point.p || 'N/A';
@@ -1954,19 +2000,27 @@
                                     color: 'rgba(0,0,0,0.1)'
                                 }
                             },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'Weighted Average Unit Price (' + ($scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw') + ') ($)',
-                                    font: { size: 14, weight: 'bold' }
-                                },
-                                grid: {
-                                    display: true,
-                                    color: 'rgba(0,0,0,0.1)'
-                                },
+                                                            y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Weighted Average Unit Price (' + ($scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw') + ') ($)',
+                                        font: { size: 14, weight: 'bold' }
+                                    },
+                                    grid: {
+                                        display: true,
+                                        color: 'rgba(0,0,0,0.1)'
+                                    },
                                 ticks: {
-                                    callback: function (value) {
-                                        return '$' + value.toLocaleString();
+                                    callback: function (value, index, values) {
+                                        if (value >= 1000) {
+                                            return '$' + (value / 1000).toFixed(1) + 'K';
+                                        } else if (value >= 1) {
+                                            return '$' + value.toFixed(2);
+                                        } else if (value > 0) {
+                                            return '$' + value.toFixed(2);
+                                        } else {
+                                            return '$0.00';
+                                        }
                                     }
                                 }
                             }
@@ -2081,15 +2135,16 @@
                 const x = validData.map(item => item.qty);
                 const y = validData.map(item => item.price);
            
-                const totalQty = quantities.reduce((sum, q) => sum + q, 0);
-                const weightedAvg = quantities.reduce((sum, q, i) => sum + (q * prices[i]), 0) / totalQty;
+                // Calculate weighted statistics using validData only
+                const totalQty = x.reduce((sum, q) => sum + q, 0);
+                const weightedAvg = x.reduce((sum, q, i) => sum + (q * y[i]), 0) / totalQty;
   
                 const weightedStdDev = Math.sqrt(
-                    quantities.reduce((sum, q, i) => sum + q * Math.pow(prices[i] - weightedAvg, 2), 0) / totalQty
+                    x.reduce((sum, q, i) => sum + q * Math.pow(y[i] - weightedAvg, 2), 0) / totalQty
                 );
                 
-                const cleanData = quantities.map((qty, i) => ({ qty, price: prices[i] }))
-                    .filter(item => Math.abs(item.price - weightedAvg) <= weightedStdDev);
+                // Filter outliers from validData (not from original arrays)
+                const cleanData = validData.filter(item => Math.abs(item.price - weightedAvg) <= weightedStdDev);
                 
                 const cleanTotalQty = cleanData.reduce((sum, item) => sum + item.qty, 0);
                 const weightedAvgNoOutliers = cleanTotalQty > 0 ? 
@@ -2098,15 +2153,43 @@
                 const prediction = loessSmooth(x, y, 0.3, [$scope.customQuantityData.userQuantity]);
                 
                 const loessUnfiltered = loessSmooth(x, y, 0.3, [$scope.customQuantityData.userQuantity]);
-                const loessFiltered = loessSmooth(cleanData.map(item => item.qty), cleanData.map(item => item.price), 0.9, [$scope.customQuantityData.userQuantity]);
+                const loessFiltered = loessSmooth(cleanData.map(item => item.qty), cleanData.map(item => item.price), 0.3, [$scope.customQuantityData.userQuantity]);
                 
                 // Calculate confidence intervals using bootstrap
                 const ciUnfiltered = bootstrapCI(x, y, [$scope.customQuantityData.userQuantity], 0.3, 100);
-                const ciFiltered = bootstrapCI(cleanData.map(item => item.qty), cleanData.map(item => item.price), [$scope.customQuantityData.userQuantity], 0.9, 100);
+                const ciFiltered = bootstrapCI(cleanData.map(item => item.qty), cleanData.map(item => item.price), [$scope.customQuantityData.userQuantity], 0.3, 100);
                 
                 if (prediction && prediction.length > 0 && isFinite(prediction[0]) && prediction[0] > 0) {
                     const predictedPrice = prediction[0];
                     const totalCost = $scope.customQuantityData.userQuantity * predictedPrice;
+                    
+                    // Check for counterintuitive LOESS results
+                    const loessUnfilteredValue = loessUnfiltered[0] || 0;
+                    const loessFilteredValue = loessFiltered[0] || 0;
+                    const hasCounterintuitiveResult = loessFilteredValue > loessUnfilteredValue;
+                    
+                    // Determine explanation for counterintuitive results
+                    let counterintuitiveExplanation = '';
+                    if (hasCounterintuitiveResult) {
+                        const userQty = $scope.customQuantityData.userQuantity;
+                        const filteredQuantities = cleanData.map(item => item.qty);
+                        const allQuantities = x;
+                        
+                        const minFiltered = Math.min(...filteredQuantities);
+                        const maxFiltered = Math.max(...filteredQuantities);
+                        const minAll = Math.min(...allQuantities);
+                        const maxAll = Math.max(...allQuantities);
+                        
+                        if (userQty < minFiltered || userQty > maxFiltered) {
+                            counterintuitiveExplanation = 'This result occurs because your quantity is outside the range of non-outlier data, causing different extrapolation behavior.';
+                        } else {
+                            // Calculate the difference to provide more specific explanation
+                            const difference = loessFilteredValue - loessUnfilteredValue;
+                            const percentChange = ((difference / loessUnfilteredValue) * 100).toFixed(1);
+                            
+                            counterintuitiveExplanation = `This result occurs because removing outliers changed the local data patterns around your quantity (${userQty.toLocaleString()}). The LOESS algorithm detected a different local trend, resulting in a ${percentChange}% change in prediction. This is normal for local regression methods when data distribution changes.`;
+                        }
+                    }
                     
                     $scope.customQuantityPrediction = {
                         success: true,
@@ -2114,20 +2197,24 @@
                         predictedUnitPrice: predictedPrice,
                         totalCost: totalCost,
                         priceType: $scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw',
-                        loessUnfiltered: loessUnfiltered[0] || 0,
-                        loessFiltered: loessFiltered[0] || 0,
+                        loessUnfiltered: loessUnfilteredValue,
+                        loessFiltered: loessFilteredValue,
                         weightedAvg: weightedAvg,
                         weightedAvgNoOutliers: weightedAvgNoOutliers,
                         dataPoints: validData.length,
-                        loessUnfilteredTotal: (loessUnfiltered[0] || 0) * $scope.customQuantityData.userQuantity,
-                        loessFilteredTotal: (loessFiltered[0] || 0) * $scope.customQuantityData.userQuantity,
+                        dataPointsNoOutliers: cleanData.length,
+                        loessUnfilteredTotal: loessUnfilteredValue * $scope.customQuantityData.userQuantity,
+                        loessFilteredTotal: loessFilteredValue * $scope.customQuantityData.userQuantity,
                         weightedAvgTotal: weightedAvg * $scope.customQuantityData.userQuantity,
                         weightedAvgNoOutliersTotal: weightedAvgNoOutliers * $scope.customQuantityData.userQuantity,
                         // Confidence intervals for LOESS predictions
                         loessUnfilteredLower: ciUnfiltered.lower[0] || 0,
                         loessUnfilteredUpper: ciUnfiltered.upper[0] || 0,
                         loessFilteredLower: ciFiltered.lower[0] || 0,
-                        loessFilteredUpper: ciFiltered.upper[0] || 0
+                        loessFilteredUpper: ciFiltered.upper[0] || 0,
+                        // Counterintuitive result detection
+                        hasCounterintuitiveResult: hasCounterintuitiveResult,
+                        counterintuitiveExplanation: counterintuitiveExplanation
                     };
                 } else {
                     $scope.customQuantityPrediction = {
@@ -2202,5 +2289,31 @@ angular.module('dqeControllers')
             if (!input) return '';
             var match = /\/Date\((\d+)\)\//.exec(input);
             return match ? new Date(parseInt(match[1])) : input;
+        };
+    })
+    .filter('smartCurrency', function () {
+        return function (input) {
+            if (input === null || input === undefined || isNaN(input)) {
+                return '$0.00';
+            }
+            
+            var value = parseFloat(input);
+            
+            if (value > 0 && value < 0.01) {
+                return '$0.01';
+            }
+            else if (value >= 0.01 && value < 1) {
+                return '$' + value.toFixed(2);
+            }
+            else if (value >= 1) {
+                // Format large numbers with commas for better readability
+                return '$' + value.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+            else {
+                return '$' + value.toFixed(2);
+            }
         };
     });

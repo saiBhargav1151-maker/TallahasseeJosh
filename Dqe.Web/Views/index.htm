@@ -26,13 +26,13 @@
     <script type="text/javascript" src="./Scripts/angular-block-ui/angular-block-ui.js"></script>
     <script type="text/javascript" src="./Scripts/ngStorage.min.js"></script>
     <!--utilities-->
-    <script type="text/javascript" src="./Scripts/app/utilities/extensions.js?date=20250731"></script>
+    <script type="text/javascript" src="./Scripts/app/utilities/extensions.js?date=20250820"></script>
     <!--app driver-->
-    <script type="text/javascript" src="./Scripts/app/app.js?date=20250731"></script>
+    <script type="text/javascript" src="./Scripts/app/app.js?date=20250820"></script>
     <!--bundles-->
-    <script type="text/javascript" src="./bundles/services?date=20250731"></script>
-    <script type="text/javascript" src="./bundles/directives?date=20250731"></script>
-    <script type="text/javascript" src="./bundles/controllers?date=20250731"></script>
+    <script type="text/javascript" src="./bundles/services?date=20250820"></script>
+    <script type="text/javascript" src="./bundles/directives?date=20250820"></script>
+    <script type="text/javascript" src="./bundles/controllers?date=20250820"></script>
     <!--logging-->
     <script type="text/javascript" src="./Scripts/stacktrace.js"></script>
     <script type="text/javascript" src="./Scripts/alltech-logging.js"></script>
@@ -114,6 +114,9 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li>
                             <a href="https://www.fdot.gov/programmanagement/estimates/applications/dqe/dqe-help" title="Help - opens a new browser window" target="_blank">Help</a>
+                        </li>
+                        <li ng-if="showStatisticsDetails">
+                            <a href="./Content/Statistics_Details.docx" title="Statistics Details - Download Word Document" download="Statistics_Details.docx">Statistics Details</a>
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right" ng-show="currentUser.isAuthenticated">
