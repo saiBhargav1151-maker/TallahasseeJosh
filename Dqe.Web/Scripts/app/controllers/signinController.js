@@ -42,7 +42,16 @@
             user.district = $scope.impersonateUser.district;
             securityService.impersonateUser(user, function () {
                 securityService.getCurrentUser(function(u) {
-                    if (u.role == 'A' || u.role == 'D' || u.role == 'E' || u.role == 'R') {
+                    if (u.role == 'A'
+                        || u.role == 'D'
+                        || u.role == 'E'
+                        || u.role == 'R'
+                        || u.role == '1'
+                        || u.role == 'C'
+                        || u.role == '2'
+                        || u.role == 'M'
+                        || u.role == 'O'
+                    ) {
                         $location.url('/home_estimates');
                     }else if (u.role == 'P') {
                         $location.url('/admin_payitems_maintain');

@@ -57,17 +57,7 @@ namespace Dqe.Web.Controllers
                                 id = i.SrsId,
                                 fullName = i.FullName,
                                 district = i.District,
-                                role = i.Role == DqeRole.Administrator
-                                 ? "A"
-                                 : i.Role == DqeRole.DistrictAdministrator
-                                    ? "D"
-                                    : i.Role == DqeRole.Estimator
-                                        ? "E"
-                                        : i.Role == DqeRole.PayItemAdministrator
-                                            ? "P"
-                                            : i.Role == DqeRole.Reviewer
-                                                ? "R"
-                                            : "T",
+                                role = ((char)i.Role).ToString(),
                                 costGroupAuthorization = i.CostGroupAuthorization,
                                 roleAsString = i.RoleAsString,
                                 selected = false
@@ -87,17 +77,7 @@ namespace Dqe.Web.Controllers
                 t.IsActive = true;
                 t.SrsId = user.id;
                 t.District = user.district;
-                t.Role = user.role == "A"
-                    ? DqeRole.Administrator
-                    : user.role == "D"
-                        ? DqeRole.DistrictAdministrator
-                        : user.role == "T"
-                            ? DqeRole.CostBasedTemplateAdministrator
-                            : user.role == "P"
-                                ? DqeRole.PayItemAdministrator
-                                 : user.role == "R"
-                                    ? DqeRole.Reviewer
-                                    : DqeRole.Estimator;
+                t.Role = ((DqeRole)user.role);
                 t.CostGroupAuthorization = user.costGroupAuthorization;
                 u.Transform(t, currentDqeUser);
                 _commandRepository.Add(u);
@@ -107,17 +87,7 @@ namespace Dqe.Web.Controllers
                 var t = (Domain.Transformers.DqeUser)u.GetTransformer();
                 t.IsActive = true;
                 t.District = user.district;
-                t.Role = user.role == "A"
-                    ? DqeRole.Administrator
-                    : user.role == "D"
-                        ? DqeRole.DistrictAdministrator
-                        : user.role == "T"
-                            ? DqeRole.CostBasedTemplateAdministrator
-                            : user.role == "P"
-                                ? DqeRole.PayItemAdministrator
-                                : user.role == "R"
-                                    ? DqeRole.Reviewer
-                                : DqeRole.Estimator;
+                t.Role = ((DqeRole)user.role);
                 t.CostGroupAuthorization = user.costGroupAuthorization;
                 u.Transform(t, currentDqeUser);
             }

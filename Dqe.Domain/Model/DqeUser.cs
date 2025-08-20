@@ -236,7 +236,10 @@ namespace Dqe.Domain.Model
         }
 
       
-
+        /// <summary>
+        /// TODO: THIS FUNCTION TAKES A LOT OF TIME TO RUN on dev. THIS SHOULD BE FIXED. MB.
+        /// </summary>
+        /// <returns></returns>
         public override Transformers.DqeUser GetTransformer()
         {
             return new Transformers.DqeUser
@@ -248,15 +251,7 @@ namespace Dqe.Domain.Model
                 SrsId = SrsId,
                 FullName = Name,
                 CostGroupAuthorization = CostGroupAuthorization,
-                RoleAsString =
-                    Role == DqeRole.System ? "System"
-                    : Role == DqeRole.Administrator ? "System Administrator"
-                    : Role == DqeRole.DistrictAdministrator ? "District Administrator"
-                    : Role == DqeRole.PayItemAdministrator ? "Pay Item Administrator"
-                    : Role == DqeRole.CostBasedTemplateAdministrator ? "Cost-Based Template Administrator"
-                    : Role == DqeRole.Estimator ? "Estimator"
-                    : Role == DqeRole.Reviewer ? "Reviewer"
-                    : "No Role"
+                RoleAsString = Helper.GetRoleDisplayLabel(Role)
             };
         }
 
@@ -280,6 +275,8 @@ namespace Dqe.Domain.Model
             if (account.Role != DqeRole.System 
                 && account.Role != DqeRole.Administrator 
                 && account.Role != DqeRole.DistrictAdministrator
+                && account.Role != DqeRole.MaintenanceDistrictAdmin
+                && account.Role != DqeRole.AdminReadOnly
                 )
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
@@ -301,7 +298,9 @@ namespace Dqe.Domain.Model
                     && transformer.Role != DqeRole.CostBasedTemplateAdministrator 
                     && transformer.Role != DqeRole.PayItemAdministrator
                     && transformer.Role != DqeRole.Estimator
-                    && transformer.Role != DqeRole.Reviewer)
+                    && transformer.Role != DqeRole.StateReviewer
+                    && transformer.Role != DqeRole.Coder
+                    && transformer.Role != DqeRole.AdminReadOnly)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for CO.", transformer.Role));
                 }

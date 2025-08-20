@@ -111,7 +111,8 @@ namespace Dqe.Domain.Model
             if (assignmentUser.IsInDqeDistrict(District)) return;
             if (_assignedUsers.Contains(assignmentUser)) return;
             if (account.Role == DqeRole.Administrator
-                || (account.Role == DqeRole.DistrictAdministrator && account.IsInDqeDistrict(District)))
+                || (account.Role == DqeRole.DistrictAdministrator && account.IsInDqeDistrict(District))
+                || (account.Role == DqeRole.MaintenanceDistrictAdmin && account.IsInDqeDistrict(District)))
             {
                 _assignedUsers.Add(assignmentUser);    
                 return;
@@ -123,7 +124,13 @@ namespace Dqe.Domain.Model
         {
             if (proposal == null) throw new ArgumentNullException("proposal");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System 
+                && account.Role != DqeRole.Administrator 
+                && account.Role != DqeRole.DistrictAdministrator 
+                && account.Role != DqeRole.Estimator
+                && account.Role != DqeRole.Coder
+                && account.Role != DqeRole.MaintenanceDistrictAdmin
+                && account.Role != DqeRole.MaintenanceEstimator)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -168,7 +175,13 @@ namespace Dqe.Domain.Model
         public virtual ProjectEstimate CreateNewVersionFromWt(string comment, Wt.Project source, bool initializePrices, DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System
+                && account.Role != DqeRole.Administrator 
+                && account.Role != DqeRole.DistrictAdministrator 
+                && account.Role != DqeRole.Estimator
+                && account.Role != DqeRole.MaintenanceEstimator
+                && account.Role != DqeRole.MaintenanceDistrictAdmin
+                && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -883,7 +896,17 @@ namespace Dqe.Domain.Model
         {
             if (transformer == null) throw new ArgumentNullException("transformer");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Reviewer)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator 
+                && account.Role != DqeRole.DistrictAdministrator 
+                && account.Role != DqeRole.Estimator 
+                && account.Role != DqeRole.DistrictReviewer
+                && account.Role != DqeRole.StateReviewer
+                && account.Role != DqeRole.Coder
+                && account.Role != DqeRole.MaintenanceDistrictAdmin
+                && account.Role != DqeRole.MaintenanceEstimator
+                && account.Role != DqeRole.AdminReadOnly
+
+                )
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

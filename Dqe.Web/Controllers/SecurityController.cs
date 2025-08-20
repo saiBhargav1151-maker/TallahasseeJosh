@@ -109,32 +109,8 @@ namespace Dqe.Web.Controllers
                     }, JsonRequestBehavior.AllowGet);    
             }
             var user = _dqeUserRepository.Get(dqeIdenetity.Id);
-            var role = user.Role == DqeRole.Administrator
-                ? "A"
-                : user.Role == DqeRole.DistrictAdministrator
-                    ? "D"
-                    : user.Role == DqeRole.CostBasedTemplateAdministrator
-                        ? "T"
-                        : user.Role == DqeRole.Estimator
-                            ? "E"
-                            : user.Role == DqeRole.PayItemAdministrator
-                                ? "P"
-                                : user.Role == DqeRole.Reviewer
-                                    ? "R"
-                                    : string.Empty;
-            var roleName = user.Role == DqeRole.Administrator
-                ? "Administrator"
-                : user.Role == DqeRole.DistrictAdministrator
-                    ? "District Coordinator"
-                    : user.Role == DqeRole.CostBasedTemplateAdministrator
-                        ? "Cost Based Template Administrator"
-                        : user.Role == DqeRole.Estimator
-                            ? "Estimator"
-                            : user.Role == DqeRole.PayItemAdministrator
-                                ? "Pay Item Administrator"
-                                : user.Role == DqeRole.Reviewer
-                                    ? "Reviewer"
-                                : string.Empty;
+            var role = ((char)user.Role).ToString();
+            var roleName = Helper.GetRoleDisplayLabel(user.Role);
 
             //!!NEEDS TO BE REMOVED, THIS IS FORCING USER  Marcus Barnes TO BE A REVIEWER ROLE!!!!
             //if (user.RacfId == "KNAKNMQ")
@@ -271,15 +247,8 @@ namespace Dqe.Web.Controllers
                 t.SrsId = user.id;
                 t.District = user.district;
                 t.CostGroupAuthorization = "U";
-                t.Role = user.role == "A"
-                    ? DqeRole.Administrator
-                    : user.role == "D"
-                        ? DqeRole.DistrictAdministrator
-                        : user.role == "P"
-                            ? DqeRole.PayItemAdministrator
-                            : user.role == "T"
-                                ? DqeRole.CostBasedTemplateAdministrator
-                                : DqeRole.Estimator;
+                t.Role = (DqeRole)user.role ; 
+
                 u.Transform(t, sys);
                 _commandRepository.Add(u);
             }
@@ -288,17 +257,7 @@ namespace Dqe.Web.Controllers
                 var t = u.GetTransformer();
                 t.IsActive = true;
                 t.District = user.district;
-                t.Role = user.role == "A"
-                    ? DqeRole.Administrator
-                    : user.role == "D"
-                        ? DqeRole.DistrictAdministrator
-                        : user.role == "P"
-                            ? DqeRole.PayItemAdministrator
-                            : user.role == "T"
-                                ? DqeRole.CostBasedTemplateAdministrator
-                                : user.role == "R"
-                                ? DqeRole.Reviewer
-                                : DqeRole.Estimator;
+                t.Role = (DqeRole)(char)user.role[0]; 
                 u.Transform(t, sys);
             }
             var encryptedTicket = CreateAuthenticationTicket(u);

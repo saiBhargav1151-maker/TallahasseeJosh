@@ -68,9 +68,16 @@
     var payItemAdminRole = { name: 'Pay Item Administrator', value: 'P' };
     var costBasedTemplateAdminRole = { name: 'Cost-Based Template Administrator', value: 'T' };
     var estimatorRole = { name: 'Estimator', value: 'E' };
-    var reviewerRole = { name: 'Reviewer', value: 'R' };
-    var coRoles = [systemAdminRole, payItemAdminRole, costBasedTemplateAdminRole, estimatorRole, reviewerRole];
-    var districtRoles = [districtAdminRole, estimatorRole, reviewerRole];
+    var DistrictReviewerRole = { name: 'District Reviewer', value: 'R' };
+    var StateReviewerRole = { name: 'State Reviewer', value: '1' };
+    var CoderRole = { name: 'Coder', value: 'C' };
+    var MaintenanceDistrictAdminRole = { name: 'Maintenance District Admin Role', value: '3' };
+    var MaintenanceEstimatorRole = { name: 'Maintenance Estimator Role', value: 'M' };
+    var AdminReadOnlyRole = { name: 'Admin Read Only', value: 'O' };
+    var coRoles = [systemAdminRole, payItemAdminRole, costBasedTemplateAdminRole,
+        estimatorRole, StateReviewerRole, CoderRole, MaintenanceDistrictAdminRole, MaintenanceEstimatorRole, AdminReadOnlyRole];
+    var districtRoles = [districtAdminRole, estimatorRole, DistrictReviewerRole,
+        StateReviewerRole, MaintenanceDistrictAdminRole, MaintenanceEstimatorRole];
     $scope.sysRoles = function() {
         if ($scope.thisUser == undefined) {
             return emptyRoles();
@@ -97,7 +104,7 @@
         return ($scope.district.startsWith('D') || $scope.district == 'TP');
     }
     function validCoRoles() {
-        if ($scope.role != systemAdminRole.value && $scope.role != payItemAdminRole.value && $scope.role != costBasedTemplateAdminRole.value && $scope.role != estimatorRole.value && $scope.role != reviewerRole.value) {
+        if ($scope.role != systemAdminRole.value && $scope.role != payItemAdminRole.value && $scope.role != costBasedTemplateAdminRole.value && $scope.role != estimatorRole.value && $scope.role != StateReviewerRole.value) {
             $scope.role = undefined;
         }
         return coRoles;

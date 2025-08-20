@@ -30,7 +30,7 @@ namespace Dqe.Web.Services
                     : label == SnapshotLabel.Initial ? "Initial"
                     : string.Empty;
         }
-
+     
         //public static string GetNextSnapshotLabelString( SnapshotLabel label)
         //{
         //    return label == SnapshotLabel.Official ? "Official"

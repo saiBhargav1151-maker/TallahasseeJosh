@@ -82,7 +82,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Reviewer })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.DistrictReviewer })]
         //public ActionResult DownloadStructureData()
         public ActionResult DownloadStructureData(FormCollection form)
         {

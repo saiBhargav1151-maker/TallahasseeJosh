@@ -3,7 +3,7 @@
         getNavs: function (currentUser) {
             if (currentUser.isAuthenticated) {
                 //co admin or district admin
-                if (currentUser.role == 'A' || currentUser.role == 'D') {
+                if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == '2' || currentUser.role == 'O') {
                     return [
                         {
                             title: 'Home',
@@ -31,7 +31,7 @@
                             active: $location.url().startsWith('/payitems') ? 'active' : ''
                         }
                     ];
-                } else if (currentUser.role == 'P' || currentUser.role == 'T') {
+                } else if (currentUser.role == 'P' || currentUser.role == 'T' || currentUser.role == '2' || currentUser.role == 'O') {
                     //pay item admin or cost-based template admin
                     return [
                         {
@@ -106,7 +106,8 @@
             if (currentUser.isAuthenticated) {
                 if ($location.url().startsWith('/home')) {
                     //co admin, district admin, or estimator
-                    if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == 'E') {
+                    if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == 'E' || currentUser.role == '1' || currentUser.role == 'R'
+                        || currentUser.role == 'C' || currentUser.role == '2' || currentUser.role == 'M' || currentUser.role == 'O') {
                         return [
                             {
                                 title: 'My Estimates',

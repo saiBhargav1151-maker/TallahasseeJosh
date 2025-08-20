@@ -18,7 +18,12 @@ using Proposal = Dqe.Domain.Model.Proposal;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Reviewer })]
+    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer,
+        DqeRole.DistrictReviewer,
+        DqeRole.Coder,
+        DqeRole.MaintenanceEstimator,
+        DqeRole.MaintenanceDistrictAdmin,
+        DqeRole.AdminReadOnly})]
     public class ProjectProposalController : Controller
     {
         private readonly IWebTransportService _webTransportService;
@@ -1276,7 +1281,7 @@ namespace Dqe.Web.Controllers
                     isAuthorized = currentUser.Role == DqeRole.Administrator || currentUser.IsInDqeDistrict(project.District) || currentUser.IsAuthorizedOnProject(project),
                     isSystemAdmin = currentUser.Role == DqeRole.Administrator,
                     isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(project.District),
-                    isReviewRole = currentUser.Role == DqeRole.Reviewer   
+                    isReviewRole = currentUser.Role == DqeRole.DistrictReviewer   
                 },
                 authorizedUsers = project.AssignedUsers.Select(i => new
                 {
