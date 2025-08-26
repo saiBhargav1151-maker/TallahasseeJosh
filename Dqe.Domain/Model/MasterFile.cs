@@ -44,16 +44,16 @@ namespace Dqe.Domain.Model
             payItemMaster.MyMasterFile = this;
         }
 
-        /// <summary>
-        /// This just 
-        /// </summary>
-        /// <param name="project"></param>
-        /// <param name="account"></param>
+
         public virtual void AddProject(Project project, DqeUser account)
         {
             if (project == null) throw new ArgumentNullException("project");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder && account.Role != DqeRole.MaintenanceEstimator && account.Role != DqeRole.MaintenanceDistrictAdmin && account.Role != DqeRole.AdminReadOnly)
+            List<DqeRole> approvedRoles = new List<DqeRole>() { 
+                DqeRole.System, DqeRole.Administrator, DqeRole.DistrictAdministrator, 
+                DqeRole.Estimator, DqeRole.Coder, DqeRole.MaintenanceEstimator, DqeRole.MaintenanceDistrictAdmin, DqeRole.AdminReadOnly, DqeRole.DistrictReviewer, DqeRole.StateReviewer
+            };
+            if (!approvedRoles.Contains(account.Role))
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

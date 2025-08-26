@@ -12,7 +12,7 @@ using Dqe.Web.Attributes;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new [] {DqeRole.Administrator, DqeRole.DistrictAdministrator})]
+    [CustomAuthorize(Roles = new [] {DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.MaintenanceDistrictAdmin, DqeRole.AdminReadOnly})]
     public class SecurityAdministrationController : Controller
     {
         private readonly IStaffService _staffService;
@@ -64,7 +64,29 @@ namespace Dqe.Web.Controllers
                             }), JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Gets all users
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public JsonResult GetAllRoles()
+        {
+            var roleList = new DqeRoleModelList();
+
+            return Json(roleList.AllDqeRoles
+                .Select(i => new
+                {
+                    id = i.Id,
+                    displayName = i.DisplayName,
+                    district = i.CoRole,
+                    email = i.DistrictRole,
+                    roleEnum = i.Role.ToString()
+                }),
+                JsonRequestBehavior.AllowGet); ;
+        }
+
         [HttpPost]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator })]
         public ActionResult UpdateUser(dynamic user)
         {
             var currentUser = (DqeIdentity)User.Identity;
@@ -95,6 +117,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator})]
         public ActionResult RemoveUsers(dynamic users)
         {
             var currentUser = (DqeIdentity)User.Identity;

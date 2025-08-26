@@ -389,7 +389,9 @@ namespace Dqe.Domain.Model
         public virtual ProjectEstimate CreateNewReviewVersionFromSnapshot(string comment, ProjectEstimate source, DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator
+                && account.Role != DqeRole.StateReviewer
+                && account.Role != DqeRole.DistrictReviewer)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

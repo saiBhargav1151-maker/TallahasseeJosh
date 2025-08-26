@@ -239,6 +239,7 @@ namespace Dqe.Web.Controllers
 #endif
             var u = _dqeUserRepository.GetBySrsId(user.id);
             var sys = _dqeUserRepository.GetSystemAccount();
+
             if (u == null)
             {
                 u = new DqeUser(_staffService, _dqeUserRepository, _proposalRepository, _projectRepository);
@@ -247,7 +248,15 @@ namespace Dqe.Web.Controllers
                 t.SrsId = user.id;
                 t.District = user.district;
                 t.CostGroupAuthorization = "U";
-                t.Role = (DqeRole)user.role ; 
+                if (user.role is int)
+                {
+                    user.role = Convert.ToString(user.role);
+                    t.Role = (DqeRole)user.role[0];
+                }
+                else if (user.role is string)
+                {
+                    t.Role = (DqeRole)user.role[0];
+                }
 
                 u.Transform(t, sys);
                 _commandRepository.Add(u);
@@ -257,7 +266,16 @@ namespace Dqe.Web.Controllers
                 var t = u.GetTransformer();
                 t.IsActive = true;
                 t.District = user.district;
-                t.Role = (DqeRole)(char)user.role[0]; 
+                if (user.role is int)
+                {
+                    user.role = Convert.ToString(user.role);
+                    t.Role = (DqeRole)user.role[0];
+                }
+                else if(user.role is string)
+                {
+                    t.Role = (DqeRole)user.role[0];
+                }
+                
                 u.Transform(t, sys);
             }
             var encryptedTicket = CreateAuthenticationTicket(u);

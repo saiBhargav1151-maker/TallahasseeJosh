@@ -119,6 +119,12 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer,
+        DqeRole.DistrictReviewer,
+        DqeRole.Coder,
+        DqeRole.MaintenanceEstimator,
+        DqeRole.MaintenanceDistrictAdmin,
+        DqeRole.AdminReadOnly})]
         public ActionResult GetProposal(string number)
         {
             return GetProposal(number, string.Empty);
@@ -1281,7 +1287,7 @@ namespace Dqe.Web.Controllers
                     isAuthorized = currentUser.Role == DqeRole.Administrator || currentUser.IsInDqeDistrict(project.District) || currentUser.IsAuthorizedOnProject(project),
                     isSystemAdmin = currentUser.Role == DqeRole.Administrator,
                     isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(project.District),
-                    isReviewRole = currentUser.Role == DqeRole.DistrictReviewer   
+                    isReviewRole = (currentUser.Role == DqeRole.DistrictReviewer && currentUser.IsInDqeDistrict(project.District) ) || (currentUser.Role == DqeRole.StateReviewer)
                 },
                 authorizedUsers = project.AssignedUsers.Select(i => new
                 {

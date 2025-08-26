@@ -277,6 +277,7 @@ namespace Dqe.Domain.Model
                 && account.Role != DqeRole.DistrictAdministrator
                 && account.Role != DqeRole.MaintenanceDistrictAdmin
                 && account.Role != DqeRole.AdminReadOnly
+                && account.Role != DqeRole.DistrictReviewer
                 )
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
@@ -300,14 +301,17 @@ namespace Dqe.Domain.Model
                     && transformer.Role != DqeRole.Estimator
                     && transformer.Role != DqeRole.StateReviewer
                     && transformer.Role != DqeRole.Coder
-                    && transformer.Role != DqeRole.AdminReadOnly)
+                    && transformer.Role != DqeRole.AdminReadOnly
+                     && transformer.Role != DqeRole.DistrictReviewer
+                     && transformer.Role != DqeRole.MaintenanceDistrictAdmin
+                     && transformer.Role != DqeRole.MaintenanceEstimator)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for CO.", transformer.Role));
                 }
             }
             else
             {
-                if (transformer.Role != DqeRole.DistrictAdministrator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.Estimator)
+                if (transformer.Role != DqeRole.DistrictAdministrator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.DistrictReviewer && transformer.Role != DqeRole.StateReviewer && transformer.Role != DqeRole.MaintenanceDistrictAdmin && transformer.Role != DqeRole.MaintenanceEstimator)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for district {1}.", transformer.Role, transformer.District));
                 }
