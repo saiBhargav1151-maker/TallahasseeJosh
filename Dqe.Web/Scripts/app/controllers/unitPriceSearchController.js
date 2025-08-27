@@ -1154,99 +1154,107 @@
         }
 
         // Helper function to aggregate multiple y-values per x
-        function aggregateDataByX(x, y, method = 'mean') {
-            const groups = {};
-            for (let i = 0; i < x.length; i++) {
-                const xVal = x[i];
+        function aggregateDataByX(x, y, method) {
+            // Handle default parameter for older JavaScript
+            if (method === undefined) method = 'mean';
+            
+            var groups = {};
+            for (var i = 0; i < x.length; i++) {
+                var xVal = x[i];
                 if (!groups[xVal]) {
                     groups[xVal] = [];
                 }
                 groups[xVal].push(y[i]);
             }
-            const result = [];
-            for (const [xVal, yVals] of Object.entries(groups)) {
-                let aggregatedY;
+            var result = [];
+            for (var xVal in groups) {
+                if (groups.hasOwnProperty(xVal)) {
+                    var yVals = groups[xVal];
+                    var aggregatedY;
 
-                switch (method) {
-                    case 'mean':
-                        aggregatedY = yVals.reduce((sum, val) => sum + val, 0) / yVals.length;
-                        break;
-                    case 'median':
-                        yVals.sort((a, b) => a - b);
-                        const mid = Math.floor(yVals.length / 2);
-                        aggregatedY = yVals.length % 2 === 0
-                            ? (yVals[mid - 1] + yVals[mid]) / 2
-                            : yVals[mid];
-                        break;
-                    case 'first':
-                        aggregatedY = yVals[0];
-                        break;
-                    case 'last':
-                        aggregatedY = yVals[yVals.length - 1];
-                        break;
-                    default:
-                        aggregatedY = yVals.reduce((sum, val) => sum + val, 0) / yVals.length;
+                    switch (method) {
+                        case 'mean':
+                            aggregatedY = yVals.reduce(function(sum, val) { return sum + val; }, 0) / yVals.length;
+                            break;
+                        case 'median':
+                            yVals.sort(function(a, b) { return a - b; });
+                            var mid = Math.floor(yVals.length / 2);
+                            aggregatedY = yVals.length % 2 === 0
+                                ? (yVals[mid - 1] + yVals[mid]) / 2
+                                : yVals[mid];
+                            break;
+                        case 'first':
+                            aggregatedY = yVals[0];
+                            break;
+                        case 'last':
+                            aggregatedY = yVals[yVals.length - 1];
+                            break;
+                        default:
+                            aggregatedY = yVals.reduce(function(sum, val) { return sum + val; }, 0) / yVals.length;
+                    }
+
+                    result.push({ x: parseFloat(xVal), y: aggregatedY });
                 }
-
-                result.push({ x: parseFloat(xVal), y: aggregatedY });
             }
 
-            return result.sort((a, b) => a.x - b.x);
+            return result.sort(function(a, b) { return a.x - b.x; });
         }
 
-        const bandwidthCache = new Map();
+        // Bandwidth cache using plain object instead of Map for better compatibility
+        var bandwidthCache = {};
         
-       
-        let cachedUnfilteredBandwidth = null;
-        let cachedFilteredBandwidth = null;
-        let lastUnfilteredDataKey = null;
-        let lastFilteredDataKey = null;
+        var cachedUnfilteredBandwidth = null;
+        var cachedFilteredBandwidth = null;
+        var lastUnfilteredDataKey = null;
+        var lastFilteredDataKey = null;
         
-        function calculateAdaptiveBandwidth(x, y, targetQuantity = null) {
+        function calculateAdaptiveBandwidth(x, y, targetQuantity) {
+            // Handle default parameter for older JavaScript
+            if (targetQuantity === undefined) targetQuantity = null;
            
-            const xSum = x.reduce((sum, val) => sum + val, 0);
-            const ySum = y.reduce((sum, val) => sum + val, 0);
-            const xMin = Math.min(...x);
-            const xMax = Math.max(...x);
-            const yMin = Math.min(...y);
-            const yMax = Math.max(...y);
-            const cacheKey = `${x.length}_${xSum.toFixed(2)}_${ySum.toFixed(2)}_${xMin.toFixed(2)}_${xMax.toFixed(2)}_${yMin.toFixed(2)}_${yMax.toFixed(2)}_${targetQuantity || 'null'}`;
+            var xSum = x.reduce(function(sum, val) { return sum + val; }, 0);
+            var ySum = y.reduce(function(sum, val) { return sum + val; }, 0);
+            var xMin = Math.min.apply(null, x);
+            var xMax = Math.max.apply(null, x);
+            var yMin = Math.min.apply(null, y);
+            var yMax = Math.max.apply(null, y);
+            var cacheKey = x.length + '_' + xSum.toFixed(2) + '_' + ySum.toFixed(2) + '_' + xMin.toFixed(2) + '_' + xMax.toFixed(2) + '_' + yMin.toFixed(2) + '_' + yMax.toFixed(2) + '_' + (targetQuantity || 'null');
             
-            if (bandwidthCache.has(cacheKey)) {
+            if (bandwidthCache.hasOwnProperty(cacheKey)) {
                 console.log('Using cached bandwidth for dataset:', { length: x.length, cacheKey: cacheKey.substring(0, 50) + '...' });
-                return bandwidthCache.get(cacheKey);
+                return bandwidthCache[cacheKey];
             }
             
             if (!Array.isArray(x) || !Array.isArray(y) || x.length < 3 || y.length < 3 || x.length !== y.length) {
-                const result = 0.8; // Default fallback
-                bandwidthCache.set(cacheKey, result);
+                var result = 0.8; // Default fallback
+                bandwidthCache[cacheKey] = result;
                 return result;
             }
-            const validData = x.map((xi, i) => ({ x: xi, y: y[i] }))
-                .filter(point => isFinite(point.x) && isFinite(point.y) && point.x > 0 && point.y > 0);
+            var validData = x.map(function(xi, i) { return { x: xi, y: y[i] }; })
+                .filter(function(point) { return isFinite(point.x) && isFinite(point.y) && point.x > 0 && point.y > 0; });
 
             if (validData.length < 3) {
-                const result = 0.8;
-                bandwidthCache.set(cacheKey, result);
+                var result = 0.8;
+                bandwidthCache[cacheKey] = result;
                 return result;
             }
 
-            const sortedData = validData.sort((a, b) => a.x - b.x);
-            const xValues = sortedData.map(d => d.x);
-            const yValues = sortedData.map(d => d.y);
+            var sortedData = validData.sort(function(a, b) { return a.x - b.x; });
+            var xValues = sortedData.map(function(d) { return d.x; });
+            var yValues = sortedData.map(function(d) { return d.y; });
 
             // Check if we're predicting near existing data points (local prediction)
-            let isLocalPrediction = false;
+            var isLocalPrediction = false;
             if (targetQuantity !== null) {
                 // Find the closest existing data point to the target
-                const distances = xValues.map(x => Math.abs(x - targetQuantity));
-                const minDistance = Math.min(...distances);
-                const closestIndex = distances.indexOf(minDistance);
-                const closestQuantity = xValues[closestIndex];
+                var distances = xValues.map(function(x) { return Math.abs(x - targetQuantity); });
+                var minDistance = Math.min.apply(null, distances);
+                var closestIndex = distances.indexOf(minDistance);
+                var closestQuantity = xValues[closestIndex];
                 
                 // Calculate relative distance (percentage of data range)
-                const xRange = Math.max(...xValues) - Math.min(...xValues);
-                const relativeDistance = minDistance / xRange;
+                var xRange = Math.max.apply(null, xValues) - Math.min.apply(null, xValues);
+                var relativeDistance = minDistance / xRange;
                 
                 // If target is within 5% of existing data, treat as local prediction
                 isLocalPrediction = relativeDistance < 0.05;
@@ -1260,26 +1268,26 @@
                 });
             }
 
-            const xRange = Math.max(...xValues) - Math.min(...xValues);
-            const xMean = xValues.reduce((sum, val) => sum + val, 0) / xValues.length;
+            var xRange = Math.max.apply(null, xValues) - Math.min.apply(null, xValues);
+            var xMean = xValues.reduce(function(sum, val) { return sum + val; }, 0) / xValues.length;
             
-            const windowSize = Math.min(5, Math.floor(xValues.length / 4));
-            let localVariance = 0;
-            let varianceCount = 0;
+            var windowSize = Math.min(5, Math.floor(xValues.length / 4));
+            var localVariance = 0;
+            var varianceCount = 0;
             
-            for (let i = windowSize; i < xValues.length - windowSize; i++) {
-                const windowY = yValues.slice(i - windowSize, i + windowSize + 1);
-                const windowMean = windowY.reduce((sum, val) => sum + val, 0) / windowY.length;
-                const variance = windowY.reduce((sum, val) => sum + Math.pow(val - windowMean, 2), 0) / windowY.length;
+            for (var i = windowSize; i < xValues.length - windowSize; i++) {
+                var windowY = yValues.slice(i - windowSize, i + windowSize + 1);
+                var windowMean = windowY.reduce(function(sum, val) { return sum + val; }, 0) / windowY.length;
+                var variance = windowY.reduce(function(sum, val) { return sum + Math.pow(val - windowMean, 2); }, 0) / windowY.length;
                 localVariance += variance;
                 varianceCount++;
             }
             
-            const avgLocalVariance = varianceCount > 0 ? localVariance / varianceCount : 0;
+            var avgLocalVariance = varianceCount > 0 ? localVariance / varianceCount : 0;
             
-            const dataDensity = xValues.length / xRange;
+            var dataDensity = xValues.length / xRange;
      
-            let adaptiveBandwidth = 0.9; 
+            var adaptiveBandwidth = 0.9; 
             
             if (dataDensity > 20) {
                 adaptiveBandwidth *= 0.6;
@@ -1291,7 +1299,9 @@
                 adaptiveBandwidth *= 1.2;
             }
             
-            const globalVariance = yValues.reduce((sum, val) => sum + Math.pow(val - yValues.reduce((s, v) => s + v, 0) / yValues.length, 2), 0) / yValues.length;
+            var globalVariance = yValues.reduce(function(sum, val) { 
+                return sum + Math.pow(val - yValues.reduce(function(s, v) { return s + v; }, 0) / yValues.length, 2); 
+            }, 0) / yValues.length;
             if (avgLocalVariance > globalVariance * 0.3) {
                 adaptiveBandwidth *= 0.7; 
             } else if (avgLocalVariance < globalVariance * 0.05) {
@@ -1309,7 +1319,7 @@
             
             // Apply local bandwidth reduction for predictions near existing data
             if (isLocalPrediction) {
-                const originalBandwidth = adaptiveBandwidth;
+                var originalBandwidth = adaptiveBandwidth;
                 // Use much smaller bandwidth for local predictions to focus on nearby points
                 adaptiveBandwidth = Math.min(adaptiveBandwidth, 0.3);
                 
@@ -1323,14 +1333,15 @@
             adaptiveBandwidth = Math.max(0.2, Math.min(0.9, adaptiveBandwidth));
             
             
-            const minPoints = Math.max(3, Math.floor(adaptiveBandwidth * xValues.length));
+            var minPoints = Math.max(3, Math.floor(adaptiveBandwidth * xValues.length));
             if (minPoints < 3) {
                 adaptiveBandwidth = Math.max(0.2, 3 / xValues.length);
             }
             
-            if (bandwidthCache.size > 100) {
-                const firstKey = bandwidthCache.keys().next().value;
-                bandwidthCache.delete(firstKey);
+            // Simple cache size management for plain object
+            var cacheKeys = Object.keys(bandwidthCache);
+            if (cacheKeys.length > 100) {
+                delete bandwidthCache[cacheKeys[0]];
             }
             
             console.log('Adaptive bandwidth calculation:', {
@@ -1343,15 +1354,19 @@
                 dataPoints: xValues.length
             });
             
-            bandwidthCache.set(cacheKey, adaptiveBandwidth);
+            bandwidthCache[cacheKey] = adaptiveBandwidth;
             return adaptiveBandwidth;
         }
         
-        function getCachedBandwidth(x, y, isFiltered = false, targetQuantity = null) {
+        function getCachedBandwidth(x, y, isFiltered, targetQuantity) {
+            // Handle default parameters for older JavaScript
+            if (isFiltered === undefined) isFiltered = false;
+            if (targetQuantity === undefined) targetQuantity = null;
+            
             // Create a data key for comparison
-            const xSum = x.reduce((sum, val) => sum + val, 0);
-            const ySum = y.reduce((sum, val) => sum + val, 0);
-            const dataKey = `${x.length}_${xSum.toFixed(2)}_${ySum.toFixed(2)}`;
+            var xSum = x.reduce(function(sum, val) { return sum + val; }, 0);
+            var ySum = y.reduce(function(sum, val) { return sum + val; }, 0);
+            var dataKey = x.length + '_' + xSum.toFixed(2) + '_' + ySum.toFixed(2);
             
             // Check if we have cached bandwidth for this exact dataset
             if (isFiltered) {
@@ -1378,7 +1393,7 @@
             cachedFilteredBandwidth = null;
             lastUnfilteredDataKey = null;
             lastFilteredDataKey = null;
-            bandwidthCache.clear();
+            bandwidthCache = {};
             console.log('Bandwidth cache cleared');
         }
 
@@ -1389,8 +1404,8 @@
             if (xArr.length === 1) return yArr[0];
             
             // Filter out any NaN or invalid values
-            const validIndices = [];
-            for (let i = 0; i < xArr.length; i++) {
+            var validIndices = [];
+            for (var i = 0; i < xArr.length; i++) {
                 if (isFinite(xArr[i]) && isFinite(yArr[i]) && xArr[i] > 0 && yArr[i] > 0) {
                     validIndices.push(i);
                 }
@@ -1399,15 +1414,15 @@
             if (validIndices.length === 0) return NaN;
             if (validIndices.length === 1) return yArr[validIndices[0]];
             
-            const validX = validIndices.map(i => xArr[i]);
-            const validY = validIndices.map(i => yArr[i]);
+            var validX = validIndices.map(function(i) { return xArr[i]; });
+            var validY = validIndices.map(function(i) { return yArr[i]; });
             
-            const exactIndex = validX.indexOf(targetX);
+            var exactIndex = validX.indexOf(targetX);
             if (exactIndex !== -1) return validY[exactIndex];
             
-            let leftIndex = -1;
-            let rightIndex = -1;
-            for (let i = 0; i < validX.length - 1; i++) {
+            var leftIndex = -1;
+            var rightIndex = -1;
+            for (var i = 0; i < validX.length - 1; i++) {
                 if (targetX >= validX[i] && targetX <= validX[i + 1]) {
                     leftIndex = i;
                     rightIndex = i + 1;
@@ -1429,14 +1444,14 @@
             }
             
             // Linear interpolation/extrapolation
-            const x1 = validX[leftIndex];
-            const x2 = validX[rightIndex];
-            const y1 = validY[leftIndex];
-            const y2 = validY[rightIndex];
+            var x1 = validX[leftIndex];
+            var x2 = validX[rightIndex];
+            var y1 = validY[leftIndex];
+            var y2 = validY[rightIndex];
             
             if (x2 === x1) return y1;
-            const slope = (y2 - y1) / (x2 - x1);
-            const result = y1 + slope * (targetX - x1);
+            var slope = (y2 - y1) / (x2 - x1);
+            var result = y1 + slope * (targetX - x1);
 
             return isFinite(result) && result > 0 ? result : NaN;
         }
@@ -1444,24 +1459,24 @@
             if (!Array.isArray(x) || !Array.isArray(y) || !Array.isArray(xvals) ||
                 x.length === 0 || y.length === 0 || x.length !== y.length) {
 
-                return xvals.map(() => NaN);
+                return xvals.map(function() { return NaN; });
             }
             
             // Debug logging for specific cases
-            const isCustomQuantityCase = xvals.length === 1 && xvals[0] === $scope.customQuantityData?.userQuantity;
+            var isCustomQuantityCase = xvals.length === 1 && xvals[0] === ($scope.customQuantityData && $scope.customQuantityData.userQuantity);
             if (isCustomQuantityCase) {
                 console.log('LOESS calculation for custom quantity:', {
                     targetQuantity: xvals[0],
                     dataPoints: x.length,
                     bandwidth: bandwidth,
-                    sampleData: x.slice(0, 5).map((xi, i) => ({ x: xi, y: y[i] }))
+                    sampleData: x.slice(0, 5).map(function(xi, i) { return { x: xi, y: y[i] }; })
                 });
             }
             
             try {
-                const aggregatedData = aggregateDataByX(x, y, 'median'); // Use median to reduce outlier influence
-                const uniqueX = aggregatedData.map(d => d.x);
-                const uniqueY = aggregatedData.map(d => d.y);
+                var aggregatedData = aggregateDataByX(x, y, 'median'); // Use median to reduce outlier influence
+                var uniqueX = aggregatedData.map(function(d) { return d.x; });
+                var uniqueY = aggregatedData.map(function(d) { return d.y; });
                 
                 if (isCustomQuantityCase) {
                     console.log('After aggregation:', {
@@ -1473,16 +1488,16 @@
                 
                 if (uniqueX.length < 3) {
                     console.warn("Not enough unique x-values for LOESS (need at least 3)");
-                    return xvals.map(xval => interpolateLinear(uniqueX, uniqueY, xval));
+                    return xvals.map(function(xval) { return interpolateLinear(uniqueX, uniqueY, xval); });
                 }
                 
-                const sortedIndices = uniqueX.map((_, i) => i)
-                    .sort((a, b) => uniqueX[a] - uniqueX[b]);
-                const sortedX = sortedIndices.map(i => uniqueX[i]);
-                const sortedY = sortedIndices.map(i => uniqueY[i]);
+                var sortedIndices = uniqueX.map(function(_, i) { return i; })
+                    .sort(function(a, b) { return uniqueX[a] - uniqueX[b]; });
+                var sortedX = sortedIndices.map(function(i) { return uniqueX[i]; });
+                var sortedY = sortedIndices.map(function(i) { return uniqueY[i]; });
                 
                 // More conservative bandwidth adjustment
-                const adjustedBandwidth = Math.max(bandwidth, 3 / sortedX.length);
+                var adjustedBandwidth = Math.max(bandwidth, 3 / sortedX.length);
                 
                 if (isCustomQuantityCase) {
                     console.log('LOESS parameters:', {
@@ -1494,18 +1509,18 @@
                 }
                 
                 if (typeof science !== "undefined" && typeof science.stats !== "undefined" && typeof science.stats.loess === "function") {
-                    const loess = science.stats.loess().bandwidth(adjustedBandwidth);
-                    const smoothedValues = loess(sortedX, sortedY);
+                    var loess = science.stats.loess().bandwidth(adjustedBandwidth);
+                    var smoothedValues = loess(sortedX, sortedY);
                     
                     if (isCustomQuantityCase) {
                         console.log('Science.js LOESS results:', {
                             smoothedValues: smoothedValues.slice(0, 10),
-                            targetIndex: sortedX.findIndex(x => Math.abs(x - xvals[0]) < 0.01)
+                            targetIndex: sortedX.findIndex(function(x) { return Math.abs(x - xvals[0]) < 0.01; })
                         });
                     }
                     
-                    return xvals.map(xval => {
-                        const result = interpolateLinear(sortedX, smoothedValues, xval);
+                    return xvals.map(function(xval) {
+                        var result = interpolateLinear(sortedX, smoothedValues, xval);
                         // Ensure we don't return NaN values
                         return isFinite(result) && result > 0 ? result : interpolateLinear(sortedX, sortedY, xval);
                     });
@@ -1521,19 +1536,19 @@
         }
         function manualLoessSmooth(x, y, bandwidth, xvals) {
 
-            const aggregatedData = aggregateDataByX(x, y, 'median'); // Use median to reduce outlier influence
-            const uniqueX = aggregatedData.map(d => d.x);
-            const uniqueY = aggregatedData.map(d => d.y);
+            var aggregatedData = aggregateDataByX(x, y, 'median'); // Use median to reduce outlier influence
+            var uniqueX = aggregatedData.map(function(d) { return d.x; });
+            var uniqueY = aggregatedData.map(function(d) { return d.y; });
 
             if (uniqueX.length < 3) {
-                return xvals.map(xval => interpolateLinear(uniqueX, uniqueY, xval));
+                return xvals.map(function(xval) { return interpolateLinear(uniqueX, uniqueY, xval); });
             }
             
             // More conservative window size calculation
-            const windowSize = Math.max(3, Math.floor(bandwidth * uniqueX.length));
+            var windowSize = Math.max(3, Math.floor(bandwidth * uniqueX.length));
             
             // Debug logging for custom quantity case
-            const isCustomQuantityCase = xvals.length === 1 && xvals[0] === $scope.customQuantityData?.userQuantity;
+            var isCustomQuantityCase = xvals.length === 1 && xvals[0] === ($scope.customQuantityData && $scope.customQuantityData.userQuantity);
             if (isCustomQuantityCase) {
                 console.log('Manual LOESS parameters:', {
                     windowSize: windowSize,
@@ -1542,30 +1557,33 @@
                 });
             }
 
-            return xvals.map(xval => {
+            return xvals.map(function(xval) {
                 // nearest points
-                const distances = uniqueX.map((xi, i) => ({ dist: Math.abs(xi - xval), index: i }));
-                distances.sort((a, b) => a.dist - b.dist);
+                var distances = uniqueX.map(function(xi, i) { return { dist: Math.abs(xi - xval), index: i }; });
+                distances.sort(function(a, b) { return a.dist - b.dist; });
 
-                const nearestPoints = distances.slice(0, Math.min(windowSize, distances.length));
+                var nearestPoints = distances.slice(0, Math.min(windowSize, distances.length));
                 
                 if (isCustomQuantityCase) {
                     console.log('Manual LOESS for target:', {
                         targetX: xval,
-                        nearestPoints: nearestPoints.slice(0, 5).map(p => ({
-                            x: uniqueX[p.index],
-                            y: uniqueY[p.index],
-                            distance: p.dist
-                        }))
+                        nearestPoints: nearestPoints.slice(0, 5).map(function(p) {
+                            return {
+                                x: uniqueX[p.index],
+                                y: uniqueY[p.index],
+                                distance: p.dist
+                            };
+                        })
                     });
                 }
 
-                let weightedSum = 0;
-                let totalWeight = 0;
+                var weightedSum = 0;
+                var totalWeight = 0;
 
-                for (const point of nearestPoints) {
+                for (var i = 0; i < nearestPoints.length; i++) {
+                    var point = nearestPoints[i];
                     // Improved weighting function - more emphasis on closer points
-                    const weight = point.dist === 0 ? 1 : 1 / (1 + Math.pow(point.dist, 1.5));
+                    var weight = point.dist === 0 ? 1 : 1 / (1 + Math.pow(point.dist, 1.5));
                     weightedSum += uniqueY[point.index] * weight;
                     totalWeight += weight;
                 }
@@ -1575,7 +1593,7 @@
                     return interpolateLinear(uniqueX, uniqueY, xval);
                 }
                 
-                const result = weightedSum / totalWeight;
+                var result = weightedSum / totalWeight;
                 
                 if (isCustomQuantityCase) {
                     console.log('Manual LOESS result:', {
@@ -1590,41 +1608,44 @@
             });
         }
         //Bootstrap CI function
-        function bootstrapCI(x, y, xvals, frac, nBoot = 500) {
+        function bootstrapCI(x, y, xvals, frac, nBoot) {
+            // Handle default parameter for older JavaScript
+            if (nBoot === undefined) nBoot = 500;
+            
             if (!x.length || !y.length || x.length !== y.length) {
                 return {
-                    lower: xvals.map(() => null),
-                    upper: xvals.map(() => null),
+                    lower: xvals.map(function() { return null; }),
+                    upper: xvals.map(function() { return null; }),
                 };
             }
             
             // Create a seeded random number generator for consistent results
-            let seed = 12345; // Fixed seed for consistent results
+            var seed = 12345; // Fixed seed for consistent results
             function seededRandom() {
                 seed = (seed * 9301 + 49297) % 233280;
                 return seed / 233280;
             }
             
-            let preds = [];
-            for (let b = 0; b < nBoot; b++) {
-                let indices = [];
-                for (let i = 0; i < x.length; i++) {
+            var preds = [];
+            for (var b = 0; b < nBoot; b++) {
+                var indices = [];
+                for (var i = 0; i < x.length; i++) {
                     indices.push(Math.floor(seededRandom() * x.length));
                 }
-                let xBoot = indices.map(i => x[i]);
-                let yBoot = indices.map(i => y[i]);
-                let smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
+                var xBoot = indices.map(function(i) { return x[i]; });
+                var yBoot = indices.map(function(i) { return y[i]; });
+                var smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
                 preds.push(smoothed);
             }
-            let lower = [];
-            let upper = [];
-            for (let i = 0; i < xvals.length; i++) {
+            var lower = [];
+            var upper = [];
+            for (var i = 0; i < xvals.length; i++) {
                 // Filter out null, NaN, and negative values for unit prices
-                let valuesAtPoint = preds.map(row => row[i]).filter(v => v !== null && !isNaN(v) && v >= 0);
-                valuesAtPoint.sort((a, b) => a - b);
+                var valuesAtPoint = preds.map(function(row) { return row[i]; }).filter(function(v) { return v !== null && !isNaN(v) && v >= 0; });
+                valuesAtPoint.sort(function(a, b) { return a - b; });
                 if (valuesAtPoint.length > 0) {
-                    let lowerIdx = Math.floor(valuesAtPoint.length * 0.025);
-                    let upperIdx = Math.floor(valuesAtPoint.length * 0.975);
+                    var lowerIdx = Math.floor(valuesAtPoint.length * 0.025);
+                    var upperIdx = Math.floor(valuesAtPoint.length * 0.975);
 
                     // Ensure lower bound is non-negative (minimum 0)
                     lower[i] = Math.max(0, valuesAtPoint[lowerIdx]);
@@ -1634,7 +1655,7 @@
                     upper[i] = null;
                 }
             }
-            return { lower, upper };
+            return { lower: lower, upper: upper };
         }
 
         // Line Graph rendering
@@ -1660,18 +1681,29 @@
                             return;
                         }
 
-                        const quantities = $scope.bidHistoryData.map(item => item.Quantity || 0);
-                        const prices = $scope.bidHistoryData.map(item => $scope.getPriceField(item) || 0);
+                        var quantities = $scope.bidHistoryData.map(function(item) { return item.Quantity || 0; });
+                        var prices = $scope.bidHistoryData.map(function(item) { return $scope.getPriceField(item) || 0; });
 
-                        const { weightedMean, weightedStd } = computeWeightedStats(prices, quantities);
-                        const filtered = filterOutliers(prices, quantities, weightedMean, weightedStd);
-                        const QuantityFiltered = filtered.map(d => d.q);
-                        const PriceFiltered = filtered.map(d => d.p);
+                        var stats = computeWeightedStats(prices, quantities);
+                        var weightedMean = stats.weightedMean;
+                        var weightedStd = stats.weightedStd;
+                        var filtered = filterOutliers(prices, quantities, weightedMean, weightedStd);
+                        var QuantityFiltered = filtered.map(function(d) { return d.q; });
+                        var PriceFiltered = filtered.map(function(d) { return d.p; });
 
                         // Common range for unfiltered data
-                        const quantityRange = Array.from(new Set(quantities)).sort((a, b) => a - b);
+                        var quantitySet = {};
+                        for (var i = 0; i < quantities.length; i++) {
+                            quantitySet[quantities[i]] = true;
+                        }
+                        var quantityRange = Object.keys(quantitySet).map(function(q) { return parseFloat(q); }).sort(function(a, b) { return a - b; });
+                        
                         // Range for filtered data (no outliers)
-                        const quantityRangeFiltered = Array.from(new Set(QuantityFiltered)).sort((a, b) => a - b);
+                        var filteredSet = {};
+                        for (var i = 0; i < QuantityFiltered.length; i++) {
+                            filteredSet[QuantityFiltered[i]] = true;
+                        }
+                        var quantityRangeFiltered = Object.keys(filteredSet).map(function(q) { return parseFloat(q); }).sort(function(a, b) { return a - b; });
                         
                         // Debug logging to verify data consistency
                         console.log('Data ranges:', {
@@ -1690,22 +1722,22 @@
                         });
                         
                         // Get cached adaptive bandwidth for both datasets
-                        const adaptiveBandwidthUnfiltered = getCachedBandwidth(quantities, prices, false);
-                        const adaptiveBandwidthFiltered = getCachedBandwidth(QuantityFiltered, PriceFiltered, true);
+                        var adaptiveBandwidthUnfiltered = getCachedBandwidth(quantities, prices, false);
+                        var adaptiveBandwidthFiltered = getCachedBandwidth(QuantityFiltered, PriceFiltered, true);
 
                         // LOESS fits with adaptive bandwidth
-                        const loessUnfiltered = loessSmooth(quantities, prices, adaptiveBandwidthUnfiltered, quantityRange);
-                        const loessFiltered = loessSmooth(QuantityFiltered, PriceFiltered, adaptiveBandwidthFiltered, quantityRangeFiltered);
+                        var loessUnfiltered = loessSmooth(quantities, prices, adaptiveBandwidthUnfiltered, quantityRange);
+                        var loessFiltered = loessSmooth(QuantityFiltered, PriceFiltered, adaptiveBandwidthFiltered, quantityRangeFiltered);
 
                         // Bootstrap CI with adaptive bandwidth
-                        const ciUnfiltered = bootstrapCI(quantities, prices, quantityRange, adaptiveBandwidthUnfiltered, 500);
-                        const ciFiltered = bootstrapCI(QuantityFiltered, PriceFiltered, quantityRangeFiltered, adaptiveBandwidthFiltered, 500);
-                        const lowerUnfiltered = quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.lower[i] })).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
-                        const upperUnfiltered = quantityRange.map((q, i) => ({ x: q, y: ciUnfiltered.upper[i] })).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
-                        const lowerFiltered = quantityRangeFiltered.map((q, i) => ({ x: q, y: ciFiltered.lower[i] })).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
-                        const upperFiltered = quantityRangeFiltered.map((q, i) => ({ x: q, y: ciFiltered.upper[i] })).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
-                        const filteredPoints = filtered.map(d => {
-                            let price = d.p;
+                        var ciUnfiltered = bootstrapCI(quantities, prices, quantityRange, adaptiveBandwidthUnfiltered, 500);
+                        var ciFiltered = bootstrapCI(QuantityFiltered, PriceFiltered, quantityRangeFiltered, adaptiveBandwidthFiltered, 500);
+                        var lowerUnfiltered = quantityRange.map(function(q, i) { return { x: q, y: ciUnfiltered.lower[i] }; }).filter(function(pt) { return pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y); });
+                        var upperUnfiltered = quantityRange.map(function(q, i) { return { x: q, y: ciUnfiltered.upper[i] }; }).filter(function(pt) { return pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y); });
+                        var lowerFiltered = quantityRangeFiltered.map(function(q, i) { return { x: q, y: ciFiltered.lower[i] }; }).filter(function(pt) { return pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y); });
+                        var upperFiltered = quantityRangeFiltered.map(function(q, i) { return { x: q, y: ciFiltered.upper[i] }; }).filter(function(pt) { return pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y); });
+                        var filteredPoints = filtered.map(function(d) {
+                            var price = d.p;
                             if (price > 0 && price < 0.01) {
                                 price = 0.01;
                             }
@@ -1716,87 +1748,134 @@
                                 p: d.pn
                             };
                         });
-                        const loessLineUnfiltered = quantityRange.map((q, i) => {
-                            let price = loessUnfiltered[i];
+                        var loessLineUnfiltered = quantityRange.map(function(q, i) {
+                            var price = loessUnfiltered[i];
                             // Force values less than $0.01 (but greater than 0) to be $0.01 for chart display
                             if (price > 0 && price < 0.01) {
                                 price = 0.01;
                             }
                             return { x: q, y: price };
-                        }).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
+                        }).filter(function(pt) { return pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y); });
                         
-                        const loessLineFiltered = quantityRangeFiltered.map((q, i) => {
-                            let price = loessFiltered[i];
+                        var loessLineFiltered = quantityRangeFiltered.map(function(q, i) {
+                            var price = loessFiltered[i];
 
                             if (price > 0 && price < 0.01) {
                                 price = 0.01;
                             }
                             return { x: q, y: price };
-                        }).filter(pt => pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y));
+                        }).filter(function(pt) { return pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y); });
                         
                         // Fill small gaps in LOESS lines by interpolating between valid points
-                        const fillGapsInLine = (lineData) => {
+                        var fillGapsInLine = function(lineData) {
                             if (lineData.length < 2) return lineData;
                             
-                            const filled = [];
-                            for (let i = 0; i < lineData.length; i++) {
+                            var filled = [];
+                            for (var i = 0; i < lineData.length; i++) {
                                 filled.push(lineData[i]);
                                 
                                 // If there's a gap to the next point, add interpolated points
                                 if (i < lineData.length - 1) {
-                                    const current = lineData[i];
-                                    const next = lineData[i + 1];
-                                    const gap = next.x - current.x;
+                                    var current = lineData[i];
+                                    var next = lineData[i + 1];
+                                    var gap = next.x - current.x;
                                     
                                     // If gap is significant (more than 1.5x the average gap), add interpolated points
-                                    const avgGap = (lineData[lineData.length - 1].x - lineData[0].x) / (lineData.length - 1);
+                                    var avgGap = (lineData[lineData.length - 1].x - lineData[0].x) / (lineData.length - 1);
                                     if (gap > avgGap * 1.5) {
-                                        const numInterpolated = Math.min(Math.floor(gap / avgGap), 3); // Max 3 interpolated points
-                                        for (let j = 1; j <= numInterpolated; j++) {
-                                            const t = j / (numInterpolated + 1);
-                                            const interpolatedX = current.x + t * gap;
-                                            const interpolatedY = current.y + t * (next.y - current.y);
+                                        var numInterpolated = Math.min(Math.floor(gap / avgGap), 3); // Max 3 interpolated points
+                                        for (var j = 1; j <= numInterpolated; j++) {
+                                            var t = j / (numInterpolated + 1);
+                                            var interpolatedX = current.x + t * gap;
+                                            var interpolatedY = current.y + t * (next.y - current.y);
                                             filled.push({ x: interpolatedX, y: interpolatedY });
                                         }
                                     }
                                 }
                             }
-                            return filled.sort((a, b) => a.x - b.x);
+                            return filled.sort(function(a, b) { return a.x - b.x; });
                         };
                         
-                        const filledLoessUnfiltered = fillGapsInLine(loessLineUnfiltered);
-                        const filledLoessFiltered = fillGapsInLine(loessLineFiltered);
+                        var filledLoessUnfiltered = fillGapsInLine(loessLineUnfiltered);
+                        var filledLoessFiltered = fillGapsInLine(loessLineFiltered);
                         
                         // Add gap filling for confidence intervals as well
-                        const fillGapsInConfidenceIntervals = (lowerData, upperData) => {
+                        var fillGapsInConfidenceIntervals = function(lowerData, upperData) {
                             if (lowerData.length < 2 || upperData.length < 2) return { lower: lowerData, upper: upperData };
                             
-                            const allX = [...new Set([...lowerData.map(d => d.x), ...upperData.map(d => d.x)])].sort((a, b) => a - b);
-                            const filledLower = [];
-                            const filledUpper = [];
+                            var allXValues = [];
+                            for (var i = 0; i < lowerData.length; i++) {
+                                allXValues.push(lowerData[i].x);
+                            }
+                            for (var i = 0; i < upperData.length; i++) {
+                                allXValues.push(upperData[i].x);
+                            }
+                            // Remove duplicates and sort
+                            var allX = [];
+                            for (var i = 0; i < allXValues.length; i++) {
+                                if (allX.indexOf(allXValues[i]) === -1) {
+                                    allX.push(allXValues[i]);
+                                }
+                            }
+                            allX.sort(function(a, b) { return a - b; });
                             
-                            for (let i = 0; i < allX.length; i++) {
-                                const x = allX[i];
-                                const lowerPoint = lowerData.find(d => d.x === x);
-                                const upperPoint = upperData.find(d => d.x === x);
+                            var filledLower = [];
+                            var filledUpper = [];
+                            
+                            for (var i = 0; i < allX.length; i++) {
+                                var x = allX[i];
+                                var lowerPoint = null;
+                                var upperPoint = null;
+                                
+                                // Find matching points
+                                for (var j = 0; j < lowerData.length; j++) {
+                                    if (lowerData[j].x === x) {
+                                        lowerPoint = lowerData[j];
+                                        break;
+                                    }
+                                }
+                                for (var j = 0; j < upperData.length; j++) {
+                                    if (upperData[j].x === x) {
+                                        upperPoint = upperData[j];
+                                        break;
+                                    }
+                                }
                                 
                                 if (lowerPoint && upperPoint) {
                                     filledLower.push(lowerPoint);
                                     filledUpper.push(upperPoint);
                                 } else if (i > 0 && i < allX.length - 1) {
                                     // Interpolate missing points
-                                    const prevLower = lowerData.find(d => d.x < x);
-                                    const nextLower = lowerData.find(d => d.x > x);
-                                    const prevUpper = upperData.find(d => d.x < x);
-                                    const nextUpper = upperData.find(d => d.x > x);
+                                    var prevLower = null;
+                                    var nextLower = null;
+                                    var prevUpper = null;
+                                    var nextUpper = null;
+                                    
+                                    // Find previous and next points
+                                    for (var j = 0; j < lowerData.length; j++) {
+                                        if (lowerData[j].x < x && (!prevLower || lowerData[j].x > prevLower.x)) {
+                                            prevLower = lowerData[j];
+                                        }
+                                        if (lowerData[j].x > x && (!nextLower || lowerData[j].x < nextLower.x)) {
+                                            nextLower = lowerData[j];
+                                        }
+                                    }
+                                    for (var j = 0; j < upperData.length; j++) {
+                                        if (upperData[j].x < x && (!prevUpper || upperData[j].x > prevUpper.x)) {
+                                            prevUpper = upperData[j];
+                                        }
+                                        if (upperData[j].x > x && (!nextUpper || upperData[j].x < nextUpper.x)) {
+                                            nextUpper = upperData[j];
+                                        }
+                                    }
                                     
                                     if (prevLower && nextLower && prevUpper && nextUpper) {
-                                        const t = (x - prevLower.x) / (nextLower.x - prevLower.x);
-                                        const interpolatedLower = prevLower.y + t * (nextLower.y - prevLower.y);
-                                        const interpolatedUpper = prevUpper.y + t * (nextUpper.y - prevUpper.y);
+                                        var t = (x - prevLower.x) / (nextLower.x - prevLower.x);
+                                        var interpolatedLower = prevLower.y + t * (nextLower.y - prevLower.y);
+                                        var interpolatedUpper = prevUpper.y + t * (nextUpper.y - prevUpper.y);
                                         
-                                        filledLower.push({ x, y: interpolatedLower });
-                                        filledUpper.push({ x, y: interpolatedUpper });
+                                        filledLower.push({ x: x, y: interpolatedLower });
+                                        filledUpper.push({ x: x, y: interpolatedUpper });
                                     }
                                 }
                             }
@@ -1804,21 +1883,21 @@
                             return { lower: filledLower, upper: filledUpper };
                         };
                         
-                        const filledConfidenceUnfiltered = fillGapsInConfidenceIntervals(lowerUnfiltered, upperUnfiltered);
-                        const filledConfidenceFiltered = fillGapsInConfidenceIntervals(lowerFiltered, upperFiltered);
+                        var filledConfidenceUnfiltered = fillGapsInConfidenceIntervals(lowerUnfiltered, upperUnfiltered);
+                        var filledConfidenceFiltered = fillGapsInConfidenceIntervals(lowerFiltered, upperFiltered);
 
                         if (quantities.length === 0 || prices.length === 0) {
                             $scope.isChartLoading = false;
                             return;
                         }
 
-                        const outlierPoints = [];
-                        const normalPoints = [];
-                        const bidPoints = [];
+                        var outlierPoints = [];
+                        var normalPoints = [];
+                        var bidPoints = [];
 
-                        for (let i = 0; i < $scope.bidHistoryData.length; i++) {
-                            const item = $scope.bidHistoryData[i];
-                            const quantity = item.Quantity || 0;
+                        for (var i = 0; i < $scope.bidHistoryData.length; i++) {
+                            var item = $scope.bidHistoryData[i];
+                            var quantity = item.Quantity || 0;
                             let price = $scope.getPriceField(item) || 0;
 
                             if (price > 0 && price < 0.01) {
