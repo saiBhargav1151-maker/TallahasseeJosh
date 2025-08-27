@@ -32,24 +32,19 @@ namespace Dqe.Infrastructure.Fdot
 
         /// <summary>
         /// Retrieves a list of pay item details (name and description) based on the input string.
-        /// Supports searching by pay item number (Name) or partial description. Results are filtered to SpecBook "13"
-        /// and sorted by Name and Description.
+        /// Supports searching by pay item number (Name) or partial description. Results are filtered to SpecBook "13".
         /// </summary>
         /// <param name="input">The user-provided search term, which may be a pay item number or part of a description.</param>
         /// <returns>A distinct list of matching <see cref="PayItemDTO"/> objects containing Name and combined Description.</returns>
-
         public IList<PayItemDTO> GetPayItemDetails(string input)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 RefItem ri = null;
-
-                var sanitizedInput = input.Replace(" ", "").Trim();
-
-                var rawResults = session.QueryOver(() => ri)
+                var results = session.QueryOver(() => ri)
                     .Where(() => ri.SpecBook == "13")
                     .And(Restrictions.Or(
-                        Expression.Sql("LOWER(REPLACE(RTRIM(LTRIM(REFITEM_NM)) + ' - ' + RTRIM(LTRIM(DESCR)), ' ', '')) LIKE ?", $"%{input.Trim().ToLower().Replace(" ", "")}%", NHibernateUtil.String),
+                        Restrictions.On(() => ri.Name).IsLike(input.Trim(), MatchMode.Anywhere),
                         Restrictions.On(() => ri.Description).IsLike(input.Trim(), MatchMode.Anywhere)
                     ))
                     .SelectList(list => list
@@ -59,10 +54,10 @@ namespace Dqe.Infrastructure.Fdot
                     )
                     .OrderBy(() => ri.Name).Asc()
                     .ThenBy(() => ri.Description).Asc()
-                    .Take(15)
+                    .Take(30)
                     .List<object[]>();
 
-                var finalResults = rawResults
+                return results
                     .Select(row => new PayItemDTO
                     {
                         Name = row[1]?.ToString(),
@@ -70,8 +65,6 @@ namespace Dqe.Infrastructure.Fdot
                     })
                     .Distinct()
                     .ToList();
-
-                return finalResults;
             }
         }
         /// <summary>
