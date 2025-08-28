@@ -32,20 +32,27 @@ namespace Dqe.Infrastructure.Fdot
 
         /// <summary>
         /// Retrieves a list of pay item details (name and description) based on the input string.
-        /// Supports searching by pay item number (Name) or partial description. Results are filtered to SpecBook "13".
+        /// Supports case-insensitive searching by pay item number (Name) or partial description. Results are filtered to SpecBook "13".
         /// </summary>
         /// <param name="input">The user-provided search term, which may be a pay item number or part of a description.</param>
         /// <returns>A distinct list of matching <see cref="PayItemDTO"/> objects containing Name and combined Description.</returns>
         public IList<PayItemDTO> GetPayItemDetails(string input)
         {
+            // Sanitize input
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return new List<PayItemDTO>();
+            }
+
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 RefItem ri = null;
+                var sanitizedInput = input.Trim();
                 var results = session.QueryOver(() => ri)
                     .Where(() => ri.SpecBook == "13")
                     .And(Restrictions.Or(
-                        Restrictions.On(() => ri.Name).IsLike(input.Trim(), MatchMode.Anywhere),
-                        Restrictions.On(() => ri.Description).IsLike(input.Trim(), MatchMode.Anywhere)
+                        Restrictions.On(() => ri.Name).IsInsensitiveLike(sanitizedInput, MatchMode.Anywhere),
+                        Restrictions.On(() => ri.Description).IsInsensitiveLike(sanitizedInput, MatchMode.Anywhere)
                     ))
                     .SelectList(list => list
                         .Select(() => ri.Id)
