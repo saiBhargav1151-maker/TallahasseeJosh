@@ -22,8 +22,8 @@
                 return new Array(num);
             };
             $scope.numberOfPages = function () {
-                if ($scope.filteredItems != undefined) {
-                    return Math.ceil($scope.filteredItems.length / $scope.pageSize);
+                if ($scope.filteredPayItems != undefined) {
+                    return Math.ceil($scope.filteredPayItems.length / $scope.pageSize);
                 }
                 return 0;
             };
@@ -55,6 +55,7 @@
                             if (item.name === specBook) {
                                 $scope.searchPayItems.masterFile = item;
                                 document.getElementById("hiddenMasterFile").value = item.name;
+                                return; // Skip further iterations
                             }
                         });
 
@@ -69,8 +70,7 @@
                             //obsoleteFlag: ''
                         };
                         $scope.filterItems();
-                        $scope.filteredItems = $filter('orderBy')($scope.filteredItems, 'name');
-                        $scope.filterCurrent(); // 04-14-2025 JWW Added call to filterCurrent to purge inactive payitems.
+                        $scope.filteredPayItems = $filter('orderBy')($scope.filteredPayItems, 'name'); 
                     }
                 });
             };
@@ -109,33 +109,32 @@
             //    $scope.filterItems();
             //};
 
-            $scope.filterCurrent = function () {
+            $scope.filterObsolete = function () {
+                var tempPayItems = [];
                 if ($scope.searchPayItems.showCurrentItems) {
-                    angular.forEach($scope.payItems, function (item) {
-                        if (item.isObsolete) {
-                            $scope.removedItemsNotCurrent.push(item);
+                    angular.forEach($scope.filteredPayItems, function (item) {
+                        if (!item.isObsolete) {
+                            tempPayItems.push(item);
                         }
                     });
-                    angular.forEach($scope.removedItemsNotCurrent, function (item) {
-                        var index = $scope.payItems.indexOf(item);
-                        $scope.payItems.splice(index, 1);
-                    });
-                } else {
-                    angular.forEach($scope.removedItemsNotCurrent, function (item) {
-                        if (!item.hasStructure && $scope.searchPayItems.structure) {
-                            $scope.removedItemsWithoutStructures.push(item);
-                        } else {
-                            $scope.payItems.push(item);
-                        }
-                    });
-                    $scope.removedItemsNotCurrent = new Array();
+                    $scope.filteredPayItems = tempPayItems;
+                }                
+            };
+
+
+            $scope.toggleObsolete = function () {
+                //if we are showing all items then we need to rescope out from all PI's
+                if (!$scope.searchPayItems.showCurrentItems) {
+                    $scope.filterItems();
                 }
-                $scope.filterItems();
+                else {
+                    $scope.filterObsolete();
+                }
             };
 
             $scope.filterItems = function () {
                 $scope.currentPage = 0;
-                $scope.filteredItems = $filter('filter')($scope.payItems,
+                $scope.filteredPayItems = $filter('filter')($scope.payItems,
                 {
                     id: $scope.filter.id,
                     name: $scope.filter.name,
@@ -145,7 +144,8 @@
                     specTech: $scope.filter.specTech,
                     combFlag: $scope.filter.combFlag
                     //obsoleteFlag: $scope.filter.obsoleteFlag
-                });
+                    });
+                $scope.filterObsolete();
             };
 
             $scope.clearAllFilters = function () {
