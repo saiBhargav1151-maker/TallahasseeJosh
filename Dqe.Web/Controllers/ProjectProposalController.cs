@@ -1284,10 +1284,14 @@ namespace Dqe.Web.Controllers
             {
                 security = new
                 {
+                    role = currentUser.Role,
+                    district = project.District,
+                    userInDistrict = currentUser.IsInDqeDistrict(project.District),
                     isAuthorized = currentUser.Role == DqeRole.Administrator || currentUser.IsInDqeDistrict(project.District) || currentUser.IsAuthorizedOnProject(project),
                     isSystemAdmin = currentUser.Role == DqeRole.Administrator,
                     isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(project.District),
-                    isReviewRole = (currentUser.Role == DqeRole.DistrictReviewer && currentUser.IsInDqeDistrict(project.District) ) || (currentUser.Role == DqeRole.StateReviewer)
+                    isReviewRole = (currentUser.Role == DqeRole.DistrictReviewer && currentUser.IsInDqeDistrict(project.District) ) || (currentUser.Role == DqeRole.StateReviewer),
+                    isCoderRole = (currentUser.Role == DqeRole.Coder && currentUser.IsInDqeDistrict(project.District) ) || (currentUser.Role == DqeRole.StateReviewer)
                 },
                 authorizedUsers = project.AssignedUsers.Select(i => new
                 {

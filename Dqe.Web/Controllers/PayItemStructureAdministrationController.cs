@@ -17,6 +17,7 @@ using FDOT.Enterprise.Configuration.Client;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
+    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator, DqeRole.AdminReadOnly })]
     public class PayItemStructureAdministrationController : Controller
     {
         private readonly IDqeUserRepository _dqeUserRepository;
@@ -62,7 +63,7 @@ namespace Dqe.Web.Controllers
         //TODO: add obsolete date and flag for structure.  date is informational, and flag controls the visibility of the structure on the boe. - rule is all structure items must be past obsolete date
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetCostBasedTemplates()
         {
             var result = _costBasedTemplateRepository.GetAll().Select(i => new
@@ -75,7 +76,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetLrePickLists()
         {
             var result = _lreService.GetLrePickLists().OrderBy(i => i.GroupDescription).Select(i => new
@@ -88,69 +89,69 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetUnitCodes()
         {
             return GetCodes("UNITS", true);
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetUnitTypeCodes()
         {
             return GetCodes("UNITTYP");
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetItemTypeCodes()
         {
             return GetCodes("ITEMTYP");
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetFuelAdjustmentTypeCodes()
         {
             return GetCodes("FUELTYP");
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetItemClassCodes()
         {
             return GetCodes("ITEMCLS");
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetContractClassCodes()
         {
             return GetCodes("CONTCLS");
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetPrecisionCodes()
         {
             var result = new List<dynamic>
             {
-                new 
+                new
                 {
                     name = "(0)",
                     description = "1 Whole"
                 },
-                new 
+                new
                 {
                     name = "(1)",
                     description = "1/10"
                 },
-                new 
+                new
                 {
                     name = "(2)",
                     description = "1/100"
                 },
-                new 
+                new
                 {
                     name = "(3)",
                     description = "1/1000"
@@ -160,7 +161,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        //[CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+        [AllowAnonymous]
         public ActionResult GetSpecBooks()
         {
             var mfs = _masterFileRepository.GetAll();
@@ -176,7 +177,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        //[CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+        [AllowAnonymous]
         public ActionResult GetCurrentSpecBook()
         {
             var mfs = _masterFileRepository.GetAll();
@@ -199,8 +200,8 @@ namespace Dqe.Web.Controllers
             var result = new
             {
                 latestSpecBook.id,
-                specBook = latestSpecBook.name, 
-                latestSpecBook.description, 
+                specBook = latestSpecBook.name,
+                latestSpecBook.description,
                 latestSpecBook.copyMasterFile,
                 latestSpecBook.effectiveDate
             };
@@ -208,6 +209,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult GetWorkTypes()
         {
             var code = _webTransportService.GetCodeTable("WRKTYP");
@@ -219,12 +221,13 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult GetStructureForItem(int specYear, string itemName)
         {
             var structure = _payItemStructureRepository.Get(specYear, itemName);
             if (structure == null)
             {
-                return new DqeResult(null, new ClientMessage{ Severity = ClientMessageSeverity.Error, text = "Pay Item not found"}, JsonRequestBehavior.AllowGet);
+                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "Pay Item not found" }, JsonRequestBehavior.AllowGet);
             }
             var result = new
             {
@@ -237,7 +240,7 @@ namespace Dqe.Web.Controllers
                         ? structure.Units[0]
                         : "MIXED"
             };
-            var l = new List<object> {result};
+            var l = new List<object> { result };
             return new DqeResult(l, JsonRequestBehavior.AllowGet);
         }
 
@@ -253,7 +256,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+        [AllowAnonymous]
         public ActionResult GetUnlinkedItems(string val)
         {
             var result = _payItemMasterRepository.GetHeaders(val).Select(i => new
@@ -277,7 +280,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetStructures()
         {
             var structures = _payItemStructureRepository.GetAllHeaders(string.Empty, true);
@@ -296,6 +299,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult GetStructuresRange(string set, bool currentStructuresOnly)
         {
             var structures = _payItemStructureRepository.GetAllHeaders(set, currentStructuresOnly);
@@ -314,6 +318,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult GetStructureDetail(int structureId)
         {
             var structure = _payItemStructureRepository.Get(structureId);
@@ -370,7 +375,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] {DqeRole.Administrator, DqeRole.PayItemAdministrator})]
+
         public ActionResult GetProtectedItemDetail(int itemId)
         {
             var item = _payItemMasterRepository.Get(itemId);
@@ -448,7 +453,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+
         public ActionResult GetProtectedStructureDetail(int structureId)
         {
             var structure = _payItemStructureRepository.Get(structureId);
@@ -486,7 +491,7 @@ namespace Dqe.Web.Controllers
                 essHistory = structure.EssHistory,
                 pendingInformation = structure.PendingInformation,
                 srsId = structure.SrsId,
-                monitor = monitor == null 
+                monitor = monitor == null
                     ? new
                     {
                         fullName = string.Empty,
@@ -561,12 +566,14 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult GetItemHeadersForStructure(int structureId, bool currentItemsOnly)
         {
             return new DqeResult(GetItemHeaders(structureId, currentItemsOnly), JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult GetPayItemsBySpecBook(string specBook)
         {
             var structures = _payItemMasterRepository.GetPayItemsWithStructureInfo(specBook);
@@ -608,6 +615,7 @@ namespace Dqe.Web.Controllers
                 payItems,
                 security
             };
+            var count = payItems.Count();
             return new DqeResult(result, JsonRequestBehavior.AllowGet);
         }
 
@@ -640,12 +648,12 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] {DqeRole.Administrator, DqeRole.PayItemAdministrator})]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
         public ActionResult SaveItem(dynamic item)
         {
             item.name = ((string)item.safeName.ToString()).TrimStart('~');
             var codes = _webTransportService.GetCodeTable("UNITS");
-            if (item.name == null || string.IsNullOrWhiteSpace(item.name.ToString()) )
+            if (item.name == null || string.IsNullOrWhiteSpace(item.name.ToString()))
             {
                 return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "Pay Item ID is required" });
             }
@@ -696,7 +704,7 @@ namespace Dqe.Web.Controllers
                     if (!lreItemSelected)
                     {
                         return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "At least one LRE pick list must be specified." });
-                    }    
+                    }
                 }
             }
             else
@@ -712,7 +720,7 @@ namespace Dqe.Web.Controllers
             DateTime parseDate;
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
-            var pi = item.id == 0 ? new PayItemMaster() : (PayItemMaster) _payItemMasterRepository.Get(item.id);
+            var pi = item.id == 0 ? new PayItemMaster() : (PayItemMaster)_payItemMasterRepository.Get(item.id);
             var pit = pi.GetTransformer();
             pit.Administrative = item.administrative;
             pit.AlternateItemName = item.alternateItemName.ToString();
@@ -844,14 +852,14 @@ namespace Dqe.Web.Controllers
                 _commandRepository.Flush();
                 if (updateWtPayItems)
                 {
-                    _webTransportService.UpdateRefItem(pi, currentDqeUser);    
+                    _webTransportService.UpdateRefItem(pi, currentDqeUser);
                 }
                 if (!item.nullLrePickList)
                 {
                     if (updateLrePayItems && lreItemSelected)
                     {
                         _lreService.UpdateRefItem(pi, item.lrePickLists, currentDqeUser);
-                    }    
+                    }
                 }
                 var result = GetItemHeaders(item.structureId, item.showCurrent);
                 return new DqeResult(result, new ClientMessage { Severity = ClientMessageSeverity.Success, text = "Pay Item Added" });
@@ -863,8 +871,8 @@ namespace Dqe.Web.Controllers
             if (updateLrePayItems && lreItemSelected)
             {
                 _lreService.UpdateRefItem(pi, item.lrePickLists, currentDqeUser);
-            }   
-            return new DqeResult(null, new ClientMessage{ Severity = ClientMessageSeverity.Success, text = "Pay Item Updated"});
+            }
+            return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = "Pay Item Updated" });
         }
 
         [HttpPost]
@@ -874,7 +882,7 @@ namespace Dqe.Web.Controllers
             if (structure.name == null || string.IsNullOrWhiteSpace(structure.name.ToString()) ||
                 structure.title == null || string.IsNullOrWhiteSpace(structure.title.ToString()))
             {
-                return new DqeResult(null, new ClientMessage{Severity = ClientMessageSeverity.Error, text = "Pay Item Structure ID and Title are required"});
+                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "Pay Item Structure ID and Title are required" });
             }
             structure.name = ((string)structure.safeName.ToString()).TrimStart('~');
             if (structure.id == 0)
@@ -982,7 +990,7 @@ namespace Dqe.Web.Controllers
                         ? units[0]
                         : "MIXED"
             };
-            return new DqeResult(result, new ClientMessage{ Severity = ClientMessageSeverity.Success, text = string.Format("Pay Item Structure {0}", structure.id == 0 ? "Added" : "Updated")});
+            return new DqeResult(result, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Pay Item Structure {0}", structure.id == 0 ? "Added" : "Updated") });
         }
     }
 }

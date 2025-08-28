@@ -65,7 +65,7 @@ namespace Dqe.Web.Controllers
         }
 
         /// <summary>
-        /// Gets all users
+        /// Gets all roles
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -99,7 +99,7 @@ namespace Dqe.Web.Controllers
                 t.IsActive = true;
                 t.SrsId = user.id;
                 t.District = user.district;
-                t.Role = ((DqeRole)user.role);
+                t.Role = (DqeRole)user.role.ToString()[0]; 
                 t.CostGroupAuthorization = user.costGroupAuthorization;
                 u.Transform(t, currentDqeUser);
                 _commandRepository.Add(u);
@@ -109,7 +109,7 @@ namespace Dqe.Web.Controllers
                 var t = (Domain.Transformers.DqeUser)u.GetTransformer();
                 t.IsActive = true;
                 t.District = user.district;
-                t.Role = ((DqeRole)user.role);
+                t.Role = (DqeRole)user.role.ToString()[0];
                 t.CostGroupAuthorization = user.costGroupAuthorization;
                 u.Transform(t, currentDqeUser);
             }

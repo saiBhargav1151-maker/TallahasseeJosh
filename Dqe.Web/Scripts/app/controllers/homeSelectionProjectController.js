@@ -1,5 +1,5 @@
-﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', function ($scope, $rootScope, $http, $route,stateService) {
- 
+﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', 'securityService', function ($scope, $rootScope, $http, $route, stateService, securityService) {
+
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
         if (!containsDqeError(result)) {
@@ -11,6 +11,21 @@
             $scope.workingEstimate = r.workingEstimate;
             $scope.versions = r.versions;
             $scope.hasReviewsInProject = false;
+
+            //$scope.thisUser.role == 'A' ? $scope.district : $scope.thisUser.district;
+
+            $scope.canCheckOut = false;
+            $scope.canSeePrices = false;
+            //if is on list, then make can checkout var as true.
+            $scope.user = null;
+            securityService.getCurrentUser(function (user) {
+                let role = user.role.toString()[0];
+                let allowedRoles = ['A', 'D', 'E', 'C', '2', 'M'];
+                if (!(role.length === 0) && allowedRoles.includes(role)) {
+                    $scope.canCheckOut = true;
+                    $scope.user = user;
+                }
+            });
 
             ///checking the first estimate of every version to see if it is a review, if so marking a bool field as true.
             for (var i = 0; i < $scope.versions.length; i++) {

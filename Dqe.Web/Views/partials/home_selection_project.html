@@ -54,9 +54,13 @@
                         </div>
                         <div class="col-lg-9" style="text-align: right;">
                             <span>
-                                <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">Check In</button>
-                                <span ng-if="security.isAuthorized">
-                                    <button type="button" title="Click to check out the project" focus-me="userCheckedIn" ng-if="project.isAvailable == true" class="btn btn-primary" ng-click="userCheckedIn = false; userCheckedOut = true; aquireCustody(project);">Check Out</button>
+                                <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">
+                                    Check In
+                                </button>
+                                <span>
+                                    <button type="button" title="Click to check out the project" focus-me="userCheckedIn" ng-if="project.isAvailable == true && canCheckOut" class="btn btn-primary" ng-click="userCheckedIn = false; userCheckedOut = true; aquireCustody(project);">
+                                        Check Out
+                                    </button>
                                 </span>
                             </span>
                             &nbsp;&nbsp;

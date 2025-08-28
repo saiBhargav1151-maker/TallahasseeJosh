@@ -11,7 +11,7 @@ using Dqe.Web.Attributes;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator, DqeRole.AdminReadOnly })]
     public class CostGroupController : Controller
     {
         private readonly ICostGroupRepository _costGroupRepository;
@@ -28,7 +28,6 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
         public ActionResult GetCostGroups()
         {
             var costGroups = _costGroupRepository.GetAllCostGroupsWithPayItems();
@@ -55,7 +54,6 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
         public ActionResult GetPayItems(string payItemName, int costGroupId)
         {
             var payItems = _payItemMasterRepository.PayItemSearchByName(payItemName).ToList();

@@ -165,8 +165,8 @@ namespace Dqe.Domain.Model
     {
         /// <summary>
         /// System 
-        /// </summary>
-        System = 'S',
+    /// </summary>
+    System = 'S',
 
         /// <summary>
         /// CO Administrator
