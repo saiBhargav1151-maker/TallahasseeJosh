@@ -1220,7 +1220,7 @@
             var cacheKey = x.length + '_' + xSum.toFixed(2) + '_' + ySum.toFixed(2) + '_' + xMin.toFixed(2) + '_' + xMax.toFixed(2) + '_' + yMin.toFixed(2) + '_' + yMax.toFixed(2) + '_' + (targetQuantity || 'null');
             
             if (bandwidthCache.hasOwnProperty(cacheKey)) {
-                console.log('Using cached bandwidth for dataset:', { length: x.length, cacheKey: cacheKey.substring(0, 50) + '...' });
+              
                 return bandwidthCache[cacheKey];
             }
             
@@ -1258,13 +1258,7 @@
                 // If target is within 5% of existing data, treat as local prediction
                 isLocalPrediction = relativeDistance < 0.05;
                 
-                console.log('Local prediction check:', {
-                    targetQuantity: targetQuantity,
-                    closestQuantity: closestQuantity,
-                    minDistance: minDistance,
-                    relativeDistance: relativeDistance,
-                    isLocalPrediction: isLocalPrediction
-                });
+               
             }
 
             var xRange = Math.max.apply(null, xValues) - Math.min.apply(null, xValues);
@@ -1322,11 +1316,6 @@
                 // Use much smaller bandwidth for local predictions to focus on nearby points
                 adaptiveBandwidth = Math.min(adaptiveBandwidth, 0.3);
                 
-                console.log('Local bandwidth reduction applied:', {
-                    originalBandwidth: originalBandwidth,
-                    reducedBandwidth: adaptiveBandwidth,
-                    reason: 'Target quantity is near existing data points'
-                });
             }
             
             adaptiveBandwidth = Math.max(0.2, Math.min(0.9, adaptiveBandwidth));
@@ -1370,7 +1359,7 @@
             // Check if we have cached bandwidth for this exact dataset
             if (isFiltered) {
                 if (lastFilteredDataKey === dataKey && cachedFilteredBandwidth !== null) {
-                    console.log('Using cached filtered bandwidth for dataset:', { length: x.length });
+                   
                     return cachedFilteredBandwidth;
                 }
                 lastFilteredDataKey = dataKey;
@@ -1378,7 +1367,7 @@
                 return cachedFilteredBandwidth;
             } else {
                 if (lastUnfilteredDataKey === dataKey && cachedUnfilteredBandwidth !== null) {
-                    console.log('Using cached unfiltered bandwidth for dataset:', { length: x.length });
+              
                     return cachedUnfilteredBandwidth;
                 }
                 lastUnfilteredDataKey = dataKey;
@@ -1461,29 +1450,11 @@
                 return xvals.map(function() { return NaN; });
             }
             
-            // Debug logging for specific cases
-            var isCustomQuantityCase = xvals.length === 1 && xvals[0] === ($scope.customQuantityData && $scope.customQuantityData.userQuantity);
-            if (isCustomQuantityCase) {
-                console.log('LOESS calculation for custom quantity:', {
-                    targetQuantity: xvals[0],
-                    dataPoints: x.length,
-                    bandwidth: bandwidth,
-                    sampleData: x.slice(0, 5).map(function(xi, i) { return { x: xi, y: y[i] }; })
-                });
-            }
-            
             try {
                 var aggregatedData = aggregateDataByX(x, y, 'median'); // Use median to reduce outlier influence
                 var uniqueX = aggregatedData.map(function(d) { return d.x; });
                 var uniqueY = aggregatedData.map(function(d) { return d.y; });
-                
-                if (isCustomQuantityCase) {
-                    console.log('After aggregation:', {
-                        originalPoints: x.length,
-                        uniquePoints: uniqueX.length,
-                        aggregatedData: aggregatedData.slice(0, 10)
-                    });
-                }
+               
                 
                 if (uniqueX.length < 3) {
                     console.warn("Not enough unique x-values for LOESS (need at least 3)");
@@ -1497,26 +1468,12 @@
                 
                 // More conservative bandwidth adjustment
                 var adjustedBandwidth = Math.max(bandwidth, 3 / sortedX.length);
-                
-                if (isCustomQuantityCase) {
-                    console.log('LOESS parameters:', {
-                        sortedX: sortedX.slice(0, 10),
-                        sortedY: sortedY.slice(0, 10),
-                        adjustedBandwidth: adjustedBandwidth,
-                        windowSize: Math.floor(adjustedBandwidth * sortedX.length)
-                    });
-                }
+           
                 
                 if (typeof science !== "undefined" && typeof science.stats !== "undefined" && typeof science.stats.loess === "function") {
                     var loess = science.stats.loess().bandwidth(adjustedBandwidth);
                     var smoothedValues = loess(sortedX, sortedY);
-                    
-                    if (isCustomQuantityCase) {
-                        console.log('Science.js LOESS results:', {
-                            smoothedValues: smoothedValues.slice(0, 10),
-                            targetIndex: sortedX.findIndex(function(x) { return Math.abs(x - xvals[0]) < 0.01; })
-                        });
-                    }
+                   
                     
                     return xvals.map(function(xval) {
                         var result = interpolateLinear(sortedX, smoothedValues, xval);
@@ -1546,36 +1503,12 @@
             // More conservative window size calculation
             var windowSize = Math.max(3, Math.floor(bandwidth * uniqueX.length));
             
-            // Debug logging for custom quantity case
-            var isCustomQuantityCase = xvals.length === 1 && xvals[0] === ($scope.customQuantityData && $scope.customQuantityData.userQuantity);
-            if (isCustomQuantityCase) {
-                console.log('Manual LOESS parameters:', {
-                    windowSize: windowSize,
-                    bandwidth: bandwidth,
-                    uniquePoints: uniqueX.length
-                });
-            }
-
             return xvals.map(function(xval) {
                 // nearest points
                 var distances = uniqueX.map(function(xi, i) { return { dist: Math.abs(xi - xval), index: i }; });
                 distances.sort(function(a, b) { return a.dist - b.dist; });
-
                 var nearestPoints = distances.slice(0, Math.min(windowSize, distances.length));
                 
-                if (isCustomQuantityCase) {
-                    console.log('Manual LOESS for target:', {
-                        targetX: xval,
-                        nearestPoints: nearestPoints.slice(0, 5).map(function(p) {
-                            return {
-                                x: uniqueX[p.index],
-                                y: uniqueY[p.index],
-                                distance: p.dist
-                            };
-                        })
-                    });
-                }
-
                 var weightedSum = 0;
                 var totalWeight = 0;
 
@@ -1595,12 +1528,7 @@
                 var result = weightedSum / totalWeight;
                 
                 if (isCustomQuantityCase) {
-                    console.log('Manual LOESS result:', {
-                        targetX: xval,
-                        result: result,
-                        weightedSum: weightedSum,
-                        totalWeight: totalWeight
-                    });
+                   
                 }
                 
                 return result;
@@ -1703,22 +1631,6 @@
                             filteredSet[QuantityFiltered[i]] = true;
                         }
                         var quantityRangeFiltered = Object.keys(filteredSet).map(function(q) { return parseFloat(q); }).sort(function(a, b) { return a - b; });
-                        
-                        // Debug logging to verify data consistency
-                        console.log('Data ranges:', {
-                            unfiltered: {
-                                count: quantities.length,
-                                min: Math.min(...quantities),
-                                max: Math.max(...quantities),
-                                rangeLength: quantityRange.length
-                            },
-                            filtered: {
-                                count: QuantityFiltered.length,
-                                min: Math.min(...QuantityFiltered),
-                                max: Math.max(...QuantityFiltered),
-                                rangeLength: quantityRangeFiltered.length
-                            }
-                        });
                         
                         // Get cached adaptive bandwidth for both datasets
                         var adaptiveBandwidthUnfiltered = getCachedBandwidth(quantities, prices, false);
@@ -2303,7 +2215,6 @@
             validData.forEach(item => {
                 const lettingDate = new Date(parseInt(item.l.replace(/\/Date\((\d+)\)\//, '$1')));
                 let timeKey;
-                console.log($scope.trendAnalysisData.trendTimeGrouping);
                 switch ($scope.trendAnalysisData.trendTimeGrouping) {
                     case 'year':
                         timeKey = lettingDate.getFullYear();
