@@ -32,11 +32,11 @@
                     Enter Pay Item Number or Des: <span class="form-text text-muted months-hint" style="color: red;">
                         * required
                     </span>
-                    <!-- Simple Tooltip -->
+                    <!-- Enhanced Tooltip -->
                     <div class="info-tooltip-wrapper">
                         <i class="fas fa-info-circle info-icon"></i>
                         <div class="tooltip">
-                            <div class="tooltip-item">
+                            <!--<div class="tooltip-item">
                                 <strong>Search Process:</strong> Type at least <span class="tooltip-highlight">3 characters</span>, then click the search button or press Enter.
                             </div>
                             <div class="tooltip-item">
@@ -44,6 +44,14 @@
                             </div>
                             <div class="tooltip-item">
                                 <strong>Search Options:</strong> You can search by Pay Item Number or Description.
+                            </div>-->
+                            <div class="tooltip-item">
+                                <strong>Pay Item Number Format:</strong> Use leading zeros and exact spacing.
+                                <br><strong>Example:</strong> For pay item "0334 1 15", enter: <span class="tooltip-highlight">0334</span> followed by <span class="tooltip-highlight">two spaces</span>, then <span class="tooltip-highlight">1</span>, and <span class="tooltip-highlight">one space</span> before <span class="tooltip-highlight">15</span>
+                                <br><strong>Note:</strong> Incorrect spacing (e.g., only one space after 1) will return no results.
+                            </div>
+                            <div class="tooltip-item">
+                                <strong>Case Insensitive:</strong> Search works with any case combination (e.g., "embankment" or "EMBANKMENT").
                             </div>
                         </div>
                     </div>
@@ -52,7 +60,7 @@
                     <input type="text" id="payItemInput"
                            ng-model="searchText"
                            ng-keypress="onSearchKeyPress($event)"
-                           placeholder="Type and press Enter or click Search"
+                           placeholder="e.g., 0102  1, embankment, or asphalt"
                            autocomplete="off"
                            class="form-control modern-input"
                            maxlength="180"
@@ -2082,7 +2090,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .tooltip {
             visibility: hidden;
             opacity: 0;
-            width: 280px;
+            width: 350px;
             background-color: #333;
             color: white;
             text-align: left;
@@ -2092,7 +2100,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             z-index: 1001;
             bottom: 125%;
             left: 50%;
-            margin-left: -140px;
+            margin-left: -175px;
             font-size: var(--small-font-size);
             line-height: 1.4;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);

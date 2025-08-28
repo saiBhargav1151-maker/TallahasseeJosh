@@ -1211,7 +1211,6 @@
         function calculateAdaptiveBandwidth(x, y, targetQuantity) {
             // Handle default parameter for older JavaScript
             if (targetQuantity === undefined) targetQuantity = null;
-           
             var xSum = x.reduce(function(sum, val) { return sum + val; }, 0);
             var ySum = y.reduce(function(sum, val) { return sum + val; }, 0);
             var xMin = Math.min.apply(null, x);
