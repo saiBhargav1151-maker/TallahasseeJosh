@@ -4,7 +4,7 @@
         <!-- Group 1: Item Filters -->
         <div class="col-md-4">
             <div>
-                <h4 class="section-title">Item Filters</h4>
+                <h4 class="inflation-title">Item Filters</h4>
             </div>
             <!-- Proposal Input -->
             <!--<div class="form-group search-input-group">
@@ -211,7 +211,7 @@
         <!-- Group 2: Contract Filters -->
         <div class="col-md-3">
             <div class="section-header">
-                <h4 class="section-title">Contract Filters</h4>
+                <h4 class="inflation-title">Contract Filters</h4>
             </div>
 
             <div class="form-group">
@@ -258,7 +258,7 @@
         <!-- Group 3: Bid Filters -->
         <div class="col-md-2">
             <div class="section-header">
-                <h4 class="section-title">Bid Filters</h4>
+                <h4 class="inflation-title">Bid Filters</h4>
             </div>
 
             <div class="form-group">
@@ -357,7 +357,7 @@
         </div>
         <div class="col-md-3">
             <div class="section-header">
-                <h4 class="section-title">Regional Filters</h4>
+                <h4 class="inflation-title">Regional Filters</h4>
             </div>
 
             <div class="form-group">
@@ -564,7 +564,7 @@
                 <div class="table-section">
                     <div class="chart-section">
                         <div class="chart-header" ng-if="!shouldHideGraphForLumpSum()">
-                            <h4 class="section-title">
+                            <h4 class="inflation-title">
                                 <i class="fas fa-chart-line"></i> Unit Price Bid Analysis
                                 <span class="price-type-indicator" ng-if="useInflationAdjustedPrices">
                                     (Inflation-Adjusted)
@@ -575,7 +575,7 @@
                             </h4>
                         </div>
                         <div ng-if="chartStats && !shouldHideGraphForLumpSum()" class="stats-section">
-                            <h5 class="section-title">
+                            <h5 class="inflation-title">
                                 <i class="fas fa-calculator"></i> Summary Statistics
                             </h5>
                             <div class="stats-grid">
@@ -615,21 +615,21 @@
                                     <div class="stat-label">Avg Inflation-Adjusted Price</div>
                                     <div class="stat-value">${{ chartStats.avgInflationAdjustedPrice | number:2 }}</div>
                                 </div>-->
-                                <div class="stat-card" ng-if="useInflationAdjustedPrices">
+                                <!--<div class="stat-card" ng-if="useInflationAdjustedPrices">
                                     <div class="stat-label">Max Inflation Increase</div>
                                     <div class="stat-value">{{ chartStats.maxInflationIncrease | number:1 }}%</div>
                                 </div>
                                 <div class="stat-card" ng-if="useInflationAdjustedPrices">
                                     <div class="stat-label">Avg Unit Price Inflation Increase</div>
                                     <div class="stat-value">{{ chartStats.avgInflationIncrease | number:1 }}%</div>
-                                </div>
+                                </div>-->
 
                             </div>
                         </div>
 
                         <!-- Trend Analysis Section -->
                         <div ng-if="bidHistoryData && bidHistoryData.length > 0 && !shouldHideGraphForLumpSum()" class="stats-section">
-                            <h5 class="section-title">
+                            <h5 class="inflation-title">
                                 <i class="fas fa-chart-line"></i> Price Trend Analysis
                                 <button class="btn btn-sm btn-outline-primary" ng-click="toggleTrendChart()" style="font-size: 12px; padding: 6px 12px; border-radius: 6px; font-weight: 500; border: 1.5px solid #1F4283; background: #ffffff; color: #1F4283; transition: all 0.2s ease;">
                                     <i class="fas" ng-class="showTrendChart ? 'fa-eye-slash' : 'fa-eye'"></i>
@@ -677,7 +677,7 @@
 
 
                             <div class="custom-quantity-header">
-                                <h5 class="section-title">
+                                <h5 class="inflation-title">
                                     <i class="fas fa-calculator"></i> Custom Quantity Analysis
                                     <i class="fas fa-info-circle text-info"
                                        data-toggle="tooltip"
@@ -718,7 +718,7 @@
                             <!-- LOESS Prediction Results -->
                             <div ng-if="customQuantityPrediction" class="prediction-results">
                                 <div ng-if="customQuantityPrediction.success" class="prediction-success">
-                                    <h6 class="section-title">
+                                    <h6 class="inflation-title">
                                         <i class="fas fa-chart-line"></i> LOESS Prediction Results
                                     </h6>
                                     <div class="prediction-grid">
@@ -799,7 +799,7 @@
                             <!-- Summary stats -->
                         </div>
                         <div class="table-header" ng-if="!isLargeDataset">
-                            <h4 class="section-title">
+                            <h4 class="inflation-title">
                                 <i class="fas fa-table"></i> Bid History Data
                             </h4>
                             <div class="table-controls">
@@ -883,6 +883,7 @@
                                                     {{ item.b | smartCurrency }}
                                                 </span>
                                             </span>
+                                           
                                             <span ng-if="column.key === 'InflationAdjustedPrice'"
                                                   title="{{ getInflationInfo(item) }}"
                                                   style="cursor: help;">
@@ -1011,12 +1012,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-weight: 400;
         }
 
-        .section-title {
-            font-size: var(--title-font-size);
-            font-weight: 700;
-            color: #1F4283;
-            font-family: var(--primary-font);
-        }
 
         /* Main Panel Styling */
         .modern-panel {
@@ -1423,16 +1418,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             padding: 0;
         }
 
-        .section-title {
-            color: #0B172D;
-            font-weight: 700;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: var(--heading-font-size);
-        }
-
         /* Table Section */
         .table-section {
             background: #ffffff;
@@ -1448,19 +1433,22 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             border-radius: 6px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border: 2px solid #1F4283;
+            position: relative;
+            white-space:nowrap;
         }
 
         /* Optimized table styling */
         .bid-table {
             width: 100%;
+            word-wrap: break-word;
             border-collapse: separate;
             border-spacing: 0;
             font-size: var(--small-font-size);
             background-color: #ffffff;
             min-width: auto;
+            table-layout:auto;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
-
             .bid-table th {
                 position: sticky;
                 top: 0;
@@ -1472,7 +1460,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 padding: 12px 8px;
                 text-align: center;
                 font-size: var(--small-font-size);
-                white-space: nowrap;
             }
 
             .bid-table td {
@@ -1482,9 +1469,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 vertical-align: middle;
                 font-size: var(--small-font-size);
                 line-height: 1.4;
-                word-wrap: break-word;
-                white-space: normal;
-                max-width: 120px;
             }
 
             .bid-table tbody tr:nth-child(even) {
@@ -1565,7 +1549,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             .bid-table td:nth-child(20),
             .bid-table td:nth-child(21) {
                 font-weight: 500;
-                white-space: nowrap;
+                white-space: normal;
+                word-wrap: break-word;
+                word-break: break-word;
+                max-width: 120px;
+                min-width: 80px;
+                overflow-wrap: break-word;
             }
 
             .bid-table td:nth-child(15) {
@@ -1573,23 +1562,47 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 text-transform: capitalize;
             }
 
-            .bid-table td:nth-child(19) {
-                min-width: 120px;
-                max-width: 150px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                    .bid-table td:nth-child(19) {
+            min-width: 120px;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+            .bid-table td:nth-child(19):hover {
+                white-space: normal;
+                overflow: visible;
+                position: relative;
+                z-index: 100;
+                background: #D6E1F5;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                border-radius: 4px;
             }
 
-                .bid-table td:nth-child(19):hover {
-                    white-space: normal;
-                    overflow: visible;
-                    position: relative;
-                    z-index: 100;
-                    background: #D6E1F5;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-                    border-radius: 4px;
-                }
+        /* Work Type and Work Mix specific styling */
+        .bid-table td:nth-child(20),
+        .bid-table td:nth-child(21) {
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            hyphens: auto;
+            line-height: 1.3;
+            padding: 8px 6px;
+            vertical-align: top;
+        }
+
+        .bid-table th:nth-child(20),
+        .bid-table th:nth-child(21) {
+            white-space: normal;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.3;
+            padding: 10px 6px;
+            vertical-align: top;
+        }
 
             .bid-table tbody tr {
                 min-height: 42px;
@@ -1675,105 +1688,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             background: #D6E1F5;
         }
 
-        .bid-table th:nth-child(1), .bid-table td:nth-child(1) {
-            width: 80px;
-        }
 
-        .bid-table th:nth-child(2), .bid-table td:nth-child(2) {
-            width: 100px;
-        }
-
-        .bid-table th:nth-child(3), .bid-table td:nth-child(3) {
-            width: 70px;
-        }
-
-        .bid-table th:nth-child(4), .bid-table td:nth-child(4) {
-            width: 120px;
-        }
-
-        .bid-table th:nth-child(5), .bid-table td:nth-child(5) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(6), .bid-table td:nth-child(6) {
-            width: 50px;
-        }
-
-        .bid-table th:nth-child(7), .bid-table td:nth-child(7) {
-            width: 70px;
-        }
-
-        .bid-table th:nth-child(8), .bid-table td:nth-child(8) {
-            width: 90px;
-        }
-
-        .bid-table th:nth-child(9), .bid-table td:nth-child(9) {
-            width: 60px;
-        }
-
-        .bid-table th:nth-child(10), .bid-table td:nth-child(10) {
-            width: 90px;
-        }
-
-        .bid-table th:nth-child(11), .bid-table td:nth-child(11) {
-            width: 70px;
-        }
-
-        .bid-table th:nth-child(12), .bid-table td:nth-child(12) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(13), .bid-table td:nth-child(13) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(14), .bid-table td:nth-child(14) {
-            width: 100px;
-        }
-
-        .bid-table th:nth-child(15), .bid-table td:nth-child(15) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(16), .bid-table td:nth-child(16) {
-            width: 70px;
-        }
-
-        .bid-table th:nth-child(17), .bid-table td:nth-child(17) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(18), .bid-table td:nth-child(18) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(19), .bid-table td:nth-child(19) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(20), .bid-table td:nth-child(20) {
-            width: 100px;
-        }
-
-        .bid-table th:nth-child(21), .bid-table td:nth-child(21) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(22), .bid-table td:nth-child(22) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(23), .bid-table td:nth-child(23) {
-            width: 70px;
-        }
-
-        .bid-table th:nth-child(24), .bid-table td:nth-child(24) {
-            width: 80px;
-        }
-
-        .bid-table th:nth-child(25), .bid-table td:nth-child(25) {
-            width: 70px;
-        }
 
         .bid-table td:nth-child(6) {
             background-color: #f0f8ff !important;
@@ -3010,9 +2925,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 grid-template-columns: 1fr;
             }
 
-                    .section-title {
-            font-size: var(--title-font-size);
-        }
 
             .district-county-row {
                 flex-direction: column;

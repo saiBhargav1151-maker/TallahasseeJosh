@@ -60,7 +60,7 @@
             { key: 'CalculatedUnit', label: 'Units', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'Quantity', label: 'Quantity', visible: true, sortable: true, selectionOrder: 4 },
             { key: 'b', label: 'Unit Price Bid', visible: true, sortable: true, selectionOrder: 5 },
-            { key: 'InflationAdjustedPrice', label: 'Inflation-Adjusted Unit Price', visible: true, sortable: true, selectionOrder: 6 },
+            { key: 'InflationAdjustedPrice', label: 'Adj. Unit Price', visible: true, sortable: true, selectionOrder: 6 },
             { key: 'IsOutlier', label: 'Outlier', visible: true, sortable: true, selectionOrder: 7 },
             { key: 'PvBidTotal', label: 'Bid Amount', visible: true, sortable: true, selectionOrder: 8 },
             { key: 'd', label: 'District', visible: true, sortable: true, selectionOrder: 9 },
@@ -2264,7 +2264,7 @@
             if (sparseIntervals.length > 0) {
                 const timeUnit = $scope.trendAnalysisData.trendTimeGrouping === 'year' ? 'years' :
                     $scope.trendAnalysisData.trendTimeGrouping === 'quarter' ? 'quarters' : 'months';
-                $scope.trendWarning = `Warning: Some of your time intervals (${timeUnit}) include fewer than 5 contracts, which may affect the accuracy of the calculated average. Consider selecting a broader time range for a more stable trend.`;
+                $scope.trendWarning = `Warning: Some of your time intervals (${timeUnit}) include fewer than 5 contracts, which may affect the accuracy of the calculated average. `;
             } else {
                 $scope.trendWarning = '';
             }
