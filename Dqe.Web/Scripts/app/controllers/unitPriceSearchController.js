@@ -69,7 +69,7 @@
             { key: 'VendorName', label: 'Bidder Name', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'BidStatus', label: 'Bid Status', visible: true, sortable: true, selectionOrder: 12 },
             { key: 'VendorRanking', label: 'Bidder Rank', visible: true, sortable: true, selectionOrder: 13 },
-            { key: 'NumberOfBidders', label: 'Number of Bidders', visible: true, sortable: true, selectionOrder: 14 },
+     
             { key: 'ContractType', label: 'Contract Type', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'ContractWorkType', label: 'Work Type', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'WorkMixDescription', label: 'Work Mix', visible: false, sortable: false, selectionOrder: 0 },
@@ -170,8 +170,38 @@
             "FMV": "Fair Market Value (Bidder Rank 1, 2, 3)"
         };
         $scope.isInvalidDateRange = function () {
-            return $scope.startDate && $scope.endDate && new Date($scope.startDate) > new Date($scope.endDate);
+            if (!$scope.startDate || !$scope.endDate) return false;
+            
+            // Parse dates without timezone conversion to avoid date shifting
+            const startDate = parseDateWithoutTimezone($scope.startDate);
+            const endDate = parseDateWithoutTimezone($scope.endDate);
+            
+            return startDate > endDate;
         };
+
+        // Helper function to parse date without timezone conversion
+        function parseDateWithoutTimezone(dateValue) {
+            if (!dateValue) return null;
+            
+            // If it's a string in MM/DD/YYYY format, parse it directly
+            if (typeof dateValue === 'string') {
+                const parts = dateValue.split('/');
+                if (parts.length === 3) {
+                    const month = parseInt(parts[0]) - 1; // Month is 0-indexed
+                    const day = parseInt(parts[1]);
+                    const year = parseInt(parts[2]);
+                    return new Date(year, month, day);
+                }
+            }
+            
+            // If it's already a Date object, return it
+            if (dateValue instanceof Date) {
+                return dateValue;
+            }
+            
+            // Fallback to original behavior
+            return new Date(dateValue);
+        }
         $scope.contractTypes = Object.keys($scope.contractTypeMap);
         $timeout(function () {
             $scope.selectedContractTypes = ['CC'];
@@ -463,25 +493,6 @@
                     }
 
                     bidItem.MarketArea = foundMarketArea || "Unknown";
-                });
-
-                // Calculate Number of Bidders per Contract
-                const contractBidderCounts = {};
-                $scope.bidHistoryData.forEach(function (bidItem) {
-                    const contract = bidItem.p;
-                    const vendorName = bidItem.VendorName;
-
-                    if (!contractBidderCounts[contract]) {
-                        contractBidderCounts[contract] = new Set();
-                    }
-                    if (vendorName && vendorName.trim() && vendorName.trim().length > 0) {
-                        contractBidderCounts[contract].add(vendorName.trim());
-                    }
-                });
-                $scope.bidHistoryData.forEach(function (bidItem) {
-                    const contract = bidItem.p;
-                    const bidderSet = contractBidderCounts[contract];
-                    bidItem.NumberOfBidders = bidderSet ? bidderSet.size : 0;
                 });
                 if (responseSize > maxSize) {
                     $scope.isLargeDataset = true;
@@ -827,26 +838,32 @@
                 let headers = [
                     "Contract Number", "Project Number", "Pay Item", "Description", "Supplemental Description",
                     "Units", "Quantity", "Unit Price Bid", "Inflation-Adjusted Unit Price", "Weighted Avg No Outliers", "Outlier", "Bid Amount", "District",
-                    "Primary County", "Bidder Name", "Bid Status", "Bidder Rank", "Number of Bidders"
+                    "Primary County", "Bidder Name", "Bid Status", "Bidder Rank"
                     , "Contract Type", "Work Type", "Work Mix", "Project Category",
                     "Letting Date", "Executed Date", "Awarded Days", "Proposal Type", "Bid Type"
                 ].join(",") + "\n";
 
                 let rows = $scope.bidHistoryData.map(item => {
-                    // Handle LS items for CSV export
+                    // Handle LS items for CSV export and round to 2 decimal places
                     const unitPrice = item.CalculatedUnit === 'LS - Lump Sum' ?
-                        (item.Quantity > 0 ? item.b / item.Quantity : 0) : item.b;
+                        (item.Quantity > 0 ? (item.b / item.Quantity) : 0) : item.b;
 
                     const inflationAdjustedUnitPrice = item.CalculatedUnit === 'LS - Lump Sum' && item.InflationAdjustedPrice ?
-                        (item.Quantity > 0 ? item.InflationAdjustedPrice / item.Quantity : 0) :
+                        (item.Quantity > 0 ? (item.InflationAdjustedPrice / item.Quantity) : 0) :
                         (item.InflationAdjustedPrice || item.b);
+
+                    // Round all monetary values to 2 decimal places
+                    const roundedUnitPrice = parseFloat(unitPrice).toFixed(2);
+                    const roundedInflationAdjustedUnitPrice = parseFloat(inflationAdjustedUnitPrice).toFixed(2);
+                    const roundedWeightedAvgNoOutliers = parseFloat(item.WeightedAvgNoOutliers || 0).toFixed(2);
+                    const roundedBidAmount = parseFloat(item.PvBidTotal || 0).toFixed(2);
 
                     return [
                         `"${item.p}"`, `"${item.ProjectNumber}"`, `"${item.ri}"`, `"${item.Description.replace(/"/g, '""')}"`,
                         `"${item.SupplementalDescription}"`,
-                        `"${item.CalculatedUnit}"`, `"${item.Quantity}"`, `"${unitPrice}"`, `"${inflationAdjustedUnitPrice}"`, `"${item.WeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`,
-                        `"${item.PvBidTotal}"`, `"${item.d}"`, `"${item.c}"`, `"${item.VendorName}"`,
-                        `"${(item.BidStatus)}"`, `"${item.VendorRanking}"`, `"${item.NumberOfBidders}"`, `"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`,
+                        `"${item.CalculatedUnit}"`, `"${item.Quantity}"`, `"${roundedUnitPrice}"`, `"${roundedInflationAdjustedUnitPrice}"`, `"${roundedWeightedAvgNoOutliers}"`, `"${item.IsOutlier ? 'Yes' : 'No'}"`,
+                        `"${roundedBidAmount}"`, `"${item.d}"`, `"${item.c}"`, `"${item.VendorName}"`,
+                        `"${(item.BidStatus)}"`, `"${item.VendorRanking}"`,`"${$scope.contractTypeMap[item.ContractType] || item.ContractType}"`,
                         `"${$scope.workTypeMap[item.ContractWorkType] || item.ContractWorkType}"`, `"${(item.WorkMixDescription)}"`, `"${(item.CategoryDescription)}"`,
                         `"${formatDotNetDate(item.l)}"`, `"${formatDotNetDate(item.ExecutedDate)}"`,
                         `"${item.Duration}"`, `"${$scope.proposalTypeMap[item.ProposalType] || item.ProposalType}"`, `"${$scope.getBidTypeLabel(item.BidType)}"`
@@ -906,13 +923,31 @@
             return currentY;
         }
 
+        // Helper function to format date without timezone conversion
+        function formatDateForPDF(dateValue) {
+            if (!dateValue) return 'All';
+            
+            // If it's already a string, return it as-is
+            if (typeof dateValue === 'string') {
+                return dateValue;
+            }
+            
+            // If it's a Date object, format it as MM/DD/YYYY
+            if (dateValue instanceof Date) {
+                const month = (dateValue.getMonth() + 1).toString().padStart(2, '0');
+                const day = dateValue.getDate().toString().padStart(2, '0');
+                const year = dateValue.getFullYear();
+                return `${month}/${day}/${year}`;
+            }
+            
+            // Fallback to original behavior
+            return dateValue.toLocaleDateString();
+        }
+
         $scope.downloadPDF = function () {
             setTimeout(function () {
                 var jsPDF = window.jspdf && window.jspdf.jsPDF;
-                if (typeof jsPDF !== 'function') {
-                    console.error('PDF generation libraries are still loading. Please try again shortly. jsPDF is not loaded!');
-                    return;
-                }
+               
 
                 var doc = new jsPDF({ unit: 'pt', format: 'a4' });
                 let y = 40;
@@ -956,9 +991,9 @@
                 y += 15;
                 doc.text(
                     'Date Range: ' +
-                    ($scope.startDate ? new Date($scope.startDate).toLocaleDateString() : 'All') +
+                    formatDateForPDF($scope.startDate) +
                     ' to ' +
-                    ($scope.endDate ? new Date($scope.endDate).toLocaleDateString() : 'All'),
+                    formatDateForPDF($scope.endDate),
                     40,
                     y
                 );
@@ -1013,10 +1048,7 @@
                     doc.text('Weighted Average Unit Price (' + ($scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.avg || 0).toFixed(2), 40, y);
                     y += 15;
                     doc.text('Weighted Average (No Outliers) (' + ($scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.weightedAvgNoOutliers || 0).toFixed(2), 40, y);
-                    y += 15;
-                    doc.text('Average Inflation-Adjusted Price: $' + ($scope.chartStats.avgInflationAdjustedPrice || 0).toFixed(2), 40, y);
-                    y += 15;
-                    doc.text('Average Inflation Increase: ' + ($scope.chartStats.avgInflationIncrease || 0).toFixed(1) + '%', 40, y);
+                   
                     y += 25;
                 }
 
@@ -1042,7 +1074,7 @@
                 doc.setFontSize(9);
                 doc.setTextColor(100);
                 doc.text('For complete data, please use the CSV export option.', 40, pageHeight - 40);
-                doc.text('Report generated by DQE System', 40, pageHeight - 25);
+                doc.text('Report generated by DQE Application', 40, pageHeight - 25);
                 doc.save('UnitPriceSearch_Report.pdf');
                 setTimeout(function () {
                     if (!$scope.$$phase) $scope.$apply();
@@ -1978,17 +2010,18 @@
                                         order: 0
                                     },
                                     {
-                                        label: 'Bid Point Outlier',
-                                        data: outlierPoints,
-                                        backgroundColor: 'rgba(128, 128, 128, 0.3)',
-                                        pointRadius: 5,
-                                    },
-                                    {
                                         label: 'Bid Point',
                                         data: filteredPoints,
                                         backgroundColor: 'rgba(0, 128, 0, 0.5)',
                                         pointRadius: 5,
                                     },
+                                    {
+                                        label: 'Bid Point Outlier',
+                                        data: outlierPoints,
+                                        backgroundColor: 'rgba(128, 128, 128, 0.3)',
+                                        pointRadius: 5,
+                                    },
+                                    
 
                                 ]
 
@@ -2665,9 +2698,6 @@
             if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) {
                 return { min: 0, max: 0 };
             }
-
-
-
             const quantities = $scope.bidHistoryData.map(item => item.Quantity || 0).filter(qty => qty > 0);
             if (quantities.length === 0) {
                 return { min: 0, max: 0 };
@@ -2677,8 +2707,8 @@
             const maxQuantity = Math.max(...quantities);
 
             return {
-                min: minQuantity * 0.1,
-                max: maxQuantity * 10
+                min: minQuantity ,
+                max: maxQuantity
             };
         };
         // Cleanup when controller is destroyed
