@@ -1017,7 +1017,7 @@
                         { label: 'Total Contracts', value: $scope.chartStats.totalContracts || 0 },
                         { label: 'Total Bid Amount', value: '$' + ($scope.chartStats.totalBidAmount || 0).toLocaleString() },
                         { label: 'Total Quantity', value: ($scope.chartStats.totalQuantity || 0).toLocaleString() },
-                        { label: 'Average Quantity', value: ($scope.chartStats.avgQty || 0).toFixed(2) },
+                        { label: 'Average Quantity', value: ($scope.chartStats.avgQty || 0).toFixed(2).toLocaleString() },
                         { label: 'Outlier Count', value: $scope.chartStats.outlierCount || 0 }
                     ];
 

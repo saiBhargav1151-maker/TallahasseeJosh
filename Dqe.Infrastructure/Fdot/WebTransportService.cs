@@ -38,21 +38,17 @@ namespace Dqe.Infrastructure.Fdot
         /// <returns>A distinct list of matching <see cref="PayItemDTO"/> objects containing Name and combined Description.</returns>
         public IList<PayItemDTO> GetPayItemDetails(string input)
         {
-            // Sanitize input
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return new List<PayItemDTO>();
-            }
-
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 RefItem ri = null;
-                var sanitizedInput = input.Trim();
-                var results = session.QueryOver(() => ri)
+
+                var sanitizedInput = input.Replace(" ", "").Trim();
+
+                var rawResults = session.QueryOver(() => ri)
                     .Where(() => ri.SpecBook == "13")
                     .And(Restrictions.Or(
-                        Restrictions.On(() => ri.Name).IsInsensitiveLike(sanitizedInput, MatchMode.Anywhere),
-                        Restrictions.On(() => ri.Description).IsInsensitiveLike(sanitizedInput, MatchMode.Anywhere)
+                        Expression.Sql("LOWER(REPLACE(RTRIM(LTRIM(REFITEM_NM)) + ' - ' + RTRIM(LTRIM(DESCR)), ' ', '')) LIKE ?", $"%{input.Trim().ToLower().Replace(" ", "")}%", NHibernateUtil.String),
+                        Restrictions.On(() => ri.Description).IsLike(input.Trim(), MatchMode.Anywhere)
                     ))
                     .SelectList(list => list
                         .Select(() => ri.Id)
@@ -61,10 +57,10 @@ namespace Dqe.Infrastructure.Fdot
                     )
                     .OrderBy(() => ri.Name).Asc()
                     .ThenBy(() => ri.Description).Asc()
-                    .Take(30)
+                    .Take(40)
                     .List<object[]>();
 
-                return results
+                var finalResults = rawResults
                     .Select(row => new PayItemDTO
                     {
                         Name = row[1]?.ToString(),
@@ -72,8 +68,14 @@ namespace Dqe.Infrastructure.Fdot
                     })
                     .Distinct()
                     .ToList();
+
+                return finalResults;
             }
+
+
+
         }
+
         /// <summary>
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
