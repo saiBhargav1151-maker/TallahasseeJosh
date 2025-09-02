@@ -112,7 +112,6 @@
                     if ((latestRunningModifiedVersion == -1)) {
                         $scope.versions[i].displayOrder = topDisplayNumber;
                         latestRunningModifiedVersion = i;
-                        //break;
                     }
 
                     //set some dates for comparrison
@@ -229,6 +228,7 @@
             }
         });
     }
+    
     $scope.synchronizeWorkingEstimate = function (estimate, project) {
         $http.post('./projectproposal/SyncWorkingEstimate', estimate).success(function (result) {
             //processResult(result);
@@ -247,6 +247,7 @@
             processResult(result);
         });
     };
+
     $scope.createProjectVersionFromWt = function (project) {
         $http.post('./projectproposal/CreateProjectVersionFromWt', project).success(function (result) {
             processResult(result);

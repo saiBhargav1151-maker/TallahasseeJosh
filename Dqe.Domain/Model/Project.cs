@@ -222,7 +222,7 @@ namespace Dqe.Domain.Model
             var s = new ProjectEstimate(_webTransportService)
             {
                 Created = DateTime.Now,
-                Label = SnapshotLabel.Estimator,
+                Label = account.Role != DqeRole.Coder ? SnapshotLabel.Estimator : SnapshotLabel.Coder,
                 LastUpdated = DateTime.Now,
                 Estimate = _projectRepository.GetMaxEstimate(ProjectNumber, v.Version) + 1,
                 EstimateComment = comment,
@@ -516,7 +516,7 @@ namespace Dqe.Domain.Model
         public virtual void SnapshotWorkingEstimate(DqeUser account, bool labelSnapshot, string comment, bool proposalOverride, ILreService lreService)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -874,7 +874,7 @@ namespace Dqe.Domain.Model
         public virtual void AquireCustody(DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

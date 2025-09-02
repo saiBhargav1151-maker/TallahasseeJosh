@@ -16,7 +16,7 @@ using BidHistory = Dqe.Domain.Model.BidHistory;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new[] {DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator})]
+    [CustomAuthorize(Roles = new[] {DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder })]
     public class EstimateController : Controller
     {
         private readonly IDqeUserRepository _dqeUserRepository;

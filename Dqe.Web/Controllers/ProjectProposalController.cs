@@ -1009,7 +1009,13 @@ namespace Dqe.Web.Controllers
             }
             //TODO: add call to determine whether to initialize prices from wT
             //var loadPrices = Convert.ToBoolean(ConfigurationManager.AppSettings["loadPrices"]);
-            var loadPrices = _systemParametersRepository.Get().LoadPrices;
+            var loadPrices = false;
+            if(currentDqeUser.Role != DqeRole.Coder)
+            {
+                loadPrices = _systemParametersRepository.Get().LoadPrices;
+            }
+
+
             var ss = project.CreateNewVersionFromWt(string.Empty, wtProjectEstimate, loadPrices
                 , currentDqeUser);
             return ResultStructureFromProjectSelection(project, currentDqeUser);
