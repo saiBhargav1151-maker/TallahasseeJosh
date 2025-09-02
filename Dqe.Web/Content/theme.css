@@ -1416,9 +1416,11 @@ th {
   line-height: 1.428571429;
   vertical-align: top;
   border-top: 1px solid #dddddd;
+  white-space:normal;
 }
 .table > thead > tr > th {
   vertical-align: bottom;
+  width:150pt;
   border-bottom: 2px solid #dddddd;
 }
 .table > caption + thead > tr:first-child > th,
