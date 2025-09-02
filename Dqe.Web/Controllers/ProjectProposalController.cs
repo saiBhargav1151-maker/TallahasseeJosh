@@ -68,7 +68,7 @@ namespace Dqe.Web.Controllers
             _payItemMasterRepository = payItemMasterRepository;
             _reportRepository = reportRepository;
             _systemParametersRepository = systemParametersRepository;
-            _lreService = lreService;
+            _lreService = lreService;            
             _environmentProvider = environmentProvider;
         }
 
@@ -1057,7 +1057,7 @@ namespace Dqe.Web.Controllers
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
             var p = _projectRepository.Get((int)project.id);
-            if (p.CustodyOwner != currentDqeUser)
+            if (p.CustodyOwner != currentDqeUser && currentDqeUser.Role != DqeRole.Coder)
             {
                 return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = string.Format("Project {0} is not currently owned by {1}", project.number, currentDqeUser.Name) });
             }
@@ -1216,6 +1216,52 @@ namespace Dqe.Web.Controllers
             return ResultStructureFromProjectSelection(p, currentDqeUser);
         }
 
+        /// <summary>
+        /// This creates a new Version with a single estimate of type Review 'R'. 
+        /// This does NOT update info to LRE, this is intended to be read only (except the notes). MB. 
+        /// </summary>
+        /// <param name="snapshot">The snapshot in which the review will be based upon</param>
+        [HttpPost]
+        public ActionResult CreateCoderProjectVersionFromWorkingEstimate(dynamic project)
+        {
+            var currentUser = (DqeIdentity)User.Identity;
+            var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
+            var p = _projectRepository.Get((int)project.id);
+            if (p.CustodyOwner != currentDqeUser && currentDqeUser.Role != DqeRole.Coder)
+            {
+                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = string.Format("Project {0} is not currently owned by {1}", project.number, currentDqeUser.Name) });
+            }
+
+            //prevent snapshot of prior let projects
+#if !DEBUG
+            var en = _environmentProvider.GetEnvironment().ToUpper();
+            if (!en.StartsWith("U"))
+            {
+                if (p.Proposals.Any())
+                {
+                    var prop = p.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
+                    if (prop != null)
+                    {
+                        if (prop.LettingDate.HasValue)
+                        {
+                            if (prop.LettingDate.Value.Date < new DateTime(2015, 6, 1).Date)
+                            {
+                                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = string.Format("Project {0} was let prior to 6/1/2015, so a snapshot cannot be taken.", project.number) });
+                            }
+                        }
+                    }
+                }
+            }
+#endif
+            //end snapshot prevent
+
+            p.CoderSnapshotWorkingEstimate(currentDqeUser, _lreService);
+            //var currentLabel = p.GetCurrentSnapshotLabel();
+            return new DqeResult(new
+            {
+            });
+        }
+
         [HttpPost]
         public ActionResult SaveComment(dynamic snapshot)
         {
@@ -1297,7 +1343,7 @@ namespace Dqe.Web.Controllers
                     isSystemAdmin = currentUser.Role == DqeRole.Administrator,
                     isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(project.District),
                     isReviewRole = (currentUser.Role == DqeRole.DistrictReviewer && currentUser.IsInDqeDistrict(project.District) ) || (currentUser.Role == DqeRole.StateReviewer),
-                    isCoderRole = (currentUser.Role == DqeRole.Coder && currentUser.IsInDqeDistrict(project.District) ) || (currentUser.Role == DqeRole.StateReviewer)
+                    isCoderRole = (currentUser.Role == DqeRole.Coder)
                 },
                 authorizedUsers = project.AssignedUsers.Select(i => new
                 {
@@ -1382,8 +1428,9 @@ namespace Dqe.Web.Controllers
                             ? "Project Preconstruction"
                             : string.Format("Version {0} Estimate {1}", snapshot.MyProjectVersion.EstimateSource.MyProjectVersion.Version, snapshot.MyProjectVersion.EstimateSource.Estimate)
                 },
-                versions = project
+            versions = project
                     .ProjectVersions
+                    .Where(v => !(currentUser.Role == DqeRole.Coder) || (v.ProjectEstimates.Any() && v.ProjectEstimates.ToList()[0].Label == SnapshotLabel.Coder)) //if coder user then only pull in coder estimates
                     .OrderByDescending(i => i.Version)
                     .Select(i => new
                     {
@@ -1428,6 +1475,7 @@ namespace Dqe.Web.Controllers
                     text = string.IsNullOrWhiteSpace(message) ? string.Empty : message
                 },
                 JsonRequestBehavior.AllowGet);
+
             return result;
         }
 

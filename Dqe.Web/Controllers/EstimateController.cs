@@ -501,7 +501,7 @@ namespace Dqe.Web.Controllers
             }
             if (currentDqeUser.Role != DqeRole.Administrator)
             {
-                if (!currentDqeUser.IsInDqeDistrict(project.District) && !currentDqeUser.IsAuthorizedOnProject(project))
+                if (!currentDqeUser.IsInDqeDistrict(project.District) && !currentDqeUser.IsAuthorizedOnProject(project) && currentDqeUser.Role != DqeRole.Coder)
                 {
                     return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "You are not authorized to price the project." });
                 }    

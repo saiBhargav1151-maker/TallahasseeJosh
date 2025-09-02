@@ -1,5 +1,10 @@
 namespace Dqe.Domain.Model
 {
+
+    /// <summary>
+    /// Labels of the Estimates/Snapshots. Some of these are one Estimate/Snapshot  per version. (Like Review and Coder)
+    /// ****Note, MUST add new labels to the DynamicHelper.GetSnapshotLabelString() function. MB.
+    /// </summary>
     public enum SnapshotLabel
     {
         /// <summary>
@@ -8,12 +13,12 @@ namespace Dqe.Domain.Model
         Estimator = 'E',
 
         /// <summary>
-        /// Snapshot made by Review user
+        /// Snapshot made by Review user. This is designed with a single estimate per version, because there is not a version label. MB.
         /// </summary>
         Review = 'R',
 
         /// <summary>
-        /// Snapshot made by Coder user
+        /// Snapshot made by Coder user. This is designed with a single estimate per version, because there is not a version label. MB.
         /// </summary>
         Coder = 'C',
 
@@ -58,17 +63,17 @@ namespace Dqe.Domain.Model
         Official = 'O'
     }
 
-    public enum SnapshotLabelOrder
-    {
-        Estimator = 1,
-        Review = 2,
-        Initial = 3,
-        Scope = 4,
-        Phase1 = 5,
-        Phase2 = 6,
-        Phase3 = 7,
-        Phase4 = 8,
-        Authorization = 9,
-        Official = 10
-    }
+    //public enum SnapshotLabelOrder
+    //{
+    //    Estimator = 1,
+    //    Review = 2,
+    //    Initial = 3,
+    //    Scope = 4,
+    //    Phase1 = 5,
+    //    Phase2 = 6,
+    //    Phase3 = 7,
+    //    Phase4 = 8,
+    //    Authorization = 9,
+    //    Official = 10
+    //}
 }

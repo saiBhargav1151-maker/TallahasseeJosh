@@ -18,6 +18,12 @@ namespace Dqe.Web.Services
             return true;
         }
 
+        /// <summary>
+        /// Returns a snapshot Label display verbiage. MB.
+        /// </summary>
+        /// <param name="label"></param>
+        /// <returns></returns>
+        /// <see cref="SnapshotLabel"/>
         public static string GetSnapshotLabelString(SnapshotLabel label)
         {
             return label == SnapshotLabel.Official ? "Official"
@@ -28,6 +34,8 @@ namespace Dqe.Web.Services
                     : label == SnapshotLabel.Phase1 ? "Phase I"
                     : label == SnapshotLabel.Scope ? "Scope"
                     : label == SnapshotLabel.Initial ? "Initial"
+                    : label == SnapshotLabel.Review ? "Review"
+                    : label == SnapshotLabel.Coder ? "Coder"
                     : string.Empty;
         }
      

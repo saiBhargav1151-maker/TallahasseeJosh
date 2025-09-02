@@ -668,6 +668,96 @@ namespace Dqe.Domain.Model
             }
         }
 
+        public virtual void CoderSnapshotWorkingEstimate(DqeUser account, ILreService lreService)
+        {
+            ProjectEstimate source = null;
+            foreach (var pv in _projectVersions.Where(i => i.VersionOwner == account))
+            {
+                foreach (var ps in pv.ProjectEstimates)
+                {
+                    if (ps.IsWorkingEstimate)
+                    {
+                        source = ps;
+                    }
+                }
+            }
+            if (source == null)
+            {
+                throw new InvalidOperationException(string.Format("Working estimate could not be determined for project {0} and user {1}", ProjectNumber, account.Name));
+            }
+            if (account == null) throw new ArgumentNullException("account");
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator
+                && account.Role != DqeRole.Coder)
+            {
+                throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
+            }
+
+            var v = new ProjectVersion
+            {
+                MyProject = this,
+                ProjectSource = ProjectSourceType.Snapshot,
+                Version = _projectRepository.GetMaxVersion(ProjectNumber) + 1,
+                VersionOwner = account,
+                EstimateSource = source
+            };
+            _projectVersions.Add(v);
+            var s = new ProjectEstimate(_webTransportService)
+            {
+                Created = DateTime.Now,
+                Label = SnapshotLabel.Coder,
+                LastUpdated = source.LastUpdated,
+                Estimate = 1,
+                EstimateComment = string.Empty,
+                IsWorkingEstimate = false,
+            };
+            v.AddEstimate(s);
+            if (source.EstimateGroups != null)
+            {
+                foreach (var eg in source.EstimateGroups)
+                {
+                    var e = new EstimateGroup
+                    {
+                        Name = eg.Name,
+                        Description = eg.Description,
+                        AlternateSet = eg.AlternateSet,
+                        FederalConstructionClass = eg.FederalConstructionClass,
+                        CombineWithLikeItems = eg.CombineWithLikeItems,
+                        WtId = eg.WtId,
+                        IsLsDbSummary = eg.IsLsDbSummary,
+                        AlternateMember = eg.AlternateMember
+                    };
+                    s.AddEstimateGroup(e);
+                    foreach (var pi in eg.ProjectItems)
+                    {
+                        var p = new ProjectItem
+                        {
+                            PayItemDescription = pi.PayItemDescription,
+                            AlternateMember = pi.AlternateMember,
+                            //LineNumber = pi.LineNumber,
+                            PayItemNumber = pi.PayItemNumber,
+                            //Price = pi.Price,
+                            //PreviousPrice = pi.PreviousPrice,
+                            PriceSet = pi.PriceSet,
+                            Quantity = pi.Quantity,
+                            CalculatedUnit = pi.CalculatedUnit,
+                            Unit = pi.Unit,
+                            //IsLumpSum = pi.IsLumpSum,
+                            CombineWithLikeItems = pi.CombineWithLikeItems,
+                            AlternateSet = pi.AlternateSet,
+                            SupplementalDescription = pi.SupplementalDescription,
+                            Fund = pi.Fund,
+                            WtId = pi.WtId
+                        };
+                        e.AddProjectItem(p);
+                    }
+                }
+            }
+
+            _commandRepository.Flush();
+            account.MyRecentProjectEstimate = s;
+            //return s;
+        }
+
         public virtual void SnapshotWorkingEstimate(DqeUser account, bool labelSnapshot, ILreService lreService)
         {
             SnapshotWorkingEstimate(account, labelSnapshot, string.Empty, false, lreService);
@@ -850,11 +940,11 @@ namespace Dqe.Domain.Model
         public virtual void ReleaseCustody(DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
-            if (account.Role == DqeRole.System || account.Role == DqeRole.Administrator || account.Role == DqeRole.DistrictAdministrator)
+            if (account.Role == DqeRole.System || account.Role == DqeRole.Administrator || account.Role == DqeRole.DistrictAdministrator || account.Role == DqeRole.Coder)
             {
                 CustodyOwner = null;
             }
