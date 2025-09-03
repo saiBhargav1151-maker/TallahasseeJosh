@@ -256,7 +256,6 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public ActionResult GetUnlinkedItems(string val)
         {
             var result = _payItemMasterRepository.GetHeaders(val).Select(i => new

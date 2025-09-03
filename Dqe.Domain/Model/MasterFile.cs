@@ -44,11 +44,12 @@ namespace Dqe.Domain.Model
             payItemMaster.MyMasterFile = this;
         }
 
-
         public virtual void AddProject(Project project, DqeUser account)
         {
             if (project == null) throw new ArgumentNullException("project");
             if (account == null) throw new ArgumentNullException("account");
+
+            //List of approved Roles
             List<DqeRole> approvedRoles = new List<DqeRole>() { 
                 DqeRole.System, DqeRole.Administrator, DqeRole.DistrictAdministrator, 
                 DqeRole.Estimator, DqeRole.Coder, DqeRole.MaintenanceEstimator, DqeRole.MaintenanceDistrictAdmin, DqeRole.AdminReadOnly, DqeRole.DistrictReviewer, DqeRole.StateReviewer

@@ -89,7 +89,7 @@ namespace Dqe.Domain.Model
             if (ProposalSource != ProposalSourceType.Wt) return SnapshotLabel.Estimator;
             if (!Projects.Any()) return SnapshotLabel.Estimator;
             var dict = Projects.ToDictionary(project => project, project => project.GetCurrentSnapshotLabel());
-            var review = dict.All(i => i.Value == SnapshotLabel.Review);
+            //var review = dict.All(i => i.Value == SnapshotLabel.Review);
             var initial = dict.All(i => i.Value == SnapshotLabel.Initial);
             var scope = dict.All(i => i.Value == SnapshotLabel.Scope);
             var phase1 = dict.All(i => i.Value == SnapshotLabel.Phase1);
@@ -130,10 +130,10 @@ namespace Dqe.Domain.Model
             {
                 return SnapshotLabel.Initial;
             }
-            if (review)
-            {
-                return SnapshotLabel.Review;
-            }
+            //if (review)
+            //{
+            //    return SnapshotLabel.Review;
+            //}
 
             return SnapshotLabel.Estimator;
             //var inSync = dict.All(i => i.Value == dict.First().Value);
@@ -198,7 +198,7 @@ namespace Dqe.Domain.Model
         {
             if (ProposalSource != ProposalSourceType.Wt) return SnapshotLabel.Estimator;
             var dict = Projects.ToDictionary(project => project, project => project.GetCurrentSnapshotLabel());
-            var review = dict.All(i => i.Value == SnapshotLabel.Review);
+            //var review = dict.All(i => i.Value == SnapshotLabel.Review);
             var initial = dict.All(i => i.Value == SnapshotLabel.Initial);
             var scope = dict.All(i => i.Value == SnapshotLabel.Scope);
             var phase1 = dict.All(i => i.Value == SnapshotLabel.Phase1);
@@ -239,13 +239,13 @@ namespace Dqe.Domain.Model
             {
                 return SnapshotLabel.Initial;
             }
-            if (review)
-            {
-                return SnapshotLabel.Review;
-            }
+            //if (review)
+            //{
+            //    return SnapshotLabel.Review;
+            //}
             //return SnapshotLabel.Phase2;
             var inSync = dict.All(i => i.Value == dict.First().Value);
-            return inSync ? SnapshotLabel.Phase2 : SnapshotLabel.Estimator;
+            return inSync ? SnapshotLabel.Initial : SnapshotLabel.Estimator;
         }
 
         //public virtual void SnapshotWorkingEstimate(DqeUser account, bool labelSnapshot)

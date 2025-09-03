@@ -103,7 +103,7 @@ namespace Dqe.Infrastructure.Repositories.Custom
         public Project GetByProjectNumber(string number)
         {
             InitializeSession();
-            var result = Session
+            return Session
                 .QueryOver<Project>()
                 .Where(i => i.ProjectNumber == number)
                 .Fetch(i => i.MyMasterFile).Eager
@@ -115,7 +115,6 @@ namespace Dqe.Infrastructure.Repositories.Custom
                 .Left.JoinQueryOver(i => i.EstimateGroups)
                 .Left.JoinQueryOver(i => i.ProjectItems)
                 .SingleOrDefault();
-            return result;
         }
 
         public Project GetDetailProjectForLsBd(string number, DqeUser owner)

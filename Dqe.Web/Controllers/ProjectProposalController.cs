@@ -1159,7 +1159,7 @@ namespace Dqe.Web.Controllers
             var nextLabel = p == null ? SnapshotLabel.Estimator : p.GetNextSnapshotLabel();
             return new DqeResult(new
             {
-                label = nextLabel == SnapshotLabel.Phase2 ? "Intial"
+                label = nextLabel == SnapshotLabel.Initial ? "Intial"
                 : nextLabel == SnapshotLabel.Scope ? "Scope"
                 : nextLabel == SnapshotLabel.Phase1 ? "Phase I"
                 : nextLabel == SnapshotLabel.Phase2 ? "Phase II"

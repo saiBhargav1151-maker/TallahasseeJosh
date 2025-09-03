@@ -112,13 +112,6 @@ namespace Dqe.Web.Controllers
             var role = ((char)user.Role).ToString();
             var roleName = Helper.GetRoleDisplayLabel(user.Role);
 
-            //!!NEEDS TO BE REMOVED, THIS IS FORCING USER  Marcus Barnes TO BE A REVIEWER ROLE!!!!
-            //if (user.RacfId == "KNAKNMQ")
-            //{
-            //    role = "A";
-            //    roleName = "Administrator";
-            //}
-
             return
                 Json(
                     new
@@ -248,6 +241,7 @@ namespace Dqe.Web.Controllers
                 t.SrsId = user.id;
                 t.District = user.district;
                 t.CostGroupAuthorization = "U";
+                //This is needed since the addition of roles that have numerical char values. It auto defines them as int's as opposed to chars
                 if (user.role is int)
                 {
                     user.role = Convert.ToString(user.role);

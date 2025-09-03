@@ -2,7 +2,9 @@ using System.Collections.Generic;
 
 namespace Dqe.Domain.Model
 {
-
+    /// <summary>
+    /// Roles with more properties.MB
+    /// </summary>
     public class DqeRoleModelItem
     {
         public char Id { get; set; }
@@ -24,7 +26,7 @@ namespace Dqe.Domain.Model
     }
 
     /// <summary>
-    /// writing my own list of roles.MB
+    /// Roles with more properties.MB
     /// </summary>
     public class DqeRoleModelList{
         public DqeRoleModelList()

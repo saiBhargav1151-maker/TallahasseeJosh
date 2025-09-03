@@ -12,8 +12,6 @@
             $scope.versions = r.versions;
             $scope.hasReviewsInProject = false;
 
-            //$scope.thisUser.role == 'A' ? $scope.district : $scope.thisUser.district;
-
             $scope.canCheckOut = false;
             $scope.canSeePrices = false;
             //if is on list, then make can checkout var as true.
