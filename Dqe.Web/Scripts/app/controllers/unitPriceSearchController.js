@@ -1258,12 +1258,11 @@
             var cacheKey = x.length + '_' + xSum.toFixed(2) + '_' + ySum.toFixed(2) + '_' + xMin.toFixed(2) + '_' + xMax.toFixed(2) + '_' + yMin.toFixed(2) + '_' + yMax.toFixed(2) + '_' + (targetQuantity || 'null');
             
             if (bandwidthCache.hasOwnProperty(cacheKey)) {
-              
                 return bandwidthCache[cacheKey];
             }
             
             if (!Array.isArray(x) || !Array.isArray(y) || x.length < 3 || y.length < 3 || x.length !== y.length) {
-                var result = 0.8; // Default fallback
+                var result = 0.4;
                 bandwidthCache[cacheKey] = result;
                 return result;
             }
@@ -1271,7 +1270,7 @@
                 .filter(function(point) { return isFinite(point.x) && isFinite(point.y) && point.x > 0 && point.y > 0; });
 
             if (validData.length < 3) {
-                var result = 0.8;
+                var result = 0.4;
                 bandwidthCache[cacheKey] = result;
                 return result;
             }
@@ -1295,13 +1294,12 @@
                 
                 // If target is within 5% of existing data, treat as local prediction
                 isLocalPrediction = relativeDistance < 0.05;
-                
-               
             }
 
             var xRange = Math.max.apply(null, xValues) - Math.min.apply(null, xValues);
             var xMean = xValues.reduce(function(sum, val) { return sum + val; }, 0) / xValues.length;
             
+            // Calculate local variance for noise detection
             var windowSize = Math.min(5, Math.floor(xValues.length / 4));
             var localVariance = 0;
             var varianceCount = 0;
@@ -1315,69 +1313,44 @@
             }
             
             var avgLocalVariance = varianceCount > 0 ? localVariance / varianceCount : 0;
-            
             var dataDensity = xValues.length / xRange;
-     
-            var adaptiveBandwidth = 0.9; 
-            
-            if (dataDensity > 20) {
-                adaptiveBandwidth *= 0.6;
-            } else if (dataDensity > 10) {
-                adaptiveBandwidth *= 0.7; 
-            } else if (dataDensity < 1) {
-                adaptiveBandwidth *= 1.4; 
-            } else if (dataDensity < 2) {
-                adaptiveBandwidth *= 1.2;
-            }
-            
-            var globalVariance = yValues.reduce(function(sum, val) { 
-                return sum + Math.pow(val - yValues.reduce(function(s, v) { return s + v; }, 0) / yValues.length, 2); 
-            }, 0) / yValues.length;
-            if (avgLocalVariance > globalVariance * 0.3) {
-                adaptiveBandwidth *= 0.7; 
-            } else if (avgLocalVariance < globalVariance * 0.05) {
-                adaptiveBandwidth *= 1.3; 
-            }
-            
-            // Adjust based on data range - more conservative for small ranges
-            if (xRange > 1000) {
-                adaptiveBandwidth *= 1.1; 
-            } else if (xRange < 50) {
-                adaptiveBandwidth *= 0.8;
-            } else if (xRange < 100) {
-                adaptiveBandwidth *= 0.9; 
-            }
-            
-            // Apply local bandwidth reduction for predictions near existing data
-            if (isLocalPrediction) {
-                var originalBandwidth = adaptiveBandwidth;
-                // Use much smaller bandwidth for local predictions to focus on nearby points
-                adaptiveBandwidth = Math.min(adaptiveBandwidth, 0.3);
+            var dataPoints = xValues.length;
+           
+            var adaptiveBandwidth = 0.3; 
+            if (dataPoints >= 900) {
+             
+                adaptiveBandwidth = 0.36;
+            } else if (dataPoints >= 601) {
+             
+                adaptiveBandwidth = 0.46;
+            } else if (dataPoints >= 301) {
                 
+                adaptiveBandwidth = 0.56;
+            } else if (dataPoints >= 201) {
+                
+                adaptiveBandwidth = 0.65;
+            } else if (dataPoints >= 101) {
+                
+                adaptiveBandwidth = 0.75;
+            } else if (dataPoints >= 51) {
+               
+                adaptiveBandwidth = 0.8;
+            } else {
+               
+                adaptiveBandwidth = 0.9;
             }
+           
+            adaptiveBandwidth = Math.max(0.21, Math.min(0.8, adaptiveBandwidth));
             
-            adaptiveBandwidth = Math.max(0.2, Math.min(0.9, adaptiveBandwidth));
-            
-            
-            var minPoints = Math.max(3, Math.floor(adaptiveBandwidth * xValues.length));
-            if (minPoints < 3) {
-                adaptiveBandwidth = Math.max(0.2, 3 / xValues.length);
-            }
-            
-            // Simple cache size management for plain object
+         
             var cacheKeys = Object.keys(bandwidthCache);
             if (cacheKeys.length > 100) {
                 delete bandwidthCache[cacheKeys[0]];
             }
             
-            console.log('Adaptive bandwidth calculation:', {
-                originalBandwidth: 0.8,
-                adaptiveBandwidth: adaptiveBandwidth,
-                dataDensity: dataDensity,
-                avgLocalVariance: avgLocalVariance,
-                globalVariance: globalVariance,
-                xRange: xRange,
-                dataPoints: xValues.length
+            console.log('Improved adaptive bandwidth calculation:', {
+                dataPoints: dataPoints,
+                adaptiveBandwidth: adaptiveBandwidth
             });
             
             bandwidthCache[cacheKey] = adaptiveBandwidth;
@@ -1484,93 +1457,163 @@
         function loessSmooth(x, y, bandwidth, xvals) {
             if (!Array.isArray(x) || !Array.isArray(y) || !Array.isArray(xvals) ||
                 x.length === 0 || y.length === 0 || x.length !== y.length) {
-
                 return xvals.map(function() { return NaN; });
             }
             
             try {
-                var aggregatedData = aggregateDataByX(x, y, 'median'); // Use median to reduce outlier influence
+                // Use improved aggregation with better outlier handling
+                var aggregatedData = aggregateDataByX(x, y, 'median');
                 var uniqueX = aggregatedData.map(function(d) { return d.x; });
                 var uniqueY = aggregatedData.map(function(d) { return d.y; });
-               
                 
                 if (uniqueX.length < 3) {
                     console.warn("Not enough unique x-values for LOESS (need at least 3)");
                     return xvals.map(function(xval) { return interpolateLinear(uniqueX, uniqueY, xval); });
                 }
                 
+                // Sort data properly
                 var sortedIndices = uniqueX.map(function(_, i) { return i; })
                     .sort(function(a, b) { return uniqueX[a] - uniqueX[b]; });
                 var sortedX = sortedIndices.map(function(i) { return uniqueX[i]; });
                 var sortedY = sortedIndices.map(function(i) { return uniqueY[i]; });
                 
-                // More conservative bandwidth adjustment
-                var adjustedBandwidth = Math.max(bandwidth, 3 / sortedX.length);
-           
+                // Improved bandwidth adjustment based on data characteristics
+                var dataRange = Math.max(...sortedX) - Math.min(...sortedX);
+                var dataDensity = sortedX.length / dataRange;
+                var minBandwidth = Math.max(0.1, 3 / sortedX.length);
+                var adjustedBandwidth = Math.max(bandwidth, minBandwidth);
+                
+                // For very dense data, ensure we don't over-smooth
+                if (dataDensity > 20 && adjustedBandwidth > 0.3) {
+                    adjustedBandwidth = Math.min(adjustedBandwidth, 0.3);
+                }
                 
                 if (typeof science !== "undefined" && typeof science.stats !== "undefined" && typeof science.stats.loess === "function") {
-                    var loess = science.stats.loess().bandwidth(adjustedBandwidth);
-                    var smoothedValues = loess(sortedX, sortedY);
-                   
-                    
-                    return xvals.map(function(xval) {
-                        var result = interpolateLinear(sortedX, smoothedValues, xval);
-                        // Ensure we don't return NaN values
-                        return isFinite(result) && result > 0 ? result : interpolateLinear(sortedX, sortedY, xval);
-                    });
+                    try {
+                        var loess = science.stats.loess()
+                            .bandwidth(adjustedBandwidth);
+                        
+                        var smoothedValues = loess(sortedX, sortedY);
+                        
+                        return xvals.map(function(xval) {
+                            var result = interpolateLinear(sortedX, smoothedValues, xval);
+                            // Fallback to original data if smoothing fails
+                            if (!isFinite(result) || result <= 0) {
+                                result = interpolateLinear(sortedX, sortedY, xval);
+                            }
+                            return result;
+                        });
+                    } catch (scienceError) {
+                        console.warn("Science.js LOESS failed, falling back to manual implementation:", scienceError);
+                        return improvedManualLoessSmooth(sortedX, sortedY, adjustedBandwidth, xvals);
+                    }
                 } else {
-                    console.warn("Science.js not available, using manual LOESS");
-                    return manualLoessSmooth(x, y, bandwidth, xvals);
+                    console.warn("Science.js not available, using improved manual LOESS");
+                    return improvedManualLoessSmooth(sortedX, sortedY, adjustedBandwidth, xvals);
                 }
 
             } catch (error) {
-                console.error("Science.js LOESS error:", error);
-                return manualLoessSmooth(x, y, bandwidth, xvals);
+                console.error("LOESS error:", error);
+                return improvedManualLoessSmooth(x, y, bandwidth, xvals);
             }
         }
-        function manualLoessSmooth(x, y, bandwidth, xvals) {
+        function improvedManualLoessSmooth(x, y, bandwidth, xvals) {
+            if (!Array.isArray(x) || !Array.isArray(y) || x.length < 3) {
+                return xvals.map(function() { return NaN; });
+            }
 
-            var aggregatedData = aggregateDataByX(x, y, 'median'); // Use median to reduce outlier influence
-            var uniqueX = aggregatedData.map(function(d) { return d.x; });
-            var uniqueY = aggregatedData.map(function(d) { return d.y; });
-
-            if (uniqueX.length < 3) {
-                return xvals.map(function(xval) { return interpolateLinear(uniqueX, uniqueY, xval); });
+            // Calculate adaptive window size based on data characteristics
+            var dataRange = Math.max(...x) - Math.min(...x);
+            var dataDensity = x.length / dataRange;
+            var baseWindowSize = Math.max(3, Math.floor(bandwidth * x.length));
+            
+            // Adjust window size based on data density
+            var windowSize = baseWindowSize;
+            if (dataDensity > 20) {
+                // Dense data: use smaller windows for more detail
+                windowSize = Math.max(3, Math.floor(baseWindowSize * 0.7));
+            } else if (dataDensity < 2) {
+                // Sparse data: use larger windows for stability
+                windowSize = Math.min(x.length, Math.floor(baseWindowSize * 1.3));
             }
             
-            // More conservative window size calculation
-            var windowSize = Math.max(3, Math.floor(bandwidth * uniqueX.length));
-            
             return xvals.map(function(xval) {
-                // nearest points
-                var distances = uniqueX.map(function(xi, i) { return { dist: Math.abs(xi - xval), index: i }; });
+                // Calculate distances and sort
+                var distances = x.map(function(xi, i) { 
+                    return { 
+                        dist: Math.abs(xi - xval), 
+                        index: i,
+                        x: xi,
+                        y: y[i]
+                    }; 
+                });
                 distances.sort(function(a, b) { return a.dist - b.dist; });
+                
+                // Get nearest points within window
                 var nearestPoints = distances.slice(0, Math.min(windowSize, distances.length));
                 
+                // Calculate weights using improved tricube weight function
+                var maxDistance = nearestPoints[nearestPoints.length - 1].dist;
                 var weightedSum = 0;
                 var totalWeight = 0;
+                var validPoints = 0;
 
                 for (var i = 0; i < nearestPoints.length; i++) {
                     var point = nearestPoints[i];
-                    // Improved weighting function - more emphasis on closer points
-                    var weight = point.dist === 0 ? 1 : 1 / (1 + Math.pow(point.dist, 1.5));
-                    weightedSum += uniqueY[point.index] * weight;
-                    totalWeight += weight;
+                    var normalizedDist = maxDistance > 0 ? point.dist / maxDistance : 0;
+                    
+                    // Tricube weight function: (1 - |d|^3)^3
+                    var weight = 0;
+                    if (normalizedDist < 1) {
+                        var absDist = Math.abs(normalizedDist);
+                        weight = Math.pow(1 - Math.pow(absDist, 3), 3);
+                    }
+                    
+                    // Additional distance-based weighting for very close points
+                    if (point.dist === 0) {
+                        weight = 1; // Exact match gets full weight
+                    } else if (point.dist < dataRange * 0.01) {
+                        weight = Math.max(weight, 0.8); // Very close points get high weight
+                    }
+                    
+                    if (weight > 0 && isFinite(point.y) && point.y > 0) {
+                        weightedSum += point.y * weight;
+                        totalWeight += weight;
+                        validPoints++;
+                    }
                 }
 
-                // If no valid weighted calculation, fall back to linear interpolation
-                if (totalWeight <= 0) {
-                    return interpolateLinear(uniqueX, uniqueY, xval);
+                // Fallback strategies if no valid weighted calculation
+                if (totalWeight <= 0 || validPoints < 2) {
+                    // Try linear interpolation
+                    var result = interpolateLinear(x, y, xval);
+                    if (isFinite(result) && result > 0) {
+                        return result;
+                    }
+                    
+                    // Last resort: use nearest neighbor
+                    if (nearestPoints.length > 0) {
+                        return nearestPoints[0].y;
+                    }
+                    
+                    return NaN;
                 }
                 
                 var result = weightedSum / totalWeight;
                 
-                if (isCustomQuantityCase) {
-                   
+                // Ensure result is positive and finite
+                if (!isFinite(result) || result <= 0) {
+                    // Fallback to linear interpolation
+                    result = interpolateLinear(x, y, xval);
                 }
                 
                 return result;
             });
+        }
+
+        function manualLoessSmooth(x, y, bandwidth, xvals) {
+            // Legacy function - redirect to improved version
+            return improvedManualLoessSmooth(x, y, bandwidth, xvals);
         }
         //Bootstrap CI function
         function bootstrapCI(x, y, xvals, frac, nBoot) {
@@ -1584,14 +1627,21 @@
                 };
             }
             
+            if (x.length > 100) {
+                nBoot = Math.min(nBoot, 300); 
+            } else if (x.length < 10) {
+                nBoot = Math.min(nBoot, 200); 
+            }
             // Create a seeded random number generator for consistent results
-            var seed = 12345; // Fixed seed for consistent results
+            var seed = 12345; 
             function seededRandom() {
                 seed = (seed * 9301 + 49297) % 233280;
                 return seed / 233280;
             }
             
             var preds = [];
+            var validBootstrapCount = 0;
+            
             for (var b = 0; b < nBoot; b++) {
                 var indices = [];
                 for (var i = 0; i < x.length; i++) {
@@ -1599,18 +1649,50 @@
                 }
                 var xBoot = indices.map(function(i) { return x[i]; });
                 var yBoot = indices.map(function(i) { return y[i]; });
-                var smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
-                preds.push(smoothed);
+                
+                try {
+                    var smoothed = loessSmooth(xBoot, yBoot, frac, xvals);
+                    
+                    // Validate bootstrap result
+                    var validResults = smoothed.filter(function(v) { 
+                        return v !== null && !isNaN(v) && isFinite(v) && v > 0; 
+                    });
+                    
+                    if (validResults.length >= xvals.length * 0.8) { 
+                        preds.push(smoothed);
+                        validBootstrapCount++;
+                    }
+                } catch (error) {
+                    console.warn("Bootstrap iteration failed:", error);
+                    continue;
+                }
             }
+            
+            // Ensure we have enough valid bootstrap samples
+            if (validBootstrapCount < 10) {
+                console.warn("Insufficient valid bootstrap samples:", validBootstrapCount);
+                return {
+                    lower: xvals.map(function() { return null; }),
+                    upper: xvals.map(function() { return null; }),
+                };
+            }
+            
             var lower = [];
             var upper = [];
             for (var i = 0; i < xvals.length; i++) {
-                // Filter out null, NaN, and negative values for unit prices
-                var valuesAtPoint = preds.map(function(row) { return row[i]; }).filter(function(v) { return v !== null && !isNaN(v) && v >= 0; });
-                valuesAtPoint.sort(function(a, b) { return a - b; });
+               
+                var valuesAtPoint = preds.map(function(row) { return row[i]; })
+                    .filter(function(v) { return v !== null && !isNaN(v) && isFinite(v) && v >= 0; });
+                
                 if (valuesAtPoint.length > 0) {
-                    var lowerIdx = Math.floor(valuesAtPoint.length * 0.025);
-                    var upperIdx = Math.floor(valuesAtPoint.length * 0.975);
+                    valuesAtPoint.sort(function(a, b) { return a - b; });
+      
+                    var lowerIdx = Math.floor(valuesAtPoint.length * 0.05); // 90% CI instead of 95%
+                    var upperIdx = Math.floor(valuesAtPoint.length * 0.95);
+                    
+                    // Ensure indices are within bounds
+                    lowerIdx = Math.max(0, lowerIdx);
+                    upperIdx = Math.min(valuesAtPoint.length - 1, upperIdx);
 
                     // Ensure lower bound is non-negative (minimum 0)
                     lower[i] = Math.max(0, valuesAtPoint[lowerIdx]);
@@ -1620,6 +1702,7 @@
                     upper[i] = null;
                 }
             }
+            
             return { lower: lower, upper: upper };
         }
 
@@ -1976,7 +2059,8 @@
                                         pointRadius: 0,
                                         borderWidth: 2,
                                         tension: 0.4,
-                                        order: 0
+                                        order: 0,
+                                        hidden: true // Hide by default
                                     },
                                     {
                                         label: '95% CI Outliers (Upper)',
@@ -1988,7 +2072,8 @@
                                         pointRadius: 0,
                                         borderWidth: 2,
                                         tension: 0.4,
-                                        order: 0
+                                        order: 0,
+                                        hidden: true // Hide by default
                                     },
 
                                     {
@@ -1997,11 +2082,12 @@
                                         type: 'line',
                                         borderColor: 'rgba(0,0,255,0.5)',
                                         backgroundColor: 'rgba(0,0,255,0.1)',
-                                        fill: '+1', // fill to next dataset
+                                        fill: '+1',
                                         pointRadius: 0,
                                         borderWidth: 2,
                                         tension: 0.4,
-                                        order: 0
+                                        order: 0,
+                                        hidden: true 
                                     },
                                     {
                                         label: '95% CI No Outliers (Upper)',
@@ -2013,22 +2099,22 @@
                                         pointRadius: 0,
                                         borderWidth: 2,
                                         tension: 0.4,
-                                        order: 0
+                                        order: 0,
+                                        hidden: true 
                                     },
                                     {
                                         label: 'Bid Point',
                                         data: filteredPoints,
                                         backgroundColor: 'rgba(0, 128, 0, 0.5)',
-                                        pointRadius: 5,
+                                        pointRadius: 3,
                                     },
                                     {
                                         label: 'Bid Point Outlier',
                                         data: outlierPoints,
                                         backgroundColor: 'rgba(128, 128, 128, 0.3)',
-                                        pointRadius: 5,
+                                        pointRadius: 3,
                                     },
-                                    
-
+                                   
                                 ]
 
                             },
