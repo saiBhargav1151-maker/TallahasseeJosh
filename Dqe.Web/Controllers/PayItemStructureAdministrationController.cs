@@ -308,8 +308,9 @@ namespace Dqe.Web.Controllers
                     ? string.Empty
                     : i.Units.Count == 1
                         ? i.Units[0]
-                        : "MIXED"
-            });
+                        : "MIXED",
+                isObsolete = i.IsObsolete
+            });       
             return new DqeResult(result, JsonRequestBehavior.AllowGet);
         }
 

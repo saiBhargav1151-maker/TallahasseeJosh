@@ -162,6 +162,7 @@
                     <td></td>
                     <td>Structure ID</td>
                     <td>Title</td>
+                    <td>Obsolete</td>
                     <td>Unit</td>
                 </tr>
                 <tr>
@@ -188,6 +189,7 @@
                         </a>
                     </td>
                     <td>{{structure.title}}</td>
+                    <td>{{structure.isObsolete ? 'Obsolete': '-'}}</td>
                     <td>{{structure.unit}}</td>
                 </tr>
                 <tr ng-repeat-end ng-if="structure.showDetail">
