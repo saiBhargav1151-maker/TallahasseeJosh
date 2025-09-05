@@ -135,20 +135,31 @@
         <div class="panel panel-default">
             <div class="panel-heading">Options</div>
             <div class="panel-body">
-                <div style="width: 300px; float: left;">
-                    <label>
-                        <!-- 04/14/2025 JWW Changed label from 'Show Current Structures Only' to 'Show only active Pay Item Structures'. -->
-                        <input type="checkbox" title="Show current structures only" ng-model="showCurrentStructures" ng-change="resetList()" /> Show only Active Pay Item Structures
-                    </label>
+                <div style="width: 200px; float: left; text-align: center;">
+                    <label>Structures</label>
+                    <select class="form-control" title="Active Structure Options" ng-model="activeStructureOptions" ng-change="resetList()">
+                        <option value="true">Active</option>
+                        <option value="false">Obsolete</option>
+                        <option value="all" selected>Both Active/Obsolete</option>
+                    </select>
                 </div>
-                <div style="width: 300px; float: left;">
-                    <label>
-                        <!-- 04/14/2025 JWW Changed label from 'Show Current Items Only' to 'Show only active Pay Items'. -->
-                        <input type="checkbox" title="Show current pay items only" ng-model="showCurrentItems" ng-change="resetStructures()" /> Show only Active Pay Items
-                    </label>
+                <!--<input type="checkbox" title="Show current structures only" ng-model="showCurrentStructures" ng-change="resetList()" /> Show only Active Pay Item Structures
+
+    <!-- 04/14/2025 JWW Changed label from 'Show Current Items Only' to 'Show only active Pay Items'. -->
+                <!--<label style="padding-left: 50px;">
+                    <input type="checkbox" title="Show current pay items only" ng-model="showCurrentItems" ng-change="resetStructures()" /> Show only Active Pay Items
+                </label>-->
+
+                <div style="width: 200px; float: left; margin-left: 50px; text-align: center;">
+                    <label>Pay Items</label>
+                    <select class="form-control" title="Active Pay Items Options" ng-model="activePayItemOptions" ng-change="resetStructures()">
+                        <option value="true" selected>Active</option>
+                        <option value="false">Obsolete</option>
+                        <option value="all">Both Active/Obsolete</option>
+                    </select>
                 </div>
-                <div style="clear: both;">
-                </div>
+            </div>
+            <div style="clear: both;">
             </div>
         </div>
     </div>
@@ -162,7 +173,7 @@
                     <td></td>
                     <td>Structure ID</td>
                     <td>Title</td>
-                    <td>Obsolete</td>
+                    <td style="text-align: center;">Active</td>
                     <td>Unit</td>
                 </tr>
                 <tr>
@@ -173,6 +184,7 @@
                     </td>
                     <td><input class="form-control" title="Filter structure name" ng-model="filter.name"></td>
                     <td><input class="form-control" title="Filter structure title" ng-model="filter.title"></td>
+                    <td style="text-align: center;"></td>
                     <td><input class="form-control" title="Filter structure unit" ng-model="filter.unit"></td>
                 </tr>
             </thead>
@@ -189,11 +201,12 @@
                         </a>
                     </td>
                     <td>{{structure.title}}</td>
-                    <td>{{structure.isObsolete ? 'Obsolete': '-'}}</td>
+                    <td ng-if="structure.isObsolete" style="text-align: center;">-</td>
+                    <td ng-if="!structure.isObsolete" style="text-align: center;">Active</td>
                     <td>{{structure.unit}}</td>
                 </tr>
                 <tr ng-repeat-end ng-if="structure.showDetail">
-                    <td colspan="4">
+                    <td colspan="5">
                         <div class="panel panel-primary">
                             <div class="panel-heading">Pay Item Structure</div>
                             <div class="panel-body">
