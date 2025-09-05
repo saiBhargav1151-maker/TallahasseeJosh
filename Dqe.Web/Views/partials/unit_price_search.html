@@ -860,7 +860,8 @@
                                                 <a ng-if="item.ProjectNumber && item.ProjectNumber.length >= 7"
                                                    ng-href="https://owpbstandardmap.fdot.gov/?query=WorkProgram_Tbl15_Dissolved_2004,itemseg,{{ item.ProjectNumber.substring(0,7) }}"
                                                    target="_blank"
-                                                   rel="noopener">
+                                                   rel="noopener"
+                                                   title="Click to open GIS map in a new tab">
                                                     {{ item.ProjectNumber }}
                                                 </a>
                                                 <span ng-if="!item.ProjectNumber || item.ProjectNumber.length < 7">

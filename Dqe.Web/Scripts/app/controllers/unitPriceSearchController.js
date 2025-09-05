@@ -1797,35 +1797,27 @@
                             }
                             return { x: q, y: price };
                         }).filter(function(pt) { return pt.x > 0 && pt.y > 0 && isFinite(pt.x) && isFinite(pt.y); });
-                        
-                        // Fill small gaps in LOESS lines by interpolating between valid points
+                     
                         var fillGapsInLine = function(lineData) {
                             if (lineData.length < 2) return lineData;
-                            
-                            var filled = [];
-                            for (var i = 0; i < lineData.length; i++) {
-                                filled.push(lineData[i]);
-                                
-                                // If there's a gap to the next point, add interpolated points
-                                if (i < lineData.length - 1) {
-                                    var current = lineData[i];
-                                    var next = lineData[i + 1];
-                                    var gap = next.x - current.x;
-                                    
-                                    // If gap is significant (more than 1.5x the average gap), add interpolated points
-                                    var avgGap = (lineData[lineData.length - 1].x - lineData[0].x) / (lineData.length - 1);
-                                    if (gap > avgGap * 1.5) {
-                                        var numInterpolated = Math.min(Math.floor(gap / avgGap), 3); // Max 3 interpolated points
-                                        for (var j = 1; j <= numInterpolated; j++) {
-                                            var t = j / (numInterpolated + 1);
-                                            var interpolatedX = current.x + t * gap;
-                                            var interpolatedY = current.y + t * (next.y - current.y);
-                                            filled.push({ x: interpolatedX, y: interpolatedY });
-                                        }
-                                    }
-                                }
+                       
+                            var maxPoints = 50; 
+                            if (lineData.length <= maxPoints) {
+                                return lineData;
                             }
-                            return filled.sort(function(a, b) { return a.x - b.x; });
+                            var step = Math.ceil(lineData.length / maxPoints);
+                            var sampled = [];
+                            
+                            for (var i = 0; i < lineData.length; i += step) {
+                                sampled.push(lineData[i]);
+                            }
+                            
+                            // Always include the last point
+                            if (sampled[sampled.length - 1] !== lineData[lineData.length - 1]) {
+                                sampled.push(lineData[lineData.length - 1]);
+                            }
+                            
+                            return sampled;
                         };
                         
                         var filledLoessUnfiltered = fillGapsInLine(loessLineUnfiltered);
@@ -1835,84 +1827,31 @@
                         var fillGapsInConfidenceIntervals = function(lowerData, upperData) {
                             if (lowerData.length < 2 || upperData.length < 2) return { lower: lowerData, upper: upperData };
                             
-                            var allXValues = [];
-                            for (var i = 0; i < lowerData.length; i++) {
-                                allXValues.push(lowerData[i].x);
-                            }
-                            for (var i = 0; i < upperData.length; i++) {
-                                allXValues.push(upperData[i].x);
-                            }
-                            // Remove duplicates and sort
-                            var allX = [];
-                            for (var i = 0; i < allXValues.length; i++) {
-                                if (allX.indexOf(allXValues[i]) === -1) {
-                                    allX.push(allXValues[i]);
-                                }
-                            }
-                            allX.sort(function(a, b) { return a - b; });
+                            // Reduce points for confidence intervals too (max 30 points each)
+                            var maxCIPoints = 30;
                             
-                            var filledLower = [];
-                            var filledUpper = [];
-                            
-                            for (var i = 0; i < allX.length; i++) {
-                                var x = allX[i];
-                                var lowerPoint = null;
-                                var upperPoint = null;
+                            var reducePoints = function(data) {
+                                if (data.length <= maxCIPoints) return data;
                                 
-                                // Find matching points
-                                for (var j = 0; j < lowerData.length; j++) {
-                                    if (lowerData[j].x === x) {
-                                        lowerPoint = lowerData[j];
-                                        break;
-                                    }
-                                }
-                                for (var j = 0; j < upperData.length; j++) {
-                                    if (upperData[j].x === x) {
-                                        upperPoint = upperData[j];
-                                        break;
-                                    }
+                                var step = Math.ceil(data.length / maxCIPoints);
+                                var sampled = [];
+                                
+                                for (var i = 0; i < data.length; i += step) {
+                                    sampled.push(data[i]);
                                 }
                                 
-                                if (lowerPoint && upperPoint) {
-                                    filledLower.push(lowerPoint);
-                                    filledUpper.push(upperPoint);
-                                } else if (i > 0 && i < allX.length - 1) {
-                                    // Interpolate missing points
-                                    var prevLower = null;
-                                    var nextLower = null;
-                                    var prevUpper = null;
-                                    var nextUpper = null;
-                                    
-                                    // Find previous and next points
-                                    for (var j = 0; j < lowerData.length; j++) {
-                                        if (lowerData[j].x < x && (!prevLower || lowerData[j].x > prevLower.x)) {
-                                            prevLower = lowerData[j];
-                                        }
-                                        if (lowerData[j].x > x && (!nextLower || lowerData[j].x < nextLower.x)) {
-                                            nextLower = lowerData[j];
-                                        }
-                                    }
-                                    for (var j = 0; j < upperData.length; j++) {
-                                        if (upperData[j].x < x && (!prevUpper || upperData[j].x > prevUpper.x)) {
-                                            prevUpper = upperData[j];
-                                        }
-                                        if (upperData[j].x > x && (!nextUpper || upperData[j].x < nextUpper.x)) {
-                                            nextUpper = upperData[j];
-                                        }
-                                    }
-                                    
-                                    if (prevLower && nextLower && prevUpper && nextUpper) {
-                                        var t = (x - prevLower.x) / (nextLower.x - prevLower.x);
-                                        var interpolatedLower = prevLower.y + t * (nextLower.y - prevLower.y);
-                                        var interpolatedUpper = prevUpper.y + t * (nextUpper.y - prevUpper.y);
-                                        
-                                        filledLower.push({ x: x, y: interpolatedLower });
-                                        filledUpper.push({ x: x, y: interpolatedUpper });
-                                    }
+                                // Always include the last point
+                                if (sampled[sampled.length - 1] !== data[data.length - 1]) {
+                                    sampled.push(data[data.length - 1]);
                                 }
-                            }
+                                
+                                return sampled;
+                            };
                             
-                            return { lower: filledLower, upper: filledUpper };
+                            return { 
+                                lower: reducePoints(lowerData), 
+                                upper: reducePoints(upperData) 
+                            };
                         };
                         
                         var filledConfidenceUnfiltered = fillGapsInConfidenceIntervals(lowerUnfiltered, upperUnfiltered);
