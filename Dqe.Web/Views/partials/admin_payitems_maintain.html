@@ -135,7 +135,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">Options</div>
             <div class="panel-body">
-                <div style="width: 200px; float: left; text-align: center;">
+                <div style="width: 175px; float: left; text-align: center;">
                     <label>Structures</label>
                     <select class="form-control" title="Active Structure Options" ng-model="activeStructureOptions" ng-change="resetList()">
                         <option value="true">Active</option>
@@ -147,16 +147,22 @@
 
     <!-- 04/14/2025 JWW Changed label from 'Show Current Items Only' to 'Show only active Pay Items'. -->
                 <!--<label style="padding-left: 50px;">
-                    <input type="checkbox" title="Show current pay items only" ng-model="showCurrentItems" ng-change="resetStructures()" /> Show only Active Pay Items
-                </label>-->
+        <input type="checkbox" title="Show current pay items only" ng-model="showCurrentItems" ng-change="resetStructures()" /> Show only Active Pay Items
+    </label>-->
 
-                <div style="width: 200px; float: left; margin-left: 50px; text-align: center;">
+                <div style="width: 175px; float: left; margin-left: 50px; text-align: center;">
                     <label>Pay Items</label>
                     <select class="form-control" title="Active Pay Items Options" ng-model="activePayItemOptions" ng-change="resetStructures()">
                         <option value="true" selected>Active</option>
                         <option value="false">Obsolete</option>
                         <option value="all">Both Active/Obsolete</option>
                     </select>
+                </div>
+
+                <!--<select class="form-control" name="specYear" title="Spec year" ng-options="item.name as item.name for item in specBooks" ng-model="specBook.current" ng-change="changeSpecId(specBook)"></select>-->
+                <div style="width: 75px; float: left; margin-left: 50px; text-align: center;">
+                    <label>Spec Years</label>
+                    <select class="form-control" name="specYearFilter" title="Spec year" ng-options="payitem.name as payitem.name for payitem in payItemSpecYearsOptions" ng-model="payItemSpecYearsSelected.name" ng-change="resetStructures()"></select>
                 </div>
             </div>
             <div style="clear: both;">

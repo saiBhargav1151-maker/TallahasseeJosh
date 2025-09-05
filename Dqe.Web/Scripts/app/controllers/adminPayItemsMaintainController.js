@@ -4,6 +4,9 @@
     $scope.showCurrentStructures = true;
     $scope.activeStructureOptions = "true";
     $scope.activePayItemOptions = "true";
+    $scope.payItemSpecYearsOptions = [];
+    $scope.payItemSpecYearsAllOption = { id: '0', name: 'All', description: 'All' };
+    $scope.payItemSpecYearsSelected = { id: '0', name: 'All', description: 'All' };
 
     $http.get('./PayItemStructureAdministration/GetUnitCodes').success(function (result) {
         if (!containsDqeError(result)) {
@@ -69,6 +72,9 @@
     $http.get('./PayItemStructureAdministration/GetSpecBooks').success(function (result) {
         if (!containsDqeError(result)) {
             $scope.specBooks = getDqeData(result);
+            $scope.payItemSpecYearsOptions = angular.copy($scope.specBooks);
+            $scope.payItemSpecYearsOptions.unshift($scope.payItemSpecYearsAllOption);
+
             $http.get('./PayItemStructureAdministration/GetCurrentSpecBook').success(function (res) {
                 if (!containsDqeError(res)) {
                     var currentSpecBook = getDqeData(res);
@@ -241,6 +247,15 @@
                     let filtered = [];
                     angular.forEach(structure.items, function (item) {
                         if (item.isObsolete === true) {
+                            filtered.push(item);
+                        }
+                    });
+                    structure.items = filtered;
+                }
+                if ($scope.payItemSpecYearsSelected.name !== null && $scope.payItemSpecYearsSelected.name !== undefined && $scope.payItemSpecYearsSelected.name != 'All') {
+                    let filtered = [];
+                    angular.forEach(structure.items, function (item) {
+                        if (item.specBook == $scope.payItemSpecYearsSelected.name) {
                             filtered.push(item);
                         }
                     });
