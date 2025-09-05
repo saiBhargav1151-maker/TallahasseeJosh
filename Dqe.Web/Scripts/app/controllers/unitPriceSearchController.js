@@ -54,27 +54,27 @@
         $scope.availableColumns = [
             { key: 'p', label: 'Contract', visible: true, sortable: true, selectionOrder: 1 },
             { key: 'ProjectNumber', label: 'Project Number', visible: true, sortable: true, selectionOrder: 2 },
-            { key: 'ri', label: 'Pay Item', visible: true, sortable: true, selectionOrder: 3 },
-            { key: 'Description', label: 'Description', visible: false, sortable: true, selectionOrder: 0 },
+            { key: 'ri', label: 'Pay Item', visible: true, sortable: false, selectionOrder: 3 },
+            { key: 'Description', label: 'Description', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'SupplementalDescription', label: 'Supp Desc', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'CalculatedUnit', label: 'Units', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'Quantity', label: 'Quantity', visible: true, sortable: true, selectionOrder: 4 },
             { key: 'b', label: 'Unit Price Bid', visible: true, sortable: true, selectionOrder: 5 },
             { key: 'InflationAdjustedPrice', label: 'Adj. Unit Price', visible: true, sortable: true, selectionOrder: 6 },
-            { key: 'IsOutlier', label: 'Outlier', visible: true, sortable: true, selectionOrder: 7 },
+            { key: 'IsOutlier', label: 'Outlier', visible: false, sortable: true, selectionOrder: 7 },
             { key: 'PvBidTotal', label: 'Bid Amount', visible: true, sortable: true, selectionOrder: 8 },
-            { key: 'd', label: 'District', visible: true, sortable: true, selectionOrder: 9 },
-            { key: 'MarketArea', label: 'Market Area', visible: true, sortable: true, selectionOrder: 10 },
-            { key: 'c', label: 'County', visible: true, sortable: true, selectionOrder: 11 },
-            { key: 'VendorName', label: 'Bidder Name', visible: false, sortable: false, selectionOrder: 0 },
-            { key: 'BidStatus', label: 'Bid Status', visible: true, sortable: true, selectionOrder: 12 },
-            { key: 'VendorRanking', label: 'Bidder Rank', visible: true, sortable: true, selectionOrder: 13 },
+            { key: 'd', label: 'District', visible: true, sortable: true, selectionOrder: 11 },
+            { key: 'MarketArea', label: 'Market Area', visible: true, sortable: true, selectionOrder: 12 },
+            { key: 'c', label: 'County', visible: true, sortable: true, selectionOrder: 13 },
+            { key: 'VendorName', label: 'Bidder Name', visible: true, sortable: true, selectionOrder: 14 },
+            { key: 'BidStatus', label: 'Bid Status', visible: true, sortable: true, selectionOrder: 15 },
+            { key: 'VendorRanking', label: 'Bidder Rank', visible: false, sortable: true, selectionOrder: 16 },
      
-            { key: 'ContractType', label: 'Contract Type', visible: false, sortable: false, selectionOrder: 0 },
-            { key: 'ContractWorkType', label: 'Work Type', visible: false, sortable: false, selectionOrder: 0 },
-            { key: 'WorkMixDescription', label: 'Work Mix', visible: false, sortable: false, selectionOrder: 0 },
-            { key: 'CategoryDescription', label: 'Project Category', visible: false, sortable: false, selectionOrder: 0 },
-            { key: 'l', label: 'Letting Date', visible: true, sortable: true, selectionOrder: 15 },
+            { key: 'ContractType', label: 'Contract Type', visible: true, sortable: true, selectionOrder: 9 },
+            { key: 'ContractWorkType', label: 'Work Type', visible: true, sortable: true, selectionOrder: 10 },
+            { key: 'WorkMixDescription', label: 'Work Mix', visible: false, sortable: true, selectionOrder: 0 },
+            { key: 'CategoryDescription', label: 'Project Category', visible: false, sortable: true, selectionOrder: 0 },
+            { key: 'l', label: 'Letting Date', visible: true, sortable: true, selectionOrder: 17 },
             { key: 'ExecutedDate', label: 'Executed Date', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'Duration', label: 'Awarded Days', visible: false, sortable: false, selectionOrder: 0 },
             { key: 'ProposalType', label: 'Proposal Type', visible: false, sortable: false, selectionOrder: 0 },
@@ -106,8 +106,8 @@
         $scope.resetToDefaultColumns = function () {
             $scope.availableColumns.forEach(col => {
                 col.visible = col.key === 'p' || col.key === 'ProjectNumber' || col.key === 'ri' ||
-                    col.key === 'Quantity' || col.key === 'b' || col.key === 'InflationAdjustedPrice' || col.key === 'PvBidTotal' ||
-                    col.key === 'd' || col.key === 'MarketArea' || col.key === 'c' || col.key === 'NumberOfBidders';
+                    col.key === 'Quantity' || col.key === 'b' || col.key === 'InflationAdjustedPrice' || col.key === 'PvBidTotal' || col.key === 'ContractType' || col.key === 'ContractWorkType' ||
+                    col.key === 'd' || col.key === 'MarketArea' || col.key === 'c' || col.key === 'VendorName' || col.key === 'BidStatus' || col.key === 'l';
             });
             $scope.nextSelectionOrder = 1;
             $scope.availableColumns.forEach(col => {
@@ -2045,13 +2045,16 @@
                                         label: 'Bid Point',
                                         data: filteredPoints,
                                         backgroundColor: 'rgba(0, 128, 0, 0.5)',
+                                        pointStyle: 'circle',
                                         pointRadius: 3,
+                                        pointHoverRadius: 10
                                     },
                                     {
                                         label: 'Bid Point Outlier',
                                         data: outlierPoints,
                                         backgroundColor: 'rgba(128, 128, 128, 0.3)',
                                         pointRadius: 3,
+                                        pointHoverRadius: 10
                                     },
                                    
                                 ]

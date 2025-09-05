@@ -185,7 +185,7 @@
                     <div>
                         <label class="modern-label" for="minQuantity">Minimum:</label>
                         <input type="number" id="minQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMinQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" min="1" placeholder="Min quantity"
+                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/"  placeholder="Min quantity"
                                maxlength="15" />
                     </div>
                     <div class="separator">to</div>
@@ -290,12 +290,12 @@
                        required
                        min="1"
                        max="120"
-                       placeholder="12"
+                       placeholder="36"
                        aria-describedby="monthsHint"
-                       title="Enter number of months (1 to 120). Default is 12." />
+                       title="Enter number of months (1 to 120). Default is 36." />
 
                 <small id="monthsHint" class="form-text text-muted months-hint">
-                    Enter a value between 1 and 120. Default is 12.
+                    Enter a value between 1 and 120. Default is 36.
                 </small>
 
                 <div class="error-message"
