@@ -311,8 +311,9 @@ namespace Dqe.Web.Controllers
                     ? string.Empty
                     : i.Units.Count == 1
                         ? i.Units[0]
-                        : "MIXED"
-            });
+                        : "MIXED",
+                isObsolete = i.IsObsolete
+            });       
             return new DqeResult(result, JsonRequestBehavior.AllowGet);
         }
 
@@ -537,12 +538,18 @@ namespace Dqe.Web.Controllers
             return new DqeResult(result, JsonRequestBehavior.AllowGet);
         }
 
-        private object GetItemHeaders(int structureId, bool currentItemsOnly)
+        private object GetItemHeaders(int structureId, bool currentItemsOnly, bool orderByLastUpdated = false)
         {
             var structure = _payItemStructureRepository.Get(structureId);
             var items = currentItemsOnly
                 ? structure.PayItemMasters.Where(i => !i.ObsoleteDate.HasValue || i.ObsoleteDate.Value.Date >= DateTime.Now.Date)
                 : structure.PayItemMasters;
+
+            if (orderByLastUpdated)
+            {
+                items = items.OrderByDescending(i => i.LastUpdatedDate);
+            }
+
             var result = items.Select(i => new
             {
                 id = i.Id,
@@ -559,16 +566,19 @@ namespace Dqe.Web.Controllers
                     ? i.ObsoleteDate.Value.ToShortDateString()
                     : string.Empty,
                 isObsolete = i.ObsoleteDate.HasValue && (i.ObsoleteDate.Value.Date < DateTime.Now.Date),
-                specType = i.Ilflg1
+                specType = i.Ilflg1,
+                lastUpdatedDate = i.LastUpdatedDate.HasValue
+                    ? i.LastUpdatedDate.Value.ToShortDateString()
+                    : string.Empty
             });
             return result;
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult GetItemHeadersForStructure(int structureId, bool currentItemsOnly)
+        public ActionResult GetItemHeadersForStructure(int structureId, bool currentItemsOnly, bool orderByLastUpdated = false)
         {
-            return new DqeResult(GetItemHeaders(structureId, currentItemsOnly), JsonRequestBehavior.AllowGet);
+            return new DqeResult(GetItemHeaders(structureId, currentItemsOnly, orderByLastUpdated), JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]

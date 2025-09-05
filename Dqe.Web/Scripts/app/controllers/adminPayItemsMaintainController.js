@@ -2,6 +2,11 @@
     $rootScope.$broadcast('initializeNavigation');
     $scope.showCurrentItems = true;
     $scope.showCurrentStructures = true;
+    $scope.activeStructureOptions = "true";
+    $scope.activePayItemOptions = "true";
+    $scope.payItemSpecYearsOptions = [];
+    $scope.payItemSpecYearsAllOption = { id: '0', name: 'All', description: 'All' };
+    $scope.payItemSpecYearsSelected = { id: '0', name: 'All', description: 'All' };
 
     $http.get('./PayItemStructureAdministration/GetUnitCodes').success(function (result) {
         if (!containsDqeError(result)) {
@@ -67,6 +72,9 @@
     $http.get('./PayItemStructureAdministration/GetSpecBooks').success(function (result) {
         if (!containsDqeError(result)) {
             $scope.specBooks = getDqeData(result);
+            $scope.payItemSpecYearsOptions = angular.copy($scope.specBooks);
+            $scope.payItemSpecYearsOptions.unshift($scope.payItemSpecYearsAllOption);
+
             $http.get('./PayItemStructureAdministration/GetCurrentSpecBook').success(function (res) {
                 if (!containsDqeError(res)) {
                     var currentSpecBook = getDqeData(res);
@@ -82,13 +90,22 @@
     $scope.listItems = function ($event, set) {
         $scope.holdEvent = $event;
         $scope.holdSet = set;
+        if ($scope.activeStructureOptions === 'all' || $scope.activeStructureOptions === "false") {
+            $scope.showCurrentStructures = false;
+        }
+        else {
+            $scope.showCurrentStructures = true;
+        }
+
         $http.get('./PayItemStructureAdministration/GetStructuresRange', { params: { set: set, currentStructuresOnly: $scope.showCurrentStructures } }).success(function (result) {
             if (!containsDqeError(result)) {
                 $scope.structures = getDqeData(result);
+
                 $scope.filter = {
                     name: '',
                     title: '',
-                    unit: ''
+                    unit: '',
+                    isObsolete: $scope.activeStructureOptions === "false" ? 'true' : ''
                 };
                 $scope.filterItems();
                 // JWW 02/25/25 - Title attribute of link is truncated and assigned to variable to be displayed on admin_payitems_maintain page as title above grid
@@ -184,6 +201,7 @@
         {
             name: $scope.filter.name,
             title: $scope.filter.title,
+            isObsolete: $scope.filter.isObsolete,
             unit: $scope.filter.unit
         });
     }
@@ -192,19 +210,28 @@
         {
             name: '',
             title: '',
-            unit: ''
+            unit: '',
+            isObsolete: ''
         });
         $scope.filter.name = '';
         $scope.filter.title = '';
+        $scope.filter.isObsolete = '';
         $scope.filter.unit = '';
         $scope.filterItems();
     }
     $scope.getItemsForStructure = function (structure) {
-        $http.get('./PayItemStructureAdministration/GetItemHeadersForStructure', { params: { structureId: structure.id, currentItemsOnly: $scope.showCurrentItems } }).success(function (result) {
+        if ($scope.activePayItemOptions === 'all' || $scope.activePayItemOptions === "false") {
+            $scope.showCurrentItems = false;
+        }
+        else {
+            $scope.showCurrentItems = true;
+        }
+
+        $http.get('./PayItemStructureAdministration/GetItemHeadersForStructure', { params: { structureId: structure.id, currentItemsOnly: $scope.showCurrentItems, orderByLastUpdated: true } }).success(function (result) {
             if (!containsDqeError(result)) {
                 structure.items = getDqeData(result);
                 var unit = '';
-                if (structure.items != undefined) {
+                if (structure.items != undefined && $scope.activePayItemOptions != "false") {
                     for (var i = 0; i < structure.items.length; i++) {
                         if (structure.items[i].isObsolete) continue;
                         if (unit == '') {
@@ -214,6 +241,25 @@
                             break;
                         }
                     }
+                }
+                else if ($scope.activePayItemOptions === "false") {
+
+                    let filtered = [];
+                    angular.forEach(structure.items, function (item) {
+                        if (item.isObsolete === true) {
+                            filtered.push(item);
+                        }
+                    });
+                    structure.items = filtered;
+                }
+                if ($scope.payItemSpecYearsSelected.name !== null && $scope.payItemSpecYearsSelected.name !== undefined && $scope.payItemSpecYearsSelected.name != 'All') {
+                    let filtered = [];
+                    angular.forEach(structure.items, function (item) {
+                        if (item.specBook == $scope.payItemSpecYearsSelected.name) {
+                            filtered.push(item);
+                        }
+                    });
+                    structure.items = filtered;
                 }
                 structure.unit = unit;
             }
