@@ -80,9 +80,9 @@
     var StateReviewerRole = { name: 'State Reviewer', value: '1' };
     var estimatorRole = { name: 'Estimator', value: 'E' };
 
-
+    //CoderRole
     var coRoles = [systemAdminRole, payItemAdminRole, costBasedTemplateAdminRole,
-        estimatorRole, StateReviewerRole, CoderRole, MaintenanceDistrictAdminRole, MaintenanceEstimatorRole, AdminReadOnlyRole];
+        estimatorRole, StateReviewerRole, MaintenanceDistrictAdminRole, MaintenanceEstimatorRole, AdminReadOnlyRole]; 
 
     var districtRoles = [districtAdminRole, estimatorRole, DistrictReviewerRole,
         StateReviewerRole, MaintenanceDistrictAdminRole, MaintenanceEstimatorRole];
