@@ -9,6 +9,9 @@
     <property name="ProjectNumber" type="String" >
       <column name="PROJECT_NM" not-null="true" length="20" sql-type="varchar" />
     </property>
+	  <property name="Pjcde1" type="String">
+		  <column name="PJCDE1" not-null="false" sql-type="varchar" />
+	  </property>
     <property name="SpecBook" type="String" >
       <column name="SPECBOOK" not-null="true" length="20" sql-type="varchar" />
     </property>

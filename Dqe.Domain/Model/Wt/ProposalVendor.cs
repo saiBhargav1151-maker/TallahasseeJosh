@@ -28,7 +28,7 @@ namespace Dqe.Domain.Model.Wt
         public virtual RefVendor MyRefVendor { get; set; }
 
         public virtual decimal? BidTotal { get; set; }
-
+        public virtual int? VendorRanking { get; set; }
         public virtual IEnumerable<Bid> Bids
         {
             get { return _bids.ToList().AsReadOnly(); }

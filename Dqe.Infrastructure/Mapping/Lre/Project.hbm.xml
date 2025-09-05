@@ -6,6 +6,8 @@
       <generator class="assigned"/>
     </id>
     <property name="ProjectName" column="ESTM_PROJ_ID" not-null="true"/>
-    <property name="District" column="MNG_DIST_CD" not-null="true"/>
+	  <property name="District" column="MNG_DIST_CD" not-null="true"/>
+	  <!--indictates to user if they want DQE as the primary estimating program instead of LRE. MB.-->
+	  <property name="QuantityComplete" column="QTY_CMPLT_CD" not-null="true" update="true" />
   </class>
 </hibernate-mapping>

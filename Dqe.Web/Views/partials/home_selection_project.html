@@ -162,6 +162,12 @@
                             <h5>Working Estimate</h5>
                         </div>
                         <div class="col-lg-10" style="text-align: right;">
+                            <span>
+                                Preferred Estimate: {{prefferedApplication}}
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>
+                            <!--<input type="hidden" value={{prefferedApplication}} ng-model="project.QuantityComplete">-->
+
                             <span ng-if="project.userHasCustody == true && security.isAuthorized">
                                 <span ng-show="!project.isOfficial">
                                     <span ng-show="project.nextLabel != undefined && project.nextLabel != null && project.nextLabel != ''">
