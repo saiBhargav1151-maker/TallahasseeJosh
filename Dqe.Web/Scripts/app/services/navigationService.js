@@ -3,7 +3,7 @@
         getNavs: function (currentUser) {
             if (currentUser.isAuthenticated) {
                 //co admin or district admin
-                if (currentUser.role == 'A' || currentUser.role == 'D') {
+                if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == '2' || currentUser.role == 'O') {
                     return [
                         {
                             title: 'Home',
@@ -36,7 +36,8 @@
                             active: $location.url().startsWith('/unitpricesearch') ? 'active' : ''
                         }
                     ];
-                } else if (currentUser.role == 'P' || currentUser.role == 'T') {
+                }
+                else if (currentUser.role == 'P' || currentUser.role == 'T') {
                     //pay item admin or cost-based template admin
                     return [
                         {
@@ -64,7 +65,8 @@
                             active: $location.url().startsWith('/unitpricesearch') ? 'active' : ''
                         }
                     ];
-                } else if (currentUser.role == 'E') {
+                }
+                else if (currentUser.role == 'E' || currentUser.role == '2' || currentUser.role == 'O') {
                     //estimators
                     return [
                         {
@@ -93,11 +95,38 @@
                             active: $location.url().startsWith('/unitpricesearch') ? 'active' : ''
                         }
                     ];
-                } else {
+                }
+                    //Reviewer users
+                else if (currentUser.role == 'R' || currentUser.role == '1') {
+                    return [
+                        {
+                            title: 'Home',
+                            url: '/home_project',
+                            active: $location.url().startsWith('/home') ? 'active' : ''
+                        }
+                    ];
+                }
+                else if (currentUser.role == 'C') {
+                    return [
+                        {
+                            title: 'Home',
+                            url: '/home_project',
+                            active: $location.url().startsWith('/home') ? 'active' : ''
+                        },
+                        {
+                            title: 'Basis of Estimates',
+                            url: '/boe',
+                            active: $location.url().startsWith('/boe') ? 'active' : ''
+                        }
+                    ];
+                }
+                else {
                     return [];
                 }
 
-            } else {
+            }
+            //Non- signed in users
+            else {
                 return [
                     {
                         title: 'Home',
@@ -127,7 +156,8 @@
             if (currentUser.isAuthenticated) {
                 if ($location.url().startsWith('/home')) {
                     //co admin, district admin, or estimator
-                    if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == 'E') {
+                    if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == 'E' || 
+                        currentUser.role == '2' || currentUser.role == 'M' || currentUser.role == 'O') {
                         return [
                             {
                                 title: 'My Estimates',
@@ -166,6 +196,35 @@
                             }
                         ];
                     }
+                    else if (currentUser.role == 'R' || currentUser.role == '1') {
+                        return [
+                            {
+                                title: 'Project',
+                                active: $location.url().startsWith('/home_project'),
+                                url: '/home_project'
+                            },
+                        ]                          
+                    }
+                    else if (currentUser.role == 'C') {
+                        return [
+                            {
+                                title: 'My Estimates',
+                                active: $location.url().startsWith('/home_estimates'),
+                                url: '/home_estimates'
+                            },
+                            {
+                                title: 'Project',
+                                active: $location.url().startsWith('/home_project'),
+                                url: '/home_project'
+                            },
+                            {
+                                title: 'Proposal',
+                                active: $location.url().startsWith('/home_proposal'),
+                                url: '/home_proposal'
+                            }
+                        ];
+                    }
+
                 }
                 if ($location.url().startsWith('/profile')) {
                     if (currentUser.role == 'E') {
@@ -193,7 +252,7 @@
                 }
                 if ($location.url().startsWith('/admin')) {
                     //co admin
-                    if (currentUser.role == 'A') {
+                    if (currentUser.role == 'A' || currentUser.role == 'O') {
                         return [
                             {
                                 title: 'Security',
@@ -231,7 +290,8 @@
                                 url: '/admin_costgroups'
                             }
                         ];
-                    } else if (currentUser.role == 'D') {
+                    }
+                    else if (currentUser.role == 'D' || currentUser.role == 'R' || currentUser.role == '2' || currentUser.role == '1') {
                         //district admin
                         return [
                             {
@@ -245,7 +305,8 @@
                             //    url: '/admin_defaultvalues_pricing_parameters'
                             //}
                         ];
-                    } else if (currentUser.role == 'P') {
+                    }
+                    else if (currentUser.role == 'P') {
                         //pay item admin
                         return [
                             {

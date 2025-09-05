@@ -54,13 +54,17 @@
                         </div>
                         <div class="col-lg-9" style="text-align: right;">
                             <span>
-                                <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">Check In</button>
-                                <span ng-if="security.isAuthorized">
-                                    <button type="button" title="Click to check out the project" focus-me="userCheckedIn" ng-if="project.isAvailable == true" class="btn btn-primary" ng-click="userCheckedIn = false; userCheckedOut = true; aquireCustody(project);">Check Out</button>
+                                <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">
+                                    Check In
+                                </button>
+                                <span>
+                                    <button type="button" title="Click to check out the project" focus-me="userCheckedIn" ng-if="project.isAvailable == true && canCheckOut" class="btn btn-primary" ng-click="userCheckedIn = false; userCheckedOut = true; aquireCustody(project);">
+                                        Check Out
+                                    </button>
                                 </span>
                             </span>
                             &nbsp;&nbsp;
-                            <span ng-show="project.userHasCustody == true && security.isAuthorized">
+                            <span ng-show="(project.userHasCustody == true && security.isAuthorized) || security.isCoderRole">
                                 <button type="button" class="btn btn-primary" title="Click to create a new version and estimate from Project Preconstruction" focus-me="confirmCreateNewVersionFromWtReset" ng-show="!confirmCreateNewVersionFromWt && !project.isOfficial" ng-click="confirmCreateNewVersionFromWt = true; confirmCreateNewVersionFromWtReset = false;">Create New Version from Project Preconstruction</button>
                                 <span class="alert alert-warning" ng-show="confirmCreateNewVersionFromWt">
                                     Click 'Yes' to create a new project version from Project Preconstruction or 'No' to cancel&nbsp;&nbsp;
@@ -170,7 +174,7 @@
 
                             <span ng-if="project.userHasCustody == true && security.isAuthorized">
                                 <span ng-show="!project.isOfficial">
-                                    <span ng-show="project.nextLabel != undefined && project.nextLabel != null && project.nextLabel != ''">
+                                    <span ng-show="project.nextLabel != undefined && project.nextLabel != null && project.nextLabel != '' && !security.isCoderRole">
                                         <label>
                                             <strong>Apply {{project.nextLabel}} Label</strong>
                                             <input type="checkbox" title="Take labeled snapshot" ng-model="project.takeLabeledSnapshot">
@@ -205,7 +209,7 @@
                         <div class="col-lg-3">
                             <strong>Source:</strong> {{workingEstimate.source}}
                         </div>
-                        <div class="col-lg-3">
+                        <div class="col-lg-3" ng-if="!security.isCoderRole">
                             <strong>Estimate:</strong> {{workingEstimate.estimate.Total | currency}}
                         </div>
                     </div>
@@ -318,7 +322,7 @@
                                                 <thead>
                                                     <tr>
                                                         <td style="width: 5%" ng-if="project.userHasCustody == true && security.isAuthorized && !project.isOfficial"></td>
-                                                        <td style="width: 5%" ng-if="security.isSystemAdmin"></td> <!--ng-if="security.isSystemAdmin"-->
+                                                        <td style="width: 5%" ng-if="security.isSystemAdmin || security.isReviewRole"></td> <!--ng-if="security.isSystemAdmin"-->
                                                         <td style="width: 5%; text-align: center;">Existing Review</td>
                                                         <td style="width: 5%">Estimate</td>
                                                         <td style="width: 5%">Working Estimate</td>
@@ -328,7 +332,7 @@
                                                         <td style="width: 40%" ng-if="!project.userHasCustody">Comment</td>
                                                         <td style="width: 10%">Estimate</td>
                                                         <td style="width: 5%">Label</td>
-                                                        <td style="width: 5%">Select for Report</td>
+                                                        <td style="width: 5%" ng-if="!security.isCoderRole">Select for Report</td>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -341,7 +345,7 @@
                                                                 <a href="" title="Click to cancel the creation of the new version" ng-click="confirmCreateVersionFromEstimate = false">No</a>
                                                             </div>
                                                         </td>
-                                                        <td ng-if="security.isSystemAdmin">
+                                                        <td ng-if="security.isSystemAdmin || security.isReviewRole">
                                                             <a href="" title="Click to create a new review version from this estimate" ng-show="!confirmCreateReviewVersionFromEstimate" ng-click="confirmCreateReview = true">Create New <b>Review</b></a>
                                                             <div ng-show="confirmCreateReview">
                                                                 <div>Confirm?</div>
@@ -355,7 +359,7 @@
                                                         </td>
                                                         <td>{{snapshot.projectSnapshot}}</td>
                                                         <td>{{snapshot.isWorkingEstimate}}</td>
-                                                        <td>{{snapshot.created}}</td>
+                                                        <td>{{snapshot.created}}<span hidden="hidden">{{snapshot.projectSnapshotId}}</span></td>
                                                         <td>{{snapshot.lastUpdated}}</td>
 
 
@@ -406,7 +410,7 @@
                                                         </td>
                                                         <td style="text-align: right;">{{snapshot.estimate.Total | currency}}</td>
                                                         <td>{{snapshot.label}}</td>
-                                                        <td><input type="checkbox" title="Select snapshot &#013;--Max 2--" name="selected" ng-model="snapshot.selected" ng-change="updateSelection(versions)" ng-disabled="snapshot.disabled"></td>
+                                                        <td ng-if="!security.isCoderRole"><input type="checkbox" title="Select snapshot &#013;--Max 2--" name="selected" ng-model="snapshot.selected" ng-change="updateSelection(versions)" ng-disabled="snapshot.disabled"></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -456,7 +460,7 @@
                                                         <td style="width: 40%" ng-if="!project.userHasCustody">Comment</td>
                                                         <td style="width: 10%; text-align: center;">Estimate</td>
                                                         <td style="width: 5%">Label</td>
-                                                        <td style="width: 5%">Select for Report</td>
+                                                        <td style="width: 5%" ng-if="!security.isCoderRole">Select for Report</td>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -493,6 +497,8 @@
                                                                 </div>
                                                             </div>
                                                             <div ng-if="!version.isCurrentOwner">
+
+                                                                <span>{{snapshot.comment}}</span>
                                                                 <div ng-show="!snapshot.showFullComment">
                                                                     {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
                                                                     <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
@@ -513,7 +519,7 @@
 
                                                         <td style="text-align: right;">{{snapshot.estimate.Total | currency}}</td>
                                                         <td>{{snapshot.label}}</td>
-                                                        <td><input type="checkbox" title="Select snapshot &#013;--Max 2--" name="selected" ng-model="snapshot.selected" ng-change="updateSelection(versions)" ng-disabled="snapshot.disabled"></td>
+                                                        <td ng-if="!security.isCoderRole"><input type="checkbox" title="Select snapshot &#013;--Max 2--" name="selected" ng-model="snapshot.selected" ng-change="updateSelection(versions)" ng-disabled="snapshot.disabled"></td>
                                                     </tr>
                                                 </tbody>
                                             </table>

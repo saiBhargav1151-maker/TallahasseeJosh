@@ -59,6 +59,9 @@ namespace Dqe.Domain.Model
 
         public virtual int? PseeContactSrsId { get; protected internal set; }
 
+        /// <summary>
+        /// holds the estimate amounts grabbed from LRE snapshots
+        /// </summary>
         public virtual decimal? EstimateInitial { get; protected internal set; }
 
         public virtual decimal? EstimateScope { get; protected internal set; }
@@ -115,7 +118,8 @@ namespace Dqe.Domain.Model
             if (assignmentUser.IsInDqeDistrict(District)) return;
             if (_assignedUsers.Contains(assignmentUser)) return;
             if (account.Role == DqeRole.Administrator
-                || (account.Role == DqeRole.DistrictAdministrator && account.IsInDqeDistrict(District)))
+                || (account.Role == DqeRole.DistrictAdministrator && account.IsInDqeDistrict(District))
+                || (account.Role == DqeRole.MaintenanceDistrictAdmin && account.IsInDqeDistrict(District)))
             {
                 _assignedUsers.Add(assignmentUser);    
                 return;
@@ -127,7 +131,13 @@ namespace Dqe.Domain.Model
         {
             if (proposal == null) throw new ArgumentNullException("proposal");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System 
+                && account.Role != DqeRole.Administrator 
+                && account.Role != DqeRole.DistrictAdministrator 
+                && account.Role != DqeRole.Estimator
+                && account.Role != DqeRole.Coder
+                && account.Role != DqeRole.MaintenanceDistrictAdmin
+                && account.Role != DqeRole.MaintenanceEstimator)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -173,7 +183,13 @@ namespace Dqe.Domain.Model
         public virtual ProjectEstimate CreateNewVersionFromWt(string comment, Wt.Project source, bool initializePrices, DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System
+                && account.Role != DqeRole.Administrator 
+                && account.Role != DqeRole.DistrictAdministrator 
+                && account.Role != DqeRole.Estimator
+                && account.Role != DqeRole.MaintenanceEstimator
+                && account.Role != DqeRole.MaintenanceDistrictAdmin
+                && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -214,7 +230,7 @@ namespace Dqe.Domain.Model
             var s = new ProjectEstimate(_webTransportService)
             {
                 Created = DateTime.Now,
-                Label = SnapshotLabel.Estimator,
+                Label = account.Role != DqeRole.Coder ? SnapshotLabel.Estimator : SnapshotLabel.Coder,
                 LastUpdated = DateTime.Now,
                 Estimate = _projectRepository.GetMaxEstimate(ProjectNumber, v.Version) + 1,
                 EstimateComment = comment,
@@ -381,7 +397,9 @@ namespace Dqe.Domain.Model
         public virtual ProjectEstimate CreateNewReviewVersionFromSnapshot(string comment, ProjectEstimate source, DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator
+                && account.Role != DqeRole.StateReviewer
+                && account.Role != DqeRole.DistrictReviewer)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -473,6 +491,18 @@ namespace Dqe.Domain.Model
                         {
                             EstimatePhase2 = null;
                         }
+                        if (label == SnapshotLabel.Phase1)
+                        {
+                            EstimatePhase1= null;
+                        }
+                        if (label == SnapshotLabel.Scope)
+                        {
+                            EstimateScope = null;
+                        }
+                        if (label == SnapshotLabel.Initial)
+                        {
+                            EstimateInitial= null;
+                        }
                         estimate.Label = SnapshotLabel.Estimator;
                         estimate.LabelRemovedOn = DateTime.Now;
                         if (!string.IsNullOrWhiteSpace(comment))
@@ -494,7 +524,7 @@ namespace Dqe.Domain.Model
         public virtual void SnapshotWorkingEstimate(DqeUser account, bool labelSnapshot, string comment, bool proposalOverride, ILreService lreService)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -549,6 +579,22 @@ namespace Dqe.Domain.Model
                 }
                 if (labelSnapshot)
                 {
+                    if (source.Label == SnapshotLabel.Initial)
+                    {
+                        EstimateInitial = source.GetEstimateTotal().Total;
+                        lreService.SetDqeSnapshotInLre(this, account, SnapshotLabel.Initial, EstimateInitial.Value);
+                    }
+                    if (source.Label == SnapshotLabel.Scope)
+                    {
+                        EstimateScope= source.GetEstimateTotal().Total;
+                        lreService.SetDqeSnapshotInLre(this, account, SnapshotLabel.Scope, EstimateScope.Value);
+                    }
+                    if (source.Label == SnapshotLabel.Phase1)
+                    {
+                        EstimatePhase1 = source.GetEstimateTotal().Total;
+                        lreService.SetDqeSnapshotInLre(this, account, SnapshotLabel.Phase1, EstimatePhase1.Value);
+                    }
+
                     if (source.Label == SnapshotLabel.Phase2)
                     {
                         EstimatePhase2 = source.GetEstimateTotal().Total;
@@ -632,6 +678,96 @@ namespace Dqe.Domain.Model
             }
         }
 
+        public virtual void CoderSnapshotWorkingEstimate(DqeUser account, ILreService lreService)
+        {
+            ProjectEstimate source = null;
+            foreach (var pv in _projectVersions.Where(i => i.VersionOwner == account))
+            {
+                foreach (var ps in pv.ProjectEstimates)
+                {
+                    if (ps.IsWorkingEstimate)
+                    {
+                        source = ps;
+                    }
+                }
+            }
+            if (source == null)
+            {
+                throw new InvalidOperationException(string.Format("Working estimate could not be determined for project {0} and user {1}", ProjectNumber, account.Name));
+            }
+            if (account == null) throw new ArgumentNullException("account");
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator
+                && account.Role != DqeRole.Coder)
+            {
+                throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
+            }
+
+            var v = new ProjectVersion
+            {
+                MyProject = this,
+                ProjectSource = ProjectSourceType.Snapshot,
+                Version = _projectRepository.GetMaxVersion(ProjectNumber) + 1,
+                VersionOwner = account,
+                EstimateSource = source
+            };
+            _projectVersions.Add(v);
+            var s = new ProjectEstimate(_webTransportService)
+            {
+                Created = DateTime.Now,
+                Label = SnapshotLabel.Coder,
+                LastUpdated = source.LastUpdated,
+                Estimate = 1,
+                EstimateComment = string.Empty,
+                IsWorkingEstimate = false,
+            };
+            v.AddEstimate(s);
+            if (source.EstimateGroups != null)
+            {
+                foreach (var eg in source.EstimateGroups)
+                {
+                    var e = new EstimateGroup
+                    {
+                        Name = eg.Name,
+                        Description = eg.Description,
+                        AlternateSet = eg.AlternateSet,
+                        FederalConstructionClass = eg.FederalConstructionClass,
+                        CombineWithLikeItems = eg.CombineWithLikeItems,
+                        WtId = eg.WtId,
+                        IsLsDbSummary = eg.IsLsDbSummary,
+                        AlternateMember = eg.AlternateMember
+                    };
+                    s.AddEstimateGroup(e);
+                    foreach (var pi in eg.ProjectItems)
+                    {
+                        var p = new ProjectItem
+                        {
+                            PayItemDescription = pi.PayItemDescription,
+                            AlternateMember = pi.AlternateMember,
+                            //LineNumber = pi.LineNumber,
+                            PayItemNumber = pi.PayItemNumber,
+                            //Price = pi.Price,
+                            //PreviousPrice = pi.PreviousPrice,
+                            PriceSet = pi.PriceSet,
+                            Quantity = pi.Quantity,
+                            CalculatedUnit = pi.CalculatedUnit,
+                            Unit = pi.Unit,
+                            //IsLumpSum = pi.IsLumpSum,
+                            CombineWithLikeItems = pi.CombineWithLikeItems,
+                            AlternateSet = pi.AlternateSet,
+                            SupplementalDescription = pi.SupplementalDescription,
+                            Fund = pi.Fund,
+                            WtId = pi.WtId
+                        };
+                        e.AddProjectItem(p);
+                    }
+                }
+            }
+
+            _commandRepository.Flush();
+            account.MyRecentProjectEstimate = s;
+            //return s;
+        }
+
         public virtual void SnapshotWorkingEstimate(DqeUser account, bool labelSnapshot, ILreService lreService)
         {
             SnapshotWorkingEstimate(account, labelSnapshot, string.Empty, false, lreService);
@@ -639,35 +775,62 @@ namespace Dqe.Domain.Model
 
         public virtual SnapshotLabel GetNextSnapshotLabel()
         {
+            //checks exhisting mileston have price totals and sets variable true if so
+            var hasInitial = EstimateInitial.HasValue;
+            var hasScope = EstimateScope.HasValue;
+            var hasPhase1 = EstimatePhase1.HasValue;
+
             var hasPhase2 = EstimatePhase2.HasValue;
             var hasPhase3 = EstimatePhase3.HasValue;
             var hasPhase4 = EstimatePhase4.HasValue;
+
+            //checks all version estimates for milestones and sets variables true if found
             foreach (var v in _projectVersions)
             {
                 foreach (var ps in v.ProjectEstimates)
                 {
+                    if (ps.Label == SnapshotLabel.Initial) hasInitial = true;
+                    if (ps.Label == SnapshotLabel.Scope) hasScope = true;
+                    if (ps.Label == SnapshotLabel.Phase1) hasPhase1 = true;
+
                     if (ps.Label == SnapshotLabel.Phase2) hasPhase2 = true;
                     if (ps.Label == SnapshotLabel.Phase3) hasPhase3 = true;
                     if (ps.Label == SnapshotLabel.Phase4) hasPhase4 = true;
                 }
             }
+
+            //From highest milestone bool down we check to see if that milestone exhist then return the next milestone.
             if (hasPhase4) return SnapshotLabel.Estimator;
             if (hasPhase3) return SnapshotLabel.Phase4;
             if (hasPhase2) return SnapshotLabel.Phase3;
-            return SnapshotLabel.Phase2;
+
+            if (hasPhase1) return SnapshotLabel.Phase2;
+            if (hasScope) return SnapshotLabel.Phase1;
+            if (hasInitial) return SnapshotLabel.Scope;
+            return SnapshotLabel.Initial;
         }
 
         protected internal virtual SnapshotLabel GetNextProposalSnapshotLabel()
         {
+            //checks exhisting milestone flags and sets variables if flags have value
+            var hasInitial = EstimateInitial.HasValue;
+            var hasScope = EstimateScope.HasValue;
+            var hasPhase1 = EstimatePhase1.HasValue;
+
             var hasPhase2 = EstimatePhase2.HasValue;
             var hasPhase3 = EstimatePhase3.HasValue;
             var hasPhase4 = EstimatePhase4.HasValue;
             var hasAuthorization = false;
             var hasOfficial = false;
+            //checks all version estimates for milestones and sets variables true if found
             foreach (var v in _projectVersions)
             {
                 foreach (var ps in v.ProjectEstimates)
                 {
+                    if (ps.Label == SnapshotLabel.Initial) hasInitial = true;
+                    if (ps.Label == SnapshotLabel.Scope) hasScope = true;
+                    if (ps.Label == SnapshotLabel.Phase1) hasPhase1 = true;
+
                     if (ps.Label == SnapshotLabel.Phase2) hasPhase2 = true;
                     if (ps.Label == SnapshotLabel.Phase3) hasPhase3 = true;
                     if (ps.Label == SnapshotLabel.Phase4) hasPhase4 = true;
@@ -675,25 +838,41 @@ namespace Dqe.Domain.Model
                     if (ps.Label == SnapshotLabel.Official) hasOfficial = true;
                 }
             }
+            //From highest milestone bool down we check to see if that milestone exhist then return the next milestone.
             if (hasOfficial) return SnapshotLabel.Estimator;
             if (hasAuthorization) return SnapshotLabel.Official;
             if (hasPhase4) return SnapshotLabel.Authorization;
             if (hasPhase3) return SnapshotLabel.Phase4;
             if (hasPhase2) return SnapshotLabel.Phase3;
-            return SnapshotLabel.Phase2;
+
+            if (hasPhase1) return SnapshotLabel.Phase2;
+            if (hasScope) return SnapshotLabel.Phase1;
+            if (hasInitial) return SnapshotLabel.Scope;
+            return SnapshotLabel.Initial;
+
         }
 
         public virtual SnapshotLabel GetCurrentSnapshotLabel()
         {
+            //checks exhisting milestone flags and sets variables if flags have value
+            var hasInitial = EstimateInitial.HasValue;
+            var hasScope = EstimateScope.HasValue;
+            var hasPhase1 = EstimatePhase1.HasValue;
+
             var hasPhase2 = EstimatePhase2.HasValue;
             var hasPhase3 = EstimatePhase3.HasValue;
             var hasPhase4 = EstimatePhase4.HasValue;
             var hasAuthorization = false;
             var hasOfficial = false;
+            //From highest milestone bool down we check to see if that milestone exhist then return the next milestone.
             foreach (var v in _projectVersions)
             {
                 foreach (var ps in v.ProjectEstimates)
                 {
+                    if (ps.Label == SnapshotLabel.Initial) hasInitial = true;
+                    if (ps.Label == SnapshotLabel.Scope) hasScope = true;
+                    if (ps.Label == SnapshotLabel.Phase1) hasPhase1 = true;
+
                     if (ps.Label == SnapshotLabel.Phase2) hasPhase2 = true;
                     if (ps.Label == SnapshotLabel.Phase3) hasPhase3 = true;
                     if (ps.Label == SnapshotLabel.Phase4) hasPhase4 = true;
@@ -701,13 +880,31 @@ namespace Dqe.Domain.Model
                     if (ps.Label == SnapshotLabel.Official) hasOfficial = true;
                 }
             }
+            //From highest milestone bool down we check to see if that milestone exhist then return THAT milestone.
             if (hasOfficial) return SnapshotLabel.Official;
             if (hasAuthorization) return SnapshotLabel.Authorization;
             if (hasPhase4) return SnapshotLabel.Phase4;
             if (hasPhase3) return SnapshotLabel.Phase3;
             if (hasPhase2) return SnapshotLabel.Phase2;
+
+            if (hasPhase1) return SnapshotLabel.Phase1;
+            if (hasScope) return SnapshotLabel.Scope;
+            if (hasInitial) return SnapshotLabel.Initial;
             return SnapshotLabel.Estimator;
-        } 
+        }
+
+        public virtual string GetSnapshotLabelString(SnapshotLabel label)
+        {
+            return label == SnapshotLabel.Official ? "Official"
+                    : label == SnapshotLabel.Authorization ? "Authorization"
+                    : label == SnapshotLabel.Phase4 ? "Phase IV"
+                    : label == SnapshotLabel.Phase3 ? "Phase III"
+                    : label == SnapshotLabel.Phase2 ? "Phase II"
+                    : label == SnapshotLabel.Phase1 ? "Phase I"
+                    : label == SnapshotLabel.Scope ? "Scope"
+                    : label == SnapshotLabel.Initial ? "Initial"
+                    : string.Empty;
+        }
 
         public virtual void AssignWorkingEstimate(ProjectVersion version, DqeUser account)
         {
@@ -753,11 +950,11 @@ namespace Dqe.Domain.Model
         public virtual void ReleaseCustody(DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
-            if (account.Role == DqeRole.System || account.Role == DqeRole.Administrator || account.Role == DqeRole.DistrictAdministrator)
+            if (account.Role == DqeRole.System || account.Role == DqeRole.Administrator || account.Role == DqeRole.DistrictAdministrator || account.Role == DqeRole.Coder)
             {
                 CustodyOwner = null;
             }
@@ -777,7 +974,7 @@ namespace Dqe.Domain.Model
         public virtual void AquireCustody(DqeUser account)
         {
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -801,7 +998,17 @@ namespace Dqe.Domain.Model
         {
             if (transformer == null) throw new ArgumentNullException("transformer");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator 
+                && account.Role != DqeRole.DistrictAdministrator 
+                && account.Role != DqeRole.Estimator 
+                && account.Role != DqeRole.DistrictReviewer
+                && account.Role != DqeRole.StateReviewer
+                && account.Role != DqeRole.Coder
+                && account.Role != DqeRole.MaintenanceDistrictAdmin
+                && account.Role != DqeRole.MaintenanceEstimator
+                && account.Role != DqeRole.AdminReadOnly
+
+                )
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

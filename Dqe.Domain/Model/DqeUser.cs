@@ -220,6 +220,26 @@ namespace Dqe.Domain.Model
 
         public virtual bool IsActive { get; protected internal set; }
 
+        /// <summary>
+        /// Given an abbreviation, return the Role name as a string
+        /// </summary>
+        /// <param name="abbreviation">Char</param>
+        /// <returns></returns>
+        public static string GetRoleNameString(string abbreviation)
+        {
+            if (Enum.TryParse<DqeRole>(abbreviation, out DqeRole result))
+            {
+                string tempstring = Enum.Parse(typeof(DqeRole), abbreviation, true).ToString();
+                return tempstring;
+            }
+            return string.Empty;
+        }
+
+      
+        /// <summary>
+        /// TODO: THIS FUNCTION TAKES A LOT OF TIME TO RUN on dev. THIS SHOULD BE FIXED. MB.
+        /// </summary>
+        /// <returns></returns>
         public override Transformers.DqeUser GetTransformer()
         {
             return new Transformers.DqeUser
@@ -231,18 +251,7 @@ namespace Dqe.Domain.Model
                 SrsId = SrsId,
                 FullName = Name,
                 CostGroupAuthorization = CostGroupAuthorization,
-                RoleAsString =
-                    Role == DqeRole.System
-                        ? "System"
-                        : Role == DqeRole.Administrator
-                            ? "System Administrator"
-                            : Role == DqeRole.DistrictAdministrator
-                                ? "District Administrator"
-                                : Role == DqeRole.PayItemAdministrator
-                                    ? "Pay Item Administrator"
-                                    : Role == DqeRole.CostBasedTemplateAdministrator
-                                        ? "Cost-Based Template Administrator"
-                                        : Role == DqeRole.Estimator ? "Estimator" : "No Role"
+                RoleAsString = Helper.GetRoleDisplayLabel(Role)
             };
         }
 
@@ -265,7 +274,11 @@ namespace Dqe.Domain.Model
             }
             if (account.Role != DqeRole.System 
                 && account.Role != DqeRole.Administrator 
-                && account.Role != DqeRole.DistrictAdministrator)
+                && account.Role != DqeRole.DistrictAdministrator
+                && account.Role != DqeRole.MaintenanceDistrictAdmin
+                && account.Role != DqeRole.AdminReadOnly
+                && account.Role != DqeRole.DistrictReviewer
+                )
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -285,14 +298,20 @@ namespace Dqe.Domain.Model
                 if (transformer.Role != DqeRole.Administrator 
                     && transformer.Role != DqeRole.CostBasedTemplateAdministrator 
                     && transformer.Role != DqeRole.PayItemAdministrator
-                    && transformer.Role != DqeRole.Estimator)
+                    && transformer.Role != DqeRole.Estimator
+                    && transformer.Role != DqeRole.StateReviewer
+                    && transformer.Role != DqeRole.Coder
+                    && transformer.Role != DqeRole.AdminReadOnly
+                     && transformer.Role != DqeRole.DistrictReviewer
+                     && transformer.Role != DqeRole.MaintenanceDistrictAdmin
+                     && transformer.Role != DqeRole.MaintenanceEstimator)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for CO.", transformer.Role));
                 }
             }
             else
             {
-                if (transformer.Role != DqeRole.DistrictAdministrator && transformer.Role != DqeRole.Estimator)
+                if (transformer.Role != DqeRole.DistrictAdministrator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.DistrictReviewer && transformer.Role != DqeRole.StateReviewer && transformer.Role != DqeRole.MaintenanceDistrictAdmin && transformer.Role != DqeRole.MaintenanceEstimator)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for district {1}.", transformer.Role, transformer.District));
                 }

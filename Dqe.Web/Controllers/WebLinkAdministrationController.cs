@@ -13,7 +13,7 @@ using Dqe.Web.Services;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new [] {DqeRole.Administrator, DqeRole.PayItemAdministrator })]
+    [CustomAuthorize(Roles = new [] {DqeRole.Administrator, DqeRole.PayItemAdministrator, DqeRole.AdminReadOnly })]
     public class WebLinkAdministrationController : Controller
     {
         private readonly IDqeUserRepository _dqeUserRepository;

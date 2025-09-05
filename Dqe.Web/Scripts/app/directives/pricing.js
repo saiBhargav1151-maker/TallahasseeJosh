@@ -5,10 +5,25 @@
             pricingLevel: '='
         },
         templateUrl: './Views/directives/pricing.html',
-        controller: ['$scope', '$rootScope', '$http', '$filter', '$location', 'stateService', 'fileUpload', '$localStorage', '$route',  function ($scope, $rootScope, $http, $filter, $location, stateService, fileUpload, $localStorage, $route) {
+        controller: ['$scope', '$rootScope', '$http', '$filter', '$location', 'stateService', 'fileUpload', '$localStorage', '$route', 'securityService', function ($scope, $rootScope, $http, $filter, $location, stateService, fileUpload, $localStorage, $route, securityService) {
                 $scope.prp = {
                     syncPrices: true
-                };
+            };
+
+            $scope.canSyncPrices = true;
+            //if is on list, then make can checkout var as true.
+            $scope.user = null;
+            securityService.getCurrentUser(function (user) {
+                let role = user.role.toString()[0];
+                if (role === 'C') {
+                    $scope.canSyncPrices = false;
+                    $scope.prp = {
+                        syncPrices: false
+                    };
+                    $scope.user = user;
+                }
+            });
+
             $scope.transferLsDbEstimate = function (estimate) {
                 var lsdbLoad = {
                     number: estimate.project.number,
