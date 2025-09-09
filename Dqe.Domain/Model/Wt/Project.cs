@@ -44,6 +44,8 @@ namespace Dqe.Domain.Model.Wt
 
         public virtual string FederalProjectNumber { get; set; }
 
+        public virtual string ProjectType { get; set; }
+
         public virtual string ProjectWorkType { get; set; }
 
         #region "pricing"

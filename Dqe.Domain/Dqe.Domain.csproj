@@ -100,6 +100,7 @@
     <Compile Include="Model\Entity.cs" />
     <Compile Include="Model\EstimateGroup.cs" />
     <Compile Include="Model\EstimateTotal.cs" />
+    <Compile Include="Model\MaintenanceEstimatorPricingParameter.cs" />
     <Compile Include="Model\EstimatorPricingParameter.cs" />
     <Compile Include="Model\ItemGroup.cs" />
     <Compile Include="Model\ItemSet.cs" />

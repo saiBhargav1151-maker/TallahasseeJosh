@@ -52,6 +52,9 @@
 	  <property name="FederalProjectNumber" >
 		  <column name="FEDPROJECTNUM" not-null="false" sql-type="varchar" />
 	  </property>
+	  <property name="ProjectType" >
+		  <column name="PROJECTTYPE" not-null="false" sql-type="varchar" />
+	  </property>
 	  <property name="ProjectWorkType" >
 		  <column name="PROJECTWORKTYPE" not-null="false" sql-type="varchar" />
 	  </property>

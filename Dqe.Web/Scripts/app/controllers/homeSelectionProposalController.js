@@ -95,10 +95,17 @@
             .then(function (response) {
                 var proposals = [];
                 angular.forEach(response.data, function (item) {
+                    item.displayName = item.number;
+                    if ((item.contractType[0] == 'M')){
+                        item.displayName = '(M) ' + item.displayName;
+                    }
+                    else {
+                        item.displayName = '(C) ' + item.displayName;
+                    }
                     proposals.push(item);
                 });
                 return proposals;
-            });
+           });
     };
     $scope.snapshotWorkingEstimate = function (proposal) {
         if (proposal.takeLabeledSnapshot == undefined) {

@@ -25,4 +25,9 @@ namespace Dqe.Domain.Transformers
     {
         public Model.DqeUser User { get; set; }
     }
+
+    public class MaintenanceEstimatorPricingParameter : PricingParameter
+    {
+        public Model.DqeUser User { get; set; }
+    }
 }
