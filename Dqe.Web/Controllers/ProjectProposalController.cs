@@ -134,12 +134,36 @@ namespace Dqe.Web.Controllers
         {
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
+            //create proposal and load projects
+            var p = _webTransportService.GetProposal(number);
+
+            //Maintenance can only view maintenance proposal types and construction view construction types.
+            if ((currentDqeUser.Role == DqeRole.MaintenanceEstimator || currentDqeUser.Role == DqeRole.MaintenanceDistrictAdmin) && !p.ContractType.StartsWith("M"))
+            {
+                return new DqeResult(null,
+                  new ClientMessage
+                  {
+                      Severity = ClientMessageSeverity.Error,
+                      text = string.Format("This proposal is authorized as a Construction Contract Type")
+                  },
+                  JsonRequestBehavior.AllowGet);
+
+            }
+            else if ((currentDqeUser.Role == DqeRole.Estimator) && p.ContractType.StartsWith("M"))
+            {
+                return new DqeResult(null,
+                   new ClientMessage
+                   {
+                       Severity = ClientMessageSeverity.Error,
+                       text = string.Format("This proposal is authorized as a Maintenance Contract Type")
+                   },
+                   JsonRequestBehavior.AllowGet);
+            }
             //is proposal in DQE?
             var prop = _proposalRepository.GetWtByNumber(number);
             if (prop == null)
             {
-                //create proposal and load projects
-                var p = _webTransportService.GetProposal(number);
+
                 if (p == null)
                     throw new InvalidOperationException(string.Format("Proposal {0} was not found in WT", number));
                 var pro = AddProposal(p, currentDqeUser);
@@ -156,13 +180,14 @@ namespace Dqe.Web.Controllers
             else
             {
                 //update
-                var p = _webTransportService.GetProposal(number);
+                
                 if (p == null)
                     throw new InvalidOperationException(string.Format("Proposal {0} was not found in WT", number));
                 var propt = prop.GetTransformer();
                 propt.LettingDate = p.MyLetting == null ? (DateTime?)null : p.MyLetting.LettingDate;
                 propt.District = p.District.Name;
                 propt.Description = p.Description;
+                propt.ContractType = p.ContractType;
                 prop.Transform(propt, currentDqeUser);
                 var proposalCounty = p.County;
                 var county = _marketAreaRepository.GetCountyByCode(proposalCounty.Name);
@@ -502,6 +527,7 @@ namespace Dqe.Web.Controllers
                     isOfficial = prop.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                     authorizationTotal = authorizationTotal,
                     officialTotal = officialTotal,
+                    contractType = prop.ContractType,
                     removeLabelComment = string.Empty
                 },
                 projects = prop.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
@@ -513,6 +539,7 @@ namespace Dqe.Web.Controllers
                     description = i.Description,
                     designer = i.DesignerName,
                     county = i.MyCounty.Name,
+                    projectType = i.ProjectType,
                     owner = i.CustodyOwner == null ? string.Empty : i.CustodyOwner.Name,
                     hasCustody = i.CustodyOwner == currentDqeUser,
                     label = DynamicHelper.GetSnapshotLabelString(i.GetCurrentSnapshotLabel()),
@@ -537,8 +564,33 @@ namespace Dqe.Web.Controllers
         {
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
-            //is project in DQE?
+            var wtp = _webTransportService.GetProject(number);
             var project = _projectRepository.GetByProjectNumber(number);
+
+            //Maintenance can only view maintenance proposal types and construction view construction types.
+            if ((currentDqeUser.Role == DqeRole.MaintenanceEstimator || currentDqeUser.Role == DqeRole.MaintenanceDistrictAdmin) && !wtp.ProjectType.StartsWith("M"))
+            {
+                return new DqeResult(null,
+                  new ClientMessage
+                  {
+                      Severity = ClientMessageSeverity.Error,
+                      text = string.Format("This project is authorized as a Construction Project Type")
+                  },
+                  JsonRequestBehavior.AllowGet);
+
+            }
+            else if ((currentDqeUser.Role == DqeRole.Estimator) && wtp.ProjectType.StartsWith("M"))
+            {
+                return new DqeResult(null,
+                   new ClientMessage
+                   {
+                       Severity = ClientMessageSeverity.Error,
+                       text = string.Format("This project is authorized as a Maintenance Project Type")
+                   },
+                   JsonRequestBehavior.AllowGet);
+            }
+
+            //is project in DQE?
             if (project == null)
             {
                 var r = AddProjectToDqe(number, currentDqeUser);
@@ -551,7 +603,6 @@ namespace Dqe.Web.Controllers
                 if (p == null) throw new InvalidOperationException("Expected project cast");
                 currentDqeUser.SetRecentProject(p);
                 //does WT have a proposal
-                var wtp = _webTransportService.GetProject(p.ProjectNumber);
                 if (wtp != null && wtp.MyProposal != null)
                 {
                     var result = AddProposal(wtp.MyProposal, currentDqeUser);
@@ -567,6 +618,7 @@ namespace Dqe.Web.Controllers
                 }
                 return ResultStructureFromProjectSelection(p, currentDqeUser);
             }
+            //if project is not in DQE
             else
             {
                 //TODO: should I check the synchronization status of the proposal here?
@@ -576,7 +628,6 @@ namespace Dqe.Web.Controllers
                 LoadLreSnapshotData(project);
                 var proposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
                 currentDqeUser.SetRecentProposal(proposal);
-                var wtp = _webTransportService.GetProject(project.ProjectNumber);
                 if (wtp != null)
                 {
                     //sync project
@@ -736,6 +787,7 @@ namespace Dqe.Web.Controllers
                     }
                 }
             }
+            project.ProjectType = wtp.ProjectType;
             //in DQE
             return ResultStructureFromProjectSelection(project, currentDqeUser, successMessage);
         }
@@ -1284,6 +1336,7 @@ namespace Dqe.Web.Controllers
                 {
                     id = i.Id,
                     number = i.ProjectNumber,
+                    projectType = i.ProjectType
                 }),
                 JsonRequestBehavior.AllowGet);
         }
@@ -1297,6 +1350,7 @@ namespace Dqe.Web.Controllers
                 {
                     id = i.Id,
                     number = i.ProposalNumber,
+                    contractType = i.ContractType
                 }),
                 JsonRequestBehavior.AllowGet);
         }
@@ -1360,6 +1414,7 @@ namespace Dqe.Web.Controllers
                     district = project.District,
                     designer = project.DesignerName,
                     county = project.MyCounty.Name,
+                    projectType = project.ProjectType,
                     filenumber = project.MyMasterFile.FileNumber,
                     comment = snapshot == null ? string.Empty : snapshot.EstimateComment,
                     lettingDate = wtProposal == null 
@@ -1392,6 +1447,7 @@ namespace Dqe.Web.Controllers
                     number = i.ProposalNumber,
                     source = i.ProposalSource == ProposalSourceType.Wt ? "Project Preconstruction" : "Gaming",
                     comment = i.Comment,
+                    contractType = i.ContractType,
                     created = i.Created,
                     lastUpdated = i.LastUpdated,
                     filenumber = i.Projects.FirstOrDefault().MyMasterFile.FileNumber

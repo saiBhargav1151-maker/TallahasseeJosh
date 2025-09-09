@@ -29,6 +29,13 @@ namespace Dqe.Domain.Model
         [Required]
         public virtual string ProposalNumber { get; protected internal set; }
 
+        /// <summary>
+        /// Pulls in from Transport as a 'CC', 'CLS', 'TOPB'..... 'MC', 'MMOA', etc. 
+        /// Everything that starts with a 'M' will be maintenance type contract as I was told that they know that naming convention. 
+        /// Construction contract types usually start with 'C' or 'T'
+        /// </summary>
+        public virtual string ContractType { get; set; }
+
         public virtual ProposalSourceType ProposalSource { get; protected internal set; }
 
         [StringLength(500)]
@@ -635,7 +642,8 @@ namespace Dqe.Domain.Model
                 LastUpdated = LastUpdated,
                 Description = Description,
                 LettingDate = LettingDate,
-                District = District
+                District = District,
+                //ContractType = ContractType
             };
         }
 
@@ -643,7 +651,13 @@ namespace Dqe.Domain.Model
         {
             if (transformer == null) throw new ArgumentNullException("transformer");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
+            if (account.Role != DqeRole.System && 
+                account.Role != DqeRole.Administrator && 
+                account.Role != DqeRole.DistrictAdministrator && 
+                account.Role != DqeRole.Estimator && 
+                account.Role != DqeRole.Coder && 
+                account.Role != DqeRole.MaintenanceDistrictAdmin && 
+                account.Role != DqeRole.MaintenanceEstimator)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -658,6 +672,7 @@ namespace Dqe.Domain.Model
             District = transformer.District;
             Description = transformer.Description;
             LettingDate = transformer.LettingDate;
+            ContractType = transformer.ContractType;
         }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

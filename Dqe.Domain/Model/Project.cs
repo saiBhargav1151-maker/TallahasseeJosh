@@ -48,6 +48,11 @@ namespace Dqe.Domain.Model
 
         public virtual County MyCounty { get; protected internal set; }
 
+        /// <summary>
+        /// Pulling from Transport as either a 'C' or a 'M' for maintenance
+        /// </summary>
+        public virtual string ProjectType { get; set; }
+
         //public virtual DateTime? LettingDate { get; protected internal set; }
 
         public virtual DqeUser CustodyOwner { get; protected internal set; }

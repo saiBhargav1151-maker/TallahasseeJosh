@@ -342,6 +342,13 @@
             .then(function (response) {
                 var projects = [];
                 angular.forEach(response.data, function (item) {
+                    item.displayName = item.number;
+                    if ((item.projectType[0] == 'M')) {
+                        item.displayName = '(M) ' + item.displayName;
+                    }
+                    else {
+                        item.displayName = '(C) ' + item.displayName;
+                    }
                     projects.push(item);
                 });
                 return projects;
