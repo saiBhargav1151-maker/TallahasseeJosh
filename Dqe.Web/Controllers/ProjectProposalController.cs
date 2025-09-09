@@ -487,6 +487,31 @@ namespace Dqe.Web.Controllers
 
         private ActionResult ResultStructureFromProposal(Proposal prop, DqeUser currentDqeUser, string successMessage)
         {
+
+            //Maintenance can only view maintenance proposal types and construction view construction types.
+            if ((currentDqeUser.Role == DqeRole.MaintenanceEstimator || currentDqeUser.Role == DqeRole.MaintenanceDistrictAdmin) && !prop.ContractType.StartsWith("M"))
+            {
+                return new DqeResult(null,
+                  new ClientMessage
+                  {
+                      Severity = ClientMessageSeverity.Error,
+                      text = string.Format("This proposal is authorized as a Construction Contract Type")
+                  },
+                  JsonRequestBehavior.AllowGet);
+
+            }
+            else if ((currentDqeUser.Role == DqeRole.Estimator) && prop.ContractType.StartsWith("M"))
+            {
+                return new DqeResult(null,
+                   new ClientMessage
+                   {
+                       Severity = ClientMessageSeverity.Error,
+                       text = string.Format("This proposal is authorized as a Maintenance Contract Type")
+                   },
+                   JsonRequestBehavior.AllowGet);
+            }
+            var wtp = _webTransportService.GetProposal(prop.ProposalNumber);
+
             var nextSnapshot = prop.GetNextSnapshotLabel();
             var currentSnapshot = prop.GetCurrentSnapshotLabel();
             var authorizationTotal = (Decimal)0;
@@ -527,7 +552,7 @@ namespace Dqe.Web.Controllers
                     isOfficial = prop.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                     authorizationTotal = authorizationTotal,
                     officialTotal = officialTotal,
-                    contractType = prop.ContractType,
+                    contractType = wtp.ContractType,
                     removeLabelComment = string.Empty
                 },
                 projects = prop.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
@@ -590,7 +615,7 @@ namespace Dqe.Web.Controllers
                    JsonRequestBehavior.AllowGet);
             }
 
-            //is project in DQE?
+            //is project not in DQE?
             if (project == null)
             {
                 var r = AddProjectToDqe(number, currentDqeUser);
@@ -618,12 +643,12 @@ namespace Dqe.Web.Controllers
                 }
                 return ResultStructureFromProjectSelection(p, currentDqeUser);
             }
-            //if project is not in DQE
+            //if project is in DQE
             else
             {
                 //TODO: should I check the synchronization status of the proposal here?
                 //should the proposal in DQE be matched against the proposal in wT at this point to remove the proposal from DQE its not a match?
-
+                project.ProjectType = wtp.ProjectType;
                 currentDqeUser.SetRecentProject(project);
                 LoadLreSnapshotData(project);
                 var proposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
