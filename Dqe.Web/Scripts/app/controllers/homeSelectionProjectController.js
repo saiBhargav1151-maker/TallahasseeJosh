@@ -325,7 +325,6 @@
         });
     }
     $scope.getProjects = function (val) {
-/*        const originalString = val;*/
         const stringWithoutDashes = val.replace(/-/g, "");
         return $http.get('./projectproposal/GetProjects', { params: { number: stringWithoutDashes } })
             .then(function (response) {
