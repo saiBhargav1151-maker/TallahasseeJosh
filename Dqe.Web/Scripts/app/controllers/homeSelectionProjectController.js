@@ -325,7 +325,9 @@
         });
     }
     $scope.getProjects = function (val) {
-        return $http.get('./projectproposal/GetProjects', { params: { number: val } })
+/*        const originalString = val;*/
+        const stringWithoutDashes = val.replace(/-/g, "");
+        return $http.get('./projectproposal/GetProjects', { params: { number: stringWithoutDashes } })
             .then(function (response) {
                 var projects = [];
                 angular.forEach(response.data, function (item) {
