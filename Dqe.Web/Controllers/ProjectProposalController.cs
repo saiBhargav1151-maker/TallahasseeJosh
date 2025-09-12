@@ -138,13 +138,13 @@ namespace Dqe.Web.Controllers
             var p = _webTransportService.GetProposal(number);
 
             //Maintenance can only view maintenance proposal types and construction view construction types.
-            if ((currentDqeUser.Role == DqeRole.MaintenanceEstimator || currentDqeUser.Role == DqeRole.MaintenanceDistrictAdmin) && !p.ContractType.StartsWith("M"))
+            if (currentDqeUser.Role == DqeRole.MaintenanceEstimator && !p.ContractType.StartsWith("M"))
             {
                 return new DqeResult(null,
                   new ClientMessage
                   {
                       Severity = ClientMessageSeverity.Error,
-                      text = string.Format("This proposal is authorized as a Construction Contract Type")
+                      text = string.Format("Authorization to Construction Contract Type required.")
                   },
                   JsonRequestBehavior.AllowGet);
 
@@ -155,7 +155,7 @@ namespace Dqe.Web.Controllers
                    new ClientMessage
                    {
                        Severity = ClientMessageSeverity.Error,
-                       text = string.Format("This proposal is authorized as a Maintenance Contract Type")
+                       text = string.Format("Authorization to Maintenance Contract Type required")
                    },
                    JsonRequestBehavior.AllowGet);
             }
@@ -593,27 +593,31 @@ namespace Dqe.Web.Controllers
             var project = _projectRepository.GetByProjectNumber(number);
 
             //Maintenance can only view maintenance proposal types and construction view construction types.
-            if ((currentDqeUser.Role == DqeRole.MaintenanceEstimator || currentDqeUser.Role == DqeRole.MaintenanceDistrictAdmin) && !wtp.ProjectType.StartsWith("M"))
+            if(project.Proposals != null && project.Proposals.Any())
             {
-                return new DqeResult(null,
-                  new ClientMessage
-                  {
-                      Severity = ClientMessageSeverity.Error,
-                      text = string.Format("This project is authorized as a Construction Project Type")
-                  },
-                  JsonRequestBehavior.AllowGet);
+                if (currentDqeUser.Role == DqeRole.MaintenanceEstimator  && !wtp.ProjectType.StartsWith("M"))
+                {
+                    return new DqeResult(null,
+                      new ClientMessage
+                      {
+                          Severity = ClientMessageSeverity.Error,
+                          text = string.Format("Authorization to Construction Type Projects required.")
+                      },
+                      JsonRequestBehavior.AllowGet);
 
+                }
+                else if ((currentDqeUser.Role == DqeRole.Estimator) && wtp.ProjectType.StartsWith("M"))
+                {
+                    return new DqeResult(null,
+                       new ClientMessage
+                       {
+                           Severity = ClientMessageSeverity.Error,
+                           text = string.Format("Authorization to Maintenance Type Projects required.")
+                       },
+                       JsonRequestBehavior.AllowGet);
+                }
             }
-            else if ((currentDqeUser.Role == DqeRole.Estimator) && wtp.ProjectType.StartsWith("M"))
-            {
-                return new DqeResult(null,
-                   new ClientMessage
-                   {
-                       Severity = ClientMessageSeverity.Error,
-                       text = string.Format("This project is authorized as a Maintenance Project Type")
-                   },
-                   JsonRequestBehavior.AllowGet);
-            }
+
 
             //is project not in DQE?
             if (project == null)
