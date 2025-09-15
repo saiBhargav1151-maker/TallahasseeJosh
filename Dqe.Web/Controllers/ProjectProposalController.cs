@@ -1425,6 +1425,7 @@ namespace Dqe.Web.Controllers
                     isAuthorized = currentUser.Role == DqeRole.Administrator || currentUser.IsInDqeDistrict(project.District) || currentUser.IsAuthorizedOnProject(project),
                     isSystemAdmin = currentUser.Role == DqeRole.Administrator,
                     isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(project.District),
+                    isMaintenanceDistrictAdmin = currentUser.Role == DqeRole.MaintenanceDistrictAdmin && currentUser.IsInDqeDistrict(project.District),
                     isReviewRole = (currentUser.Role == DqeRole.DistrictReviewer && currentUser.IsInDqeDistrict(project.District) ) || (currentUser.Role == DqeRole.StateReviewer),
                     isCoderRole = (currentUser.Role == DqeRole.Coder)
                 },
@@ -1574,7 +1575,8 @@ namespace Dqe.Web.Controllers
                 {
                     isAuthorized = currentUser.Role == DqeRole.Administrator || currentUser.IsInDqeDistrict(snapshot.MyProjectVersion.MyProject.District) || currentUser.IsAuthorizedOnProject(snapshot.MyProjectVersion.MyProject),
                     isSystemAdmin = currentUser.Role == DqeRole.Administrator,
-                    isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(snapshot.MyProjectVersion.MyProject.District)    
+                    isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(snapshot.MyProjectVersion.MyProject.District),
+                    isMaintenanceDistrictAdmin = currentUser.Role == DqeRole.MaintenanceDistrictAdmin && currentUser.IsInDqeDistrict(snapshot.MyProjectVersion.MyProject.District)
                 },
                 authorizedUsers = snapshot.MyProjectVersion.MyProject.AssignedUsers.Select(i => new
                 {

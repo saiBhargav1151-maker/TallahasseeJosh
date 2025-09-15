@@ -69,7 +69,7 @@
                         </div>
                         <div class="col-lg-6" style="text-align: right;">
                             <span>
-                                <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">
+                                <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin || security.isMaintenanceDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">
                                     Check In
                                 </button>
                                 <span>
@@ -131,7 +131,7 @@
                         </div>
                         <input type="hidden" id="hiddenProjectNumber" name="hiddenProjectNumber" value="">
                     </form>
-                    <div ng-show="(security.isSystemAdmin || security.isDistrictAdmin) && project != undefined">
+                    <div ng-show="(security.isSystemAdmin || security.isDistrictAdmin || security.isMaintenanceDistrictAdmin) && project != undefined">
                         <a href="" title="click to show/hide other authorized users for this project" ng-click="securityControls.isExpanded = !securityControls.isExpanded">
                             <i class="glyphicon glyphicon-plus" title="Show Security Controls" ng-show="!securityControls.isExpanded"></i>
                             <i class="glyphicon glyphicon-minus" title="Hide Security Controls" ng-show="securityControls.isExpanded"></i>
