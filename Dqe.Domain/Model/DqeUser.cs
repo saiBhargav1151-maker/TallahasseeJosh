@@ -161,7 +161,7 @@ namespace Dqe.Domain.Model
 
         public virtual void AssignProjectToUser(Project project , DqeUser assignmentUser)
         {
-            if (Role == DqeRole.Administrator || (Role == DqeRole.DistrictAdministrator && IsInDqeDistrict(project.District)))
+            if (Role == DqeRole.Administrator || ((Role == DqeRole.DistrictAdministrator || Role == DqeRole.MaintenanceDistrictAdmin) && IsInDqeDistrict(project.District)))
             {
                 if (assignmentUser._assignedProjects.Contains(project)) return;
                 assignmentUser._assignedProjects.Add(project);
@@ -174,7 +174,7 @@ namespace Dqe.Domain.Model
 
         public virtual void UnassignProjectToUser(Project project, DqeUser assignmentUser)
         {
-            if (Role == DqeRole.Administrator || (Role == DqeRole.DistrictAdministrator && IsInDqeDistrict(project.District)))
+            if (Role == DqeRole.Administrator || ((Role == DqeRole.DistrictAdministrator || Role == DqeRole.MaintenanceDistrictAdmin) && IsInDqeDistrict(project.District)))
             {
                 if (!assignmentUser._assignedProjects.Contains(project)) return;
                 assignmentUser._assignedProjects.Remove(project);
