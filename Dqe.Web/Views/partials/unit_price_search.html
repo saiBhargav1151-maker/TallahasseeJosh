@@ -145,10 +145,10 @@
                                id="minBidAmount"
                                class="form-control  modern-input date-input-compact"
                                ng-model="selectedMinBidAmount"
-                               placeholder="$0.00"
+                               placeholder="Min amount"
                                ng-blur="formatBidAmount('min')"
                                ng-focus="unformatBidAmount('min')"
-                               maxlength="13" />
+                               maxlength="14" />
                     </div>
                     <div class="separator">to</div>
                     <div>
@@ -164,7 +164,7 @@
                                placeholder="Leave blank for max"
                                ng-blur="formatBidAmount('max')"
                                ng-focus="unformatBidAmount('max')"
-                               maxlength="13" />
+                               maxlength="14" />
                     </div>
                 </div>
                 <!-- Bid Amount Validation Errors -->
@@ -189,7 +189,7 @@
                         <label class="modern-label" for="minQuantity">Minimum:</label>
                         <input type="text" id="minQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMinQuantity"
                                step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" placeholder="Min quantity"
-                               maxlength="15"  inputmode="decimal"
+                               maxlength="12"  inputmode="decimal"
                                pattern="[0-9,.]*"  onkeypress="return event.charCode === 0 || /[0-9,.]/.test(String.fromCharCode(event.charCode))"
                                oninput="this.value = this.value.replace(/[^0-9,.]/g, '')" />
                     </div>
@@ -198,7 +198,7 @@
                         <label class="modern-label" for="maxQuantity">Maximum:</label>
                         <input type="text" id="maxQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMaxQuantity"
                                step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" min="1" placeholder="Leave blank for max"
-                               maxlength="15"   inputmode="decimal"
+                               maxlength="12"   inputmode="decimal"
                                pattern="[0-9,.]*" onkeypress="return event.charCode === 0 || /[0-9,.]/.test(String.fromCharCode(event.charCode))"
                                oninput="this.value = this.value.replace(/[^0-9,.]/g, '')"/>
                     </div>

@@ -107,9 +107,49 @@
     };
 
     $scope.validationErrors = { bidAmountMin: '', bidAmountMax: '', bidAmountRange: '', quantityMin: '', quantityMax: '', quantityRange: '', monthsOfHistory: '', dateRange: '', regionSelection: '' };
+    
+    // Helper function to clear validation errors for a specific field
+    $scope.clearValidationError = function(fieldName) {
+      if ($scope.validationErrors[fieldName]) {
+        $scope.validationErrors[fieldName] = '';
+      }
+    };
+
+    // Helper functions to clear individual fields and their validation errors
+    $scope.clearBidAmountMin = function() {
+      $scope.selectedMinBidAmount = null;
+      $scope.clearValidationError('bidAmountMin');
+      $scope.validateBidAmountRange();
+    };
+
+    $scope.clearBidAmountMax = function() {
+      $scope.selectedMaxBidAmount = null;
+      $scope.clearValidationError('bidAmountMax');
+      $scope.validateBidAmountRange();
+    };
+
+    $scope.clearQuantityMin = function() {
+      $scope.selectedMinQuantity = null;
+      $scope.clearValidationError('quantityMin');
+      $scope.validateQuantityRange();
+    };
+
+    $scope.clearQuantityMax = function() {
+      $scope.selectedMaxQuantity = null;
+      $scope.clearValidationError('quantityMax');
+      $scope.validateQuantityRange();
+    };
+
+    $scope.clearMonthsOfHistory = function() {
+      $scope.monthsOfHistory = null;
+      $scope.clearValidationError('monthsOfHistory');
+    };
 
     $scope.validateBidAmount = function(value, type) {
-      if (!value || value === '') return true;
+      if (!value || value === '') {
+        $scope.validationErrors[`bidAmount${type}`] = '';
+        return true;
+      }
       const cleanValue = value.toString().replace(/,/g, '');
       if (isNaN(cleanValue)) {
         $scope.validationErrors[`bidAmount${type}`] = 'Please enter a valid number.';
@@ -149,7 +189,10 @@
     };
 
     $scope.validateQuantity = function(value, type) {
-      if (!value || value === '') return true;
+      if (!value || value === '') {
+        $scope.validationErrors[`quantity${type}`] = '';
+        return true;
+      }
       
       if (isNaN(value)) {
         $scope.validationErrors[`quantity${type}`] = 'Please enter a valid number.';
@@ -387,8 +430,8 @@
         $scope.trendChartInstance.destroy();
         $scope.trendChartInstance = null;
       }
+      $scope.validationErrors = { bidAmountMin: '', bidAmountMax: '', bidAmountRange: '', quantityMin: '', quantityMax: '', quantityRange: '', monthsOfHistory: '', dateRange: '', regionSelection: '' };
     };
-    // Function to recalculate weighted averages based on current toggle state
     $scope.recalculateWeightedAverages = function () {
       if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) {
         return;
@@ -430,7 +473,6 @@
         item.WeightedAvgNoOutliers = weightedAvgNoOutliers;
       });
     };
-    // Inflation toggle change handler
     $scope.onInflationToggleChange = function () {
       if ($scope.bidHistoryData && $scope.bidHistoryData.length > 0) {
         $scope.recalculateWeightedAverages();
@@ -451,7 +493,6 @@
         }
       }
     };
-    // Helper function to get the appropriate price field based on toggle state and item type
     $scope.getPriceField = function (item) {
       if (item.CalculatedUnit === 'LS - Lump Sum') {
         const calculatedUnitPrice =
@@ -1347,6 +1388,7 @@
         $scope.validateRegionSelection();
       }
     }, true);
+
     angular.forEach(filterWatchList, function (filter) {
       $scope.$watch(
         filter,
