@@ -6,7 +6,7 @@
             <div>
                 <h4 class="inflation-title">Item Filters</h4>
             </div>
-            <!-- Proposal Input -->
+            <!-- Proposal Input, Need to work on this in version two of the Bid Price search -->
             <!--<div class="form-group search-input-group">
                 <label for="projectNumberInput" class="modern-label"
                        data-original-title="Enter a valid FDOT Proposal Number (e.g., E2R22, 43633015201).">
@@ -37,14 +37,14 @@
                         <i class="fas fa-info-circle info-icon"></i>
                         <div class="tooltip">
                             <div class="tooltip-item">
-                <strong>Search Process:</strong> Type at least <span class="tooltip-highlight">3 characters</span>, then click the search button or press Enter.
-            </div>
-            <div class="tooltip-item">
-                <strong>Results:</strong> Select from the dropdown list that appears after searching.
-            </div>
-            <div class="tooltip-item">
-                <strong>Search Options:</strong> You can search by Pay Item Number or Description.
-            </div>
+                                <strong>Search Process:</strong> Type at least <span class="tooltip-highlight">3 characters</span>, then click the search button or press Enter.
+                            </div>
+                            <div class="tooltip-item">
+                                <strong>Results:</strong> Select from the dropdown list that appears after searching.
+                            </div>
+                            <div class="tooltip-item">
+                                <strong>Search Options:</strong> You can search by Pay Item Number or Description.
+                            </div>
                             <!--<div class="tooltip-item">
                                 <strong>Pay Item Number Format:</strong> Use leading zeros and exact spacing.
                                 <br><strong>Example:</strong> For pay item "0334 1 15", enter: <span class="tooltip-highlight">0334</span> followed by <span class="tooltip-highlight">two spaces</span>, then <span class="tooltip-highlight">1</span>, and <span class="tooltip-highlight">one space</span> before <span class="tooltip-highlight">15</span>
@@ -59,8 +59,8 @@
                 <div class="input-wrapper">
                     <input type="text" id="payItemInput"
                            ng-model="searchText"
-                           ng-keypress="onSearchKeyPress($event)"
-                           placeholder="e.g., 0120  6, embankment, or asphalt"
+                           ng-keyup="onSearchKeyPress($event)"
+                           placeholder="e.g., 0120  6, embankment, or asphaltic"
                            autocomplete="off"
                            class="form-control modern-input"
                            maxlength="180"
@@ -93,9 +93,6 @@
                     <i class="fas fa-lightbulb"></i>
                     <span>Click the search button or press Enter to find pay items</span>
                 </div>
-
-
-
                 <!-- Selection reminder notification -->
                 <div ng-if="showSuggestions && items.length > 0 && !selectedPayItemNumber" class="selection-reminder">
                     <i class="fas fa-hand-pointer"></i>
@@ -114,8 +111,8 @@
                         <i class="fas fa-list"></i>
                         Search Results ({{ items.length }} items)
                     </li>
-                    <li class="suggestion-item" 
-                        ng-repeat="item in items" 
+                    <li class="suggestion-item"
+                        ng-repeat="item in items"
                         ng-click="selectPayItem(item)">
                         <i class="fas fa-search suggestion-icon"></i>
                         <div class="suggestion-content">
@@ -125,13 +122,12 @@
                     </li>
                 </ul>
                 <!-- No results message -->
-                <div ng-if="showSuggestions && items.length === 0 && searchText.length >= 3 && !isSearching"
+                <div ng-if="noMatchingSuggestionsFlag && showSuggestions && items.length === 0 && searchText.length >= 3 && !isSearching"
                      class="no-results">
                     <i class="fas fa-info-circle"></i>
                     <span>No pay items found matching "{{ searchText }}"</span>
                 </div>
             </div>
-
             <!-- Bid Amount Range Filter -->
             <div class="form-group">
                 <label class="modern-label">
@@ -152,7 +148,7 @@
                                placeholder="$0.00"
                                ng-blur="formatBidAmount('min')"
                                ng-focus="unformatBidAmount('min')"
-                               maxlength="20" />
+                               maxlength="13" />
                     </div>
                     <div class="separator">to</div>
                     <div>
@@ -168,13 +164,20 @@
                                placeholder="Leave blank for max"
                                ng-blur="formatBidAmount('max')"
                                ng-focus="unformatBidAmount('max')"
-                               maxlength="20" />
+                               maxlength="13" />
                     </div>
                 </div>
-
-
+                <!-- Bid Amount Validation Errors -->
+                <div class="error-message" ng-show="validationErrors.bidAmountMin">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.bidAmountMin }}
+                </div>
+                <div class="error-message" ng-show="validationErrors.bidAmountMax">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.bidAmountMax }}
+                </div>
+                <div class="error-message" ng-show="validationErrors.bidAmountRange">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.bidAmountRange }}
+                </div>
             </div>
-
             <!-- Quantity Range -->
             <div class="form-group">
                 <label class="modern-label">
@@ -184,16 +187,20 @@
                 <div class="date-inputs-compact">
                     <div>
                         <label class="modern-label" for="minQuantity">Minimum:</label>
-                        <input type="number" id="minQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMinQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/"  placeholder="Min quantity"
-                               maxlength="15" />
+                        <input type="text" id="minQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMinQuantity"
+                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" placeholder="Min quantity"
+                               maxlength="15"  inputmode="decimal"
+                               pattern="[0-9,.]*"  onkeypress="return event.charCode === 0 || /[0-9,.]/.test(String.fromCharCode(event.charCode))"
+                               oninput="this.value = this.value.replace(/[^0-9,.]/g, '')" />
                     </div>
                     <div class="separator">to</div>
                     <div>
                         <label class="modern-label" for="maxQuantity">Maximum:</label>
-                        <input type="number" id="maxQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMaxQuantity"
+                        <input type="text" id="maxQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMaxQuantity"
                                step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" min="1" placeholder="Leave blank for max"
-                               maxlength="15" />
+                               maxlength="15"   inputmode="decimal"
+                               pattern="[0-9,.]*" onkeypress="return event.charCode === 0 || /[0-9,.]/.test(String.fromCharCode(event.charCode))"
+                               oninput="this.value = this.value.replace(/[^0-9,.]/g, '')"/>
                     </div>
                 </div>
                 <div class="quantity-preview" ng-show="selectedMinQuantity && selectedMaxQuantity">
@@ -205,26 +212,34 @@
                         Preview: Showing {{selectedMinQuantity}} to {{selectedMaxQuantity}} Quantities ({{getQuantityRange()}} total range)
                     </span>
                 </div>
+                <!-- Quantity Validation Errors -->
+                <div class="error-message" ng-show="validationErrors.quantityMin">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.quantityMin }}
+                </div>
+                <div class="error-message" ng-show="validationErrors.quantityMax">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.quantityMax }}
+                </div>
+                <div class="error-message" ng-show="validationErrors.quantityRange">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.quantityRange }}
+                </div>
             </div>
         </div>
-
         <!-- Group 2: Contract Filters -->
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="section-header">
                 <h4 class="inflation-title">Contract Filters</h4>
             </div>
-
             <div class="form-group">
                 <label for="contractTypeSelect" class="modern-label">
                     <i class="fas fa-file-contract label-icon"></i>
-                    Contract Type:
-                </label>
+                    Contract Type <span class="text-muted months-hint" style="color: #000000; ">
+    (Default is Const Contract):</span>
+</label>
                 <div class="select-wrapper">
                     <select id="contractTypeSelect"
                             class="form-control modern-input"
                             multiple
                             ng-model="selectedContractTypes">
-
                         <option value="ALL">-- All Contract Types --</option>
                         <option ng-repeat="type in contractTypes"
                                 ng-value="type">
@@ -237,7 +252,8 @@
             <div class="form-group">
                 <label for="contractWorkTypeSelect" class="modern-label">
                     <i class="fas fa-tools label-icon"></i>
-                    Work Type:
+                    Work Type<span class="text-muted months-hint" style="color: #000000; ">
+    (Default All):</span>
                 </label>
                 <div class="multiselect-wrapper">
                     <select id="contractWorkTypeSelect"
@@ -254,17 +270,17 @@
                 <div class="form-text text-muted months-hint">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
         </div>
-
         <!-- Group 3: Bid Filters -->
-        <div class="col-md-2">
+        <div class="col-md-3">
             <div class="section-header">
                 <h4 class="inflation-title">Bid Filters</h4>
             </div>
-
             <div class="form-group">
                 <label for="bidStatusFilter" class="modern-label">
                     <i class="fas fa-flag-checkered label-icon"></i>
-                    Bid Status:
+                    Bid Status<span class="text-muted months-hint" style="color: #000000; ">
+                        (Default is Bid Rank 1-3):
+                    </span>
                 </label>
                 <div class="select-wrapper">
                     <select id="bidStatusFilter" class="form-control modern-select" ng-model="selectedBidStatus">
@@ -275,32 +291,27 @@
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
             </div>
-
             <div class="form-group">
-                <label for="monthsInput" class="modern-label">
-                    <i class="fas fa-calendar-alt label-icon"></i>
-                    Months of Bid History:
+                <label for="monthsInput" class="modern-label" style="white-space:nowrap;">
+                    <i class="fas fa-calendar-alt label-icon"></i> Months of Bid History
+                    <span class="text-muted months-hint" style="color:#000000; display:inline;">(Default is 36):</span>
+                    <span class="form-text text-muted months-hint" style="color:red; display:inline; margin-left:5px;">* required</span>
                 </label>
-
                 <input type="number"
                        id="monthsInput"
                        name="monthsInput"
                        class="form-control modern-input date-input-compact"
                        ng-model="monthsOfHistory"
                        required
-                       min="1"
+                       min="0"
                        max="120"
-                       placeholder="36"
                        aria-describedby="monthsHint"
-                       title="Enter number of months (1 to 120). Default is 36." />
-
+                       title="Enter number of months (1 to 120)." />
                 <small id="monthsHint" class="form-text text-muted months-hint">
-                    Enter a value between 1 and 120. Default is 36.
+                    Enter a value between 1 and 120. Use months filter OR date range (date range overrides months)
                 </small>
-
                 <div class="error-message"
                      ng-show="unitPriceForm.monthsInput.$touched && unitPriceForm.monthsInput.$invalid">
-
                     <div ng-show="unitPriceForm.monthsInput.$error.required">
                         <i class="fas fa-exclamation-circle"></i>
                         Months value is required.
@@ -310,13 +321,42 @@
                         Please enter a value between 1 and 120 months.
                     </div>
                 </div>
+                <!-- Months of History Validation Error -->
+                <div class="error-message" ng-show="validationErrors.monthsOfHistory">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.monthsOfHistory }}
+                </div>
             </div>
 
+            <div class="form-group">
+                <label class="modern-label">
+                    <i class="fas fa-calendar-week label-icon"></i>
+                    Letting Date Range:<span class="form-text text-muted months-hint" style="color: red;">
+    * required (if no date range provided)
+</span>
+                </label>
+                <div class="date-inputs-compact">
+                    <input type="date" class="form-control modern-input date-input-compact" ng-model="startDate"
+                           max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
+                    <span class="separator">to</span>
+                    <input type="date" class="form-control modern-input date-input-compact" ng-model="endDate"
+                           max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
+                </div>
+                <div class="error-message" ng-show="isInvalidDateRange()">
+                    <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
+                </div>
+                <!-- Date Range Validation Error -->
+                <div class="error-message" ng-show="validationErrors.dateRange">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.dateRange }}
+                </div>
+                <small class="form-text text-muted months-hint">
+                    Use months filter OR date range (date range overrides months)
+                </small>
+            </div>
             <!-- Inflation Adjustment Toggle -->
             <div class="form-group">
                 <label class="modern-label">
                     <i class="fas fa-chart-line label-icon"></i>
-                    Inflation Adjustment:
+                    Inflation Adjustment<span class="text-muted months-hint" style="color:#000000; display:inline;">(Enabled by default):</span>
                 </label>
                 <div class="toggle-wrapper">
                     <label class="toggle-switch">
@@ -334,34 +374,15 @@
                     When enabled, charts and calculations use inflation-adjusted prices. Table shows both columns.
                 </small>
             </div>
-
-            <div class="form-group">
-                <label class="modern-label">
-                    <i class="fas fa-calendar-week label-icon"></i>
-                    Letting Date Range:
-                </label>
-                <div class="date-inputs-compact">
-                    <input type="date" class="form-control modern-input date-input-compact" ng-model="startDate"
-                           max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
-                    <span class="separator">to</span>
-                    <input type="date" class="form-control modern-input date-input-compact" ng-model="endDate"
-                           max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
-                </div>
-                <div class="error-message" ng-show="isInvalidDateRange()">
-                    <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
-                </div>
-                <small class="form-text text-muted months-hint">
-                    Use months filter OR date range (date range overrides months)
-                </small>
-            </div>
         </div>
         <div class="col-md-3">
             <div class="section-header">
                 <h4 class="inflation-title">Regional Filters</h4>
             </div>
-
             <div class="form-group">
-                <label class="modern-label"> <i class="fas fa-map-marker-alt label-icon"></i> Region Type:</label>
+                <label class="modern-label"> <i class="fas fa-map-marker-alt label-icon"></i> Region Type<span class="text-muted months-hint" style="color: #000000; ">
+    (Default is Statewide):
+</span></label>
                 <div class="select-wrapper">
                     <select class="form-control modern-select " ng-model="regionType" ng-change="onRegionTypeChange()">
                         <option value="">-- Statewide --</option>
@@ -462,6 +483,10 @@
                     </div>
                 </div>
             </div>
+            <!-- Region Selection Validation Error - Moved outside conditional block -->
+            <div class="error-message" ng-show="validationErrors.regionSelection">
+                <i class="fas fa-exclamation-circle"></i> {{ validationErrors.regionSelection }}
+            </div>
         </div>
     </div>
     <div class="action-buttons">
@@ -469,7 +494,7 @@
             <i class="fas fa-search"></i> Search Bids
         </button>
         <button class="btn btn-secondary btn-lg" ng-click="clearFilters()">
-            <i class="fas fa-times-circle"></i> Clear Filters
+            <i class="fas fa-times-circle"></i>Reset Filters
         </button>
         <button ng-if="bidHistoryData && !isLargeDataset && bidHistoryData.length > 0 && !shouldHideGraphForLumpSum()" class="btn btn-lg export-button" ng-click="downloadPDF()">
             <i class="fas fa-file-pdf"></i> Download PDF
@@ -521,10 +546,7 @@
          class="no-data-section">
         <div class="no-data-content">
             <i class="fas fa-search-minus no-data-icon"></i>
-            <div class="no-data-title">No Data Found</div>
-            <div class="no-data-message">
-                No bid history found for Pay Item <strong>{{ lastSearchedPayItem }}</strong>
-            </div>
+            <div class="no-data-title">No bid history found for Pay Item with the selected filters</div>
         </div>
     </div>
     <!-- Chart Stale Overlay - Now inside the results section -->
@@ -537,9 +559,8 @@
 
     <div class="results-section" ng-if="bidHistoryData && bidHistoryData.length > 0" ng-class="{ 'blurred': isChartStale }">
 
-
         <!-- NHCCI Inflation Adjustment Information -->
-        <div class="inflation-info-section" ng-if="bidHistoryData && bidHistoryData.length > 0">
+        <div class="inflation-info-section" ng-if="bidHistoryData && bidHistoryData.length > 0 && !shouldHideGraphForLumpSum()">
             <div class="inflation-info-content">
                 <i class="fas fa-chart-line inflation-icon"></i>
                 <div class="inflation-info-text">
@@ -558,7 +579,11 @@
                 </div>
             </div>
         </div>
-
+        
+        <!-- Lump Sum Info Message -->
+        <div class="ls-item-msg text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
+            <i class="fas fa-exclamation-triangle"></i> Charts and statistics are not available for LS/LS units.
+        </div>
         <div class="results-section">
             <div class="container-fluid results-container">
                 <div class="table-section">
@@ -566,10 +591,10 @@
                         <div class="chart-header" ng-if="!shouldHideGraphForLumpSum()">
                             <h4 class="inflation-title">
                                 <i class="fas fa-chart-line"></i> Unit Price Bid Analysis
-                                <span  ng-if="useInflationAdjustedPrices">
+                                <span ng-if="useInflationAdjustedPrices">
                                     (Inflation-Adjusted)
                                 </span>
-                                <span  ng-if="!useInflationAdjustedPrices">
+                                <span ng-if="!useInflationAdjustedPrices">
                                     (Raw Prices)
                                 </span>
                             </h4>
@@ -611,19 +636,6 @@
                                     <div class="stat-label">Total Outliers</div>
                                     <div class="stat-value">{{ chartStats.outlierCount }}</div>
                                 </div>
-                                <!--<div class="stat-card primary">
-                                    <div class="stat-label">Avg Inflation-Adjusted Price</div>
-                                    <div class="stat-value">${{ chartStats.avgInflationAdjustedPrice | number:2 }}</div>
-                                </div>-->
-                                <!--<div class="stat-card" ng-if="useInflationAdjustedPrices">
-                                    <div class="stat-label">Max Inflation Increase</div>
-                                    <div class="stat-value">{{ chartStats.maxInflationIncrease | number:1 }}%</div>
-                                </div>
-                                <div class="stat-card" ng-if="useInflationAdjustedPrices">
-                                    <div class="stat-label">Avg Unit Price Inflation Increase</div>
-                                    <div class="stat-value">{{ chartStats.avgInflationIncrease | number:1 }}%</div>
-                                </div>-->
-
                             </div>
                         </div>
 
@@ -641,7 +653,7 @@
                                     <label for="trendAnalysis" class="modern-label">
                                         <i class="fas fa-clock label-icon"></i>
                                         Select an Interval:
-                                    </label>
+                                    </label> 
                                     <div class="select-wrapper">
                                         <select id="trendAnalysis" class="form-control modern-select"
                                                 ng-model="trendAnalysisData.trendTimeGrouping"
@@ -661,7 +673,6 @@
                                     <span ng-bind="trendWarning"></span>
                                 </div>
                             </div>
-
                             <div ng-if="showTrendChart" class="trend-chart-container">
                                 <div class="chart-loader" ng-show="isTrendChartLoading">
                                     <div class="loading-spinner">
@@ -674,8 +685,6 @@
                         </div>
                         <!-- Custom Quantity Analysis Section -->
                         <div ng-if="bidHistoryData && bidHistoryData.length > 0 && !shouldHideGraphForLumpSum()" class="custom-quantity-section">
-
-
                             <div class="custom-quantity-header">
                                 <h5 class="inflation-title">
                                     <i class="fas fa-calculator"></i> Custom Quantity Analysis
@@ -685,36 +694,56 @@
                                 </h5>
                             </div>
                             <div class="custom-quantity-input">
-                                <div class="input-group">
-                                    <label class="modern-label" for="userQuantity">
-                                        <i class="fas fa-hashtag"></i> Enter Quantity:
-                                    </label>
-                                    <input type="number"
-                                           id="userQuantity"
-                                           class="modern-input"
-                                           ng-model="customQuantityData.userQuantity"
-                                           placeholder="Enter quantity for LOESS prediction"
-                                           min="{{ getValidQuantityRange().min }}"
-                                           max="{{ getValidQuantityRange().max }}"
-                                           step="0.01"
-                                           maxlength="15" />
-                                    <button class="btn btn-primary"
-                                            ng-click="calculateCustomQuantityStats()"
-                                            ng-disabled="!customQuantityData.userQuantity || customQuantityData.userQuantity <= 0 || isCalculatingPrediction || !isUserQuantityInRange()">
-                                        <i class="fas" ng-class="isCalculatingPrediction ? 'fa-spinner fa-spin' : 'fa-calculator'"></i>
-                                        {{ isCalculatingPrediction ? 'Calculating...' : 'Calculate' }}
-                                    </button>
-                                </div>
-
-                                <!-- Warning if quantity is out of range -->
-                                <div ng-if="customQuantityData.userQuantity && !isUserQuantityInRange()"
-                                     class="quantity-warning">
-                                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                                    <strong>Warning:</strong> Your quantity ({{ customQuantityData.userQuantity | number:2 }}) is outside the valid range for LOESS prediction.
-                                    Please enter a quantity within 10x the historical range ({{ getValidQuantityRange().min | number:2 }} - {{ getValidQuantityRange().max | number:2 }}).
+                                <div class="input-group" style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <label class="modern-label" for="userQuantity">
+                                            <i class="fas fa-hashtag"></i> Enter Quantity:
+                                        </label>
+                                        <input type="number"
+                                               id="userQuantity"
+                                               class="modern-input"
+                                               ng-model="customQuantityData.userQuantity"
+                                               placeholder="Enter quantity"
+                                               step="0.01"
+                                               maxlength="15" />
+                                        <button class="btn btn-primary"
+                                                ng-click="calculateCustomQuantityStats()"
+                                                ng-disabled="!customQuantityData.userQuantity || customQuantityData.userQuantity <= 0 || isCalculatingPrediction || !isUserQuantityInRange()">
+                                            <i class="fas" ng-class="isCalculatingPrediction ? 'fa-spinner fa-spin' : 'fa-calculator'"></i>
+                                            {{ isCalculatingPrediction ? 'Calculating...' : 'Calculate' }}
+                                        </button>
+                                    </div>
+                                    <div class="chart-js-controls" ng-if="!shouldHideGraphForLumpSum()" style="display: flex; align-items: center; gap: 10px;">
+                                        <label class="modern-label">
+                                            <i class="fas fa-sliders-h label-icon"></i>
+                                            LOESS Bandwidth:
+                                        </label>
+                                        <div class="bandwidth-control">
+                                            <div class="bandwidth-inputs" style="display: flex; align-items: center; gap: 10px;">
+                                                <input type="range"
+                                                       class="form-control bandwidth-slider"
+                                                       ng-model="chartSettings.loessBandwidth"
+                                                       ng-change="onChartBandwidthChange()"
+                                                       min="0.02"
+                                                       max="0.9"
+                                                       step="0.01"
+                                                       style="width: 150px;">
+                                                <span style="font-weight: bold; min-width: 40px;">{{chartSettings.loessBandwidth | number:2}}</span>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                Lower values = more local smoothing, Higher values = more global smoothing
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
+                            <!-- Warning if quantity is out of range -->
+                            <div ng-if="customQuantityData.userQuantity && !isUserQuantityInRange()"
+                                 class="quantity-warning">
+                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                <strong>Warning:</strong> Your quantity ({{ customQuantityData.userQuantity | number:2 }}) is outside the valid range.
+                                Please enter a quantity between {{ getValidQuantityRange().min | number:2 }} and {{ getValidQuantityRange().max | number:2 }}.
+                            </div>
                             <!-- LOESS Prediction Results -->
                             <div ng-if="customQuantityPrediction" class="prediction-results">
                                 <div ng-if="customQuantityPrediction.success" class="prediction-success">
@@ -750,7 +779,6 @@
                                                     <span class="band-label">Lower:</span>
                                                     <span class="band-value">{{ customQuantityPrediction.loessFilteredLower | smartCurrency }}</span>
                                                 </div>
-
                                             </div>
                                         </div>
                                         <div class="stat-card">
@@ -770,10 +798,7 @@
                                         ({{ customQuantityPrediction.dataPointsNoOutliers }} after outlier removal).
                                         Multiple calculation methods are shown for comparison.
                                     </div>
-
-
                                 </div>
-
                                 <div ng-if="!customQuantityPrediction.success" class="prediction-error">
                                     <div class="alert alert-warning" role="alert">
                                         <i class="fas fa-exclamation-triangle"></i>
@@ -783,7 +808,6 @@
                             </div>
                             <div class="chart-container-glass" ng-if="!shouldHideGraphForLumpSum()">
                                 <div class="canvas-wrapper" ng-class="{ 'blurred': isChartStale }">
-
                                     <div class="chart-loader" ng-show="isChartLoading">
                                         <div class="loading-spinner">
                                             <i class="fas fa-spinner fa-spin"></i>
@@ -792,9 +816,6 @@
                                     </div>
                                     <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
                                 </div>
-                            </div>
-                            <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
-                                <i class="fas fa-info-circle"></i> Charts and statistics are not available when all Lump Sum items have quantity = 1.
                             </div>
                             <!-- Summary stats -->
                         </div>
@@ -884,7 +905,7 @@
                                                     {{ item.b | smartCurrency }}
                                                 </span>
                                             </span>
-                                           
+
                                             <span ng-if="column.key === 'InflationAdjustedPrice'"
                                                   title="{{ getInflationInfo(item) }}"
                                                   style="cursor: help;">
@@ -924,22 +945,13 @@
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div>
-
-    <script src="
-https://cdn.jsdelivr.net/npm/science@1.9.3/science.v1.min.js
-"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="
 https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
 "></script>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
-
     <style>
         /* Global Font Consistency System */
         :root {
@@ -960,12 +972,10 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             line-height: 1.5;
         }
 
-        /* Consistent Font Application */
         * {
             font-family: var(--primary-font);
         }
 
-        /* Monospace for specific elements only */
         .numeric-cell,
         .date-cell,
         code,
@@ -1143,15 +1153,11 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 cursor: not-allowed;
                 opacity: 0.6;
             }
-
-
-
         /* Date Inputs */
         .date-inputs-compact {
             display: flex;
             align-items: center;
             gap: 8px;
-            
             flex-wrap: wrap;
         }
 
@@ -1277,14 +1283,20 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             padding: 8px 12px;
             margin-top: 6px;
             font-size: var(--small-font-size);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            width: max-content;
         }
 
-            .error-message div {
+            <!--.error-message div {
                 display: flex;
                 align-items: center;
                 gap: 6px;
                 margin-bottom: 2px;
-            }
+            }-->
 
                 .error-message div:last-child {
                     margin-bottom: 0;
@@ -1435,7 +1447,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border: 2px solid #1F4283;
             position: relative;
-            white-space:nowrap;
+            white-space: nowrap;
         }
 
         /* Optimized table styling */
@@ -1443,14 +1455,15 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             width: 100%;
             word-wrap: break-word;
             border-collapse: separate;
-            text-align:center;
+            text-align: center;
             border-spacing: 0;
             font-size: var(--small-font-size);
             background-color: #ffffff;
             min-width: auto;
-            table-layout:auto;
+            table-layout: auto;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
+
             .bid-table th {
                 position: sticky;
                 top: 0;
@@ -1564,47 +1577,47 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 text-transform: capitalize;
             }
 
-                    .bid-table td:nth-child(19) {
-            min-width: 120px;
-            max-width: 150px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-            .bid-table td:nth-child(19):hover {
-                white-space: normal;
-                overflow: visible;
-                position: relative;
-                z-index: 100;
-                background: #D6E1F5;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-                border-radius: 4px;
+            .bid-table td:nth-child(19) {
+                min-width: 120px;
+                max-width: 150px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
-        /* Work Type and Work Mix specific styling */
-        .bid-table td:nth-child(20),
-        .bid-table td:nth-child(21) {
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            word-break: break-word !important;
-            overflow-wrap: break-word !important;
-            hyphens: auto;
-            line-height: 1.3;
-            padding: 8px 6px;
-            vertical-align: top;
-        }
+                .bid-table td:nth-child(19):hover {
+                    white-space: normal;
+                    overflow: visible;
+                    position: relative;
+                    z-index: 100;
+                    background: #D6E1F5;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                    border-radius: 4px;
+                }
 
-        .bid-table th:nth-child(20),
-        .bid-table th:nth-child(21) {
-            white-space: normal;
-            word-wrap: break-word;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            line-height: 1.3;
-            padding: 10px 6px;
-            vertical-align: top;
-        }
+            /* Work Type and Work Mix specific styling */
+            .bid-table td:nth-child(20),
+            .bid-table td:nth-child(21) {
+                white-space: normal !important;
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                hyphens: auto;
+                line-height: 1.3;
+                padding: 8px 6px;
+                vertical-align: top;
+            }
+
+            .bid-table th:nth-child(20),
+            .bid-table th:nth-child(21) {
+                white-space: normal;
+                word-wrap: break-word;
+                word-break: break-word;
+                overflow-wrap: break-word;
+                line-height: 1.3;
+                padding: 10px 6px;
+                vertical-align: top;
+            }
 
             .bid-table tbody tr {
                 min-height: 42px;
@@ -2053,7 +2066,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-weight: bold;
         }
 
-        th[ng-click] {
+        th[ng-click] .sortable {
             cursor: pointer;
         }
 
@@ -2259,6 +2272,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             margin: 0 0 15px 0;
             color: #856404;
             line-height: 1.5;
+            font-weight:var(--small-font-size);
         }
 
         .warning-actions {
@@ -3137,7 +3151,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             z-index: 10;
             border-radius: 0 0 6px 6px;
         }
-    
+
         .category-group .suggestion-item {
             padding: 10px 12px;
             cursor: pointer;
@@ -3276,7 +3290,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             border: 1px solid #ffeaa7;
             color: #856404;
             padding: 12px 16px;
-            margin-top: 12px;
+            margin: 10px;
             border-radius: 8px;
             font-size: var(--base-font-size);
             font-weight: 500;
@@ -3385,11 +3399,11 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             height: 24px;
         }
 
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
 
         .toggle-slider {
             position: absolute;
@@ -3403,25 +3417,25 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             border-radius: 24px;
         }
 
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 18px;
+                width: 18px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+            }
 
         input:checked + .toggle-slider {
             background-color: #1F4283;
         }
 
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
+            input:checked + .toggle-slider:before {
+                transform: translateX(26px);
+            }
 
         .toggle-label {
             font-weight: 500;
@@ -3440,12 +3454,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 border-radius: 28px;
             }
 
-            .toggle-slider:before {
-                height: 22px;
-                width: 22px;
-                left: 3px;
-                bottom: 3px;
-            }
+                .toggle-slider:before {
+                    height: 22px;
+                    width: 22px;
+                    left: 3px;
+                    bottom: 3px;
+                }
 
             input:checked + .toggle-slider:before {
                 transform: translateX(28px);
@@ -3471,12 +3485,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 border-radius: 32px;
             }
 
-            .toggle-slider:before {
-                height: 26px;
-                width: 26px;
-                left: 3px;
-                bottom: 3px;
-            }
+                .toggle-slider:before {
+                    height: 26px;
+                    width: 26px;
+                    left: 3px;
+                    bottom: 3px;
+                }
 
             input:checked + .toggle-slider:before {
                 transform: translateX(28px);
@@ -3526,6 +3540,19 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             gap: 6px;
             font-weight: 500;
         }
+        .ls-item-msg {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 8px 12px;
+            margin-top: 6px;
+            font-size: var(--large-font-size);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
 
             .no-results i {
                 color: #f39c12;
@@ -3566,11 +3593,18 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             gap: 6px;
             font-weight: 500;
         }
-
-            .selection-reminder i {
+  .selection-reminder i {
                 color: #4caf50;
                 font-size: var(--small-font-size);
             }
 
-
+        /* Chart.js LOESS Bandwidth Controls */
+        .chart-js-controls {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(31, 66, 131, 0.1);
+            border: 1px solid #B1C6EC;
+        }
     </style>

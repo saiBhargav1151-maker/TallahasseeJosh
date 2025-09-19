@@ -55,30 +55,26 @@ namespace Dqe.Web.Controllers
         /// <param name="number">Pay item number to fetch historical unit price data for.</param>
         /// <returns>JSON result
         [HttpGet]
-        public ActionResult GetPayItemDetails(string number, List<string> contractType, int months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, string projectNumber, decimal? minBidAmount, decimal? maxBidAmount)
+        public ActionResult GetPayItemDetails(string number, List<string> contractType, int? months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, string projectNumber, decimal? minBidAmount, decimal? maxBidAmount, string[] district)
         {
             try
             {
                 var selectedCounties = counties?.ToList() ?? new List<string>();
-                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months, contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames, projectNumber, minBidAmount, maxBidAmount);
+                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months ?? 36, contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames, projectNumber, minBidAmount, maxBidAmount, district);
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
-
-                // Calculate inflation-adjusted prices for each bid item
+               
                 foreach (var item in historyData)
                 {
                     if (item.l.HasValue)
                     {
                         try
                         {
-                            // Parse the letting date from the .NET date format
                             DateTime lettingDate = item.l.Value;
 
-                            // Calculate inflation-adjusted price
                             decimal adjustedPrice = NHCCIData.CalculateInflationAdjustedPrice(item.b, lettingDate);
                             item.InflationAdjustedPrice = adjustedPrice;
 
-                            // Calculate inflation factor and percentage
                             string quarterKey = NHCCIData.GetQuarterKey(lettingDate);
                             if (NHCCIData.IndexByQuarter.ContainsKey(quarterKey))
                             {
@@ -94,7 +90,6 @@ namespace Dqe.Web.Controllers
                         }
                         catch (Exception ex)
                         {
-                            // If calculation fails, set default values
                             item.InflationAdjustedPrice = item.b;
                             item.InflationFactor = 1.0m;
                             item.InflationPercentIncrease = 0.0m;
@@ -104,17 +99,51 @@ namespace Dqe.Web.Controllers
                     }
                     else
                     {
-                        // Set default values if date is missing
                         item.InflationAdjustedPrice = item.b;
                         item.InflationFactor = 1.0m;
                         item.InflationPercentIncrease = 0.0m;
                         item.NHCCIQuarter = "Unknown";
                     }
                 }
+                var filteredData = historyData.Select(item => new
+                {
+                    ri = item.ri,
+                    Quantity = item.Quantity,
+                    p = item.p,
+                    ProposalType = item.ProposalType,
+                    ContractType = item.ContractType,
+                    ContractWorkType = item.ContractWorkType,
+                    m = item.m,
+                    c = item.c,
+                    d = item.d,
+                    l = item.l,
+                    b = item.b,
+                    BidStatus = item.BidStatus,
+                    PvBidTotal = item.PvBidTotal,
+                    ProjectNumber = item.ProjectNumber,
+                    Description = item.Description,
+                    SupplementalDescription = item.SupplementalDescription,
+                    CalculatedUnit = item.CalculatedUnit,
+                    ExecutionDate = item.ExecutionDate,
+                    VendorName = item.VendorName,
+                    FullNameDescription = item.FullNameDescription,
+                    Duration = item.Duration,
+                    ExecutedDate = item.ExecutedDate,
+                    ObsoleteDate = item.ObsoleteDate,
+                    BidType = item.BidType,
+                    VendorRanking = item.VendorRanking,
+                    CategoryDescription = item.CategoryDescription,
+                    WorkMixDescription = item.WorkMixDescription,
+                    LeadProjectNumber = item.LeadProjectNumber,
+                    InflationAdjustedPrice = item.InflationAdjustedPrice,
+                    InflationFactor = item.InflationFactor,
+                    InflationPercentIncrease = item.InflationPercentIncrease,
+                    NHCCIQuarter = item.NHCCIQuarter
+                }).ToList();
 
                 return new JsonResult
                 {
-                    Data = historyData,
+                    Data = filteredData,
                     JsonRequestBehavior = JsonRequestBehavior.AllowGet,
                     MaxJsonLength = Int32.MaxValue
                 };
