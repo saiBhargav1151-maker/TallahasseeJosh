@@ -581,7 +581,8 @@
                 : null,
             startDate: $scope.startDate || null,
             endDate: $scope.endDate || null,
-            counties: $scope.selectedRegionCounties,
+            // Pass counties only for market and county region types, district for district type
+            counties: ($scope.regionType === 'market' || $scope.regionType === 'county') ? $scope.selectedRegionCounties : null,
             district: districtParam,
             bidStatus: $scope.selectedBidStatus || null,
             contractType:
@@ -808,8 +809,16 @@
           const cleaned = c.includes(' - ')
             ? c.split(' - ')[1].trim()
             : c.trim();
-          if (cleaned !== 'TURNPIKE' && cleaned !== 'DIST/ST-WIDE' && !combined.includes(cleaned)) {
-            combined.push(cleaned);
+          // For market areas, include all counties including TURNPIKE and DIST/ST-WIDE
+          if ($scope.regionType === 'market') {
+            if (!combined.includes(cleaned)) {
+              combined.push(cleaned);
+            }
+          } else {
+            // For other region types, exclude TURNPIKE and DIST/ST-WIDE
+            if (cleaned !== 'TURNPIKE' && cleaned !== 'DIST/ST-WIDE' && !combined.includes(cleaned)) {
+              combined.push(cleaned);
+            }
           }
         });
       });
