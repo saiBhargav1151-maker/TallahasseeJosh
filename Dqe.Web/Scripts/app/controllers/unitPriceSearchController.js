@@ -679,6 +679,8 @@
             }
             bidItem.MarketArea = foundMarketArea || 'Unknown';
           });
+          
+          $scope.trendData = processTrendData();
           if (responseSize > maxSize) {
             $scope.isLargeDataset = true;
             $scope.largeDatasetMessage = `The dataset is too large (${(
@@ -2924,6 +2926,7 @@
             totalQuantity: 0,
             totalAmount: 0,
             count: 0,
+            uniqueContracts: new Set(),
           };
         }
         groupedData[timeKey].quantities.push(item.Quantity);
@@ -2931,6 +2934,7 @@
         groupedData[timeKey].totalQuantity += item.Quantity;
         groupedData[timeKey].totalAmount += item.PvBidTotal || 0;
         groupedData[timeKey].count++;
+        groupedData[timeKey].uniqueContracts.add(item.p);
       });
       const trendData = Object.keys(groupedData).map((timeKey) => {
         const data = groupedData[timeKey];
@@ -2947,11 +2951,12 @@
           totalQuantity: data.totalQuantity,
           totalAmount: data.totalAmount,
           count: data.count,
+          uniqueContractCount: data.uniqueContracts.size,
           date: parseTimeKeyToDate(timeKey),
         };
       });
       trendData.sort((a, b) => a.date - b.date);
-      const sparseIntervals = trendData.filter((item) => item.count < 5);
+      const sparseIntervals = trendData.filter((item) => item.uniqueContractCount < 5);
       if (sparseIntervals.length > 0) {
         const timeUnit =
           $scope.trendAnalysisData.trendTimeGrouping === 'year'
@@ -3016,6 +3021,9 @@
         return timeKey;
       }
     }
+    
+    // Expose formatTimeKey to scope for use in template
+    $scope.formatTimeKey = formatTimeKey;
     function renderTrendChart() {
       $scope.isTrendChartLoading = true;
 
@@ -3184,7 +3192,9 @@
                     lines.push(
                       `💵 Total Amount: $${dataPoint.totalAmount.toLocaleString()}`
                     );
+                      lines.push(`📄 Number of Contracts: ${dataPoint.uniqueContractCount}`);
                     lines.push(`📋 Number of Bids: ${dataPoint.count}`);
+                   
                     return lines;
                   },
                 },

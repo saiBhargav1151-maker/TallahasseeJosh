@@ -77,8 +77,10 @@
                             class="search-btn"
                             ng-click="fetchPayItemSuggestions()"
                             ng-disabled="!searchText || searchText.length < 3 || isSearching"
-                            title="Search Pay Items">
-                        <i class="fas" ng-class="isSearching ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+                            title="Search for Pay Items">
+                        <i class="fas" ng-class="isSearching ? 'fa-spinner fa-spin' : 'fa-search'"></i>&nbsp;
+                        <span style="font-weight:600;"  ng-if="!isSearching">Find Pay Item</span>
+                        <span ng-if="isSearching">Searching...</span>
                     </button>
 
                 </div>
@@ -91,12 +93,12 @@
                 <!-- Search reminder notification -->
                 <div ng-if="searchText && searchText.length >= 3 && !selectedPayItemNumber && !showSuggestions && !isSearching" class="search-reminder">
                     <i class="fas fa-lightbulb"></i>
-                    <span>Click the search button or press Enter to find pay items</span>
+                    <span>Click the Search item button or press Enter to find pay items</span>
                 </div>
                 <!-- Selection reminder notification -->
                 <div ng-if="showSuggestions && items.length > 0 && !selectedPayItemNumber" class="selection-reminder">
                     <i class="fas fa-hand-pointer"></i>
-                    <span>Click on an item from the list above to select it</span>
+                    <span>Click on an item from the list below to select it</span>
                 </div>
                 <div ng-show="unitPriceForm.payItemInput.$touched && unitPriceForm.payItemInput.$invalid" class="error-message">
                     <div ng-show="unitPriceForm.payItemInput.$error.required">
@@ -673,6 +675,16 @@
                                     <span ng-bind="trendWarning"></span>
                                 </div>
                             </div>
+                            <!-- Contract Count Summary -->
+                            <div ng-if="showTrendChart && trendData && trendData.length > 0" class="trend-summary">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Contract Distribution:</strong> 
+                                    <span ng-repeat="period in trendData" class="contract-count-item">
+                                        {{formatTimeKey(period.timeKey)}}: {{period.uniqueContractCount}} contract{{period.uniqueContractCount !== 1 ? 's' : ''}}<span ng-if="!$last">, </span>
+                                    </span>
+                                </div>
+                            </div>
                             <div ng-if="showTrendChart" class="trend-chart-container">
                                 <div class="chart-loader" ng-show="isTrendChartLoading">
                                     <div class="loading-spinner">
@@ -723,7 +735,8 @@
                                                 <input type="range"
                                                        class="form-control bandwidth-slider"
                                                        ng-model="chartSettings.loessBandwidth"
-                                                       ng-change="onChartBandwidthChange()"
+                                                       ng-mouseup="onChartBandwidthChange()"
+                                                       ng-touchend="onChartBandwidthChange()"
                                                        min="0.02"
                                                        max="0.9"
                                                        step="0.01"

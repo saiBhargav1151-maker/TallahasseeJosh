@@ -59,6 +59,18 @@ namespace Dqe.Web.Controllers
         {
             try
             {
+                // input validation
+                if (!ValidateBasicInputs(number, months, startDate, endDate, minBidAmount, maxBidAmount, minRank, maxRank))
+                {
+                    return new HttpStatusCodeResult(400, "Invalid search parameters.");
+                }
+
+                // rate limiting
+                if (!CheckBasicRateLimit())
+                {
+                    return new HttpStatusCodeResult(429, "Too many requests. Please try again later.");
+                }
+
                 var selectedCounties = counties?.ToList() ?? new List<string>();
                 var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months ?? 36, contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames, projectNumber, minBidAmount, maxBidAmount, district);
                 if (historyData == null)
@@ -151,6 +163,90 @@ namespace Dqe.Web.Controllers
             catch (Exception ex)
             {
                 return new HttpStatusCodeResult(500, "An error occurred: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Basic input validation to prevent unauthorized data access
+        /// </summary>
+        private bool ValidateBasicInputs(string number, int? months, DateTime? startDate, DateTime? endDate, decimal? minBidAmount, decimal? maxBidAmount, decimal? minRank, decimal? maxRank)
+        {
+            try
+            {
+                if (months.HasValue && (months < 1 || months > 120))
+                    return false;
+                var now = DateTime.Now;
+                var maxPastDate = now.AddYears(-10); // Only allow 10 years back
+                var maxFutureDate = now; 
+
+                if (startDate.HasValue && (startDate < maxPastDate || startDate > maxFutureDate))
+                    return false;
+
+                if (endDate.HasValue && (endDate < maxPastDate || endDate > maxFutureDate))
+                    return false;
+
+                if (startDate.HasValue && endDate.HasValue && startDate > endDate)
+                    return false;
+
+                if (minBidAmount.HasValue && (minBidAmount < 0 || minBidAmount > 999999999))
+                    return false;
+
+                if (maxBidAmount.HasValue && (maxBidAmount < 0 || maxBidAmount > 999999999))
+                    return false;
+
+                if (minBidAmount.HasValue && maxBidAmount.HasValue && minBidAmount > maxBidAmount)
+                    return false;
+
+                if (minRank.HasValue && (minRank < 0 || minRank > 1000))
+                    return false;
+
+                if (maxRank.HasValue && (maxRank < 0 || maxRank > 1000))
+                    return false;
+
+                if (minRank.HasValue && maxRank.HasValue && minRank > maxRank)
+                    return false;
+
+                if (!string.IsNullOrEmpty(number) && (number.Length > 50 || !System.Text.RegularExpressions.Regex.IsMatch(number, @"^[A-Za-z0-9\s\-\.]+$")))
+                    return false;
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Basic rate limiting to prevent abuse
+        /// </summary>
+        private bool CheckBasicRateLimit()
+        {
+            try
+            {
+                var clientIp = Request.UserHostAddress;
+                var cacheKey = $"RateLimit_{clientIp}";
+                var currentTime = DateTime.Now;
+
+                if (HttpContext.Cache[cacheKey] != null)
+                {
+                    var lastRequest = (DateTime)HttpContext.Cache[cacheKey];
+                    var timeDiff = currentTime - lastRequest;
+
+                    if (timeDiff.TotalSeconds < 5)
+                    {
+                        return false;
+                    }
+                }
+
+                // Update the rate limit cache
+                HttpContext.Cache.Insert(cacheKey, currentTime, null, DateTime.Now.AddMinutes(1), System.Web.Caching.Cache.NoSlidingExpiration);
+
+                return true;
+            }
+            catch
+            {
+                return true;
             }
         }
     }
