@@ -60,7 +60,7 @@
                     <input type="text" id="payItemInput"
                            ng-model="searchText"
                            ng-keyup="onSearchKeyPress($event)"
-                           placeholder="e.g., 0120  6, embankment, or asphaltic"
+                           placeholder="e.g., 0120  6, embankment"
                            autocomplete="off"
                            class="form-control modern-input"
                            maxlength="180"
@@ -79,7 +79,7 @@
                             ng-disabled="!searchText || searchText.length < 3 || isSearching"
                             title="Search for Pay Items">
                         <i class="fas" ng-class="isSearching ? 'fa-spinner fa-spin' : 'fa-search'"></i>&nbsp;
-                        <span style="font-weight:600;"  ng-if="!isSearching">Find Pay Item</span>
+                        <span style="font-weight:600;" ng-if="!isSearching">Search Item</span>
                         <span ng-if="isSearching">Searching...</span>
                     </button>
 
@@ -93,7 +93,7 @@
                 <!-- Search reminder notification -->
                 <div ng-if="searchText && searchText.length >= 3 && !selectedPayItemNumber && !showSuggestions && !isSearching" class="search-reminder">
                     <i class="fas fa-lightbulb"></i>
-                    <span>Click the Search item button or press Enter to find pay items</span>
+                    <span>Click the Search Item button or press Enter to find pay items</span>
                 </div>
                 <!-- Selection reminder notification -->
                 <div ng-if="showSuggestions && items.length > 0 && !selectedPayItemNumber" class="selection-reminder">
@@ -293,47 +293,12 @@
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="monthsInput" class="modern-label" style="white-space:nowrap;">
-                    <i class="fas fa-calendar-alt label-icon"></i> Months of Bid History
-                    <span class="text-muted months-hint" style="color:#000000; display:inline;">(Default is 36):</span>
-                    <span class="form-text text-muted months-hint" style="color:red; display:inline; margin-left:5px;">* required</span>
-                </label>
-                <input type="number"
-                       id="monthsInput"
-                       name="monthsInput"
-                       class="form-control modern-input date-input-compact"
-                       ng-model="monthsOfHistory"
-                       required
-                       min="0"
-                       max="120"
-                       aria-describedby="monthsHint"
-                       title="Enter number of months (1 to 120)." />
-                <small id="monthsHint" class="form-text text-muted months-hint">
-                    Enter a value between 1 and 120. Use months filter OR date range (date range overrides months)
-                </small>
-                <div class="error-message"
-                     ng-show="unitPriceForm.monthsInput.$touched && unitPriceForm.monthsInput.$invalid">
-                    <div ng-show="unitPriceForm.monthsInput.$error.required">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Months value is required.
-                    </div>
-                    <div ng-show="unitPriceForm.monthsInput.$error.min || unitPriceForm.monthsInput.$error.max">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Please enter a value between 1 and 120 months.
-                    </div>
-                </div>
-                <!-- Months of History Validation Error -->
-                <div class="error-message" ng-show="validationErrors.monthsOfHistory">
-                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.monthsOfHistory }}
-                </div>
-            </div>
 
             <div class="form-group">
                 <label class="modern-label">
                     <i class="fas fa-calendar-week label-icon"></i>
                     Letting Date Range:<span class="form-text text-muted months-hint" style="color: red;">
-    * required (when months of bid history is not use)
+    * required
 </span>
                 </label>
                 <div class="date-inputs-compact">
@@ -343,16 +308,16 @@
                     <input type="date" class="form-control modern-input date-input-compact" ng-model="endDate"
                            max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
                 </div>
-                <div class="error-message" ng-show="isInvalidDateRange()">
+                <!--<div class="error-message" ng-show="isInvalidDateRange()">
                     <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
-                </div>
+                </div>-->
                 <!-- Date Range Validation Error -->
                 <div class="error-message" ng-show="validationErrors.dateRange">
                     <i class="fas fa-exclamation-circle"></i> {{ validationErrors.dateRange }}
                 </div>
-                <small class="form-text text-muted months-hint">
+                <!--<small class="form-text text-muted months-hint">
                     Use months filter OR date range (date range overrides months)
-                </small>
+                </small>-->
             </div>
             <!-- Inflation Adjustment Toggle -->
             <div class="form-group">
@@ -455,7 +420,7 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group" ng-if="relatedCounties.length > 0 && regionType === 'county'">
+            <div class="form-group" ng-if="relatedCounties.length > 0 && (regionType === 'county' || regionType === 'market' || regionType === 'district')">
                 <label class="sub-label">Counties:</label>
                 <div class="county-filter-compact">
                     <div class="county-actions-compact">
@@ -512,7 +477,7 @@
 
     <!-- Simple Data Info Display -->
     <div class="simple-data-info" ng-if="bidHistoryData && bidHistoryData.length > 0">
-        <span><strong>Bid Data Updated Through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
+        <span><strong>Bid Data Available through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
         <span><strong>NHCCI Index Load:</strong> Q4, 2024</span>
     </div>
 
@@ -675,6 +640,13 @@
                                     <span ng-bind="trendWarning"></span>
                                 </div>
                             </div>
+                            <!-- Data Age Warning -->
+                            <div ng-if="dataAgeWarning" class="data-age-warning">
+                                <div class="alert alert-warning" role="alert" style="background-color: #fff3cd; border-color: #ffeaa7; color: #856404;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span ng-bind="dataAgeWarning"></span>
+                                </div>
+                            </div>
                             <!-- Contract Count Summary -->
                             <div ng-if="showTrendChart && trendData && trendData.length > 0" class="trend-summary">
                                 <div class="alert alert-info" role="alert">
@@ -737,9 +709,9 @@
                                                        ng-model="chartSettings.loessBandwidth"
                                                        ng-mouseup="onChartBandwidthChange()"
                                                        ng-touchend="onChartBandwidthChange()"
-                                                       min="0.02"
-                                                       max="0.9"
-                                                       step="0.01"
+                                                       min="0.2"
+                                                       max="0.8"
+                                                       step="0.1"
                                                        style="width: 150px;">
                                                 <span style="font-weight: bold; min-width: 40px;">{{chartSettings.loessBandwidth | number:2}}</span>
                                             </div>

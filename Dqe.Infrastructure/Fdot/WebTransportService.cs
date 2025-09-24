@@ -36,11 +36,18 @@ namespace Dqe.Infrastructure.Fdot
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
                 RefItem ri = null;
-                var sanitizedInput = input.Replace(" ", "").Trim();
+
+                // Normalize input: remove spaces and hyphens, convert to lowercase
+                var sanitizedInput = input.Replace(" ", "").Replace("-", "").Trim().ToLower();
+
                 var rawResults = session.QueryOver(() => ri)
                     .Where(() => ri.SpecBook == "13")
                     .And(Restrictions.Or(
-                        Expression.Sql("LOWER(REPLACE(RTRIM(LTRIM(REFITEM_NM)) + ' - ' + RTRIM(LTRIM(DESCR)), ' ', '')) LIKE ?", $"%{input.Trim().ToLower().Replace(" ", "")}%", NHibernateUtil.String),
+                        Expression.Sql(
+                            "LOWER(REPLACE(REPLACE(RTRIM(LTRIM(REFITEM_NM)) + ' - ' + RTRIM(LTRIM(DESCR)), ' ', ''), '-', '')) LIKE ?",
+                            $"%{sanitizedInput}%",
+                            NHibernateUtil.String
+                        ),
                         Restrictions.On(() => ri.Description).IsLike(input.Trim(), MatchMode.Anywhere)
                     ))
                     .SelectList(list => list
@@ -61,9 +68,11 @@ namespace Dqe.Infrastructure.Fdot
                     })
                     .Distinct()
                     .ToList();
+
                 return finalResults;
             }
         }
+
         /// <summary>
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.

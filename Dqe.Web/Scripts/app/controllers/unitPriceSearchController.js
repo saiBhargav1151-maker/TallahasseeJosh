@@ -7,7 +7,12 @@
     $scope.bidHistoryData = [];
     $scope.lastSearchedPayItem = $scope.searchText;
     $scope.isLoading = false;
-    $scope.monthsOfHistory = 36;
+    // Set default date range: end date = today, start date = today - 36 months
+    const todayDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 36);
+    $scope.endDate = todayDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    $scope.startDate = startDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
     $scope.regionType = '';
     $scope.regionOptions = [];
     $scope.selectedRegions = [];
@@ -39,6 +44,7 @@
     $scope.isTrendChartLoading = false;
     $scope.showTrendChart = false;
     $scope.trendWarning = '';
+    $scope.dataAgeWarning = '';
     $scope.useInflationAdjustedPrices = true;
     $scope.isExporting = false;
     $scope.customQuantityData = { userQuantity: null };
@@ -106,7 +112,7 @@
       return false;
     };
 
-    $scope.validationErrors = { bidAmountMin: '', bidAmountMax: '', bidAmountRange: '', quantityMin: '', quantityMax: '', quantityRange: '', monthsOfHistory: '', dateRange: '', regionSelection: '' };
+    $scope.validationErrors = { bidAmountMin: '', bidAmountMax: '', bidAmountRange: '', quantityMin: '', quantityMax: '', quantityRange: '', dateRange: '', regionSelection: '' };
     
     // Helper function to clear validation errors for a specific field
     $scope.clearValidationError = function(fieldName) {
@@ -140,10 +146,6 @@
       $scope.validateQuantityRange();
     };
 
-    $scope.clearMonthsOfHistory = function() {
-      $scope.monthsOfHistory = null;
-      $scope.clearValidationError('monthsOfHistory');
-    };
 
     $scope.validateBidAmount = function(value, type) {
       if (!value || value === '') {
@@ -237,27 +239,6 @@
       return true;
     };
 
-    $scope.validateMonthsOfHistory = function() {
-      if (!$scope.monthsOfHistory) {
-        if ($scope.startDate || $scope.endDate) {
-          $scope.validationErrors.monthsOfHistory = '';
-          return true;
-        } else {
-          $scope.validationErrors.monthsOfHistory = 'Enter valid months of bid history value.';
-          return false;
-        }
-      }
-
-      const months = parseInt($scope.monthsOfHistory);   
-      
-      if (isNaN(months) || months < 1 || months > 120) {
-        $scope.validationErrors.monthsOfHistory = 'Please enter a valid number of months (1-120).';
-        return false;
-      }
-
-      $scope.validationErrors.monthsOfHistory = '';
-      return true;
-    };
 
     $scope.validateDateRange = function() {
       const today = new Date();
@@ -266,31 +247,34 @@
       let hasError = false;
       let errorMessage = '';
 
-      if ($scope.startDate) {
+      if ($scope.startDate && $scope.endDate) {
       const startDate = parseDateWithoutTimezone($scope.startDate);
-        
+      const endDate = parseDateWithoutTimezone($scope.endDate);
+        if (startDate > endDate) {
+          hasError = true;
+          errorMessage = 'Start date cannot be later than end date.';
+        }
+        else if (startDate < pastLimit || startDate > today) {
+          hasError = true;
+          errorMessage = `Start date must be within the last 10 years (after ${pastLimit.toLocaleDateString()}).`;
+        }
+        else if (endDate < pastLimit || endDate > today) {
+          hasError = true;
+          errorMessage = `End date must be within the last 10 years (after ${pastLimit.toLocaleDateString()}).`;
+        }
+      }
+      else if ($scope.startDate) {
+        const startDate = parseDateWithoutTimezone($scope.startDate);
         if (startDate < pastLimit || startDate > today) {
           hasError = true;
           errorMessage = `Start date must be within the last 10 years (after ${pastLimit.toLocaleDateString()}).`;
         }
       }
-
-      if ($scope.endDate) {
-      const endDate = parseDateWithoutTimezone($scope.endDate);
-
+      else if ($scope.endDate) {
+        const endDate = parseDateWithoutTimezone($scope.endDate);
         if (endDate < pastLimit || endDate > today) {
           hasError = true;
           errorMessage = `End date must be within the last 10 years (after ${pastLimit.toLocaleDateString()}).`;
-        }
-      }
-
-      if ($scope.startDate && $scope.endDate && !hasError) {
-        const startDate = parseDateWithoutTimezone($scope.startDate);
-        const endDate = parseDateWithoutTimezone($scope.endDate);
-
-        if (startDate > endDate) {
-          hasError = true;
-          errorMessage = 'Start date cannot be later than end date.';
         }
       }
 
@@ -331,7 +315,6 @@
       if (!validateQuantity($scope.selectedMaxQuantity, 'Max')) isValid = false;
       if (!validateQuantityRange()) isValid = false;
 
-      if (!validateMonthsOfHistory()) isValid = false;
 
       if (!validateDateRange()) isValid = false;
 
@@ -346,7 +329,6 @@
     function validateBidAmountRange() { return $scope.validateBidAmountRange(); }
     function validateQuantity(value, type) { return $scope.validateQuantity(value, type); }
     function validateQuantityRange() { return $scope.validateQuantityRange(); }
-    function validateMonthsOfHistory() { return $scope.validateMonthsOfHistory(); }
     function validateDateRange() { return $scope.validateDateRange(); }
     function validateRegionSelection() { return $scope.validateRegionSelection(); }
 
@@ -380,7 +362,7 @@
       'District 5 (Central Florida)': ['11 - LAKE', '18 - SUMTER', '36 - MARION', '70 - BREVARD', '73 - FLAGLER', '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA'],
       'District 6 (South Florida)': ['87 - MIAMI-DADE', '90 - MONROE'],
       'District 7 (West Central Florida)': ['02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS'],
-      'Turnpike ': ['TURNPIKE']
+      'District 8 (Turnpike)': ['TURNPIKE']
     };
     $scope.marketAreaToCountiesMap = {
       'Area 01': ['BAY', 'ESCAMBIA', 'OKALOOSA', 'SANTA ROSA', 'WALTON'],
@@ -411,12 +393,14 @@
       $scope.selectedPayItemNumber = null;
       $scope.selectedMinQuantity = null;
       $scope.selectedMaxQuantity = null;
-      $scope.monthsOfHistory = 36;
+      const todayDate = new Date();
+      const startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 36);
+      $scope.endDate = todayDate.toISOString().split('T')[0];
+      $scope.startDate = startDate.toISOString().split('T')[0];
       $scope.selectedMinBidAmount = null;
       $scope.selectedMaxBidAmount = null;
       $scope.selectedBidStatus = 'FMV';
-      $scope.startDate = null;
-      $scope.endDate = null;
       $scope.items = [];
       $scope.showSuggestions = false;
       $scope.isSearching = false;
@@ -426,11 +410,12 @@
       $scope.trendAnalysisData.trendTimeGrouping = 'year';
       $scope.trendData = [];
       $scope.trendWarning = '';
+      $scope.dataAgeWarning = '';
       if ($scope.trendChartInstance) {
         $scope.trendChartInstance.destroy();
         $scope.trendChartInstance = null;
       }
-      $scope.validationErrors = { bidAmountMin: '', bidAmountMax: '', bidAmountRange: '', quantityMin: '', quantityMax: '', quantityRange: '', monthsOfHistory: '', dateRange: '', regionSelection: '' };
+      $scope.validationErrors = { bidAmountMin: '', bidAmountMax: '', bidAmountRange: '', quantityMin: '', quantityMax: '', quantityRange: '', dateRange: '', regionSelection: '' };
     };
     $scope.recalculateWeightedAverages = function () {
       if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) {
@@ -526,13 +511,8 @@
         alert('Please correct the validation errors before searching.');
         return;
       }
-      const months = $scope.monthsOfHistory;
-      if (!months && !$scope.startDate && !$scope.endDate) {
-        alert('Please enter a valid Months of Bid History between 1 and 120, or provide a Letting Date Range.');
-        return;
-      }
-      if (months && (months < 1 || months > 120)) {
-        alert('Please enter a valid Months of Bid History between 1 and 120.');
+      if (!$scope.startDate || !$scope.endDate) {
+        alert('Please provide a Letting Date Range.');
         return;
       }
       $scope.customQuantityData.userQuantity = null;
@@ -564,7 +544,7 @@
           if (region === 'District 5 (Central Florida)') return 'District 5';
           if (region === 'District 6 (South Florida)') return 'District 6';
           if (region === 'District 7 (West Central Florida)') return 'District 7';
-          if (region === 'Turnpike ') return 'Turnpike';
+              if (region === 'District 8 (Turnpike)') return 'Turnpike';
           return region;
         });
       }
@@ -573,7 +553,7 @@
         .get('/UnitPriceSearch/GetPayItemDetails', {
           params: {
             number: $scope.selectedPayItemNumber,
-            months: $scope.monthsOfHistory || ($scope.startDate || $scope.endDate ? null : 36),
+            months: null,
             contractWorkType:
               Array.isArray($scope.selectedWorkTypeCodes) &&
               $scope.selectedWorkTypeCodes.length
@@ -681,6 +661,9 @@
           });
           
           $scope.trendData = processTrendData();
+          
+          $scope.checkDataAge();
+          
           if (responseSize > maxSize) {
             $scope.isLargeDataset = true;
             $scope.largeDatasetMessage = `The dataset is too large (${(
@@ -708,7 +691,6 @@
         $scope.reverseSort = false;
       }
     };
-    // Custom sorting function to handle filtered columns
     $scope.customSort = function (item) {
       if (!$scope.sortColumn) return 0;
       let value = item[$scope.sortColumn];
@@ -804,6 +786,8 @@
         let rawList = [];
         if ($scope.regionType === 'market') {
           rawList = $scope.marketAreaToCountiesMap[region] || [];
+        } else if ($scope.regionType === 'district') {
+          rawList = $scope.districtCountyMap[region] || [];
         } else if ($scope.regionType === 'county') {
           rawList = [region];
         }
@@ -811,13 +795,11 @@
           const cleaned = c.includes(' - ')
             ? c.split(' - ')[1].trim()
             : c.trim();
-          // For market areas, include all counties including TURNPIKE and DIST/ST-WIDE
           if ($scope.regionType === 'market') {
             if (!combined.includes(cleaned)) {
               combined.push(cleaned);
             }
           } else {
-            // For other region types, exclude TURNPIKE and DIST/ST-WIDE
             if (cleaned !== 'TURNPIKE' && cleaned !== 'DIST/ST-WIDE' && !combined.includes(cleaned)) {
               combined.push(cleaned);
             }
@@ -846,6 +828,7 @@
     $scope.selectAllRegionCounties = function () { $scope.relatedCounties.forEach((c) => (c.selected = true)); $scope.selectedRegionCounties = $scope.relatedCounties.map((c) => c.name); };
     $scope.clearAllRegionCounties = function () { $scope.relatedCounties.forEach((c) => (c.selected = false)); $scope.selectedRegionCounties = []; };
     $scope.removeCounty = function (countyName) { const idx = $scope.selectedRegionCounties.indexOf(countyName); if (idx > -1) $scope.selectedRegionCounties.splice(idx, 1); const match = $scope.relatedCounties.find((c) => c.name === countyName); if (match) match.selected = false; };
+    
     $scope.onRegionTypeChange();
     $scope.formatBidAmount = function (type) {
       if (type === 'min' && $scope.selectedMinBidAmount) {
@@ -977,6 +960,29 @@
         }
       });
       return latestDate;
+    };
+
+    $scope.checkDataAge = function() {
+      if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) {
+        $scope.dataAgeWarning = '';
+        return;
+      }
+      
+      const latestDate = $scope.getLatestBidDate();
+      if (!latestDate) {
+        $scope.dataAgeWarning = '';
+        return;
+      }
+      
+      const today = new Date();
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      
+      if (latestDate < oneYearAgo) {
+        $scope.dataAgeWarning = 'Last available bid data is greater than 1 year old.';
+      } else {
+        $scope.dataAgeWarning = '';
+      }
     };
     $scope.shouldHideGraphForLumpSum = function () {
       if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0)
@@ -1194,18 +1200,7 @@
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
               y += 15;
-              doc.text('Months of History: ' + ($scope.monthsOfHistory || '36'), 40, y);
-              y += 15;
               doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (NHCCI-based adjustment to 2024 Q4 levels)' : 'Disabled (using raw prices)'), 40, y);
-              y += 15;
-              doc.text(
-                  'Date Range: ' +
-                  formatDateForPDF($scope.startDate) +
-                  ' to ' +
-                  formatDateForPDF($scope.endDate),
-                  40,
-                  y
-              );
               y += 15;
               const countiesText = 'Selected Counties: ' + ($scope.selectedRegionCounties && $scope.selectedRegionCounties.length > 0 ? $scope.selectedRegionCounties.join(', ') : 'All');
               y = wrapText(doc, countiesText, 40, y, 500, 15);
@@ -1276,7 +1271,7 @@
               doc.setFontSize(9);
               doc.setTextColor(100);
               doc.text('For complete data, please use the CSV export option.', 40, pageHeight - 40);
-              doc.text('Report generated by DQE Application', 40, pageHeight - 25);
+              doc.text('Report generated by Design Quantities and Estimates', 40, pageHeight - 25);
               doc.save('UnitPriceSearch_Report.pdf');
               setTimeout(function () {
                   if (!$scope.$$phase) $scope.$apply();
@@ -1328,7 +1323,6 @@
       'selectedContractTypes',
       'selectedWorkTypeCodes',
       'selectedBidStatus',
-      'monthsOfHistory',
       'startDate',
       'endDate',
       'regionType',
@@ -1368,23 +1362,16 @@
       }
     });
 
-    $scope.$watch('monthsOfHistory', function(newVal, oldVal) {
-      if (newVal !== oldVal) {
-        $scope.validateMonthsOfHistory();
-      }
-    });
 
     $scope.$watch('startDate', function(newVal, oldVal) {
       if (newVal !== oldVal) {
         $scope.validateDateRange();
-        $scope.validateMonthsOfHistory(); 
       }
     });
 
     $scope.$watch('endDate', function(newVal, oldVal) {
       if (newVal !== oldVal) {
         $scope.validateDateRange();
-        $scope.validateMonthsOfHistory(); 
       }
     });
 
