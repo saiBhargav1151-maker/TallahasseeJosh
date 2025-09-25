@@ -2,7 +2,7 @@
     <!-- Input -->
     <div class="row input-section">
         <!-- Group 1: Item Filters -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div>
                 <h4 class="inflation-title">Item Filters</h4>
             </div>
@@ -96,7 +96,7 @@
                     <span>Click the Search Item button or press Enter to find pay items</span>
                 </div>
                 <!-- Selection reminder notification -->
-                <div ng-if="showSuggestions && items.length > 0 && !selectedPayItemNumber" class="selection-reminder">
+                <div ng-if="showSuggestions && items.length > 0 && !selectedPayItemNumber" class="search-reminder">
                     <i class="fas fa-hand-pointer"></i>
                     <span>Click on an item from the list below to select it</span>
                 </div>
@@ -227,49 +227,75 @@
             </div>
         </div>
         <!-- Group 2: Contract Filters -->
-        <div class="col-md-2">
+        <div class="col-md-3">
             <div class="section-header">
                 <h4 class="inflation-title">Contract Filters</h4>
             </div>
             <div class="form-group">
-                <label for="contractTypeSelect" class="modern-label">
+                <label class="sub-label">
                     <i class="fas fa-file-contract label-icon"></i>
-                    Contract Type <span class="text-muted months-hint" style="color: #000000; ">
-    (Default is Const Contract):</span>
-</label>
-                <div class="select-wrapper">
-                    <select id="contractTypeSelect"
-                            class="form-control modern-input"
-                            multiple
-                            ng-model="selectedContractTypes">
-                        <option value="ALL">-- All Contract Types --</option>
-                        <option ng-repeat="type in contractTypes"
-                                ng-value="type">
-                            {{ contractTypeMap[type] }}
-                        </option>
-                    </select>
+                    Contract Type <span class="text-muted months-hint" style="color: #000000; ">(Default is Const Contract):</span>
+                </label>
+                <div class="county-filter-compact">
+                    <div class="county-actions-compact">
+                        <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllContractTypes()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn-xs btn-outline-secondary" ng-click="clearAllContractTypes()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <span class="selected-count-compact">{{selectedContractTypes.length}} selected</span>
+                    </div>
+                    <div class="county-checkboxes-compact">
+                        <div class="county-checkbox-grid">
+                            <label class="county-checkbox-label-compact" ng-repeat="type in contractTypes">
+                                <input type="checkbox" ng-model="contractTypeSelected[type]" ng-change="toggleContractType(type)">
+                                <span class="county-name-compact">{{contractTypeMap[type]}}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="selected-counties-inline" ng-if="selectedContractTypes.length > 0">
+                        <span class="county-tag-compact" ng-repeat="type in selectedContractTypes">
+                            {{contractTypeMap[type]}}
+                            <button type="button" class="remove-tag-compact" ng-click="removeContractType(type); $event.stopPropagation()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>
                 </div>
-                <div class="form-text text-muted months-hint">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
             <div class="form-group">
-                <label for="contractWorkTypeSelect" class="modern-label">
+                <label class="sub-label">
                     <i class="fas fa-tools label-icon"></i>
-                    Work Type<span class="text-muted months-hint" style="color: #000000; ">
-    (Default All):</span>
+                    Work Type <span class="text-muted months-hint" style="color: #000000; ">(Default All):</span>
                 </label>
-                <div class="multiselect-wrapper">
-                    <select id="contractWorkTypeSelect"
-                            class="form-control modern-input "
-                            ng-model="selectedWorkTypeCodes"
-                            multiple>
-                        <option value="ALL">-- All Work Types --</option>
-                        <option ng-repeat="(code, label) in workTypeMap"
-                                ng-value="code">
-                            {{ label }}
-                        </option>
-                    </select>
+                <div class="county-filter-compact">
+                    <div class="county-actions-compact">
+                        <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllWorkTypes()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn-xs btn-outline-secondary" ng-click="clearAllWorkTypes()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <span class="selected-count-compact">{{selectedWorkTypeCodes.length}} selected</span>
+                    </div>
+                    <div class="county-checkboxes-compact">
+                        <div class="county-checkbox-grid">
+                            <label class="county-checkbox-label-compact" ng-repeat="(code, label) in workTypeMap">
+                                <input type="checkbox" ng-model="workTypeSelected[code]" ng-change="toggleWorkType(code)">
+                                <span class="county-name-compact">{{label}}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="selected-counties-inline" ng-if="selectedWorkTypeCodes.length > 0">
+                        <span class="county-tag-compact" ng-repeat="code in selectedWorkTypeCodes">
+                            {{workTypeMap[code]}}
+                            <button type="button" class="remove-tag-compact" ng-click="removeWorkType(code); $event.stopPropagation()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>
                 </div>
-                <div class="form-text text-muted months-hint">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
         </div>
         <!-- Group 3: Bid Filters -->
@@ -362,7 +388,7 @@
             </div>
             <div class="form-group" ng-show="regionType === 'district' || regionType === 'market' || regionType === 'county'">
                 <label class="sub-label">
-                    {{ regionType === 'district' ? 'Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
+                    {{ regionType === 'district' ? 'Managing Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
                     <span ng-if="regionType === 'market'" class="hover-card-trigger">
                         <i class="fas fa-info-circle info-icon"></i>
                         <div class="hover-card">
@@ -391,36 +417,35 @@
                         </div>
                     </span>
                 </label>
-                <div class="multi-select-wrapper">
-                    <div class="multi-select-dropdown" ng-click="toggleMultiSelectDropdown()">
-                        <div class="multi-select-trigger">
-                            <div class="multi-select-values">
-                                <span ng-if="!selectedRegions.length" class="multi-select-placeholder">
-                                    Select {{ regionType === 'district' ? 'Districts' : regionType === 'market' ? 'Market Areas' : 'Counties' }}
-                                </span>
-                                <span class="multi-select-tag" ng-repeat="region in selectedRegions">
-                                    {{region}}
-                                    <button type="button" class="remove-tag" ng-click="toggleRegionSelection(region)">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </span>
-                            </div>
-                            <i class="fas fa-chevron-down multi-select-arrow"></i>
-                        </div>
-                        <div class="multi-select-options" ng-class="{'show': isRegionDropdownOpen}">
-                            <div class="multi-select-option" ng-repeat="option in regionOptions"
-                                 ng-class="{'selected': selectedRegions.indexOf(option) !== -1}" ng-click="toggleRegionSelection(option)">
-                                <div class="multi-select-checkbox"></div>
-                                <span>{{option}}</span>
-                            </div>
+                <div class="county-filter-compact">
+                    <div class="county-actions-compact">
+                        <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllRegions()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn-xs btn-outline-secondary" ng-click="clearAllRegions()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <span class="selected-count-compact">{{selectedRegions.length}} selected</span>
+                    </div>
+                    <div class="county-checkboxes-compact">
+                        <div class="county-checkbox-grid">
+                            <label class="county-checkbox-label-compact" ng-repeat="option in regionOptions">
+                                <input type="checkbox" ng-model="regionSelected[option]" ng-change="toggleRegionSelection(option)">
+                                <span class="county-name-compact">{{option}}</span>
+                            </label>
                         </div>
                     </div>
-                    <select multiple class="form-control modern-select" style="display: none;"
-                            ng-model="selectedRegions" ng-change="onMultiRegionChange()" ng-options="opt for opt in regionOptions">
-                    </select>
+                    <div class="selected-counties-inline" ng-if="selectedRegions.length > 0">
+                        <span class="county-tag-compact" ng-repeat="region in selectedRegions">
+                            {{region}}
+                            <button type="button" class="remove-tag-compact" ng-click="removeRegion(region); $event.stopPropagation()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div class="form-group" ng-if="relatedCounties.length > 0 && (regionType === 'county' || regionType === 'market' || regionType === 'district')">
+            <div class="form-group" ng-if="relatedCounties.length > 0 && (regionType === 'market')">
                 <label class="sub-label">Counties:</label>
                 <div class="county-filter-compact">
                     <div class="county-actions-compact">
@@ -477,7 +502,8 @@
 
     <!-- Simple Data Info Display -->
     <div class="simple-data-info" ng-if="bidHistoryData && bidHistoryData.length > 0">
-        <span><strong>Bid Data Available through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
+        <span><strong>Bid Data for search criteria available through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
+        <span ng-if="dataAgeWarning" class="data-age-warning-inline" style="color: #856404; font-weight: bold;">{{ dataAgeWarning }}</span>
         <span><strong>NHCCI Index Load:</strong> Q4, 2024</span>
     </div>
 
@@ -641,14 +667,14 @@
                                 </div>
                             </div>
                             <!-- Data Age Warning -->
-                            <div ng-if="dataAgeWarning" class="data-age-warning">
+                            <!--<div ng-if="dataAgeWarning" class="data-age-warning">
                                 <div class="alert alert-warning" role="alert" style="background-color: #fff3cd; border-color: #ffeaa7; color: #856404;">
                                     <i class="fas fa-exclamation-triangle"></i>
                                     <span ng-bind="dataAgeWarning"></span>
                                 </div>
-                            </div>
+                            </div>-->
                             <!-- Contract Count Summary -->
-                            <div ng-if="showTrendChart && trendData && trendData.length > 0" class="trend-summary">
+                            <!--<div ng-if="showTrendChart && trendData && trendData.length > 0" class="trend-summary">
                                 <div class="alert alert-info" role="alert">
                                     <i class="fas fa-info-circle"></i>
                                     <strong>Contract Distribution:</strong> 
@@ -656,7 +682,7 @@
                                         {{formatTimeKey(period.timeKey)}}: {{period.uniqueContractCount}} contract{{period.uniqueContractCount !== 1 ? 's' : ''}}<span ng-if="!$last">, </span>
                                     </span>
                                 </div>
-                            </div>
+                            </div>-->
                             <div ng-if="showTrendChart" class="trend-chart-container">
                                 <div class="chart-loader" ng-show="isTrendChartLoading">
                                     <div class="loading-spinner">
@@ -990,7 +1016,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .form-group,
         .input-group,
         .quantity-input,
-        .county-name-compact,
         .multi-select-tag,
         .multi-select-trigger,
         .multi-select-option,
@@ -1273,7 +1298,9 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             align-items: center;
             gap: 6px;
             font-weight: 500;
-            width: max-content;
+            width: 100%;
+            max-width: 358px; /* Match date-inputs-compact container width (2 * 175px + 8px gap) */
+            box-sizing: border-box;
         }
 
             <!--.error-message div {
@@ -2703,6 +2730,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .btn-outline-primary {
             color: #1F4283;
             border-color: #1F4283;
+            font-size: var(--small-font-size);
         }
 
             .btn-outline-primary:hover {
@@ -2728,16 +2756,18 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         }
 
         .county-checkboxes-compact {
-            max-height: 80px;
+            max-height: 135px;
             overflow-y: auto;
             border: 1px solid #D6E1F5;
-            padding: 4px;
+            padding: 14px;
+            word-break: break-word;
         }
 
         .county-checkbox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 2px;
+            gap:4px;
+            line-height: 1.4;
         }
 
         .no-district-message-compact {
@@ -2771,9 +2801,9 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .county-name-compact {
             font-size: var(--small-font-size);
             color: #152C57;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.3;
         }
 
         .selected-counties-inline {
@@ -3561,25 +3591,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
 
             .search-reminder i {
                 color: #ff9800;
-                font-size: var(--small-font-size);
-            }
-
-        /* Selection reminder notification */
-        .selection-reminder {
-            background: #e8f5e8;
-            border: 1px solid #4caf50;
-            color: #2e7d32;
-            padding: 8px 12px;
-            margin-top: 6px;
-            font-size: var(--small-font-size);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
-        }
-  .selection-reminder i {
-                color: #4caf50;
                 font-size: var(--small-font-size);
             }
 

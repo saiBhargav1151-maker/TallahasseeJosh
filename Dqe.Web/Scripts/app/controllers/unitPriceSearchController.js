@@ -51,6 +51,11 @@
     $scope.customQuantityPrediction = null;
     $scope.isCalculatingPrediction = false;
     $scope.chartSettings = { loessBandwidth: 0.3 };  
+    
+    // Contract Type and Work Type checkbox tracking
+    $scope.contractTypeSelected = {};
+    $scope.workTypeSelected = {};
+    $scope.regionSelected = {};
 
     $scope.availableColumns = [
       { key: 'p', label: 'Contract', visible: true, sortable: true, selectionOrder: 1 },
@@ -254,27 +259,43 @@
           hasError = true;
           errorMessage = 'Start date cannot be later than end date.';
         }
-        else if (startDate < pastLimit || startDate > today) {
+        else if (startDate < pastLimit) {
           hasError = true;
           errorMessage = `Start date must be within the last 10 years (after ${pastLimit.toLocaleDateString()}).`;
         }
-        else if (endDate < pastLimit || endDate > today) {
+        else if (startDate > today) {
+          hasError = true;
+          errorMessage = 'Start date cannot be in the future.';
+        }
+        else if (endDate < pastLimit) {
           hasError = true;
           errorMessage = `End date must be within the last 10 years (after ${pastLimit.toLocaleDateString()}).`;
+        }
+        else if (endDate > today) {
+          hasError = true;
+          errorMessage = 'End date cannot be in the future.';
         }
       }
       else if ($scope.startDate) {
         const startDate = parseDateWithoutTimezone($scope.startDate);
-        if (startDate < pastLimit || startDate > today) {
+        if (startDate < pastLimit) {
           hasError = true;
           errorMessage = `Start date must be within the last 10 years (after ${pastLimit.toLocaleDateString()}).`;
+        }
+        else if (startDate > today) {
+          hasError = true;
+          errorMessage = 'Start date cannot be in the future.';
         }
       }
       else if ($scope.endDate) {
         const endDate = parseDateWithoutTimezone($scope.endDate);
-        if (endDate < pastLimit || endDate > today) {
+        if (endDate < pastLimit) {
           hasError = true;
           errorMessage = `End date must be within the last 10 years (after ${pastLimit.toLocaleDateString()}).`;
+        }
+        else if (endDate > today) {
+          hasError = true;
+          errorMessage = 'End date cannot be in the future.';
         }
       }
 
@@ -351,9 +372,17 @@
     $scope.contractTypes = Object.keys($scope.contractTypeMap);
     $timeout(function () {
       $scope.selectedContractTypes = ['CC'];
+      // Initialize checkbox states
+      $scope.contractTypes.forEach((type) => {
+        $scope.contractTypeSelected[type] = (type === 'CC');
+      });
     });
     $scope.workTypeCodes = Object.keys($scope.workTypeMap);
-    $scope.selectedWorkTypeCodes = [];
+    $scope.selectedWorkTypeCodes = [...$scope.workTypeCodes]; // Select all by default
+    // Initialize work type checkbox states
+    $scope.workTypeCodes.forEach((code) => {
+      $scope.workTypeSelected[code] = true; // All selected by default
+    });
     $scope.districtCountyMap = {
       'District 1 (Southwest Florida)': ['01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY', '09 - HIGHLANDS', '12 - LEE', '13 - MANATEE', '16 - POLK', '17 - SARASOTA', '91 - OKEECHOBEE'],
       'District 2 (Northeast Florida)': ['26 - ALACHUA', '27 - BAKER', '28 - BRADFORD', '29 - COLUMBIA', '30 - DIXIE', '31 - GILCHRIST', '32 - HAMILTON', '33 - LAFAYETTE', '34 - LEVY', '35 - MADISON', '37 - SUWANNEE', '38 - TAYLOR', '39 - UNION', '71 - CLAY', '72 - DUVAL', '74 - NASSAU', '76 - PUTNAM', '78 - ST JOHNS'],
@@ -405,7 +434,18 @@
       $scope.showSuggestions = false;
       $scope.isSearching = false;
       $scope.selectedContractTypes = ['CC'];
-      $scope.selectedWorkTypeCodes = [];
+      $scope.selectedWorkTypeCodes = [...$scope.workTypeCodes]; // Select all by default
+      // Reset checkbox states
+      $scope.contractTypes.forEach((type) => {
+        $scope.contractTypeSelected[type] = (type === 'CC');
+      });
+      $scope.workTypeCodes.forEach((code) => {
+        $scope.workTypeSelected[code] = true; // All selected by default
+      });
+      // Reset region checkbox states
+      $scope.regionOptions.forEach((option) => {
+        $scope.regionSelected[option] = false;
+      });
       $scope.showTrendChart = false;
       $scope.trendAnalysisData.trendTimeGrouping = 'year';
       $scope.trendData = [];
@@ -767,7 +807,7 @@
         Object.values($scope.marketAreaToCountiesMap).forEach((countyList) =>
           countyList.forEach((c) => {
             const cleaned = c.trim();
-            if (cleaned !== 'TURNPIKE' && cleaned !== 'DIST/ST-WIDE') {
+            if (cleaned !== 'TURNPIKE' ) {
               allCounties.add(cleaned);
             }
           })
@@ -778,8 +818,44 @@
         $scope.relatedCounties = [];
         $scope.selectedRegionCounties = null;
       }
+      // Initialize checkbox states
+      $scope.regionOptions.forEach((option) => {
+        $scope.regionSelected[option] = false;
+      });
     };
-    $scope.toggleRegionSelection = function (option) { const idx = $scope.selectedRegions.indexOf(option); if (idx > -1) { $scope.selectedRegions.splice(idx, 1); } else { $scope.selectedRegions.push(option); } $scope.onMultiRegionChange(); };
+    $scope.toggleRegionSelection = function (option) {
+      const idx = $scope.selectedRegions.indexOf(option);
+      if ($scope.regionSelected[option] && idx === -1) {
+        $scope.selectedRegions.push(option);
+      } else if (!$scope.regionSelected[option] && idx > -1) {
+        $scope.selectedRegions.splice(idx, 1);
+      }
+      $scope.onMultiRegionChange(); 
+    };
+    $scope.selectAllRegions = function () {
+      $scope.regionOptions.forEach((option) => {
+        $scope.regionSelected[option] = true;
+        if ($scope.selectedRegions.indexOf(option) === -1) {
+        $scope.selectedRegions.push(option);
+      }
+      });
+      $scope.onMultiRegionChange();
+    };
+    $scope.clearAllRegions = function () {
+      $scope.regionOptions.forEach((option) => {
+        $scope.regionSelected[option] = false;
+      });
+      $scope.selectedRegions = [];
+      $scope.onMultiRegionChange();
+    };
+    $scope.removeRegion = function (option) {
+      const idx = $scope.selectedRegions.indexOf(option);
+      if (idx > -1) {
+        $scope.selectedRegions.splice(idx, 1);
+        $scope.regionSelected[option] = false;
+        $scope.onMultiRegionChange();
+      }
+    };
     $scope.onMultiRegionChange = function () {
       let combined = [];
       $scope.selectedRegions.forEach((region) => {
@@ -828,6 +904,68 @@
     $scope.selectAllRegionCounties = function () { $scope.relatedCounties.forEach((c) => (c.selected = true)); $scope.selectedRegionCounties = $scope.relatedCounties.map((c) => c.name); };
     $scope.clearAllRegionCounties = function () { $scope.relatedCounties.forEach((c) => (c.selected = false)); $scope.selectedRegionCounties = []; };
     $scope.removeCounty = function (countyName) { const idx = $scope.selectedRegionCounties.indexOf(countyName); if (idx > -1) $scope.selectedRegionCounties.splice(idx, 1); const match = $scope.relatedCounties.find((c) => c.name === countyName); if (match) match.selected = false; };
+    
+    // Contract Type functions
+    $scope.toggleContractType = function (type) {
+      const idx = $scope.selectedContractTypes.indexOf(type);
+      if ($scope.contractTypeSelected[type] && idx === -1) {
+        $scope.selectedContractTypes.push(type);
+      } else if (!$scope.contractTypeSelected[type] && idx > -1) {
+        $scope.selectedContractTypes.splice(idx, 1);
+      }
+    };
+    $scope.selectAllContractTypes = function () {
+      $scope.contractTypes.forEach((type) => {
+        $scope.contractTypeSelected[type] = true;
+        if ($scope.selectedContractTypes.indexOf(type) === -1) {
+          $scope.selectedContractTypes.push(type);
+        }
+      });
+    };
+    $scope.clearAllContractTypes = function () {
+      $scope.contractTypes.forEach((type) => {
+        $scope.contractTypeSelected[type] = false;
+      });
+      $scope.selectedContractTypes = [];
+    };
+    $scope.removeContractType = function (type) {
+      const idx = $scope.selectedContractTypes.indexOf(type);
+      if (idx > -1) {
+        $scope.selectedContractTypes.splice(idx, 1);
+        $scope.contractTypeSelected[type] = false;
+      }
+    };
+    
+    // Work Type functions
+    $scope.toggleWorkType = function (code) {
+      const idx = $scope.selectedWorkTypeCodes.indexOf(code);
+      if ($scope.workTypeSelected[code] && idx === -1) {
+        $scope.selectedWorkTypeCodes.push(code);
+      } else if (!$scope.workTypeSelected[code] && idx > -1) {
+        $scope.selectedWorkTypeCodes.splice(idx, 1);
+      }
+    };
+    $scope.selectAllWorkTypes = function () {
+      $scope.workTypeCodes.forEach((code) => {
+        $scope.workTypeSelected[code] = true;
+        if ($scope.selectedWorkTypeCodes.indexOf(code) === -1) {
+          $scope.selectedWorkTypeCodes.push(code);
+        }
+      });
+    };
+    $scope.clearAllWorkTypes = function () {
+      $scope.workTypeCodes.forEach((code) => {
+        $scope.workTypeSelected[code] = false;
+      });
+      $scope.selectedWorkTypeCodes = [];
+    };
+    $scope.removeWorkType = function (code) {
+      const idx = $scope.selectedWorkTypeCodes.indexOf(code);
+      if (idx > -1) {
+        $scope.selectedWorkTypeCodes.splice(idx, 1);
+        $scope.workTypeSelected[code] = false;
+      }
+    };
     
     $scope.onRegionTypeChange();
     $scope.formatBidAmount = function (type) {
