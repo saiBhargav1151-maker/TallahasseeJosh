@@ -495,7 +495,7 @@ namespace Dqe.Web.Controllers
             var project = estimate.MyProjectVersion.MyProject;
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
-            if (project.CustodyOwner != currentDqeUser)
+            if (currentDqeUser.Role != DqeRole.Administrator && project.CustodyOwner != currentDqeUser)
             {
                 return new DqeResult(null, new ClientMessage{ Severity = ClientMessageSeverity.Error, text = "You must have custody to price the project."});
             }
@@ -510,7 +510,8 @@ namespace Dqe.Web.Controllers
             var l = BuildProjectItemGroups(estimate);
             var result = new
             {
-                canEstimate = true,
+                viewOnly = currentDqeUser.Role == DqeRole.Administrator && project.CustodyOwner != currentDqeUser,
+                canEstimate = project.CustodyOwner == currentDqeUser ? true : false,
                 isSystemSync = true,
                 estimateId = estimate.Id,
                 isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
@@ -883,6 +884,7 @@ namespace Dqe.Web.Controllers
             //        var wtProposal = letting.Proposals.First(i => i.ProposalNumber == p.ProposalNumber);
             //        if (!string.IsNullOrEmpty(wtProposal.PassToDss) && (wtProposal.PassToDss == "B" || wtProposal.PassToDss == "D"))
             //        {
+
             //            _webTransportService.UpdateProposalReadyForDssPass(wtProposal);
             //        }
             //    }
@@ -904,20 +906,34 @@ namespace Dqe.Web.Controllers
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
             var itemsCount = proposal.SectionGroups.Sum(i => i.ProposalItems.Count());
-
-            if (proposal.CurrentEstimator != currentDqeUser || itemsCount == 0)
+   
+            if ((currentDqeUser.Role != DqeRole.Administrator && proposal.CurrentEstimator != currentDqeUser) || itemsCount == 0)
             {
                 proposal.SetCurrentEstimator(currentDqeUser);
                 var wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
                 proposal.SynchronizeStructure(wtp, currentDqeUser, false);
             }
 
+
             var projects = proposal.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
             {
                 HasCustody = i.CustodyOwner == currentDqeUser,
                 HasWorkingEstimate = i.ProjectHasWorkingEstimateForUser(currentDqeUser)
             }).ToList();
-            if (projects.Any(i => !i.HasCustody) || projects.Any(i => !i.HasWorkingEstimate))
+
+            if (currentDqeUser.Role == DqeRole.Administrator)
+            {
+                projects = proposal.Projects.OrderBy(i => i.ProjectNumber).Select(ii => new
+                {
+                    HasCustody = ii.CustodyOwner == currentDqeUser,
+                    HasWorkingEstimate = ii.ProjectVersions.Any(pv => pv.ProjectEstimates.Any(e => e.IsWorkingEstimate))
+                }).ToList();
+                if (projects.Any(i => !i.HasWorkingEstimate))
+                {
+                    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "You a working estimate for each project to price the proposal." });
+                }
+            }
+            else if (projects.Any(i => !i.HasCustody) || projects.Any(i => !i.HasWorkingEstimate) )
             {
                 return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "You must have custody and a working estimate for each project to price the proposal." });
             }
@@ -933,7 +949,8 @@ namespace Dqe.Web.Controllers
             var l = BuildProposalItemGroups(proposal);
             var result = new
             {
-                canEstimate = true,
+                viewOnly = currentDqeUser.Role == DqeRole.Administrator && proposal.CurrentEstimator != currentDqeUser,
+                canEstimate = projects.Any(i => !i.HasCustody) ? false : true,
                 isSystemSync = true,
                 estimateId = proposal.Id,
                 isOfficial = proposal.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
@@ -1054,7 +1071,7 @@ namespace Dqe.Web.Controllers
                 //    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved - {0}", pricesPushed ? "Project Preconstruction fixed price items updated" : "Project Preconstruction fixed price items not updated because a project is not synchronized") }, JsonRequestBehavior.AllowGet);
                 //}
             }
-            return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved") }, JsonRequestBehavior.AllowGet);
+            return new DqeResult(null, JsonRequestBehavior.AllowGet);
         }
 
         private bool IsProjectSynced(long projectId)

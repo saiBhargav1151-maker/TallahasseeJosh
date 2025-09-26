@@ -91,12 +91,22 @@ namespace Dqe.Domain.Model
                 MyRecentProjectEstimate = null;
                 return;
             }
-            var versions = project.ProjectVersions.Where(i => i.VersionOwner == this).ToList();
+
+            List<ProjectVersion> versions = new List<ProjectVersion>();
+            if (Role == DqeRole.Administrator)
+            {
+                versions = project.ProjectVersions.ToList();
+            }
+            else
+            {
+                versions = project.ProjectVersions.Where(i => i.VersionOwner == this).ToList();
+            }
+            
             if (versions.Count <= 0) return;
             ProjectEstimate estimate = null;
 
             //check each version for a working estimate flag, get the latest occurance
-            foreach(var v in versions.OrderBy(v=> v.Version))
+            foreach (var v in versions.OrderBy(v=> v.Version))
             {
                 if(v.ProjectEstimates.Any(i => i.IsWorkingEstimate))
                 {

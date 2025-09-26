@@ -568,7 +568,7 @@ namespace Dqe.Web.Controllers
                     owner = i.CustodyOwner == null ? string.Empty : i.CustodyOwner.Name,
                     hasCustody = i.CustodyOwner == currentDqeUser,
                     label = DynamicHelper.GetSnapshotLabelString(i.GetCurrentSnapshotLabel()),
-                    hasWorkingEstimate = i.ProjectHasWorkingEstimateForUser(currentDqeUser)
+                    hasWorkingEstimate = i.ProjectVersions.Any(pv => pv.ProjectEstimates.Any(e => e.IsWorkingEstimate))
                 })
             },
                 new ClientMessage
@@ -593,30 +593,30 @@ namespace Dqe.Web.Controllers
             var project = _projectRepository.GetByProjectNumber(number);
 
             //Maintenance can only view maintenance proposal types and construction view construction types.
-            if(project.Proposals != null && project.Proposals.Any())
-            {
-                if (currentDqeUser.Role == DqeRole.MaintenanceEstimator  && !wtp.ProjectType.StartsWith("M"))
-                {
-                    return new DqeResult(null,
-                      new ClientMessage
-                      {
-                          Severity = ClientMessageSeverity.Error,
-                          text = string.Format("Authorization to Construction Type Projects required.")
-                      },
-                      JsonRequestBehavior.AllowGet);
+            //if(project?.Proposals != null && project.Proposals.Any())
+            //{
+            //    if (currentDqeUser.Role == DqeRole.MaintenanceEstimator  && !wtp.ProjectType.StartsWith("M"))
+            //    {
+            //        return new DqeResult(null,
+            //          new ClientMessage
+            //          {
+            //              Severity = ClientMessageSeverity.Error,
+            //              text = string.Format("Authorization to Construction Type Projects required.")
+            //          },
+            //          JsonRequestBehavior.AllowGet);
 
-                }
-                else if ((currentDqeUser.Role == DqeRole.Estimator) && wtp.ProjectType.StartsWith("M"))
-                {
-                    return new DqeResult(null,
-                       new ClientMessage
-                       {
-                           Severity = ClientMessageSeverity.Error,
-                           text = string.Format("Authorization to Maintenance Type Projects required.")
-                       },
-                       JsonRequestBehavior.AllowGet);
-                }
-            }
+            //    }
+            //    else if ((currentDqeUser.Role == DqeRole.Estimator) && wtp.ProjectType.StartsWith("M"))
+            //    {
+            //        return new DqeResult(null,
+            //           new ClientMessage
+            //           {
+            //               Severity = ClientMessageSeverity.Error,
+            //               text = string.Format("Authorization to Maintenance Type Projects required.")
+            //           },
+            //           JsonRequestBehavior.AllowGet);
+            //    }
+            //}
 
 
             //is project not in DQE?
@@ -1405,7 +1405,16 @@ namespace Dqe.Web.Controllers
         private ActionResult ResultStructureFromProjectSelection(Project project, DqeUser currentUser, string message = "")
         {
             var wtProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
-            var version = project.ProjectVersions.Where(i => i.VersionOwner == currentUser).FirstOrDefault(i => i.ProjectEstimates.FirstOrDefault(ii => ii.IsWorkingEstimate) != null);
+            Dqe.Domain.Model.ProjectVersion version = null;
+            if (User.IsInRole(DqeRole.Administrator.ToString()))
+            {
+                version = project.ProjectVersions.OrderByDescending(v => v.Version).FirstOrDefault(i => i.ProjectEstimates.FirstOrDefault(ii => ii.IsWorkingEstimate) != null);
+            }
+            else
+            {
+                version = project.ProjectVersions.Where(i => i.VersionOwner == currentUser).FirstOrDefault(i => i.ProjectEstimates.FirstOrDefault(ii => ii.IsWorkingEstimate) != null);
+            }
+
             ProjectEstimate snapshot = null;
             if (version != null)
             {
