@@ -65,7 +65,9 @@
                            class="form-control modern-input"
                            maxlength="180"
                            required
-                           data-original-title="A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system." />
+                           title="{{searchText || 'A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system.'}}"
+                           data-toggle="tooltip"
+                           data-placement="top" />
                     <button type="button"
                             class="clear-btn"
                             ng-click="clearSearchText()"
@@ -254,14 +256,14 @@
                             </label>
                         </div>
                     </div>
-                    <div class="selected-counties-inline" ng-if="selectedContractTypes.length > 0">
+                    <!--<div class="selected-counties-inline" ng-if="selectedContractTypes.length > 0">
                         <span class="county-tag-compact" ng-repeat="type in selectedContractTypes">
                             {{contractTypeMap[type]}}
                             <button type="button" class="remove-tag-compact" ng-click="removeContractType(type); $event.stopPropagation()">
                                 <i class="fas fa-times"></i>
                             </button>
                         </span>
-                    </div>
+                    </div>-->
                 </div>
             </div>
             <div class="form-group">
@@ -287,14 +289,14 @@
                             </label>
                         </div>
                     </div>
-                    <div class="selected-counties-inline" ng-if="selectedWorkTypeCodes.length > 0">
+                    <!--<div class="selected-counties-inline" ng-if="selectedWorkTypeCodes.length > 0">
                         <span class="county-tag-compact" ng-repeat="code in selectedWorkTypeCodes">
                             {{workTypeMap[code]}}
                             <button type="button" class="remove-tag-compact" ng-click="removeWorkType(code); $event.stopPropagation()">
                                 <i class="fas fa-times"></i>
                             </button>
                         </span>
-                    </div>
+                    </div>-->
                 </div>
             </div>
         </div>
@@ -435,14 +437,14 @@
                             </label>
                         </div>
                     </div>
-                    <div class="selected-counties-inline" ng-if="selectedRegions.length > 0">
+                    <!--<div class="selected-counties-inline" ng-if="selectedRegions.length > 0">
                         <span class="county-tag-compact" ng-repeat="region in selectedRegions">
                             {{region}}
                             <button type="button" class="remove-tag-compact" ng-click="removeRegion(region); $event.stopPropagation()">
                                 <i class="fas fa-times"></i>
                             </button>
                         </span>
-                    </div>
+                    </div>-->
                 </div>
             </div>
             <div class="form-group" ng-if="relatedCounties.length > 0 && (regionType === 'market')">
@@ -465,14 +467,14 @@
                             </label>
                         </div>
                     </div>
-                    <div class="selected-counties-inline" ng-if="selectedRegionCounties.length > 0">
+                    <!--<div class="selected-counties-inline" ng-if="selectedRegionCounties.length > 0">
                         <span class="county-tag-compact" ng-repeat="county in selectedRegionCounties">
                             {{county}}
                             <button type="button" class="remove-tag-compact" ng-click="removeCounty(county); $event.stopPropagation()">
                                 <i class="fas fa-times"></i>
                             </button>
                         </span>
-                    </div>
+                    </div>-->
                 </div>
             </div>
             <!-- Region Selection Validation Error - Moved outside conditional block -->
@@ -504,7 +506,7 @@
     <div class="simple-data-info" ng-if="bidHistoryData && bidHistoryData.length > 0">
         <span><strong>Bid Data for search criteria available through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
         <span ng-if="dataAgeWarning" class="data-age-warning-inline" style="color: #856404; font-weight: bold;">{{ dataAgeWarning }}</span>
-        <span><strong>NHCCI Index Load:</strong> Q4, 2024</span>
+        <span><strong>NHCCI Index Calendar Year Load:</strong> Q4, 2024</span>
     </div>
 
     <!-- Large Dataset Warning -->
@@ -1038,7 +1040,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .modern-panel {
             background: #ffffff;
             border: 2px solid #1F4283;
-            padding: 25px;
+            padding: 12px;
             position: relative;
         }
 
@@ -1655,28 +1657,47 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             background: #ffffff;
             max-width: 100%;
+            /* Cross-browser scrollbar optimization */
+            scrollbar-width: thin;
+            scrollbar-color: #1F4283 #f8f9fa;
+            /* Smooth scrolling for better UX */
+            scroll-behavior: smooth;
+            /* Hardware acceleration for performance */
+            transform: translateZ(0);
+            will-change: scroll-position;
         }
 
-            /* Scrollbar */
+            /* Enhanced Scrollbar for Better UX */
             .table-wrapper::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
+                width: 12px;
+                height: 12px;
             }
 
             .table-wrapper::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 5px;
+                background: #f8f9fa;
+                border-radius: 6px;
+                border: 1px solid #e9ecef;
             }
 
             .table-wrapper::-webkit-scrollbar-thumb {
-                background: #1F4283;
-                border-radius: 5px;
-                border: 1px solid #f1f1f1;
+                background: linear-gradient(180deg, #1F4283 0%, #152C57 100%);
+                border-radius: 6px;
+                border: 1px solid #f8f9fa;
+                transition: background 0.2s ease;
             }
 
-                .table-wrapper::-webkit-scrollbar-thumb:hover {
-                    background: #152C57;
-                }
+            .table-wrapper::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(180deg, #152C57 0%, #0B172D 100%);
+                box-shadow: 0 2px 4px rgba(31, 66, 131, 0.3);
+            }
+
+            .table-wrapper::-webkit-scrollbar-thumb:active {
+                background: #0B172D;
+            }
+
+            .table-wrapper::-webkit-scrollbar-corner {
+                background: #f8f9fa;
+            }
 
         /* Sortable headers */
         .bid-table th.sortable {
@@ -1763,27 +1784,46 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             max-width: 100%;
             border: 1px solid #e1e5e9;
             margin-top: 10px;
+            /* Cross-browser scrollbar optimization */
+            scrollbar-width: thin;
+            scrollbar-color: #1F4283 #f8f9fa;
+            /* Smooth scrolling for better UX */
+            scroll-behavior: smooth;
+            /* Hardware acceleration for performance */
+            transform: translateZ(0);
+            will-change: scroll-position;
         }
 
             .table-wrapper::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
+                width: 12px;
+                height: 12px;
             }
 
             .table-wrapper::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 5px;
+                background: #f8f9fa;
+                border-radius: 6px;
+                border: 1px solid #e9ecef;
             }
 
             .table-wrapper::-webkit-scrollbar-thumb {
-                background: #1F4283;
-                border-radius: 5px;
-                border: 1px solid #f1f1f1;
+                background: linear-gradient(180deg, #1F4283 0%, #152C57 100%);
+                border-radius: 6px;
+                border: 1px solid #f8f9fa;
+                transition: background 0.2s ease;
             }
 
-                .table-wrapper::-webkit-scrollbar-thumb:hover {
-                    background: #152C57;
-                }
+            .table-wrapper::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(180deg, #152C57 0%, #0B172D 100%);
+                box-shadow: 0 2px 4px rgba(31, 66, 131, 0.3);
+            }
+
+            .table-wrapper::-webkit-scrollbar-thumb:active {
+                background: #0B172D;
+            }
+
+            .table-wrapper::-webkit-scrollbar-corner {
+                background: #f8f9fa;
+            }
 
         .column-selector {
             background: #ffffff;
@@ -3146,6 +3186,43 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 background: #002244;
             }
 
+        #payItemInput[title] {
+            position: relative;
+        }
+
+        #payItemInput[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1F4283;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 300px;
+            word-wrap: break-word;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        #payItemInput[title]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1F4283;
+            z-index: 1000;
+            margin-bottom: -5px;
+        }
+
         .filter-container {
             background: white;
             border-radius: 12px;
@@ -3208,7 +3285,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             justify-content: center;
             align-items: flex-start;
             text-align: center;
-            z-index: 1000; /* Must be higher than anything else */
+            z-index: 1000; 
             pointer-events: none;
             padding-top: 20px;
         }

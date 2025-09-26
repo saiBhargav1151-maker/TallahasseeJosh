@@ -391,7 +391,7 @@
       'District 5 (Central Florida)': ['11 - LAKE', '18 - SUMTER', '36 - MARION', '70 - BREVARD', '73 - FLAGLER', '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA'],
       'District 6 (South Florida)': ['87 - MIAMI-DADE', '90 - MONROE'],
       'District 7 (West Central Florida)': ['02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS'],
-      'District 8 (Turnpike)': ['TURNPIKE']
+        'District 8 (Turnpike)': ['TURNPIKE']
     };
     $scope.marketAreaToCountiesMap = {
       'Area 01': ['BAY', 'ESCAMBIA', 'OKALOOSA', 'SANTA ROSA', 'WALTON'],
@@ -799,9 +799,7 @@
             const cleaned = c.includes(' - ')
               ? c.split(' - ')[1].trim()
               : c.trim();
-            if (cleaned !== 'TURNPIKE' && cleaned !== 'DIST/ST-WIDE') {
             allCounties.add(cleaned);
-            }
           })
         );
         Object.values($scope.marketAreaToCountiesMap).forEach((countyList) =>
@@ -876,7 +874,7 @@
               combined.push(cleaned);
             }
           } else {
-            if (cleaned !== 'TURNPIKE' && cleaned !== 'DIST/ST-WIDE' && !combined.includes(cleaned)) {
+            if (!combined.includes(cleaned)) {
               combined.push(cleaned);
             }
           }
