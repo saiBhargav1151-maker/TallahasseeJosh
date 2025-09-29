@@ -126,6 +126,17 @@ namespace Dqe.Infrastructure.Repositories.Custom
             var lsdbDisjunction = new Disjunction();
             lsdbDisjunction.Add(Restrictions.Where(() => project.ProjectNumber == string.Format("{0}LS", number)));
             lsdbDisjunction.Add(Restrictions.Where(() => project.ProjectNumber == string.Format("{0}DB", number)));
+
+            if (owner.Role == DqeRole.Administrator)
+            {
+                return Session
+                .QueryOver(() => project)
+                .JoinQueryOver(() => project.ProjectVersions, () => projectVersion)
+                .JoinQueryOver(() => projectVersion.ProjectEstimates, () => projectEstimate)
+                .Where(lsdbDisjunction)
+                .Where(() => projectEstimate.IsWorkingEstimate)
+                .SingleOrDefault();
+            }
             return Session
                 .QueryOver(() => project)
                 .JoinQueryOver(() => project.ProjectVersions, () => projectVersion)

@@ -489,27 +489,27 @@ namespace Dqe.Web.Controllers
         {
 
             //Maintenance can only view maintenance proposal types and construction view construction types.
-            if ((currentDqeUser.Role == DqeRole.MaintenanceEstimator || currentDqeUser.Role == DqeRole.MaintenanceDistrictAdmin) && !prop.ContractType.StartsWith("M"))
-            {
-                return new DqeResult(null,
-                  new ClientMessage
-                  {
-                      Severity = ClientMessageSeverity.Error,
-                      text = string.Format("This proposal is authorized as a Construction Contract Type")
-                  },
-                  JsonRequestBehavior.AllowGet);
+            //if ((currentDqeUser.Role == DqeRole.MaintenanceEstimator || currentDqeUser.Role == DqeRole.MaintenanceDistrictAdmin) && !prop.ContractType.StartsWith("M"))
+            //{
+            //    return new DqeResult(null,
+            //      new ClientMessage
+            //      {
+            //          Severity = ClientMessageSeverity.Error,
+            //          text = string.Format("This proposal is authorized as a Construction Contract Type")
+            //      },
+            //      JsonRequestBehavior.AllowGet);
 
-            }
-            else if ((currentDqeUser.Role == DqeRole.Estimator) && prop.ContractType.StartsWith("M"))
-            {
-                return new DqeResult(null,
-                   new ClientMessage
-                   {
-                       Severity = ClientMessageSeverity.Error,
-                       text = string.Format("This proposal is authorized as a Maintenance Contract Type")
-                   },
-                   JsonRequestBehavior.AllowGet);
-            }
+            //}
+            //else if ((currentDqeUser.Role == DqeRole.Estimator) && prop.ContractType.StartsWith("M"))
+            //{
+            //    return new DqeResult(null,
+            //       new ClientMessage
+            //       {
+            //           Severity = ClientMessageSeverity.Error,
+            //           text = string.Format("This proposal is authorized as a Maintenance Contract Type")
+            //       },
+            //       JsonRequestBehavior.AllowGet);
+            //}
             var wtp = _webTransportService.GetProposal(prop.ProposalNumber);
 
             var nextSnapshot = prop.GetNextSnapshotLabel();

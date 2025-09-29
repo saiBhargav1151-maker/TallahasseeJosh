@@ -430,8 +430,10 @@ namespace Dqe.Domain.Model
                                 Set = itemSet,
                                 Member = itemMember,
                                 //Total = memberItems.Sum(i => i.ProjectItems.Sum(ii => ii.Quantity * ii.Price))
-
-                                Total = memberItems.Sum(i => i.GetEstimatorProjectItems(estimator).Sum(ii => Math.Round(ii.Quantity * ii.Price, 2, MidpointRounding.AwayFromZero)))
+                                //this is not pulling properly if co admin are viewing
+                                Total = estimator.Role == DqeRole.Administrator 
+                                ? memberItems.Sum(i => i.ProjectItems.Sum(ii => Math.Round(ii.Quantity * ii.Price, 2, MidpointRounding.AwayFromZero)))
+                                : memberItems.Sum(i => i.GetEstimatorProjectItems(estimator).Sum(ii => Math.Round(ii.Quantity * ii.Price, 2, MidpointRounding.AwayFromZero)))
                             };
                             cSet.ItemSets.Add(iSet);
                         }
