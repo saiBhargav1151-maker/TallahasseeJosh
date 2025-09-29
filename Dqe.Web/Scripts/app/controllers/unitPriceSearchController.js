@@ -66,9 +66,9 @@
       { key: 'CalculatedUnit', label: 'Units', visible: false, sortable: false, selectionOrder: 0 },
       { key: 'Quantity', label: 'Quantity', visible: true, sortable: true, selectionOrder: 4 },
       { key: 'b', label: 'Unit Price Bid', visible: true, sortable: true, selectionOrder: 5 },
-      { key: 'InflationAdjustedPrice', label: 'Adj. Unit Price', visible: true, sortable: true, selectionOrder: 6 },
+        { key: 'InflationAdjustedPrice', label: 'Inflation Adj. Unit Price', visible: true, sortable: true, selectionOrder: 6 },
       { key: 'IsOutlier', label: 'Outlier', visible: false, sortable: true, selectionOrder: 7 },
-      { key: 'PvBidTotal', label: 'Bid Amount', visible: true, sortable: true, selectionOrder: 8 },
+      { key: 'PvBidTotal', label: 'Contract Total Bid Amount', visible: true, sortable: true, selectionOrder: 8 },
       { key: 'd', label: 'District', visible: true, sortable: true, selectionOrder: 11 },
       { key: 'MarketArea', label: 'Market Area', visible: true, sortable: true, selectionOrder: 12 },
       { key: 'c', label: 'County', visible: true, sortable: true, selectionOrder: 13 },
@@ -610,8 +610,12 @@
               $scope.selectedContractTypes.length
                 ? $scope.selectedContractTypes
                 : null,
-            minRank: $scope.selectedMinQuantity || null,
-            maxRank: $scope.selectedMaxQuantity || Infinity,
+            minRank: $scope.selectedMinQuantity 
+              ? parseFloat($scope.selectedMinQuantity.toString().replace(/,/g, ''))
+              : null,
+            maxRank: $scope.selectedMaxQuantity 
+              ? parseFloat($scope.selectedMaxQuantity.toString().replace(/,/g, ''))
+              : null,
             projectNumber: $scope.searchProjectNumber || null,
             minBidAmount: $scope.selectedMinBidAmount
               ? parseFloat(
@@ -1166,7 +1170,7 @@
             'Inflation-Adjusted Unit Price',
             'Weighted Avg No Outliers',
             'Outlier',
-            'Bid Amount',
+            'Contract Total Bid Amount',
             'District',
             'Primary County',
             'Bidder Name',
@@ -1250,7 +1254,18 @@
         let encodedUri = encodeURI(csvContent);
         let link = document.createElement('a');
         link.setAttribute('href', encodedUri);
-        link.setAttribute('download', 'bid_history.csv');
+        
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '').substring(0, 4); 
+        // Get pay item number from the first item in the data, or use 'All' if no data
+        const payItemNumber = ($scope.bidHistoryData && $scope.bidHistoryData.length > 0) 
+          ? $scope.bidHistoryData[0].ri 
+          : 'All';
+        const cleanPayItemNumber = payItemNumber.replace(/[^0-9]/g, '');
+        const filename = `${cleanPayItemNumber}_${dateStr}_${timeStr}.csv`;
+        
+        link.setAttribute('download', filename);
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
@@ -1330,14 +1345,22 @@
               y += 20;
               doc.setFontSize(10);
               doc.setFont('helvetica', 'normal');
-              doc.text('Contract Number: ' + ($scope.searchProjectNumber || 'All'), 40, y);
-              y += 15;
+              
               doc.text('Pay Item: ' + ($scope.searchText || 'All'), 40, y);
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
               y += 15;
               doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (NHCCI-based adjustment to 2024 Q4 levels)' : 'Disabled (using raw prices)'), 40, y);
               y += 15;
+              //doc.text(
+              //    'Date Range: ' +
+              //    formatDateForPDF($scope.startDate) +
+              //    ' to ' +
+              //    formatDateForPDF($scope.endDate),
+              //    40,
+              //    y
+              //);
+              //y += 15;
               const countiesText = 'Selected Counties: ' + ($scope.selectedRegionCounties && $scope.selectedRegionCounties.length > 0 ? $scope.selectedRegionCounties.join(', ') : 'All');
               y = wrapText(doc, countiesText, 40, y, 500, 15);
               y += 10;
@@ -1351,8 +1374,7 @@
                   const stats = [
                       { label: 'Total Bids', value: $scope.chartStats.count || 0 },
                       { label: 'Total Contracts', value: $scope.chartStats.totalContracts || 0 },
-                      { label: 'Total Bid Amount', value: '$' + ($scope.chartStats.totalBidAmount || 0).toLocaleString() },
-                      { label: 'Total Quantity', value: ($scope.chartStats.totalQuantity || 0).toLocaleString() },
+                      
                       {
                           label: 'Average Quantity',
                           value: ($scope.chartStats.avgQty || 0).toLocaleString(undefined, {
@@ -1408,7 +1430,19 @@
               doc.setTextColor(100);
               doc.text('For complete data, please use the CSV export option.', 40, pageHeight - 40);
               doc.text('Report generated by Design Quantities and Estimates', 40, pageHeight - 25);
-              doc.save('UnitPriceSearch_Report.pdf');
+              
+              // Generate filename with pay item number, date, and time
+              const now = new Date();
+              const dateStr = now.toISOString().split('T')[0].replace(/-/g, ''); // YYYYMMDD format
+              const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '').substring(0, 4); // HHMM format
+              // Get pay item number from the first item in the data, or use 'All' if no data
+              const payItemNumber = ($scope.bidHistoryData && $scope.bidHistoryData.length > 0) 
+                ? $scope.bidHistoryData[0].ri 
+                : 'All';
+              const cleanPayItemNumber = payItemNumber.replace(/[^0-9]/g, '');
+              const filename = `${cleanPayItemNumber}_${dateStr}_${timeStr}.pdf`;
+              
+              doc.save(filename);
               setTimeout(function () {
                   if (!$scope.$$phase) $scope.$apply();
               }, 500);
@@ -2403,14 +2437,14 @@
               prices,
               quantityRange,
               adaptiveBandwidthUnfiltered,
-              500
+              1000
             );
             var ciFiltered = bootstrapCI(
               QuantityFiltered,
               PriceFiltered,
               quantityRangeFiltered,
               adaptiveBandwidthFiltered,
-              500
+              1000
             );
             var lowerUnfiltered = quantityRange
               .map(function (q, i) {
@@ -2501,7 +2535,7 @@
             ) {
               if (lowerData.length < 2 || upperData.length < 2)
                 return { lower: lowerData, upper: upperData };
-              var maxCIPoints = 30;
+              var maxCIPoints = 300;
               var reducePoints = function (data) {
                 if (data.length <= maxCIPoints) return data;
                 var step = Math.ceil(data.length / maxCIPoints);
@@ -2950,20 +2984,13 @@
               totalContracts: new Set(
                 $scope.bidHistoryData.map((item) => item.p)
               ).size,
-              totalBidAmount: $scope.bidHistoryData.reduce(
-                (sum, item) => sum + (item.PvBidTotal || 0),
-                0
-              ),
-              totalQuantity: $scope.bidHistoryData.reduce(
-                (sum, item) => sum + (item.Quantity || 0),
-                0
-              ),
+              
               count: $scope.bidHistoryData.length,
-              avgQty:
-                $scope.bidHistoryData.reduce(
-                  (sum, item) => sum + (item.Quantity || 0),
-                  0
-                ) / $scope.bidHistoryData.length,
+                avgQty: (() => {
+                  const winningBids = $scope.bidHistoryData.filter(item => item.BidStatus === 'W');
+                  if (winningBids.length === 0) return 0;
+                  return winningBids.reduce((sum, item) => sum + (item.Quantity || 0), 0) / winningBids.length;
+                })(),
               outlierCount: $scope.bidHistoryData.filter(
                 (item) => item.IsOutlier
               ).length,
@@ -3621,5 +3648,17 @@ angular
       } else {
         return '$' + value.toFixed(2);
       }
+    };
+  })
+  .filter('numberFormat', function () {
+    return function (input) {
+      if (input === null || input === undefined || isNaN(input)) {
+        return '0';
+      }
+      var value = parseFloat(input);
+      return value.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
     };
   });

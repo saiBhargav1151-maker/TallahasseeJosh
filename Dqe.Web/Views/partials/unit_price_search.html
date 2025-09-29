@@ -192,7 +192,7 @@
                     <div>
                         <label class="modern-label" for="minQuantity">Minimum:</label>
                         <input type="text" id="minQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMinQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" placeholder="Min quantity"
+                               step="0.1" placeholder="Min quantity"
                                maxlength="12"  inputmode="decimal"
                                pattern="[0-9,.]*"  onkeypress="return event.charCode === 0 || /[0-9,.]/.test(String.fromCharCode(event.charCode))"
                                oninput="this.value = this.value.replace(/[^0-9,.]/g, '')" />
@@ -201,7 +201,7 @@
                     <div>
                         <label class="modern-label" for="maxQuantity">Maximum:</label>
                         <input type="text" id="maxQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMaxQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" min="1" placeholder="Leave blank for max"
+                               step="0.1" placeholder="Leave blank for max"
                                maxlength="12"   inputmode="decimal"
                                pattern="[0-9,.]*" onkeypress="return event.charCode === 0 || /[0-9,.]/.test(String.fromCharCode(event.charCode))"
                                oninput="this.value = this.value.replace(/[^0-9,.]/g, '')"/>
@@ -611,14 +611,14 @@
                                     <div class="stat-label">Total Contracts</div>
                                     <div class="stat-value">{{ chartStats.totalContracts }}</div>
                                 </div>
-                                <div class="stat-card">
+                                <!--<div class="stat-card">
                                     <div class="stat-label">Total Amount</div>
                                     <div class="stat-value">{{ chartStats.totalBidAmount | smartCurrency }}</div>
-                                </div>
-                                <div class="stat-card">
+                                </div>-->
+                                <!--<div class="stat-card">
                                     <div class="stat-label">Total Quantity</div>
                                     <div class="stat-value">{{ chartStats.totalQuantity | number:2 }}</div>
-                                </div>
+                                </div>-->
                                 <div class="stat-card">
                                     <div class="stat-label">Average Quantity</div>
                                     <div class="stat-value">{{ chartStats.avgQty | number:2 }}</div>
@@ -906,7 +906,7 @@
                                             <span ng-if="column.key === 'Description'">{{ item.Description }}</span>
                                             <span ng-if="column.key === 'SupplementalDescription'">{{ item.SupplementalDescription }}</span>
                                             <span ng-if="column.key === 'CalculatedUnit'">{{ item.CalculatedUnit }}</span>
-                                            <span ng-if="column.key === 'Quantity'">{{ item.Quantity }}</span>
+                                            <span ng-if="column.key === 'Quantity'">{{ item.Quantity | numberFormat }}</span>
                                             <span ng-if="column.key === 'b'">
                                                 <span ng-if="item.CalculatedUnit === 'LS - Lump Sum'"
                                                       title="Calculated Unit Price: {{ item.b | smartCurrency }} ÷ {{ item.Quantity }} = {{ (item.b / item.Quantity) | smartCurrency }}">

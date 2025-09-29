@@ -176,7 +176,7 @@ namespace Dqe.Web.Controllers
                 if (months.HasValue && (months < 1 || months > 120))
                     return false;
                 var now = DateTime.Now;
-                var maxPastDate = now.AddYears(-10); // Only allow 10 years back
+                var maxPastDate = now.AddYears(-10); 
                 var maxFutureDate = now; 
 
                 if (startDate.HasValue && (startDate < maxPastDate || startDate > maxFutureDate))
@@ -188,19 +188,19 @@ namespace Dqe.Web.Controllers
                 if (startDate.HasValue && endDate.HasValue && startDate > endDate)
                     return false;
 
-                if (minBidAmount.HasValue && (minBidAmount < 0 || minBidAmount > 999999999))
+                if (minBidAmount.HasValue && (minBidAmount < 0 || minBidAmount > 9999999999))
                     return false;
 
-                if (maxBidAmount.HasValue && (maxBidAmount < 0 || maxBidAmount > 999999999))
+                if (maxBidAmount.HasValue && (maxBidAmount < 0 || maxBidAmount > 9999999999))
                     return false;
 
                 if (minBidAmount.HasValue && maxBidAmount.HasValue && minBidAmount > maxBidAmount)
                     return false;
 
-                if (minRank.HasValue && (minRank < 0 || minRank > 1000))
+                if (minRank.HasValue && (minRank < 0 || minRank > 999999999))
                     return false;
 
-                if (maxRank.HasValue && (maxRank < 0 || maxRank > 1000))
+                if (maxRank.HasValue && (maxRank < 0 || maxRank > 999999999))
                     return false;
 
                 if (minRank.HasValue && maxRank.HasValue && minRank > maxRank)
