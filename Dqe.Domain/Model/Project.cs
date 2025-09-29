@@ -131,6 +131,7 @@ namespace Dqe.Domain.Model
             if (account == null) throw new ArgumentNullException("account");
             if (account.Role != DqeRole.System 
                 && account.Role != DqeRole.Administrator 
+                && account.Role != DqeRole.AdminReadOnly
                 && account.Role != DqeRole.DistrictAdministrator 
                 && account.Role != DqeRole.Estimator
                 && account.Role != DqeRole.Coder

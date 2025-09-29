@@ -93,7 +93,7 @@ namespace Dqe.Domain.Model
             }
 
             List<ProjectVersion> versions = new List<ProjectVersion>();
-            if (Role == DqeRole.Administrator)
+            if (Role == DqeRole.Administrator || Role == DqeRole.AdminReadOnly)
             {
                 versions = project.ProjectVersions.ToList();
             }

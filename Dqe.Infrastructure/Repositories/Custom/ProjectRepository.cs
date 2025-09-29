@@ -127,7 +127,7 @@ namespace Dqe.Infrastructure.Repositories.Custom
             lsdbDisjunction.Add(Restrictions.Where(() => project.ProjectNumber == string.Format("{0}LS", number)));
             lsdbDisjunction.Add(Restrictions.Where(() => project.ProjectNumber == string.Format("{0}DB", number)));
 
-            if (owner.Role == DqeRole.Administrator)
+            if (owner.Role == DqeRole.AdminReadOnly || owner.Role == DqeRole.Administrator)
             {
                 return Session
                 .QueryOver(() => project)

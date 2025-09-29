@@ -16,7 +16,7 @@ using BidHistory = Dqe.Domain.Model.BidHistory;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new[] {DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder })]
+    [CustomAuthorize(Roles = new[] {DqeRole.Administrator, DqeRole.AdminReadOnly, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder })]
     public class EstimateController : Controller
     {
         private readonly IDqeUserRepository _dqeUserRepository;
@@ -495,11 +495,11 @@ namespace Dqe.Web.Controllers
             var project = estimate.MyProjectVersion.MyProject;
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
-            if (currentDqeUser.Role != DqeRole.Administrator && project.CustodyOwner != currentDqeUser)
+            if (currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && project.CustodyOwner != currentDqeUser)
             {
                 return new DqeResult(null, new ClientMessage{ Severity = ClientMessageSeverity.Error, text = "You must have custody to price the project."});
             }
-            if (currentDqeUser.Role != DqeRole.Administrator)
+            if (currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly)
             {
                 if (!currentDqeUser.IsInDqeDistrict(project.District) && !currentDqeUser.IsAuthorizedOnProject(project) && currentDqeUser.Role != DqeRole.Coder)
                 {
@@ -509,8 +509,8 @@ namespace Dqe.Web.Controllers
             var wtProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
             var l = BuildProjectItemGroups(estimate);
             var result = new
-            {
-                viewOnly = currentDqeUser.Role == DqeRole.Administrator && project.CustodyOwner != currentDqeUser,
+            { 
+                viewOnly = (currentDqeUser.Role == DqeRole.Administrator || currentDqeUser.Role == DqeRole.AdminReadOnly) && project.CustodyOwner != currentDqeUser,
                 canEstimate = project.CustodyOwner == currentDqeUser ? true : false,
                 isSystemSync = true,
                 estimateId = estimate.Id,
@@ -907,7 +907,7 @@ namespace Dqe.Web.Controllers
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
             var itemsCount = proposal.SectionGroups.Sum(i => i.ProposalItems.Count());
    
-            if ((currentDqeUser.Role != DqeRole.Administrator && proposal.CurrentEstimator != currentDqeUser) || itemsCount == 0)
+            if ((currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && proposal.CurrentEstimator != currentDqeUser) || itemsCount == 0)
             {
                 proposal.SetCurrentEstimator(currentDqeUser);
                 var wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
@@ -921,7 +921,7 @@ namespace Dqe.Web.Controllers
                 HasWorkingEstimate = i.ProjectHasWorkingEstimateForUser(currentDqeUser)
             }).ToList();
 
-            if (currentDqeUser.Role == DqeRole.Administrator)
+            if (currentDqeUser.Role == DqeRole.Administrator || currentDqeUser.Role == DqeRole.AdminReadOnly)
             {
                 projects = proposal.Projects.OrderBy(i => i.ProjectNumber).Select(ii => new
                 {
@@ -930,7 +930,7 @@ namespace Dqe.Web.Controllers
                 }).ToList();
                 if (projects.Any(i => !i.HasWorkingEstimate))
                 {
-                    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "You a working estimate for each project to price the proposal." });
+                    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "A working estimate for each project is required to price the proposal." });
                 }
             }
             else if (projects.Any(i => !i.HasCustody) || projects.Any(i => !i.HasWorkingEstimate) )
@@ -938,7 +938,7 @@ namespace Dqe.Web.Controllers
                 return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "You must have custody and a working estimate for each project to price the proposal." });
             }
 
-            if (currentDqeUser.Role != DqeRole.Administrator)
+            if (currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly)
             {
                 if (!proposal.Projects.All(i => currentDqeUser.IsInDqeDistrict(i.District)) && !proposal.Projects.All(currentDqeUser.IsAuthorizedOnProject))
                 {
@@ -949,7 +949,7 @@ namespace Dqe.Web.Controllers
             var l = BuildProposalItemGroups(proposal);
             var result = new
             {
-                viewOnly = currentDqeUser.Role == DqeRole.Administrator && proposal.CurrentEstimator != currentDqeUser,
+                viewOnly = (currentDqeUser.Role == DqeRole.Administrator || currentDqeUser.Role == DqeRole.AdminReadOnly) && proposal.CurrentEstimator != currentDqeUser,
                 canEstimate = projects.Any(i => !i.HasCustody) ? false : true,
                 isSystemSync = true,
                 estimateId = proposal.Id,

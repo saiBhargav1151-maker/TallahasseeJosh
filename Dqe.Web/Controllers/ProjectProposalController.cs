@@ -1406,7 +1406,7 @@ namespace Dqe.Web.Controllers
         {
             var wtProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
             Dqe.Domain.Model.ProjectVersion version = null;
-            if (User.IsInRole(DqeRole.Administrator.ToString()))
+            if (User.IsInRole(DqeRole.Administrator.ToString()) || User.IsInRole(DqeRole.AdminReadOnly.ToString()))
             {
                 version = project.ProjectVersions.OrderByDescending(v => v.Version).FirstOrDefault(i => i.ProjectEstimates.FirstOrDefault(ii => ii.IsWorkingEstimate) != null);
             }
