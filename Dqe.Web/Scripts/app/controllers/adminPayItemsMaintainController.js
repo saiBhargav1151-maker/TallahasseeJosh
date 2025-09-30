@@ -104,7 +104,7 @@
         $http.get('./PayItemStructureAdministration/GetProtectedStructureDetail', { params: { structureId: structure.id } }).success(function (result) {
             if (!containsDqeError(result)) {
                 structure = getDqeData(result);
-                //bug fix for null replacement items
+                //bug fix for null replacement items causing error when getting length on the payItemStructure.html page.MB.
                 if (structure.replacementItems == null || structure.replacementItems == undefined) {
                     structure.replacementItems = '';
                 }

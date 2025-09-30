@@ -239,15 +239,14 @@ namespace Dqe.Domain.Model
         {
             if (Enum.TryParse<DqeRole>(abbreviation, out DqeRole result))
             {
-                string tempstring = Enum.Parse(typeof(DqeRole), abbreviation, true).ToString();
-                return tempstring;
+                return Enum.Parse(typeof(DqeRole), abbreviation, true).ToString();
             }
             return string.Empty;
         }
 
       
         /// <summary>
-        /// TODO: THIS FUNCTION TAKES A LOT OF TIME TO RUN on dev. THIS SHOULD BE FIXED. MB.
+        /// THIS FUNCTION TAKES A LOT OF TIME TO RUN on dev. MB.
         /// </summary>
         /// <returns></returns>
         public override Transformers.DqeUser GetTransformer()
