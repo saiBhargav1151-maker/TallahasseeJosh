@@ -234,7 +234,7 @@
                 <h4 class="inflation-title">Contract Filters</h4>
             </div>
             <div class="form-group">
-                <label class="sub-label">
+                <label class="modern-label">
                     <i class="fas fa-file-contract label-icon"></i>
                     Contract Type <span class="text-muted months-hint" style="color: #000000; ">(Default is Const Contract):</span>
                 </label>
@@ -267,9 +267,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="sub-label">
+                <label class="modern-label">
                     <i class="fas fa-tools label-icon"></i>
-                    Work Type <span class="text-muted months-hint" style="color: #000000; ">(Default All):</span>
+                    Work Type <span class="text-muted months-hint" style="color: #000000; ">(Default is All):</span>
                 </label>
                 <div class="county-filter-compact">
                     <div class="county-actions-compact">
@@ -506,7 +506,7 @@
     <div class="simple-data-info" ng-if="bidHistoryData && bidHistoryData.length > 0">
         <span><strong>Bid Data for search criteria available through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
         <span ng-if="dataAgeWarning" class="data-age-warning-inline" style="color: #856404; font-weight: bold;">{{ dataAgeWarning }}</span>
-        <span><strong>NHCCI Index Calendar Year Load:</strong> Q4, 2024</span>
+        <span><strong>NHCCI Index Calendar Year Load:</strong> Q1, 2025</span>
     </div>
 
     <!-- Large Dataset Warning -->
@@ -562,7 +562,7 @@
                     <h5 class="inflation-title">NHCCI Inflation Adjustment - {{ useInflationAdjustedPrices ? 'Enabled' : 'Disabled' }}</h5>
                     <p class="inflation-description">
                         <span ng-if="useInflationAdjustedPrices">
-                            Charts and calculations are using inflation-adjusted prices (normalized to 2024 Q4 levels using NHCCI).
+                            Charts and calculations are using inflation-adjusted prices (normalized to 2025 Q1 levels using NHCCI).
                             This allows for more accurate price comparisons across different time periods.
                         </span>
                         <span ng-if="!useInflationAdjustedPrices">
@@ -716,7 +716,7 @@
                                                class="modern-input"
                                                ng-model="customQuantityData.userQuantity"
                                                placeholder="Enter quantity"
-                                               step="0.01"
+                                               step="0.15"
                                                maxlength="15" />
                                         <button class="btn btn-primary"
                                                 ng-click="calculateCustomQuantityStats()"
@@ -739,7 +739,7 @@
                                                        ng-touchend="onChartBandwidthChange()"
                                                        min="0.2"
                                                        max="0.8"
-                                                       step="0.1"
+                                                       step="0.05"
                                                        style="width: 150px;">
                                                 <span style="font-weight: bold; min-width: 40px;">{{chartSettings.loessBandwidth | number:2}}</span>
                                             </div>
@@ -2800,7 +2800,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             overflow-y: auto;
             border: 1px solid #D6E1F5;
             padding: 14px;
-            word-break: break-word;
         }
 
         .county-checkbox-grid {

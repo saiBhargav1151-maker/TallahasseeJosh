@@ -29,6 +29,7 @@ namespace Dqe.Web.Controllers
         /// <returns> JSON data
         [HttpGet]
         [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")]
+        [ValidateInput(true)]
         public ActionResult GetPayItemSuggestions(string input)
         {
             try
@@ -55,17 +56,16 @@ namespace Dqe.Web.Controllers
         /// <param name="number">Pay item number to fetch historical unit price data for.</param>
         /// <returns>JSON result
         [HttpGet]
+        [ValidateInput(true)]
         public ActionResult GetPayItemDetails(string number, List<string> contractType, int? months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, string projectNumber, decimal? minBidAmount, decimal? maxBidAmount, string[] district)
         {
             try
             {
-                // input validation
                 if (!ValidateBasicInputs(number, months, startDate, endDate, minBidAmount, maxBidAmount, minRank, maxRank))
                 {
                     return new HttpStatusCodeResult(400, "Invalid search parameters.");
                 }
 
-                // rate limiting
                 if (!CheckBasicRateLimit())
                 {
                     return new HttpStatusCodeResult(429, "Too many requests. Please try again later.");
@@ -209,6 +209,12 @@ namespace Dqe.Web.Controllers
                 if (!string.IsNullOrEmpty(number) && (number.Length > 50 || !System.Text.RegularExpressions.Regex.IsMatch(number, @"^[A-Za-z0-9\s\-\.]+$")))
                     return false;
 
+                if (!string.IsNullOrEmpty(number) && number.ToLowerInvariant().Contains("script"))
+                    return false;
+
+                if (!string.IsNullOrEmpty(number) && number.Contains("<"))
+                    return false;
+
                 return true;
             }
             catch
@@ -233,13 +239,11 @@ namespace Dqe.Web.Controllers
                     var lastRequest = (DateTime)HttpContext.Cache[cacheKey];
                     var timeDiff = currentTime - lastRequest;
 
-                    if (timeDiff.TotalSeconds < 5)
+                    if (timeDiff.TotalSeconds < 3)
                     {
                         return false;
                     }
                 }
-
-                // Update the rate limit cache
                 HttpContext.Cache.Insert(cacheKey, currentTime, null, DateTime.Now.AddMinutes(1), System.Web.Caching.Cache.NoSlidingExpiration);
 
                 return true;

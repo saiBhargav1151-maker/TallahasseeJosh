@@ -3048,10 +3048,15 @@
         return [];
       }
       const groupedData = {};
+      
       validData.forEach((item) => {
-        const lettingDate = new Date(
-          parseInt(item.l.replace(/\/Date\((\d+)\)\//, '$1'))
-        );
+        let lettingDate;
+        if (item.l && item.l.includes('/Date(')) {
+          const match = /\/Date\((\d+)\)\//.exec(item.l);
+          lettingDate = match ? new Date(parseInt(match[1])) : new Date();
+        } else {
+          lettingDate = new Date(item.l);
+        }
         let timeKey;
         switch ($scope.trendAnalysisData.trendTimeGrouping) {
           case 'year':
@@ -3069,6 +3074,7 @@
           default:
             timeKey = lettingDate.getFullYear();
         }
+        
         if (!groupedData[timeKey]) {
           groupedData[timeKey] = {
             quantities: [],
@@ -3086,6 +3092,7 @@
         groupedData[timeKey].count++;
         groupedData[timeKey].uniqueContracts.add(item.p);
       });
+      
       const trendData = Object.keys(groupedData).map((timeKey) => {
         const data = groupedData[timeKey];
         const weightedAvg =
@@ -3106,7 +3113,9 @@
         };
       });
       trendData.sort((a, b) => a.date - b.date);
+      
       const sparseIntervals = trendData.filter((item) => item.uniqueContractCount < 5);
+      
       if (sparseIntervals.length > 0) {
         const timeUnit =
           $scope.trendAnalysisData.trendTimeGrouping === 'year'

@@ -99,7 +99,8 @@ namespace Dqe.Web.Controllers
             { "2024 Q1", 3.191321352m },
             { "2024 Q2", 3.16074104m },
             { "2024 Q3", 3.360492989m },
-            { "2024 Q4", 3.232905682m }
+            { "2024 Q4", 3.232905682m },
+             { "2025 Q1", 3.166820847m }
         };
 
         /// <summary>
@@ -107,7 +108,7 @@ namespace Dqe.Web.Controllers
         /// </summary>
         public static string GetQuarterKey(DateTime date)
         {
-            int quarter = (date.Month - 1) / 3 + 1;  // Determine quarter from month
+            int quarter = (date.Month - 1) / 3 + 1;  
             return $"{date.Year} Q{quarter}";
         }
 
@@ -116,7 +117,7 @@ namespace Dqe.Web.Controllers
         /// </summary>
         public static decimal GetLatestIndex()
         {
-            return IndexByQuarter["2024 Q4"]; // Latest available as of 2024 Q4
+            return IndexByQuarter["2025 Q1"]; 
         }
 
         /// <summary>
@@ -133,22 +134,18 @@ namespace Dqe.Web.Controllers
                 
                 if (!IndexByQuarter.ContainsKey(quarterKey))
                 {
-                    // If quarter not found, return original price
                     return originalPrice;
                 }
 
                 decimal lettingDateIndex = IndexByQuarter[quarterKey];
                 decimal latestIndex = GetLatestIndex();
                 
-                // Calculate inflation factor: Latest Index / Letting Date Index
                 decimal inflationFactor = latestIndex / lettingDateIndex;
                 
-                // Calculate adjusted price: Original Price × Inflation Factor
                 return originalPrice * inflationFactor;
             }
             catch
             {
-                // Return original price if calculation fails
                 return originalPrice;
             }
         }
