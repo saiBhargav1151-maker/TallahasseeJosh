@@ -949,7 +949,7 @@ namespace Dqe.Web.Controllers
             var l = BuildProposalItemGroups(proposal);
             var result = new
             {
-                viewOnly = (currentDqeUser.Role == DqeRole.Administrator || currentDqeUser.Role == DqeRole.AdminReadOnly) && proposal.CurrentEstimator != currentDqeUser,
+                viewOnly = (currentDqeUser.Role == DqeRole.Administrator || currentDqeUser.Role == DqeRole.AdminReadOnly) && projects.Any(i => !i.HasCustody) ? true : false,
                 canEstimate = projects.Any(i => !i.HasCustody) ? false : true,
                 isSystemSync = true,
                 estimateId = proposal.Id,
