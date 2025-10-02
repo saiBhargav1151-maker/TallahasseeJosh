@@ -320,7 +320,13 @@ namespace Dqe.Domain.Model
             }
             else
             {
-                if (transformer.Role != DqeRole.DistrictAdministrator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.DistrictReviewer && transformer.Role != DqeRole.StateReviewer && transformer.Role != DqeRole.MaintenanceDistrictAdmin && transformer.Role != DqeRole.MaintenanceEstimator)
+                if (transformer.Role != DqeRole.DistrictAdministrator 
+                    && transformer.Role != DqeRole.Estimator 
+                    && transformer.Role != DqeRole.Estimator 
+                    && transformer.Role != DqeRole.DistrictReviewer 
+                    && transformer.Role != DqeRole.StateReviewer 
+                    && transformer.Role != DqeRole.MaintenanceDistrictAdmin 
+                    && transformer.Role != DqeRole.MaintenanceEstimator)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for district {1}.", transformer.Role, transformer.District));
                 }
