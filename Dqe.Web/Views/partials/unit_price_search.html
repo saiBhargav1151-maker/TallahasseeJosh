@@ -717,7 +717,9 @@
                                                ng-model="customQuantityData.userQuantity"
                                                placeholder="Enter quantity"
                                                step="0.15"
-                                               maxlength="15" />
+                                               maxlength="15" 
+                                               ng-keypress="($event.which === 13) && !(!customQuantityData.userQuantity || customQuantityData.userQuantity <= 0 || isCalculatingPrediction || !isUserQuantityInRange()) && calculateCustomQuantityStats()"
+                                               />
                                         <button class="btn btn-primary"
                                                 ng-click="calculateCustomQuantityStats()"
                                                 ng-disabled="!customQuantityData.userQuantity || customQuantityData.userQuantity <= 0 || isCalculatingPrediction || !isUserQuantityInRange()">
@@ -732,6 +734,7 @@
                                         </label>
                                         <div class="bandwidth-control">
                                             <div class="bandwidth-inputs" style="display: flex; align-items: center; gap: 10px;">
+                                                <span class="range-label">0.2</span>
                                                 <input type="range"
                                                        class="form-control bandwidth-slider"
                                                        ng-model="chartSettings.loessBandwidth"
@@ -741,6 +744,7 @@
                                                        max="0.8"
                                                        step="0.05"
                                                        style="width: 150px;">
+                                                <span class="range-label">0.8</span>
                                                 <span style="font-weight: bold; min-width: 40px;">{{chartSettings.loessBandwidth | number:2}}</span>
                                             </div>
                                             <small class="form-text text-muted">
@@ -966,7 +970,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
 "></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
     <style>
-        /* Global Font Consistency System */
         :root {
             --primary-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
             --monospace-font: 'Courier New', 'Consolas', 'Monaco', monospace;
@@ -997,7 +1000,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-family: var(--monospace-font);
         }
 
-        /* Unify font for all UI elements */
         .btn,
         .btn-xs,
         .btn-outline-primary,
@@ -1513,7 +1515,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 transition: all 0.2s ease;
             }
 
-            /* Sticky columns for Contract and Project Number */
             .bid-table th:nth-child(1),
             .bid-table th:nth-child(2) {
                 position: sticky;
@@ -1554,7 +1555,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 background: #D6E1F5;
             }
 
-            /* Column alignments */
             .bid-table td:nth-child(4),
             .bid-table td:nth-child(5),
             .bid-table td:nth-child(14),
@@ -1609,7 +1609,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     border-radius: 4px;
                 }
 
-            /* Work Type and Work Mix specific styling */
             .bid-table td:nth-child(20),
             .bid-table td:nth-child(21) {
                 white-space: normal !important;
@@ -1657,12 +1656,9 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             background: #ffffff;
             max-width: 100%;
-            /* Cross-browser scrollbar optimization */
             scrollbar-width: thin;
             scrollbar-color: #1F4283 #f8f9fa;
-            /* Smooth scrolling for better UX */
             scroll-behavior: smooth;
-            /* Hardware acceleration for performance */
             transform: translateZ(0);
             will-change: scroll-position;
         }
@@ -1699,7 +1695,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 background: #f8f9fa;
             }
 
-        /* Sortable headers */
         .bid-table th.sortable {
             cursor: pointer;
             user-select: none;
@@ -1784,12 +1779,9 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             max-width: 100%;
             border: 1px solid #e1e5e9;
             margin-top: 10px;
-            /* Cross-browser scrollbar optimization */
             scrollbar-width: thin;
             scrollbar-color: #1F4283 #f8f9fa;
-            /* Smooth scrolling for better UX */
             scroll-behavior: smooth;
-            /* Hardware acceleration for performance */
             transform: translateZ(0);
             will-change: scroll-position;
         }
@@ -1921,7 +1913,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-size: var(--small-font-size);
         }
 
-        /* Table controls styling */
         .table-controls {
             display: flex;
             align-items: center;
@@ -1952,7 +1943,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             border: 1px solid #e9ecef;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 1200px) {
             .column-grid {
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -1978,7 +1968,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: 11px;
             }
 
-                /* Table Column Formatting and Alignment */
                 .bid-table th,
                 .bid-table td {
                     padding: 8px 6px;
@@ -1987,7 +1976,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     font-family: var(--primary-font);
                 }
 
-                /* Right-justify numeric columns */
                 .bid-table .numeric-cell {
                     text-align: center !important;
                     font-family: var(--monospace-font);
@@ -1995,7 +1983,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     font-size: var(--small-font-size);
                 }
 
-                /* Center-justify location columns */
                 .bid-table .location-cell {
                     text-align: center !important;
                     font-weight: 500;
@@ -2004,20 +1991,15 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     font-size: var(--small-font-size);
                 }
 
-                /* Left-justify text columns */
                 .bid-table .text-cell {
                     text-align: center !important;
                     font-size: var(--small-font-size);
                 }
-
-                /* Currency and quantity formatting */
                 .bid-table .numeric-cell {
                     font-family: var(--monospace-font);
                     font-weight: 600;
                     color: #2c5aa0;
                 }
-
-                /* Date formatting */
                 .bid-table .date-cell {
                     text-align: center !important;
                     font-family: var(--monospace-font);
@@ -2025,21 +2007,18 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     color: #666;
                 }
 
-                /* Status and Type formatting */
                 .bid-table .status-cell {
                     text-align: center !important;
                     font-weight: 500;
                     font-size: var(--small-font-size);
                 }
 
-                /* Outlier formatting */
                 .bid-table .outlier-cell {
                     text-align: center !important;
                     font-weight: 600;
                     font-size: var(--small-font-size);
                 }
 
-            /* Responsive adjustments */
             @media (max-width: 1200px) {
                 .bid-table th,
                 .bid-table td {
@@ -2168,7 +2147,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .hover-card-trigger:hover .hover-card {
             display: block;
         }
-        /* Chart Section */
         .chart-section {
             background: #ffffff;
             padding: 24px;
@@ -2267,7 +2245,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        /* Loading States */
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -2291,7 +2268,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             border-radius: 15px;
         }
 
-        /* Large Dataset Warning */
         .large-dataset-warning {
             background: #fff3cd;
             border: 1px solid #ffeaa7;
@@ -2337,7 +2313,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: var(--base-font-size);
             }
 
-        /* NHCCI Inflation Information Section */
         .inflation-info-section {
             background: linear-gradient(135deg, #EAF0FA 0%, #B1C6EC 100%);
             border: 2px solid #1F4283;
@@ -2377,7 +2352,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             margin: 0;
         }
 
-        /* No Data Section */
         .no-data-section {
             text-align: center;
             padding: 60px 20px;
@@ -2410,7 +2384,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             line-height: 1.5;
         }
 
-        /* Results Section */
         .results-section {
             position: relative;
         }
@@ -2423,7 +2396,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             margin-top: 20px;
         }
 
-        /* Export Buttons */
         .export-buttons {
             display: flex;
             gap: 10px;
@@ -2471,7 +2443,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 transform: none;
             }
 
-        /* PDF Generation Loading */
         .pdf-loading {
             display: inline-flex;
             align-items: center;
@@ -2484,7 +2455,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 border-width: 2px;
             }
 
-        /* Summary Statistics Section */
         .stats-section {
             background: #EAF0FA;
             padding: 14px;
@@ -2595,7 +2565,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-family: var(--monospace-font);
             font-size: var(--small-font-size);
         }
-        /* Region Type Dropdown & Multi-Select */
         .region-type-section {
             margin-bottom: 18px;
             display: flex;
@@ -2705,7 +2674,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 color: #0B172D;
             }
 
-        /* District/County Filter Styles */
         .district-county-group-compact {
             background: #EAF0FA;
             border: 2px solid #B1C6EC;
@@ -2886,7 +2854,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 0 0 0.2rem rgba(31, 66, 131, 0.25);
         }
 
-        /* Quantity Filter */
         .quantity-filter {
             max-width: 400px;
             height: 130px;
@@ -2974,7 +2941,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-weight: 400;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .modern-panel {
                 padding: 25px;
@@ -3026,7 +2992,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             cursor: pointer;
         }
 
-        /* Trigger Box */
         .multi-select-trigger {
             width: 100%;
             padding: 12px 40px 12px 16px;
@@ -3085,7 +3050,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     opacity: 1;
                 }
 
-        /* Arrow Icon */
         .multi-select-arrow {
             color: #a0aec0;
             transition: all 0.2s ease;
@@ -3096,7 +3060,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             color: #003366;
         }
 
-        /* Dropdown Menu */
         .multi-select-options {
             position: absolute;
             top: 100%;
@@ -3121,7 +3084,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 transform: translateY(0);
             }
 
-        /* Dropdown Items */
         .multi-select-option {
             padding: 10px 16px;
             cursor: pointer;
@@ -3141,7 +3103,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-weight: 600;
             }
 
-        /* Checkbox Style */
         .multi-select-checkbox {
             width: 16px;
             height: 16px;
@@ -3167,7 +3128,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 transform: translate(-50%, -50%);
             }
 
-        /* Scrollbar Styling */
         .multi-select-options::-webkit-scrollbar {
             width: 6px;
         }
@@ -3263,7 +3223,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-weight: 500;
             }
 
-        /* Chart Stale Blurring Functionality */
         .results-section {
             transition: filter 0.3s ease;
             position: relative;
@@ -3375,7 +3334,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 margin-bottom: 0;
             }
 
-        /* Quantity Warning Styling */
         .quantity-warning {
             background: #fff3cd;
             border: 1px solid #ffeaa7;
@@ -3401,7 +3359,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 color: #856404;
             }
 
-        /* Trend Analysis Section - Using stats-section styling */
         .trend-controls {
             margin-bottom: 20px;
             padding: 15px;
@@ -3468,14 +3425,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-weight: 600;
                 font-size: var(--base-font-size);
             }
-        /* Responsive adjustments for trend section */
         @media (max-width: 768px) {
             .trend-controls .form-group {
                 max-width: 100%;
             }
         }
 
-        /* Toggle Switch Styles */
         .toggle-wrapper {
             display: flex;
             align-items: center;
@@ -3534,7 +3489,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-size: var(--base-font-size);
         }
 
-        /* Responsive adjustments for toggle switch */
         @media (max-width: 768px) {
             .toggle-switch {
                 width: 56px;
@@ -3598,7 +3552,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: var(--heading-font-size);
             }
         }
-        /* Character count notification */
         .character-notification {
             background: #e3f2fd;
             border: 1px solid #2196f3;
@@ -3650,7 +3603,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: var(--small-font-size);
             }
 
-        /* Search reminder notification */
         .search-reminder {
             background: #fff8e1;
             border: 1px solid #ffd54f;
@@ -3670,7 +3622,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: var(--small-font-size);
             }
 
-        /* Chart.js LOESS Bandwidth Controls */
         .chart-js-controls {
             background: #ffffff;
             border-radius: 8px;
@@ -3679,4 +3630,69 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 2px 8px rgba(31, 66, 131, 0.1);
             border: 1px solid #B1C6EC;
         }
+
+        .bandwidth-control {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .bandwidth-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bandwidth-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .bandwidth-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1f4283;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .bandwidth-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1f4283;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .bandwidth-slider:hover {
+            background: #ccc;
+        }
+
+        .bandwidth-slider::-webkit-slider-thumb:hover {
+            background: #0f2a5a;
+        }
+
+        .bandwidth-slider::-moz-range-thumb:hover {
+            background: #0f2a5a;
+        }
+
+        .range-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            min-width: 25px;
+            text-align: center;
+        }
+
     </style>
