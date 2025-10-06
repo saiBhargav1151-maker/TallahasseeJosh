@@ -110,14 +110,22 @@
                         <i class="fas fa-exclamation-circle"></i> Only letters, numbers, spaces, hyphens, and periods are allowed.
                     </div>
                 </div>
-                <ul class="suggestions-dropdown" ng-show="showSuggestions && items.length > 0">
+                <ul class="suggestions-dropdown" 
+                    ng-show="showSuggestions && items.length > 0"
+                    role="listbox"
+                    aria-label="Pay item search results">
                     <li class="suggestion-header">
                         <i class="fas fa-list"></i>
                         Search Results ({{ items.length }} items)
                     </li>
                     <li class="suggestion-item"
-                        ng-repeat="item in items"
-                        ng-click="selectPayItem(item)">
+                        ng-repeat="item in items track by $index"
+                        ng-click="selectPayItem(item)"
+                        ng-keydown="onSuggestionKeyDown($event, item, $index)"
+                        tabindex="0"
+                        role="option"
+                        aria-selected="{{ selectedSuggestionIndex === $index }}"
+                        ng-class="{ 'suggestion-item-focused': selectedSuggestionIndex === $index }">
                         <i class="fas fa-search suggestion-icon"></i>
                         <div class="suggestion-content">
                             <div class="suggestion-name">{{ item.Name }}</div>
@@ -349,19 +357,22 @@
             </div>
             <!-- Inflation Adjustment Toggle -->
             <div class="form-group">
-                <label class="modern-label">
+                <label class="modern-label" for="inflation-toggle">
                     <i class="fas fa-chart-line label-icon"></i>
                     Inflation Adjustment<span class="text-muted months-hint" style="color:#000000; display:inline;">(Enabled by default):</span>
                 </label>
                 <div class="toggle-wrapper">
-                    <label class="toggle-switch">
+                    <label class="toggle-switch" for="inflation-toggle">
                         <input type="checkbox"
+                               id="inflation-toggle"
                                ng-model="useInflationAdjustedPrices"
                                ng-change="onInflationToggleChange()"
-                               checked>
+                               ng-keydown="onInflationToggleKeyDown($event)"
+                               checked
+                               aria-describedby="inflation-help-text">
                         <span class="toggle-slider"></span>
                     </label>
-                    <span class="toggle-label">
+                    <span class="toggle-label" id="inflation-help-text">
                         {{ useInflationAdjustedPrices ? 'Use Inflation-Adjusted Prices' : 'Use Raw Prices' }}
                     </span>
                 </div>
@@ -1272,10 +1283,19 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             display: flex;
             align-items: center;
             gap: 8px;
+            outline: none;
         }
 
-            .suggestion-item:hover {
+            .suggestion-item:hover,
+            .suggestion-item-focused {
                 background: #EAF0FA;
+                border-left: 3px solid #1F4283;
+            }
+
+            .suggestion-item:focus {
+                background: #EAF0FA;
+                border-left: 3px solid #1F4283;
+                box-shadow: inset 0 0 0 1px #1F4283;
             }
 
             .suggestion-item:last-child {

@@ -50,7 +50,8 @@
     $scope.customQuantityData = { userQuantity: null };
     $scope.customQuantityPrediction = null;
     $scope.isCalculatingPrediction = false;
-    $scope.chartSettings = { loessBandwidth: 0.3 };  
+    $scope.chartSettings = { loessBandwidth: 0.3 };
+    $scope.selectedSuggestionIndex = -1; // For keyboard navigation
     
     // Contract Type and Work Type checkbox tracking
     $scope.contractTypeSelected = {};
@@ -1063,12 +1064,62 @@
     $scope.onSearchKeyPress = function (event) {
       if (event.keyCode === 13) {
         $scope.fetchPayItemSuggestions();
+      } else if (event.keyCode === 40) { 
+        event.preventDefault();
+        if ($scope.showSuggestions && $scope.items.length > 0) {
+          $scope.selectedSuggestionIndex = 0;
+          $scope.$apply();
+        }
       }
     };
-    
+    $scope.onSuggestionKeyDown = function (event, item, index) {
+      switch (event.keyCode) {
+        case 13: 
+          event.preventDefault();
+          $scope.selectPayItem(item);
+          break;
+        case 27:
+          event.preventDefault();
+          $scope.showSuggestions = false;
+          $scope.selectedSuggestionIndex = -1;
+          document.getElementById('payItemInput').focus();
+          break;
+        case 38:
+          event.preventDefault();
+          if (index > 0) {
+            $scope.selectedSuggestionIndex = index - 1;
+            $scope.$apply();
+          } else {
+            $scope.selectedSuggestionIndex = -1;
+            document.getElementById('payItemInput').focus();
+          }
+          break;
+        case 40:
+          event.preventDefault();
+          if (index < $scope.items.length - 1) {
+            $scope.selectedSuggestionIndex = index + 1;
+            $scope.$apply();
+          }
+          break;
+      }
+    };
+
+    $scope.onInflationToggleKeyDown = function (event) {
+      if (event.keyCode === 13 || event.keyCode === 32) { 
+        event.preventDefault();
+        $scope.useInflationAdjustedPrices = !$scope.useInflationAdjustedPrices;
+        $scope.onInflationToggleChange();
+        $scope.$apply();
+      }
+    };
+
+
     $scope.$watch('searchText', function(newValue, oldValue) {
       if (newValue !== oldValue && $scope.noMatchingSuggestionsFlag) {
         $scope.noMatchingSuggestionsFlag = false;
+      }
+      if (newValue !== oldValue) {
+        $scope.selectedSuggestionIndex = -1;
       }
     });
    
@@ -1077,12 +1128,14 @@
       $scope.items = [];
       $scope.selectedPayItemNumber = null;
       $scope.showSuggestions = false;
+      $scope.selectedSuggestionIndex = -1;
     };
     $scope.selectPayItem = function (item) {
       $scope.searchText = item.Description;
       $scope.selectedPayItemNumber = item.Name;
       $scope.items = [];
       $scope.showSuggestions = false;
+      $scope.selectedSuggestionIndex = -1;
     };
     $scope.getLatestBidDate = function () {
       if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) {
@@ -1849,7 +1902,7 @@
           return d.y;
         });
 
-        if (uniqueX.length < 3) {
+        if (uniqueX.length < 5) {
           return xvals.map(function (xval) {
             return interpolateLinear(uniqueX, uniqueY, xval);
           });
