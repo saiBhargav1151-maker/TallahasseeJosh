@@ -188,10 +188,10 @@ namespace Dqe.Web.Controllers
                 if (startDate.HasValue && endDate.HasValue && startDate > endDate)
                     return false;
 
-                if (minBidAmount.HasValue && (minBidAmount < 0 || minBidAmount > 9999999999))
+                if (minBidAmount.HasValue && (minBidAmount < 0 || minBidAmount > 99999999999))
                     return false;
 
-                if (maxBidAmount.HasValue && (maxBidAmount < 0 || maxBidAmount > 9999999999))
+                if (maxBidAmount.HasValue && (maxBidAmount < 0 || maxBidAmount > 99999999999))
                     return false;
 
                 if (minBidAmount.HasValue && maxBidAmount.HasValue && minBidAmount > maxBidAmount)
@@ -224,7 +224,7 @@ namespace Dqe.Web.Controllers
         }
 
         /// <summary>
-        /// Basic rate limiting to prevent abuse
+        /// rate limiting
         /// </summary>
         private bool CheckBasicRateLimit()
         {
