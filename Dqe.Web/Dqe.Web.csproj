@@ -177,6 +177,7 @@
   <ItemGroup>
     <Folder Include="Areas\" />
     <Folder Include="Views\homeReportsProposalSummary\" />
+    <Folder Include="Views\NHCCIData\" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -191,6 +192,7 @@
     <Compile Include="Controllers\EstimateController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MasterFileAdministrationController.cs" />
+    <Compile Include="Controllers\NHCCIData.cs" />
     <Compile Include="Controllers\PayItemAdministrationController.cs" />
     <Compile Include="Controllers\PayItemStructureAdministrationController.cs" />
     <Compile Include="Controllers\MarketAreaController.cs" />
@@ -198,6 +200,7 @@
     <Compile Include="Controllers\ProfileController.cs" />
     <Compile Include="Controllers\ProjectProposalController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
+    <Compile Include="Controllers\UnitPriceSearchController.cs" />
     <Compile Include="Controllers\WebLinkAdministrationController.cs" />
     <Compile Include="Controllers\CostBasedTemplateAdministrationController.cs" />
     <Compile Include="Controllers\CodeAdministrationController.cs" />
@@ -261,6 +264,8 @@
     <Content Include="Scripts\angular-mocks.js" />
     <Content Include="Scripts\angular-route.js" />
     <Content Include="Scripts\angular-route.min.js" />
+    <Content Include="Scripts\app\controllers\unitPriceSearchController.js" />
+    <Content Include="Views\partials\unit_price_search.html" />
     <Content Include="_dlls\Alltech.Logging.dll" />
     <None Include="Properties\PublishProfiles\DQE.pubxml" />
     <Content Include="Scripts\angular-ui\ui-bootstrap-tpls.js" />
