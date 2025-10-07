@@ -221,7 +221,7 @@ namespace Dqe.Web.Controllers
                 estimates = estimates.OrderByDescending(i => i.LastUpdated).ToList();
 
                 targetUrl = string.Format(_serviceUrl + "/SnapshotComparison&rs:Command=Render&rs:Format={0}&NewestProjectEstimateId={1}&OldestProjectEstimateId={2}&NewOwner={3}&OldestOwner={4}",
-                                            reportFormat, estimates.First().Id, estimates.Last().Id, staffMemberNames.First(), staffMemberNames.Last());
+                                            reportFormat, estimates.First().Id, estimates.Last().Id, estimates.First().MyProjectVersion.VersionOwner.Name, estimates.Last().MyProjectVersion.VersionOwner.Name);
                 fileName = string.Format("SnapshotComparisonReport_P{0}_V{1}_E{2}-{3}_V{4}_E{5}.{6}", estimates.First().MyProjectVersion.MyProject.ProjectNumber, estimates.First().MyProjectVersion.Version, estimates.First().Estimate,
                                                                                                     estimates.Last().MyProjectVersion.MyProject.ProjectNumber, estimates.Last().MyProjectVersion.Version, estimates.Last().Estimate, _extension);
             }
@@ -307,6 +307,28 @@ namespace Dqe.Web.Controllers
             var projectNumber = form["hiddenProjectNumber"];
 
             var targetUrl = string.Format(_serviceUrl + "/ScopeTrackingGraph&rs:Command=Render&rs:Format={0}&ProjectNumber={1}", reportFormat, projectNumber);
+
+            var fileBytes = CallSsrsWebService(targetUrl);
+
+            FillReportFormat(reportFormat);
+
+            return File(fileBytes, _contentType, string.Format("ScopeTrackingGraph{0}.{1}", projectNumber, _extension));
+        }
+
+        /// <summary>
+        /// NOT YET IMPLEMENTED. The graphing got moved to the next phase of enhancements. MB.
+        /// This returns a report with Reviews included. 
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns><returns><see cref="ActionResult"/></returns>
+        [HttpPost]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        public ActionResult ViewReviewTrackingGraph(FormCollection form)
+        {
+            var reportFormat = form["reportFormat"];
+            var projectNumber = form["hiddenProjectNumber"];
+
+            var targetUrl = string.Format(_serviceUrl + "/ScopeReviewTrackingGraph&rs:Command=Render&rs:Format={0}&ProjectNumber={1}", reportFormat, projectNumber);
 
             var fileBytes = CallSsrsWebService(targetUrl);
 

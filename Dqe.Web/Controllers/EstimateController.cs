@@ -875,18 +875,19 @@ namespace Dqe.Web.Controllers
                 return new DqeResult(officialResult, JsonRequestBehavior.AllowGet);
             }
 
-            if (nextSnapshot == SnapshotLabel.Official)
-            {
-                if (letting != null)
-                {
-                    var wtProposal = letting.Proposals.First(i => i.ProposalNumber == p.ProposalNumber);
-                    if (!string.IsNullOrEmpty(wtProposal.PassToDss) && (wtProposal.PassToDss == "B" || wtProposal.PassToDss == "D"))
-                    {
-                        _webTransportService.UpdateProposalReadyForDssPass(wtProposal);
-                    }
-                }
-            }
-  
+            //not needed since DSS is decommissioned, dont need to pass to DSS
+            //if (nextSnapshot == SnapshotLabel.Official)
+            //{
+            //    if (letting != null)
+            //    {
+            //        var wtProposal = letting.Proposals.First(i => i.ProposalNumber == p.ProposalNumber);
+            //        if (!string.IsNullOrEmpty(wtProposal.PassToDss) && (wtProposal.PassToDss == "B" || wtProposal.PassToDss == "D"))
+            //        {
+            //            _webTransportService.UpdateProposalReadyForDssPass(wtProposal);
+            //        }
+            //    }
+            //}
+
             var message = _webTransportService.UpdatePrices(p, nextSnapshot == SnapshotLabel.Official, currentDqeUser);
             var result = new
             {

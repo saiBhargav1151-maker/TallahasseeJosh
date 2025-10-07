@@ -1021,7 +1021,7 @@ namespace Dqe.Web.Controllers
             var loadPrices = _systemParametersRepository.Get().LoadPrices;
             var ss = project.CreateNewVersionFromWt(string.Empty, wtProjectEstimate, loadPrices
                 , currentDqeUser);
-            return ResultStructureFromSnapshot(ss, currentDqeUser);
+            return ResultStructureFromProjectSelection(project, currentDqeUser);
         }
 
         [HttpPost]
@@ -1203,6 +1203,24 @@ namespace Dqe.Web.Controllers
             return ResultStructureFromProjectSelection(p, currentDqeUser);
         }
 
+        /// <summary>
+        /// This creates a new Version with a single estimate of type Review 'R'. 
+        /// This does NOT update info to LRE, this is intended to be read only (except the notes). MB. 
+        /// </summary>
+        /// <param name="snapshot">The snapshot in which the review will be based upon</param>
+        /// <returns><returns><see cref="ActionResult"/></returns></returns>
+        [HttpPost]
+        public ActionResult CreateReviewProjectVersionFromEstimate(dynamic snapshot)
+        {
+            var currentUser = (DqeIdentity)User.Identity;
+            var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
+            var p = _projectRepository.GetByEstimateId((int)snapshot.projectSnapshotId);
+            var sourceVersion = p.ProjectVersions.First(i => i.ProjectEstimates.Any(ii => ii.Id == (int)snapshot.projectSnapshotId));
+            var source = sourceVersion.ProjectEstimates.First(i => i.Id == (int)snapshot.projectSnapshotId);
+            p.CreateNewReviewVersionFromSnapshot(string.Empty, source, currentDqeUser);
+            return ResultStructureFromProjectSelection(p, currentDqeUser);
+        }
+
         [HttpPost]
         public ActionResult SaveComment(dynamic snapshot)
         {
@@ -1316,7 +1334,7 @@ namespace Dqe.Web.Controllers
                             ? "Phase III"
                             : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4
                                 ? "Phase IV"
-                                : string.Empty,
+                                    : string.Empty,
                     isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                     removeLabelComment = string.Empty
                 },
@@ -1373,6 +1391,7 @@ namespace Dqe.Web.Controllers
                         owner = i.VersionOwner.Name,
                         isCurrentOwner = i.VersionOwner == currentUser,
                         projectVersion = i.Version,
+                        versionLabel = i.ProjectSource.ToString(),
                         source = i.ProjectSource == ProjectSourceType.Lre
                             ? "LRE"
                             : i.ProjectSource == ProjectSourceType.Wt
@@ -1388,6 +1407,7 @@ namespace Dqe.Web.Controllers
                                 projectSnapshot = ii.Estimate,
                                 created = string.Format("{0} @ {1}", ii.Created.ToShortDateString(), ii.Created.ToShortTimeString()),
                                 lastUpdated = string.Format("{0} @ {1}", ii.LastUpdated.ToShortDateString(), ii.LastUpdated.ToShortTimeString()),
+                                lastUpdatedRaw = ii.LastUpdated,
                                 comment = ii.EstimateComment,
                                 estimate = ii.GetEstimateTotal(),
                                 snapshotRemoved = ii.LabelRemovedOn.HasValue,
@@ -1407,6 +1427,8 @@ namespace Dqe.Web.Controllers
                                                     ? "Authorization"
                                                     : ii.Label == SnapshotLabel.Official
                                                         ? "Official"
+                                                         : ii.Label == SnapshotLabel.Review
+                                                            ? "Review"  
                                                         : string.Empty,
                                 isWorkingEstimate = ii.IsWorkingEstimate ? "Yes" : string.Empty
                             })

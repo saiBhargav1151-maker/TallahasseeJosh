@@ -8,6 +8,9 @@
 		<property name="LettingDate" >
 			<column name="LETTING_DT" not-null="true" sql-type="datetime2" />
 		</property>
+    <property name="LettingStatus" >
+      <column name="LETTINGSTATUS" not-null="true" sql-type="string" />
+    </property>
 		<property name="LettingName" >
 			<column name="LETTING_NM" not-null="true" sql-type="string" />
 		</property>

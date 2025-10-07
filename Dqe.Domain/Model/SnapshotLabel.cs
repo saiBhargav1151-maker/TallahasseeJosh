@@ -3,6 +3,7 @@ namespace Dqe.Domain.Model
     public enum SnapshotLabel
     {
         Estimator = 'E',
+        Review = 'R',
         Phase2 = '2',
         Phase3 = '3',
         Phase4 = '4',
