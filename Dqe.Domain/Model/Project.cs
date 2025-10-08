@@ -138,6 +138,7 @@ namespace Dqe.Domain.Model
             if (account == null) throw new ArgumentNullException("account");
             if (account.Role != DqeRole.System 
                 && account.Role != DqeRole.Administrator 
+                && account.Role != DqeRole.AdminReadOnly
                 && account.Role != DqeRole.DistrictAdministrator 
                 && account.Role != DqeRole.Estimator
                 && account.Role != DqeRole.Coder
@@ -685,27 +686,33 @@ namespace Dqe.Domain.Model
 
         public virtual void CoderSnapshotWorkingEstimate(DqeUser account, ILreService lreService)
         {
-            ProjectEstimate source = null;
-            foreach (var pv in _projectVersions.Where(i => i.VersionOwner == account))
-            {
-                foreach (var ps in pv.ProjectEstimates)
-                {
-                    if (ps.IsWorkingEstimate)
-                    {
-                        source = ps;
-                    }
-                }
-            }
-            if (source == null)
-            {
-                throw new InvalidOperationException(string.Format("Working estimate could not be determined for project {0} and user {1}", ProjectNumber, account.Name));
-            }
             if (account == null) throw new ArgumentNullException("account");
             if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator
                 && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
+            ProjectEstimate source = null;
+            var projectVersions = _projectVersions.Where(i => i.VersionOwner == account);
+            if (projectVersions != null)
+            {
+                foreach (var pv in projectVersions)
+                {
+                    foreach (var ps in pv.ProjectEstimates)
+                    {
+                        if (ps.IsWorkingEstimate)
+                        {
+                            source = ps;
+                        }
+                    }
+                }
+            }
+          
+            if (source == null)
+            {
+                throw new InvalidOperationException(string.Format("Working estimate could not be determined for project {0} and user {1}", ProjectNumber, account.Name));
+            }
+           
 
             var v = new ProjectVersion
             {
@@ -780,7 +787,7 @@ namespace Dqe.Domain.Model
 
         public virtual SnapshotLabel GetNextSnapshotLabel()
         {
-            //checks exhisting mileston have price totals and sets variable true if so
+            //checks existing milestone have price totals and sets variable true if so
             var hasInitial = EstimateInitial.HasValue;
             var hasScope = EstimateScope.HasValue;
             var hasPhase1 = EstimatePhase1.HasValue;
@@ -817,7 +824,7 @@ namespace Dqe.Domain.Model
 
         protected internal virtual SnapshotLabel GetNextProposalSnapshotLabel()
         {
-            //checks exhisting milestone flags and sets variables if flags have value
+            //checks existing milestone flags and sets variables if flags have value
             var hasInitial = EstimateInitial.HasValue;
             var hasScope = EstimateScope.HasValue;
             var hasPhase1 = EstimatePhase1.HasValue;
@@ -843,7 +850,7 @@ namespace Dqe.Domain.Model
                     if (ps.Label == SnapshotLabel.Official) hasOfficial = true;
                 }
             }
-            //From highest milestone bool down we check to see if that milestone exhist then return the next milestone.
+            //From highest milestone bool down we check to see if that milestone exist then return the next milestone.
             if (hasOfficial) return SnapshotLabel.Estimator;
             if (hasAuthorization) return SnapshotLabel.Official;
             if (hasPhase4) return SnapshotLabel.Authorization;
@@ -859,7 +866,7 @@ namespace Dqe.Domain.Model
 
         public virtual SnapshotLabel GetCurrentSnapshotLabel()
         {
-            //checks exhisting milestone flags and sets variables if flags have value
+            //checks existing milestone flags and sets variables if flags have value
             var hasInitial = EstimateInitial.HasValue;
             var hasScope = EstimateScope.HasValue;
             var hasPhase1 = EstimatePhase1.HasValue;
@@ -869,7 +876,7 @@ namespace Dqe.Domain.Model
             var hasPhase4 = EstimatePhase4.HasValue;
             var hasAuthorization = false;
             var hasOfficial = false;
-            //From highest milestone bool down we check to see if that milestone exhist then return the next milestone.
+            //From highest milestone bool down we check to see if that milestone exist then return the next milestone.
             foreach (var v in _projectVersions)
             {
                 foreach (var ps in v.ProjectEstimates)
@@ -885,7 +892,7 @@ namespace Dqe.Domain.Model
                     if (ps.Label == SnapshotLabel.Official) hasOfficial = true;
                 }
             }
-            //From highest milestone bool down we check to see if that milestone exhist then return THAT milestone.
+            //From highest milestone bool down we check to see if that milestone exist then return THAT milestone.
             if (hasOfficial) return SnapshotLabel.Official;
             if (hasAuthorization) return SnapshotLabel.Authorization;
             if (hasPhase4) return SnapshotLabel.Phase4;

@@ -114,7 +114,7 @@ namespace Dqe.Domain.Model
         {
             if (transformer == null) throw new ArgumentNullException("transformer");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
+            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.AdminReadOnly && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator && account.Role != DqeRole.Coder)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

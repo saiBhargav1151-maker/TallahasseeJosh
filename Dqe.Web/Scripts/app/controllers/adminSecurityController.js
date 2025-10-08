@@ -84,8 +84,10 @@
     var coRoles = [systemAdminRole, payItemAdminRole, costBasedTemplateAdminRole,
         estimatorRole, StateReviewerRole, MaintenanceDistrictAdminRole, MaintenanceEstimatorRole, AdminReadOnlyRole]; 
 
-    var districtRoles = [districtAdminRole, estimatorRole, DistrictReviewerRole,
-        StateReviewerRole, MaintenanceDistrictAdminRole, MaintenanceEstimatorRole];
+    var districtRoles = [districtAdminRole, estimatorRole];
+
+    //, DistrictReviewerRole, StateReviewerRole, MaintenanceDistrictAdminRole, MaintenanceEstimatorRole
+
 
     $scope.sysRoles = function() {
         if ($scope.thisUser == undefined) {

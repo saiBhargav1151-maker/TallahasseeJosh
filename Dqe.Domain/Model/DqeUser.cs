@@ -91,12 +91,22 @@ namespace Dqe.Domain.Model
                 MyRecentProjectEstimate = null;
                 return;
             }
-            var versions = project.ProjectVersions.Where(i => i.VersionOwner == this).ToList();
+
+            List<ProjectVersion> versions = new List<ProjectVersion>();
+            if (Role == DqeRole.Administrator || Role == DqeRole.AdminReadOnly)
+            {
+                versions = project.ProjectVersions.ToList();
+            }
+            else
+            {
+                versions = project.ProjectVersions.Where(i => i.VersionOwner == this).ToList();
+            }
+            
             if (versions.Count <= 0) return;
             ProjectEstimate estimate = null;
 
             //check each version for a working estimate flag, get the latest occurance
-            foreach(var v in versions.OrderBy(v=> v.Version))
+            foreach (var v in versions.OrderBy(v=> v.Version))
             {
                 if(v.ProjectEstimates.Any(i => i.IsWorkingEstimate))
                 {
@@ -229,15 +239,14 @@ namespace Dqe.Domain.Model
         {
             if (Enum.TryParse<DqeRole>(abbreviation, out DqeRole result))
             {
-                string tempstring = Enum.Parse(typeof(DqeRole), abbreviation, true).ToString();
-                return tempstring;
+                return Enum.Parse(typeof(DqeRole), abbreviation, true).ToString();
             }
             return string.Empty;
         }
 
       
         /// <summary>
-        /// TODO: THIS FUNCTION TAKES A LOT OF TIME TO RUN on dev. THIS SHOULD BE FIXED. MB.
+        /// THIS FUNCTION TAKES A LOT OF TIME TO RUN on dev. MB.
         /// </summary>
         /// <returns></returns>
         public override Transformers.DqeUser GetTransformer()
@@ -311,7 +320,13 @@ namespace Dqe.Domain.Model
             }
             else
             {
-                if (transformer.Role != DqeRole.DistrictAdministrator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.Estimator && transformer.Role != DqeRole.DistrictReviewer && transformer.Role != DqeRole.StateReviewer && transformer.Role != DqeRole.MaintenanceDistrictAdmin && transformer.Role != DqeRole.MaintenanceEstimator)
+                if (transformer.Role != DqeRole.DistrictAdministrator 
+                    && transformer.Role != DqeRole.Estimator 
+                    && transformer.Role != DqeRole.Estimator 
+                    && transformer.Role != DqeRole.DistrictReviewer 
+                    && transformer.Role != DqeRole.StateReviewer 
+                    && transformer.Role != DqeRole.MaintenanceDistrictAdmin 
+                    && transformer.Role != DqeRole.MaintenanceEstimator)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for district {1}.", transformer.Role, transformer.District));
                 }
