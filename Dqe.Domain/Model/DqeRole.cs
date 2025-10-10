@@ -92,7 +92,7 @@ namespace Dqe.Domain.Model
             {
                 DisplayName = "State Reviewer",
                 Role = DqeRole.StateReviewer,
-                Id = '1',
+                Id = 'B',
                 DistrictRole = true,
                 CoRole = true,
             });
@@ -108,7 +108,7 @@ namespace Dqe.Domain.Model
             {
                 DisplayName = "MaintenanceDistrictAdmin",
                 Role = DqeRole.MaintenanceDistrictAdmin,
-                Id = '2',
+                Id = 'F',
                 DistrictRole = true,
                 CoRole = true,
             });
@@ -205,7 +205,7 @@ namespace Dqe.Domain.Model
         /// State Reviewer, can be any district user
         /// We need seperate DistrictReviewer Role because we want to be able to assign district users to this role also. MB.
         /// </summary>
-        StateReviewer = '1',
+        StateReviewer = 'B',
 
         /// <summary>
         /// CO only,  because they will need to view other districts sometimes and we don't have ability to assign multiple districts
@@ -215,7 +215,7 @@ namespace Dqe.Domain.Model
         /// <summary>
         /// CO or District - same as MaintenanceEstimator but has admin security and can assign projects with override checkout
         /// </summary>
-        MaintenanceDistrictAdmin = '2',
+        MaintenanceDistrictAdmin = 'F',
 
         /// <summary>
         /// CO or District

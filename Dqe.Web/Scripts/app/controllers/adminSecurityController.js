@@ -75,9 +75,9 @@
 
     //Both CO and District Roles
     var estimatorRole = { name: 'Estimator', value: 'E' };
-    //var maintenanceDistrictAdminRole = { name: 'Maintenance District Admin Role', value: '2' };
+    //var maintenanceDistrictAdminRole = { name: 'Maintenance District Admin Role', value: 'F' };
     //var maintenanceEstimatorRole = { name: 'Maintenance Estimator Role', value: 'M' };
-    var stateReviewerRole = { name: 'State Reviewer', value: '1' };
+    var stateReviewerRole = { name: 'State Reviewer', value: 'B' };
     var adminReadOnlyRole = { name: 'Admin Read Only', value: 'O' };
 
     //CoderRole
@@ -111,7 +111,7 @@
             } else {
                 return emptyRoles();
             }
-        } else if ($scope.thisUser.role == 'D' || $scope.thisUser.role == '2') {
+        } else if ($scope.thisUser.role == 'D' || $scope.thisUser.role == 'F') {
             return validDistrictRoles();
         } else {
             return emptyRoles();
