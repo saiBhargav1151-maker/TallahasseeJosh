@@ -322,7 +322,6 @@ namespace Dqe.Domain.Model
             {
                 if (transformer.Role != DqeRole.DistrictAdministrator 
                     && transformer.Role != DqeRole.Estimator 
-                    && transformer.Role != DqeRole.Estimator 
                     && transformer.Role != DqeRole.DistrictReviewer 
                     && transformer.Role != DqeRole.StateReviewer 
                     && transformer.Role != DqeRole.MaintenanceDistrictAdmin 

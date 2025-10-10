@@ -64,27 +64,6 @@ namespace Dqe.Web.Controllers
                             }), JsonRequestBehavior.AllowGet);
         }
 
-        /// <summary>
-        /// Gets all roles
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public JsonResult GetAllRoles()
-        {
-            var roleList = new DqeRoleModelList();
-
-            return Json(roleList.AllDqeRoles
-                .Select(i => new
-                {
-                    id = i.Id,
-                    displayName = i.DisplayName,
-                    district = i.CoRole,
-                    email = i.DistrictRole,
-                    roleEnum = i.Role.ToString()
-                }),
-                JsonRequestBehavior.AllowGet); ;
-        }
-
         [HttpPost]
         [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator })]
         public ActionResult UpdateUser(dynamic user)
