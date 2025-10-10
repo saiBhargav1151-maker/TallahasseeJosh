@@ -65,7 +65,7 @@
                             </h5>
                         </div>
                         <div class="col-lg-6" style="text-align: right;">
-                            <span>
+                            <span>                             
                                 <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin || security.isMaintenanceDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">
                                     Check In
                                 </button>

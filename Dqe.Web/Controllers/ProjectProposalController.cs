@@ -1423,6 +1423,12 @@ namespace Dqe.Web.Controllers
             }
 
             var projectLetting = _webTransportService.GetProjectLetting(project.WtId);
+            var posibleOwner = true;
+
+            if (currentUser.Role == DqeRole.DistrictReviewer || currentUser.Role == DqeRole.StateReviewer)
+            {
+                posibleOwner = false;
+            }
 
             var result = new DqeResult(new
             {
@@ -1466,7 +1472,7 @@ namespace Dqe.Web.Controllers
                                 ? projectLetting.Value.ToShortDateString()
                                 : string.Empty,
                     isAvailable = project.CustodyOwner == null,
-                    userHasCustody = project.CustodyOwner == currentUser,
+                    userHasCustody = posibleOwner && project.CustodyOwner == currentUser,
                     custodyOwner = project.CustodyOwner == null ? string.Empty : project.CustodyOwner.Name,
                     nextLabel = project.GetNextSnapshotLabel() == SnapshotLabel.Initial ? "Initial"
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Scope ? "Scope"
@@ -1578,6 +1584,13 @@ namespace Dqe.Web.Controllers
         {
             var wtProposal = snapshot.MyProjectVersion.MyProject.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
             var projectLetting = _webTransportService.GetProjectLetting(snapshot.MyProjectVersion.MyProject.WtId);
+            var posibleOwner = true;
+
+            if(currentUser.Role == DqeRole.DistrictReviewer || currentUser.Role == DqeRole.StateReviewer)
+            {
+                posibleOwner = false;
+            }
+
             return new DqeResult(new
             {
                 security = new
@@ -1615,7 +1628,7 @@ namespace Dqe.Web.Controllers
                                 ? projectLetting.Value.ToShortDateString()
                                 : string.Empty,
                     isAvailable = snapshot.MyProjectVersion.MyProject.CustodyOwner == null,
-                    userHasCustody = snapshot.MyProjectVersion.MyProject.CustodyOwner == currentUser,
+                    userHasCustody = posibleOwner && snapshot.MyProjectVersion.MyProject.CustodyOwner == currentUser,
                     custodyOwner = snapshot.MyProjectVersion.MyProject.CustodyOwner == null ? string.Empty : snapshot.MyProjectVersion.MyProject.CustodyOwner.Name,
                     nextLabel =  DynamicHelper.GetSnapshotLabelString(snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel())
                 },
