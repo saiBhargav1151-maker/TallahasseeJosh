@@ -1401,7 +1401,7 @@
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
               y += 15;
-              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to 2024 Q4 levels)' : 'Disabled (using raw prices)'), 40, y);
+              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to 2025 Q2 levels)' : 'Disabled (using raw prices)'), 40, y);
               y += 15;
               //doc.text(
               //    'Date Range: ' +
@@ -3445,11 +3445,11 @@
 
     $scope.getInflationInfo = function (item) {
       if (!item.InflationAdjustedPrice || !item.InflationPercentIncrease) {
-        return 'No inflation data available';
+        return 'Inflation adjustment not available for this bid';
       }
-      return `Adjusted to 2024 Q4 (${item.InflationPercentIncrease.toFixed(
-        1
-      )}% )`;
+      
+      const percentChange = item.InflationPercentIncrease.toFixed(1);
+      return `FDOT CCI Inflation Adjustment: (${percentChange}% change)`;
     };
     $scope.calculateCustomQuantityStats = function () {
       if (
