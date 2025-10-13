@@ -1122,7 +1122,6 @@
         $scope.selectedSuggestionIndex = -1;
       }
     });
-   
     $scope.clearSearchText = function () {
       $scope.searchText = '';
       $scope.items = [];
@@ -1154,7 +1153,6 @@
       });
       return latestDate;
     };
-
     $scope.checkDataAge = function() {
       if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) {
         $scope.dataAgeWarning = '';
@@ -1403,7 +1401,7 @@
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
               y += 15;
-              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (NHCCI-based adjustment to 2024 Q4 levels)' : 'Disabled (using raw prices)'), 40, y);
+              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to 2024 Q4 levels)' : 'Disabled (using raw prices)'), 40, y);
               y += 15;
               //doc.text(
               //    'Date Range: ' +
