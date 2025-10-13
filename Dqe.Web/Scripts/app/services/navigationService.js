@@ -3,7 +3,7 @@
         getNavs: function (currentUser) {
             if (currentUser.isAuthenticated) {
                 //co admin or district admin
-                if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == '2' || currentUser.role == 'O') {
+                if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == 'F' || currentUser.role == 'O') {
                     return [
                         {
                             title: 'Home',
@@ -66,7 +66,7 @@
                         }
                     ];
                 }
-                else if (currentUser.role == 'E' || currentUser.role == '2' || currentUser.role == 'O') {
+                else if (currentUser.role == 'E' || currentUser.role == 'F' || currentUser.role == 'O') {
                     //estimators
                     return [
                         {
@@ -97,7 +97,7 @@
                     ];
                 }
                     //Reviewer users
-                else if (currentUser.role == 'R' || currentUser.role == '1') {
+                else if (currentUser.role == 'R' || currentUser.role == 'B') {
                     return [
                         {
                             title: 'Home',
@@ -157,7 +157,7 @@
                 if ($location.url().startsWith('/home')) {
                     //co admin, district admin, or estimator
                     if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == 'E' || 
-                        currentUser.role == '2' || currentUser.role == 'M' || currentUser.role == 'O') {
+                        currentUser.role == 'F' || currentUser.role == 'M' || currentUser.role == 'O') {
                         return [
                             {
                                 title: 'My Estimates',
@@ -196,7 +196,7 @@
                             }
                         ];
                     }
-                    else if (currentUser.role == 'R' || currentUser.role == '1') {
+                    else if (currentUser.role == 'R' || currentUser.role == 'B') {
                         return [
                             {
                                 title: 'Project',
@@ -291,7 +291,7 @@
                             }
                         ];
                     }
-                    else if (currentUser.role == 'D' || currentUser.role == 'R' || currentUser.role == '2' || currentUser.role == '1') {
+                    else if (currentUser.role == 'D' || currentUser.role == 'R' || currentUser.role == 'F' || currentUser.role == 'B') {
                         //district admin
                         return [
                             {

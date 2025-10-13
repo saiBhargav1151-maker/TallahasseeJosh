@@ -63,12 +63,6 @@ namespace Dqe.Web.Controllers
                     case DqeRole.Estimator:
                         pricingParameter = new EstimatorPricingParameter();
                         break;
-                    case DqeRole.MaintenanceDistrictAdmin :
-                        pricingParameter = new MaintenanceEstimatorPricingParameter();
-                        break;
-                    case DqeRole.MaintenanceEstimator:
-                        pricingParameter = new MaintenanceEstimatorPricingParameter();
-                        break;
                 }
             }
 
@@ -81,12 +75,6 @@ namespace Dqe.Web.Controllers
                     break;
                 case DqeRole.Estimator:
                     ((Domain.Transformers.EstimatorPricingParameter) transformer).User = currentDqeUser;
-                    break;
-                case DqeRole.MaintenanceDistrictAdmin:
-                    ((Domain.Transformers.MaintenanceEstimatorPricingParameter)transformer).User = currentDqeUser;
-                    break;
-                case DqeRole.MaintenanceEstimator:
-                    ((Domain.Transformers.MaintenanceEstimatorPricingParameter)transformer).User = currentDqeUser;
                     break;
                 
             }
@@ -132,12 +120,6 @@ namespace Dqe.Web.Controllers
                     pricingParameter = _pricingParameterRepository.GetDistrictDefault(currentDqeUser.District);
                     break;
                 case DqeRole.Estimator:
-                    pricingParameter = _pricingParameterRepository.GetEstimatorDefaultByUserId(currentDqeUser);
-                    break;
-                case DqeRole.MaintenanceDistrictAdmin:
-                    pricingParameter = _pricingParameterRepository.GetEstimatorDefaultByUserId(currentDqeUser);
-                    break;
-                case DqeRole.MaintenanceEstimator:
                     pricingParameter = _pricingParameterRepository.GetEstimatorDefaultByUserId(currentDqeUser);
                     break;
             }

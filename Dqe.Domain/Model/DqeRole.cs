@@ -25,114 +25,6 @@ namespace Dqe.Domain.Model
         public bool? Viewable { get; set; } = null;
     }
 
-    /// <summary>
-    /// Roles with more properties.MB
-    /// </summary>
-    public class DqeRoleModelList{
-        public DqeRoleModelList()
-        {
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "System",
-                Role = DqeRole.System,
-                Id = 'S',
-                DistrictRole = true,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "System (CO) Administrator",
-                Role = DqeRole.Administrator,
-                Id = 'A',
-                DistrictRole = false,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "District Administrator",
-                Role = DqeRole.DistrictAdministrator,
-                Id = 'D',
-                DistrictRole = true,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "Pay Item Administrator",
-                Role = DqeRole.PayItemAdministrator,
-                Id = 'P',
-                DistrictRole = false,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "Cost-Based Template Administrator",
-                Role = DqeRole.CostBasedTemplateAdministrator,
-                Id = 'T',
-                DistrictRole = false,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "Estimator",
-                Role = DqeRole.Estimator,
-                Id = 'E',
-                DistrictRole = true,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "District Reviewer",
-                Role = DqeRole.DistrictReviewer,
-                Id = 'R',
-                DistrictRole = true,
-                CoRole = false,
-            });
-
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "State Reviewer",
-                Role = DqeRole.StateReviewer,
-                Id = '1',
-                DistrictRole = true,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "Coder",
-                Role = DqeRole.Coder,
-                Id = 'C',
-                DistrictRole = false,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "MaintenanceDistrictAdmin",
-                Role = DqeRole.MaintenanceDistrictAdmin,
-                Id = '2',
-                DistrictRole = true,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "MaintenanceEstimator",
-                Role = DqeRole.MaintenanceEstimator,
-                Id = 'M',
-                DistrictRole = true,
-                CoRole = true,
-            });
-            AllDqeRoles.Add(new DqeRoleModelItem()
-            {
-                DisplayName = "AdminReadOnly",
-                Role = DqeRole.AdminReadOnly,
-                Id = 'O',
-                DistrictRole = false,
-                CoRole = true,
-            });
-        }
-        public List<DqeRoleModelItem> AllDqeRoles { get; set; } = new List<DqeRoleModelItem>();
-
-    }
-
     //public static class ExtensionMethods
     //{
     //    public static string DisplayValue(this DqeRole e)
@@ -205,7 +97,7 @@ namespace Dqe.Domain.Model
         /// State Reviewer, can be any district user
         /// We need seperate DistrictReviewer Role because we want to be able to assign district users to this role also. MB.
         /// </summary>
-        StateReviewer = '1',
+        StateReviewer = 'B',
 
         /// <summary>
         /// CO only,  because they will need to view other districts sometimes and we don't have ability to assign multiple districts
@@ -215,7 +107,7 @@ namespace Dqe.Domain.Model
         /// <summary>
         /// CO or District - same as MaintenanceEstimator but has admin security and can assign projects with override checkout
         /// </summary>
-        MaintenanceDistrictAdmin = '2',
+        MaintenanceDistrictAdmin = 'F',
 
         /// <summary>
         /// CO or District

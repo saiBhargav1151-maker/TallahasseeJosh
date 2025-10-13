@@ -660,7 +660,8 @@ namespace Dqe.Domain.Model
                 account.Role != DqeRole.Estimator && 
                 account.Role != DqeRole.Coder && 
                 account.Role != DqeRole.MaintenanceDistrictAdmin && 
-                account.Role != DqeRole.MaintenanceEstimator)
+                account.Role != DqeRole.MaintenanceEstimator &&
+                account.Role != DqeRole.DistrictReviewer)
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }

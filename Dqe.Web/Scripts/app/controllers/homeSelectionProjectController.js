@@ -21,7 +21,7 @@
             $scope.user = null;
             securityService.getCurrentUser(function (user) {
                 let role = user.role.toString()[0];
-                let allowedRoles = ['A', 'D', 'E', 'C', '2', 'M'];
+                let allowedRoles = ['A', 'D', 'E', 'C', 'F', 'M'];
                 if (!(role.length === 0) && allowedRoles.includes(role)) {
                     $scope.canCheckOut = true;
                     $scope.user = user;

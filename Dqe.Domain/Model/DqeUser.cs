@@ -304,29 +304,28 @@ namespace Dqe.Domain.Model
             }
             if (transformer.District == "CO")
             {
+                //&& transformer.Role != DqeRole.DistrictReviewer
+                //&& transformer.Role != DqeRole.MaintenanceDistrictAdmin
+                //&& transformer.Role != DqeRole.MaintenanceEstimator)
                 if (transformer.Role != DqeRole.Administrator 
                     && transformer.Role != DqeRole.CostBasedTemplateAdministrator 
                     && transformer.Role != DqeRole.PayItemAdministrator
                     && transformer.Role != DqeRole.Estimator
                     && transformer.Role != DqeRole.StateReviewer
                     && transformer.Role != DqeRole.Coder
-                    && transformer.Role != DqeRole.AdminReadOnly
-                     && transformer.Role != DqeRole.DistrictReviewer
-                     && transformer.Role != DqeRole.MaintenanceDistrictAdmin
-                     && transformer.Role != DqeRole.MaintenanceEstimator)
+                    && transformer.Role != DqeRole.AdminReadOnly)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for CO.", transformer.Role));
                 }
             }
             else
             {
+                //&& transformer.Role != DqeRole.MaintenanceDistrictAdmin
+                //    && transformer.Role != DqeRole.MaintenanceEstimator
                 if (transformer.Role != DqeRole.DistrictAdministrator 
                     && transformer.Role != DqeRole.Estimator 
-                    && transformer.Role != DqeRole.Estimator 
                     && transformer.Role != DqeRole.DistrictReviewer 
-                    && transformer.Role != DqeRole.StateReviewer 
-                    && transformer.Role != DqeRole.MaintenanceDistrictAdmin 
-                    && transformer.Role != DqeRole.MaintenanceEstimator)
+                    && transformer.Role != DqeRole.StateReviewer)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for district {1}.", transformer.Role, transformer.District));
                 }
