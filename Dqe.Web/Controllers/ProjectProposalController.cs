@@ -1024,7 +1024,7 @@ namespace Dqe.Web.Controllers
                     {
                         initialEstimate = 0;
                     }
-                    p.SetSeedEstimateValues(initialEstimate, scopeEstimate, phase1Estimate, phase2Estimate, phase3Estimate, phase4Estimate);
+                    p.SetSeedEstimateValues(initialEstimate, scopeEstimate, phase1Estimate, phase2Estimate, phase3Estimate, phase4Estimate, lreProject.QuantityComplete);
                 }
             }
             return null;
@@ -1482,7 +1482,8 @@ namespace Dqe.Web.Controllers
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4 ? "Phase IV"
                         : string.Empty,
                     isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
-                    removeLabelComment = string.Empty
+                    removeLabelComment = string.Empty,
+                    quantityComplete = project.QuantityComplete
                 },
                 proposals = project.Proposals.Select(i => new
                 {

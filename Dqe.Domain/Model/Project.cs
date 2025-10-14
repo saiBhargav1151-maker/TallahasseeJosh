@@ -79,6 +79,12 @@ namespace Dqe.Domain.Model
 
         public virtual decimal? EstimatePhase4 { get; protected internal set; }
 
+        /// <summary>
+        /// LRE Column - Dictates to user if they want DQE as the primary program instead of LRE
+        /// It is in the DB as a single char byte
+        /// </summary>
+        public virtual string QuantityComplete { get; protected internal set; }
+
         public virtual IEnumerable<DqeUser> AssignedUsers
         {
             get { return _assignedUsers.ToList().AsReadOnly(); }
@@ -99,7 +105,7 @@ namespace Dqe.Domain.Model
             MyCounty = county;
         }
 
-        public virtual void SetSeedEstimateValues(decimal? initial, decimal? scope, decimal? phase1, decimal? phase2, decimal? phase3, decimal? phase4)
+        public virtual void SetSeedEstimateValues(decimal? initial, decimal? scope, decimal? phase1, decimal? phase2, decimal? phase3, decimal? phase4, string Qt)
         {
             EstimateInitial = initial;
             EstimateScope = scope;
@@ -107,6 +113,7 @@ namespace Dqe.Domain.Model
             EstimatePhase2 = phase2;
             EstimatePhase3 = phase3;
             EstimatePhase4 = phase4;
+            QuantityComplete = Qt;
         }
 
         public virtual void AssignToUser(DqeUser assignmentUser, DqeUser account)
@@ -160,7 +167,8 @@ namespace Dqe.Domain.Model
                 PseeContactSrsId = PseeContactSrsId,
                 WtId = WtId,
                 WtLsDbId = WtLsDbId,
-                LsDbCode = LsDbCode
+                LsDbCode = LsDbCode,
+                QuantityComplete = QuantityComplete
             };
         }
 
@@ -608,6 +616,8 @@ namespace Dqe.Domain.Model
                         EstimatePhase4 = source.GetEstimateTotal().Total;
                         lreService.SetDqeSnapshotInLre(this, account, SnapshotLabel.Phase4, EstimatePhase4.Value);
                     }
+                    lreService.UpdateLreProjectSetDQEDefaultPlatform(this.ProjectNumber);
+
                 }
                 var prop = Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
                 if (prop != null)
@@ -1023,6 +1033,7 @@ namespace Dqe.Domain.Model
             WtId = transformer.WtId;
             WtLsDbId = transformer.WtLsDbId;
             LsDbCode = transformer.LsDbCode;
+            QuantityComplete = transformer.QuantityComplete;
         }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -1033,5 +1044,6 @@ namespace Dqe.Domain.Model
             //}
             return new List<ValidationResult>();
         }
+
     }
 }

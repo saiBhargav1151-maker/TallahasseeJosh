@@ -25,6 +25,13 @@
                 }
             });
 
+            //Takes the char field of QTY_CMPLT_CD in LRE table ('Y' or 'N' which has defalut 'N')
+
+            if ($scope.prefferedApplication === null || $scope.prefferedApplication === undefined) {
+                $scope.prefferedApplication = r.project.quantityComplete == null ? "Project not in LRE" : r.project.quantityComplete.toUpperCase() === 'Y' ? "DQE" : r.project.quantityComplete.toUpperCase() === 'N' ? "LRE" : "Project not in LRE";
+            }
+           
+
             ///checking the first estimate of every version to see if it is a review, if so marking a bool field as true.
             for (var i = 0; i < $scope.versions.length; i++) {
                 if ($scope.versions[i].versionLabel.trim() === 'Review') {
@@ -267,7 +274,18 @@
         });
     }
     $scope.snapshotWorkingEstimate = function (project) {
+
         $http.post('./projectproposal/SnapshotWorkingEstimate', project).success(function (result) {
+            $scope.prefferedApplication = "";
+            if (project.quantityComplete.toUpperCase() === 'N' && project.takeLabeledSnapshot != null && project.takeLabeledSnapshot) {
+                result.data.project.quantityComplete = 'Y';
+            }
+            else if (project.quantityComplete.toUpperCase() === 'Y') {
+                result.data.project.quantityComplete = 'Y';
+            }
+            else if (project.quantityComplete.toUpperCase() === 'N') {
+                result.data.project.quantityComplete = 'N';
+            }
             processResult(result);
         });
     }

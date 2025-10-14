@@ -49,14 +49,22 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="row">
-                        <div class="col-lg-3">
+                        <div class="col-lg-5">
                             <h5>
-                                Project: <strong>{{project.number}}</strong> &nbsp;&nbsp; Proposal:
+                                Project: <strong>{{project.number}}</strong>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                Proposal:
                                 <span ng-repeat="proposal in proposals">
                                     <a href="#/home_proposal/{{proposal.number}}" title="Click to view proposal {{proposal.number}}">
                                         <strong>{{proposal.number}}</strong>
                                     </a>
                                 </span>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <span>
+                                    Preferred Estimate: {{prefferedApplication}}
+                                </span>
+
+                             
                             </h5>
                         </div>
                         <div class="col-lg-3">
@@ -123,7 +131,7 @@
                                 <input type="radio" name="reportFormat" title="Output - Excel" ng-model="reportFormat.type" value="EXCELOPENXML"> Excel
                                 &nbsp;&nbsp;
                                 <button type="button" title="Click to download the report - file type: {{reportFormat.type}} file size: unknown" class="btn btn-primary" ng-click="viewScopeTrackingGraph()">View Scope Tracking Graph</button>
-                               <!-- <button type="button" title="Click to download the report - file type: {{reportFormat.type}} file size: unknown" class="btn btn-primary" ng-click="viewReviewTrackingGraph()">View Review Tracking Graph</button>-->
+                                <!-- <button type="button" title="Click to download the report - file type: {{reportFormat.type}} file size: unknown" class="btn btn-primary" ng-click="viewReviewTrackingGraph()">View Review Tracking Graph</button>-->
                             </div>
                         </div>
                         <input type="hidden" id="hiddenProjectNumber" name="hiddenProjectNumber" value="">

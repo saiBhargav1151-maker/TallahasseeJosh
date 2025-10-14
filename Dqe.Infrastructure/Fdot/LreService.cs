@@ -11,8 +11,7 @@ namespace Dqe.Infrastructure.Fdot
 {
     public class LreService : ILreService
     {
-
-        public IEnumerable<Domain.Model.Lre.Project> GetProjects(string projectName)
+          public IEnumerable<Domain.Model.Lre.Project> GetProjects(string projectName)
         {
             using (var session = Initializer.LreSessionFactory.OpenSession())
             {
@@ -35,6 +34,32 @@ namespace Dqe.Infrastructure.Fdot
             }
         }
 
+        /// <summary>
+        /// Updates the field "Quantity Complete" in LRE project table. 
+        /// This indicates to users if they should use DQE or LRE.MB.
+        /// </summary>
+        /// <param name="projectId"></param>
+        public void UpdateLreProjectSetDQEDefaultPlatform(string projectId)
+        {
+            using (var session = Initializer.LreSessionFactory.OpenSession())
+            {
+                using (var t = session.BeginTransaction())
+                {
+                    var pjtList = session.QueryOver<Domain.Model.Lre.Project>().Where(p => p.ProjectName == projectId.ToString()).List();
+                    var pjt = pjtList.FirstOrDefault();
+                    if (pjt == null)
+                    {
+                        Console.WriteLine("Project not found in LRE", DateTime.Now);
+                        return;
+                    }
+
+                    pjt.QuantityComplete = "Y";
+
+                    session.SaveOrUpdate(pjt);
+                    t.Commit();
+                }
+            }
+        }
         public void UpdateLrePrices(IEnumerable<PayItemMaster> items)
         {
             /*

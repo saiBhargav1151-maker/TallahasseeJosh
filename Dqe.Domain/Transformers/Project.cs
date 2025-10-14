@@ -22,5 +22,10 @@ namespace Dqe.Domain.Transformers
         public DateTime LastUpdated { get; protected internal set; }
         public DateTime Created { get; protected internal set; }
         public SnapshotLabel Label { get; protected internal set; }
+
+        /// <summary>
+        /// I believe this column has been utilized to instead represent "See DQE Estimates" Flag in LRE
+        /// </summary>
+        public string QuantityComplete { get; protected internal set; }
     }
 }
