@@ -1,5 +1,4 @@
 ﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', 'securityService', function ($scope, $rootScope, $http, $route, stateService, securityService) {
-
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
         if (!containsDqeError(result)) {
@@ -14,7 +13,7 @@
 
             //Takes the char field of QTY_CMPLT_CD in LRE table ('Y' or 'N' which has defalut 'N')
 
-            if ($scope.prefferedApplication === null || $scope.prefferedApplication === undefined) {
+            if ($scope.prefferedApplication == "" || $scope.prefferedApplication === null || $scope.prefferedApplication === undefined) {
                 $scope.prefferedApplication = r.project.quantityComplete == null ? "Project not in LRE" : r.project.quantityComplete.toUpperCase() === 'Y' ? "DQE" : r.project.quantityComplete.toUpperCase() === 'N' ? "LRE" : "Project not in LRE";
             }
            
@@ -247,6 +246,7 @@
         });
     }
     $scope.loadProject = function () {
+        $scope.prefferedApplication = "";
         $http.get('./projectproposal/GetProject', { params: { number: $scope.selectedProject.number } }).success(function (result) {
             stateService.currentProject = $scope.selectedProject.number;
             processResult(result);
