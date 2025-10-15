@@ -49,28 +49,28 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="row">
-                        <div class="col-lg-5">
+                        <div class="col-lg-6">
                             <h5>
-                                Project: <strong>{{project.number}}</strong>
+                                <strong> Project: </strong>
+                                {{project.number}}
                                 &nbsp;&nbsp;&nbsp;&nbsp;
-                                Proposal:
+                                <strong> Proposal: </strong>
                                 <span ng-repeat="proposal in proposals">
                                     <a href="#/home_proposal/{{proposal.number}}" title="Click to view proposal {{proposal.number}}">
-                                        <strong>{{proposal.number}}</strong>
+                                        {{proposal.number}}
                                     </a>
                                 </span>
+                                <span ng-if="proposals.length == 0">N/A </span>
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                                 <span>
-                                    Preferred Estimate: {{prefferedApplication}}
+                                    <strong>Preferred Estimate: </strong>
+                                    {{prefferedApplication}}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
                                 </span>
 
-                             
-                            </h5>
-                        </div>
-                        <div class="col-lg-3">
-                            <h5>
-                                Project Type: <strong>{{project.projectType == 'M' ? "Maintenance" : "Construction"}} </strong> 
-                            </h5>
+                               
+                            </h5>                   
+                          
                         </div>
                         <div class="col-lg-6" style="text-align: right;">
                             <span>                             
@@ -113,6 +113,10 @@
                         <div class="col-lg-2">
                             <strong>Item Year:</strong> {{project.filenumber}}
                         </div>
+                        <div class="col-lg-2">
+                            <strong> Project Type: </strong>
+                            {{project.projectType == 'M' ? "Maintenance" : "Construction"}}
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-lg-1">
@@ -121,7 +125,7 @@
                         <div class="col-lg-11">
                             {{project.description}}
                         </div>
-                    </div>
+                    </div>              
                     <form method="POST" id="ViewScopeTrackingGraph" autocomplete="off">
                         <div class="row">
 
