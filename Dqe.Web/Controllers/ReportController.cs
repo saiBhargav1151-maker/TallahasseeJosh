@@ -82,7 +82,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.DistrictReviewer })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.DistrictReviewer, DqeRole.AdminReadOnly })]
         //public ActionResult DownloadStructureData()
         public ActionResult DownloadStructureData(FormCollection form)
         {
@@ -98,7 +98,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         //public ActionResult DownloadStructureData()
         public ActionResult DownloadPayItemData(FormCollection form)
         {
@@ -188,7 +188,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer, DqeRole.DistrictReviewer })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer, DqeRole.DistrictReviewer, DqeRole.AdminReadOnly })]
         public ActionResult ViewProjectItemsReport(FormCollection form)
         {
             var versions = Server.UrlDecode(form["hiddenProjectSnapshotIds"]).Split(',');
@@ -250,7 +250,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         public ActionResult ViewUnbalancedItemsReport(FormCollection form)
         {
             var proposalNumber = form["proposalNumber"];
@@ -268,7 +268,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         public ActionResult ViewSummaryOfLettingReport(FormCollection form)
         {
             var lettingNumber = form["lettingNumber"];
@@ -284,7 +284,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         public ActionResult ViewBidToleranceReport(FormCollection form)
         {
             var lettingNumber = form["lettingNumber"];
@@ -300,7 +300,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer, DqeRole.DistrictReviewer })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer, DqeRole.DistrictReviewer, DqeRole.AdminReadOnly })]
         public ActionResult ViewScopeTrackingGraph(FormCollection form)
         {
             var reportFormat = form["reportFormat"];
@@ -407,7 +407,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         public ActionResult ViewWorkingProposalSummaryReport(FormCollection form)
         {
             var currentUser = (DqeIdentity)User.Identity;
