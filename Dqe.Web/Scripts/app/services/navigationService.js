@@ -82,16 +82,7 @@
                     ];
                 }
                     //Reviewer users
-                else if (currentUser.role == 'R' || currentUser.role == 'B') {
-                    return [
-                        {
-                            title: 'Home',
-                            url: '/home_project',
-                            active: $location.url().startsWith('/home') ? 'active' : ''
-                        }
-                    ];
-                }
-                else if (currentUser.role == 'C') {
+                else if (currentUser.role == 'C' || currentUser.role == 'R' || currentUser.role == 'B') {
                     return [
                         {
                             title: 'Home',
@@ -175,16 +166,8 @@
                             }
                         ];
                     }
-                    else if (currentUser.role == 'R' || currentUser.role == 'B') {
-                        return [
-                            {
-                                title: 'Project',
-                                active: $location.url().startsWith('/home_project'),
-                                url: '/home_project'
-                            },
-                        ]                          
-                    }
-                    else if (currentUser.role == 'C') {
+                  
+                    else if (currentUser.role == 'C' || currentUser.role == 'R' || currentUser.role == 'B') {
                         return [
                             {
                                 title: 'My Estimates',
@@ -360,32 +343,55 @@
                     ];
                 }
                 if ($location.url().startsWith('/home_project')) {
-                    return [
-                        {
-                            title: 'Project Detail',
-                            active: $location.url() == '/home_project' || $location.url().startsWith('/home_project/'),
-                            url: '/home_project'
-                        },
-                        {
-                            title: 'Prices',
-                            active: $location.url() == '/home_project_prices' || $location.url().startsWith('/home_project_prices/'),
-                            url: '/home_project_prices'
-                        }
-                    ];
+                    if (currentUser.role == 'R' || currentUser.role == 'B') {
+                        return [
+                            {
+                                title: 'Project Detail',
+                                active: $location.url() == '/home_project' || $location.url().startsWith('/home_project/'),
+                                url: '/home_project'
+                            }
+                        ];
+                    }
+                    else {
+                        return [
+                            {
+                                title: 'Project Detail',
+                                active: $location.url() == '/home_project' || $location.url().startsWith('/home_project/'),
+                                url: '/home_project'
+                            },
+                            {
+                                title: 'Prices',
+                                active: $location.url() == '/home_project_prices' || $location.url().startsWith('/home_project_prices/'),
+                                url: '/home_project_prices'
+                            }
+                        ];
+                    }
+                   
                 }
                 if ($location.url().startsWith('/home_proposal')) {
-                    return [
-                        {
-                            title: 'Proposal Detail',
-                            active: $location.url() == '/home_proposal' || $location.url().startsWith('/home_proposal/'),
-                            url: '/home_proposal'
-                        },
-                        {
-                            title: 'Prices',
-                            active: $location.url() == '/home_proposal_prices' || $location.url().startsWith('/home_proposal_prices/'),
-                            url: '/home_proposal_prices'
-                        }
-                    ];
+                    if (currentUser.role == 'R' || currentUser.role == 'B') {
+                        return [
+                            {
+                                title: 'Proposal Detail',
+                                active: $location.url() == '/home_proposal' || $location.url().startsWith('/home_proposal/'),
+                                url: '/home_proposal'
+                            }
+                        ];
+                    }
+                    else {
+                        return [
+                            {
+                                title: 'Proposal Detail',
+                                active: $location.url() == '/home_proposal' || $location.url().startsWith('/home_proposal/'),
+                                url: '/home_proposal'
+                            },
+                            {
+                                title: 'Prices',
+                                active: $location.url() == '/home_proposal_prices' || $location.url().startsWith('/home_proposal_prices/'),
+                                url: '/home_proposal_prices'
+                            }
+                        ];
+                    }
                 }
                 if ($location.url().startsWith('/home_workingestimate')) {
                     return [
