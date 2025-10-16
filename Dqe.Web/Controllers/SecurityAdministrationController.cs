@@ -49,8 +49,8 @@ namespace Dqe.Web.Controllers
             if (district == "CO") district = string.Empty;
             return
                 new DqeResult(
-                    _dqeUserRepository.GetAll(currentUser.Id, district, true)
-                        .Select(i => i.GetTransformer())
+                    _dqeUserRepository.GetAll(currentUser.Id, district, false)
+                        .Select(i => i.GetTransformer())                        
                         .Select(i =>
                             new
                             {
