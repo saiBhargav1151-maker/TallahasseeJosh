@@ -10,6 +10,7 @@
             $scope.workingEstimate = r.workingEstimate;
             $scope.versions = r.versions;
             $scope.hasReviewsInProject = false;
+            $scope.security.role = $scope.security.role.toString();
 
             //Takes the char field of QTY_CMPLT_CD in LRE table ('Y' or 'N' which has defalut 'N')
 
