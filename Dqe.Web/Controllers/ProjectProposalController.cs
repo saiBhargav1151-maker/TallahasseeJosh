@@ -1434,7 +1434,7 @@ namespace Dqe.Web.Controllers
             {
                 security = new
                 {
-                    role = currentUser.Role,
+                    role = currentUser.Role.ToString(),
                     district = project.District,
                     userInDistrict = currentUser.IsInDqeDistrict(project.District),
                     isAuthorized = currentUser.Role == DqeRole.Administrator || currentUser.IsInDqeDistrict(project.District) || currentUser.IsAuthorizedOnProject(project),

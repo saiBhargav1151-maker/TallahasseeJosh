@@ -13,7 +13,6 @@ using Dqe.Web.Services;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new [] {DqeRole.Administrator, DqeRole.PayItemAdministrator, DqeRole.AdminReadOnly })]
     public class WebLinkAdministrationController : Controller
     {
         private readonly IDqeUserRepository _dqeUserRepository;
@@ -36,6 +35,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator, DqeRole.AdminReadOnly })]
         public ActionResult SearchWebLinks(string linkType, string val)
         {
             var links = _dqeWebLinkRepository.GetWebLinks(linkType, val).ToList();
@@ -50,6 +50,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator, DqeRole.AdminReadOnly })]
         public ActionResult GetWebLinks(string linkType)
         {
             Func<IEnumerable<DqeWebLink>> func;
@@ -90,6 +91,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
         public ActionResult UpdateWebLinks(dynamic linkSet)
         {
             var currentUser = (DqeIdentity)User.Identity;
@@ -156,6 +158,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.PayItemAdministrator })]
         public ActionResult RemoveLinks(dynamic links)
         {
             var selectedLinks = ((IEnumerable<dynamic>)links).Where(i => i.selected).ToList();
