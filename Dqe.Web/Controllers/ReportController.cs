@@ -82,7 +82,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.DistrictReviewer, DqeRole.AdminReadOnly })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer, DqeRole.DistrictReviewer, DqeRole.AdminReadOnly })]
         //public ActionResult DownloadStructureData()
         public ActionResult DownloadStructureData(FormCollection form)
         {
@@ -338,7 +338,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
         public ActionResult SetupProposalSummaryReport(string proposalNumber)
         {
             var letting = _webTransportService.GetLettingByProposal(proposalNumber);
@@ -407,7 +407,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
         public ActionResult ViewWorkingProposalSummaryReport(FormCollection form)
         {
             var currentUser = (DqeIdentity)User.Identity;
@@ -424,7 +424,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
         public ActionResult SetupWorkingProposalSummaryReport(string proposalNumber, int proposalId)
         {
             var currentUser = (DqeIdentity)User.Identity;
