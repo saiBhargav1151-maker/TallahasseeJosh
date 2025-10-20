@@ -513,7 +513,7 @@ namespace Dqe.Infrastructure.Fdot
             Project project = null;
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
-                return session
+         return session
                     .QueryOver(() => project)
                     .WhereRestrictionOn(i => i.ProjectNumber).IsInsensitiveLike(number, MatchMode.Start)
                     .Where(GetProjectValidRestriction())

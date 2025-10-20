@@ -121,7 +121,7 @@ namespace Dqe.Web.Controllers
                         role,
                         name = dqeIdenetity.Name,
                         district = dqeIdenetity.District,
-                        userNameAndRole = string.Format("{0} - {1} {2}", dqeIdenetity.Name, dqeIdenetity.District, roleName)
+                        userNameAndRole = string.Format("{0} - {1} - {2}", dqeIdenetity.Name, dqeIdenetity.District, roleName)
                     }, JsonRequestBehavior.AllowGet);
         }
 

@@ -33,7 +33,7 @@
                             <h5>Proposal: <strong>{{proposal.number}}</strong></h5>
                         </div>
                         <div class="col-lg-3">
-                            <h5>Contract Type: <strong>{{proposal.contractType}}</strong> - <span>{{proposal.contractType[0] == 'M'? "Maintenanace" : "Construction"}}</span></h5>
+                            <h5>Contract Type: <strong ng-if="proposal.contractType">{{proposal.contractType}}</strong> - <span ng-if="proposal.contractType">{{proposal.contractType[0] == 'M'? "Maintenanace" : "Construction"}}</span></h5>
                         </div>
                         <div class="col-lg-6" ng-show="proposal.authorizationTotal != 0 && proposal.authorizationTotal != undefined">
                             <div style="text-align: right;">

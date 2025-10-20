@@ -58,12 +58,12 @@ namespace Dqe.Domain.Model
     public enum DqeRole
     {
         /// <summary>
-        /// System 
+        /// System - should only be used to represent system automations, not an actual user.
     /// </summary>
     System = 'S',
 
         /// <summary>
-        /// CO Administrator
+        /// CO Administrator/ System Administrator
         /// </summary>
         Administrator = 'A',
 

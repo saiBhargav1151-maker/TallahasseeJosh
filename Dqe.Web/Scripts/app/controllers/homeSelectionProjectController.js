@@ -247,8 +247,15 @@
         });
     }
     $scope.loadProject = function () {
-        $scope.prefferedApplication = "";
+    
+        //Should consider changing to a url page change like below (or use $location), 
+        //to make it more consistent and have it adjust the url.MB.
+        //const baseUrl = window.location.origin;
+        //window.location.href = baseUrl +'/#/home_project/'+ $scope.selectedProject.number;
         $http.get('./projectproposal/GetProject', { params: { number: $scope.selectedProject.number } }).success(function (result) {
+            //needing to clear this data becuase was not refreshing properly in rare occasions depending on the load speed
+            $scope.prefferedApplication = "";
+            $scope.project = null;
             stateService.currentProject = $scope.selectedProject.number;
             processResult(result);
         });
@@ -350,12 +357,14 @@
                 var projects = [];
                 angular.forEach(response.data, function (item) {
                     item.displayName = item.number;
-                    if ((item.projectType[0] == 'M')) {
-                        item.displayName = '(M) ' + item.displayName;
-                    }
-                    else {
-                        item.displayName = '(C) ' + item.displayName;
-                    }
+                    if (item.projectType) {
+                        if ((item.projectType[0] == 'M')) {
+                            item.displayName = '(M) ' + item.displayName;
+                        }
+                        else {
+                            item.displayName = '(C) ' + item.displayName;
+                        }
+                    }                  
                     projects.push(item);
                 });
                 return projects;
