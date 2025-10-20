@@ -64,7 +64,7 @@
     }
     $scope.initializeEditForm();
     //CO only Roles
-    var systemAdminRole = { name: 'System Administrator', value: 'A' };
+    var systemAdminRole = { name: 'CO Administrator', value: 'A' };
     var payItemAdminRole = { name: 'Pay Item Administrator', value: 'P' };
     var costBasedTemplateAdminRole = { name: 'Cost-Based Template Administrator', value: 'T' };
     //var coderRole = { name: 'Coder', value: 'C' };

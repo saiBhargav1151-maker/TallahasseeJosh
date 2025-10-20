@@ -115,7 +115,9 @@
                         </div>
                         <div class="col-lg-2">
                             <strong> Project Type: </strong>
-                            {{project.projectType == 'M' ? "Maintenance" : "Construction"}}
+                            <span ng-if="project.projectType">
+                                {{project.projectType == 'M' ? "Maintenance" : "Construction"}}
+                            </span>
                         </div>
                     </div>
                     <div class="row">

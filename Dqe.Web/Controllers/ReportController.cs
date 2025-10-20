@@ -82,7 +82,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer, DqeRole.DistrictReviewer, DqeRole.AdminReadOnly })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         //public ActionResult DownloadStructureData()
         public ActionResult DownloadStructureData(FormCollection form)
         {
@@ -188,7 +188,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer, DqeRole.DistrictReviewer, DqeRole.AdminReadOnly })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         public ActionResult ViewProjectItemsReport(FormCollection form)
         {
             var versions = Server.UrlDecode(form["hiddenProjectSnapshotIds"]).Split(',');
@@ -338,7 +338,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         public ActionResult SetupProposalSummaryReport(string proposalNumber)
         {
             var letting = _webTransportService.GetLettingByProposal(proposalNumber);
