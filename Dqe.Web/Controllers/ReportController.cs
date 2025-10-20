@@ -188,7 +188,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly, DqeRole.StateReviewer, DqeRole.DistrictReviewer })]
         public ActionResult ViewProjectItemsReport(FormCollection form)
         {
             var versions = Server.UrlDecode(form["hiddenProjectSnapshotIds"]).Split(',');
