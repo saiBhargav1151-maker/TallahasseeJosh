@@ -102,7 +102,7 @@
                     <button type="button" class="btn btn-default" title="Click to confirm the set of default prices" ng-click="setBestPrices(); confirmSetBestPrices = false; confirmSetBestPricesReset = true;">Yes</button>
                 </span>
             </div>
-            <div class="col-lg-6" ng-if="estimate.viewOnly && !estimate.canEstimate">
+            <div class="col-lg-6" ng-if="estimate.viewOnly">
                 <div class="text-right">
                     <span style="color: red; font-weight: bold;" ng-show="estimate.hasPendingChanges">
                         WARNING: Estimate has changes, but you are not authorized to save any changes.&nbsp;&nbsp;
