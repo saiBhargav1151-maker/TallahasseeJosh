@@ -1,9 +1,11 @@
 ﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', 'securityService', function ($scope, $rootScope, $http, $route, stateService, securityService) {
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
+        setUser();
         if (!containsDqeError(result)) {
             var r = getDqeData(result);
             stateService.currentEstimateId = r.workingEstimate == undefined ? 0 : r.workingEstimate.projectSnapshotId;
+            passOnfieldsFromOutsideDqeOn(r);
             $scope.security = r.security;
             $scope.project = r.project;
             $scope.proposals = r.proposals;
@@ -15,7 +17,7 @@
             //Takes the char field of QTY_CMPLT_CD in LRE table ('Y' or 'N' which has defalut 'N')
 
             if ($scope.prefferedApplication == "" || $scope.prefferedApplication === null || $scope.prefferedApplication === undefined) {
-                $scope.prefferedApplication = r.project.quantityComplete == null ? "Project not in LRE" : r.project.quantityComplete.toUpperCase() === 'Y' ? "DQE" : r.project.quantityComplete.toUpperCase() === 'N' ? "LRE" : "Project not in LRE";
+                $scope.prefferedApplication = r.project.quantityComplete == null ? "Project not in LRE" : r.project.quantityComplete === 'Y' ? "DQE" : r.project.quantityComplete === 'N' ? "LRE" : "Project not in LRE";
             }
            
 
@@ -134,6 +136,23 @@
             
         }
     }
+
+    function passOnfieldsFromOutsideDqeOn(r) {
+        //if page scope is already loaded with the project type, it will be always unchanged
+
+        if ($scope.project && r.project && $scope.project.projectType != null && r.project.projectType == null) {
+            if (r.project != null) {
+                r.project.projectType = $scope.project.projectType;
+            }
+           
+        }
+    }
+
+    function setUser() {
+        $http.get('./security/GetCurrentUser').success(function (result) {
+            $scope.user = result;
+        });
+    };
 
     //matches the wierd date format from AngularJS
     function formatDotNetDate(msDateString) {
@@ -282,16 +301,16 @@
         });
     }
     $scope.snapshotWorkingEstimate = function (project) {
-
+        let projectTypeTemp = project.projectType;
         $http.post('./projectproposal/SnapshotWorkingEstimate', project).success(function (result) {
             $scope.prefferedApplication = "";
-            if (project.quantityComplete.toUpperCase() === 'N' && project.takeLabeledSnapshot != null && project.takeLabeledSnapshot) {
+            if (project.quantityComplete === 'N' && project.takeLabeledSnapshot != null && project.takeLabeledSnapshot) {
                 result.data.project.quantityComplete = 'Y';
             }
-            else if (project.quantityComplete.toUpperCase() === 'Y') {
+            else if (project.quantityComplete === 'Y') {
                 result.data.project.quantityComplete = 'Y';
             }
-            else if (project.quantityComplete.toUpperCase() === 'N') {
+            else if (project.quantityComplete === 'N') {
                 result.data.project.quantityComplete = 'N';
             }
             processResult(result);
