@@ -494,7 +494,7 @@ namespace Dqe.Web.Controllers
             var estimate = _projectRepository.GetEstimate(estimateId);
             var project = estimate.MyProjectVersion.MyProject;
             var currentUser = (DqeIdentity)User.Identity;
-            var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
+            var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);       
             if (currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && project.CustodyOwner != currentDqeUser)
             {
                 return new DqeResult(null, new ClientMessage{ Severity = ClientMessageSeverity.Error, text = "You must have custody to price the project."});
@@ -509,8 +509,8 @@ namespace Dqe.Web.Controllers
             var wtProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
             var l = BuildProjectItemGroups(estimate);
             var result = new
-            { 
-                viewOnly = (currentDqeUser.Role == DqeRole.Administrator || currentDqeUser.Role == DqeRole.AdminReadOnly) && project.CustodyOwner != currentDqeUser,
+            {
+                viewOnly = (currentDqeUser.Role == DqeRole.Administrator && project.CustodyOwner != currentDqeUser) || currentDqeUser.Role == DqeRole.AdminReadOnly ,
                 canEstimate = project.CustodyOwner == currentDqeUser ? true : false,
                 isSystemSync = true,
                 estimateId = estimate.Id,
@@ -906,7 +906,7 @@ namespace Dqe.Web.Controllers
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
             var itemsCount = proposal.SectionGroups.Sum(i => i.ProposalItems.Count());
-   
+            
             if ((currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && proposal.CurrentEstimator != currentDqeUser) || itemsCount == 0)
             {
                 proposal.SetCurrentEstimator(currentDqeUser);
@@ -949,7 +949,7 @@ namespace Dqe.Web.Controllers
             var l = BuildProposalItemGroups(proposal);
             var result = new
             {
-                viewOnly = (currentDqeUser.Role == DqeRole.Administrator || currentDqeUser.Role == DqeRole.AdminReadOnly) && projects.Any(i => !i.HasCustody) ? true : false,
+                viewOnly = (currentDqeUser.Role == DqeRole.Administrator && projects.Any(i => !i.HasCustody)) || currentDqeUser.Role == DqeRole.AdminReadOnly ,
                 canEstimate = projects.Any(i => !i.HasCustody) ? false : true,
                 isSystemSync = true,
                 estimateId = proposal.Id,
@@ -1027,6 +1027,7 @@ namespace Dqe.Web.Controllers
                 }
                 pi.Transform(pit, currentDqeUser);
             }
+            //push prices means transfer prices to PrP
             if (estimate.pushPrices)
             {
                 var pricesPushed = false;
@@ -1071,7 +1072,7 @@ namespace Dqe.Web.Controllers
                 //    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved - {0}", pricesPushed ? "Project Preconstruction fixed price items updated" : "Project Preconstruction fixed price items not updated because a project is not synchronized") }, JsonRequestBehavior.AllowGet);
                 //}
             }
-            return new DqeResult(null, JsonRequestBehavior.AllowGet);
+            return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate Saved") }, JsonRequestBehavior.AllowGet);
         }
 
         private bool IsProjectSynced(long projectId)
@@ -1140,7 +1141,7 @@ namespace Dqe.Web.Controllers
                                                     : PriceSetType.Parameter;
                 }
                 pi.Transform(pit, currentDqeUser);
-            }
+            }         
             if (estimate.pushPrices)
             {
                 var proposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
