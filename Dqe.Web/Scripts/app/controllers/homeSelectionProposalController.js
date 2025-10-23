@@ -1,4 +1,4 @@
-﻿dqeControllers.controller('HomeSelectionProposalController', ['$scope', '$rootScope', '$http', '$route', 'stateService', function ($scope, $rootScope, $http, $route, stateService) {
+﻿dqeControllers.controller('HomeSelectionProposalController', ['$scope', '$rootScope', '$http', '$location', '$route', 'stateService', function ($scope, $rootScope, $http, $location, $route, stateService) {
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
         if (!containsDqeError(result)) {
@@ -84,10 +84,14 @@
             });
         }
     }
+    //Previously this was just reloading the data on the page, but decided on refreshing the page altogether because of hard to isolate occasional non syncronous loading of data. MB. 
     $scope.loadProposal = function () {
         $http.get('./projectproposal/GetProposal', { params: { number: $scope.selectedProposal.number } }).success(function (result) {
-            stateService.currentProposal = $scope.selectedProposal.number;
-            processResult(result);
+            $location.url('/home_proposal/' + $scope.selectedProposal.number);
+
+            // //unreached older way
+            //stateService.currentProposal = $scope.selectedProposal.number;
+            //processResult(result);
         });
     }
     $scope.getProposals = function (val) {

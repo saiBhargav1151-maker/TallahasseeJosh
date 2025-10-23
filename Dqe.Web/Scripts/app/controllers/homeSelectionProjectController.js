@@ -1,4 +1,4 @@
-﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', 'securityService', function ($scope, $rootScope, $http, $route, stateService, securityService) {
+﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$location', '$route', 'stateService', 'securityService', function ($scope, $rootScope, $http, $location, $route, stateService, securityService) {
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
         setUser();
@@ -7,7 +7,7 @@
             stateService.currentEstimateId = r.workingEstimate == undefined ? 0 : r.workingEstimate.projectSnapshotId;
             passOnfieldsFromOutsideDqeOn(r);
             $scope.security = r.security;
-            $scope.project = r.project;
+            $scope.project = r.project;            
             $scope.proposals = r.proposals;
             $scope.workingEstimate = r.workingEstimate;
             $scope.versions = r.versions;
@@ -17,7 +17,7 @@
             //Takes the char field of QTY_CMPLT_CD in LRE table ('Y' or 'N' which has defalut 'N')
 
             if ($scope.prefferedApplication == "" || $scope.prefferedApplication === null || $scope.prefferedApplication === undefined) {
-                $scope.prefferedApplication = r.project.quantityComplete == null ? "Project not in LRE" : r.project.quantityComplete === 'Y' ? "DQE" : r.project.quantityComplete === 'N' ? "LRE" : "Project not in LRE";
+                $scope.prefferedApplication = r.project.quantityComplete == null ? "Project not in LRE" : r.project.quantityComplete.toUpperCase() === 'Y' ? "DQE" : r.project.quantityComplete.toUpperCase() === 'N' ? "LRE" : "Project not in LRE";     
             }
            
 
@@ -265,18 +265,16 @@
             }
         });
     }
+    //Previously this was just reloading the data on the page, but decided on refreshing the page altogether because of hard to isolate occasional non syncronous loading of data. MB. 
     $scope.loadProject = function () {
-    
-        //Should consider changing to a url page change like below (or use $location), 
-        //to make it more consistent and have it adjust the url.MB.
-        //const baseUrl = window.location.origin;
-        //window.location.href = baseUrl +'/#/home_project/'+ $scope.selectedProject.number;
         $http.get('./projectproposal/GetProject', { params: { number: $scope.selectedProject.number } }).success(function (result) {
-            //needing to clear this data becuase was not refreshing properly in rare occasions depending on the load speed
-            $scope.prefferedApplication = "";
-            $scope.project = null;
-            stateService.currentProject = $scope.selectedProject.number;
-            processResult(result);
+            //this fixes a hidden bug only seen occasionally from a non syncronous call down the line
+            $location.url('/home_project/' + $scope.selectedProject.number);
+
+            //unreached older way
+            //$scope.prefferedApplication = "";        
+            //stateService.currentProject = $scope.selectedProject.number;
+            //processResult(result);
         });
     };
 
@@ -301,7 +299,7 @@
         });
     }
     $scope.snapshotWorkingEstimate = function (project) {
-        let projectTypeTemp = project.projectType;
+
         $http.post('./projectproposal/SnapshotWorkingEstimate', project).success(function (result) {
             $scope.prefferedApplication = "";
             if (project.quantityComplete === 'N' && project.takeLabeledSnapshot != null && project.takeLabeledSnapshot) {
