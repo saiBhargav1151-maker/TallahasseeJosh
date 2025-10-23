@@ -5,7 +5,6 @@
         if (!containsDqeError(result)) {
             var r = getDqeData(result);
             stateService.currentEstimateId = r.workingEstimate == undefined ? 0 : r.workingEstimate.projectSnapshotId;
-            passOnfieldsFromOutsideDqeOn(r);
             $scope.security = r.security;
             $scope.project = r.project;            
             $scope.proposals = r.proposals;
@@ -15,12 +14,10 @@
             $scope.security.role = $scope.security.role.toString();
 
             //Takes the char field of QTY_CMPLT_CD in LRE table ('Y' or 'N' which has defalut 'N')
-
             if ($scope.prefferedApplication == "" || $scope.prefferedApplication === null || $scope.prefferedApplication === undefined) {
                 $scope.prefferedApplication = r.project.quantityComplete == null ? "Project not in LRE" : r.project.quantityComplete.toUpperCase() === 'Y' ? "DQE" : r.project.quantityComplete.toUpperCase() === 'N' ? "LRE" : "Project not in LRE";     
             }
-           
-
+          
             $scope.canCheckOut = false;
             $scope.canSeePrices = false;
             //if is on list, then make can checkout var as true.
@@ -134,17 +131,6 @@
                 }
             }
             
-        }
-    }
-
-    function passOnfieldsFromOutsideDqeOn(r) {
-        //if page scope is already loaded with the project type, it will be always unchanged
-
-        if ($scope.project && r.project && $scope.project.projectType != null && r.project.projectType == null) {
-            if (r.project != null) {
-                r.project.projectType = $scope.project.projectType;
-            }
-           
         }
     }
 
