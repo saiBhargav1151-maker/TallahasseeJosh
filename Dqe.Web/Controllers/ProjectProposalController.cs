@@ -118,6 +118,22 @@ namespace Dqe.Web.Controllers
             return null;
         }
 
+        /// <summary>
+        /// Grabs the Project ContractType field from the wT Project
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult GetWtProposalContractType(string number)
+        {
+            var wtp = _webTransportService.GetProposalSlim(number);
+            var result = new DqeResult(new
+            {
+                contractType = wtp.ContractType
+            }, JsonRequestBehavior.AllowGet);
+            return result;
+        }
+
         [HttpGet]
         [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer,
         DqeRole.DistrictReviewer,
@@ -579,6 +595,23 @@ namespace Dqe.Web.Controllers
                 JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Grabs the Project Type field from the wT Project
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult GetWtProjectType(string number)
+        {
+            var wtp = _webTransportService.GetProjectSlim(number);
+            var result = new DqeResult(new
+            {
+                projectType = wtp.ProjectType
+            },JsonRequestBehavior.AllowGet);
+            return result;
+        }
+
+
         [HttpGet]
         public ActionResult GetProject(string number)
         {
@@ -589,6 +622,7 @@ namespace Dqe.Web.Controllers
         {
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
+            //this needs an await
             var wtp = _webTransportService.GetProject(number);
             var project = _projectRepository.GetByProjectNumber(number);
 

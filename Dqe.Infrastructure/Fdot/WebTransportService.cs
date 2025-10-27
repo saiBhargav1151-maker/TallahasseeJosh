@@ -550,6 +550,42 @@ namespace Dqe.Infrastructure.Fdot
             }
         }
 
+        /// <summary>
+        /// Getting a slim version of the project record, without any joins.
+        /// </summary>
+        /// <param name="number">Project Number</param>
+        /// <returns><see cref="Domain.Model.Wt.Project"/></returns>
+        public Project GetProjectSlim(string number)
+        {
+            Project project = null;
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                return session
+                    .QueryOver(() => project)
+                    .Where(i => i.ProjectNumber == number)
+                    .Where(GetProjectValidRestriction())
+                    .Where(i => i.IsLatestVersion)
+                    .SingleOrDefault();
+            }
+        }
+
+        /// <summary>
+        /// Getting a slim version of the proposal record, without any joins.
+        /// </summary>
+        /// <param name="number">Proposal Number</param>
+        /// <returns><see cref="Domain.Model.Wt.Proposal"/></returns>
+        public Proposal GetProposalSlim(string number)
+        {
+            Proposal proposal = null;
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                return session
+                    .QueryOver(() => proposal)
+                    .Where(i => i.ProposalNumber == number)
+                    .SingleOrDefault();
+            }
+        }
+
         public IEnumerable<Project> GetProjectsByProposalId(long id)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
