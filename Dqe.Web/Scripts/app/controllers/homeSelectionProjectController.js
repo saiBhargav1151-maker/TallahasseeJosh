@@ -5,6 +5,7 @@
         if (!containsDqeError(result)) {
             var r = getDqeData(result);
             stateService.currentEstimateId = r.workingEstimate == undefined ? 0 : r.workingEstimate.projectSnapshotId;
+            passOnfieldsFromOutsideDqeOn(r);
             $scope.security = r.security;
             $scope.project = r.project;            
             $scope.proposals = r.proposals;
@@ -129,8 +130,7 @@
                         latestRunningModifiedVersion = i;
                     }
                 }
-            }
-            
+            }            
         }
     }
 
@@ -139,6 +139,15 @@
             $scope.user = result;
         });
     };
+
+    function passOnfieldsFromOutsideDqeOn(r) {
+        //if page scope is already loaded with the project type, it will be always unchanged
+        if ($scope.project && r.project && $scope.project.projectType != null && r.project.projectType == null) {
+            if (r.project != null) {
+                r.project.projectType = $scope.project.projectType;
+            }
+        }
+    }
 
     //matches the wierd date format from AngularJS
     function formatDotNetDate(msDateString) {
