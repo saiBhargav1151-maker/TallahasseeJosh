@@ -262,15 +262,14 @@
     }
     //Previously this was just reloading the data on the page, but decided on refreshing the page altogether because of hard to isolate occasional non syncronous loading of data. MB. 
     $scope.loadProject = function () {
-        $http.get('./projectproposal/GetProject', { params: { number: $scope.selectedProject.number } }).success(function (result) {
-            //this fixes a hidden bug only seen occasionally from a non syncronous call down the line
-            $location.url('/home_project/' + $scope.selectedProject.number);
-
-            //unreached older way
-            //$scope.prefferedApplication = "";        
-            //stateService.currentProject = $scope.selectedProject.number;
-            //processResult(result);
-        });
+        $location.url('/home_project/' + $scope.selectedProject.number);
+        //$http.get('./projectproposal/GetProject', { params: { number: $scope.selectedProject.number } }).success(function (result) {
+        //    //this fixes a hidden bug only seen occasionally from a non syncronous call down the line
+        //    //unreached older way
+        //    //$scope.prefferedApplication = "";        
+        //    //stateService.currentProject = $scope.selectedProject.number;
+        //    //processResult(result);
+        //});
     };
 
     $scope.createProjectVersionFromWt = function (project) {

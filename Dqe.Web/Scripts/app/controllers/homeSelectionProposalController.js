@@ -86,13 +86,9 @@
     }
     //Previously this was just reloading the data on the page, but decided on refreshing the page altogether because of hard to isolate occasional non syncronous loading of data. MB. 
     $scope.loadProposal = function () {
-        $http.get('./projectproposal/GetProposal', { params: { number: $scope.selectedProposal.number } }).success(function (result) {
-            $location.url('/home_proposal/' + $scope.selectedProposal.number);
 
-            // //unreached older way
-            //stateService.currentProposal = $scope.selectedProposal.number;
-            //processResult(result);
-        });
+         $location.url('/home_proposal/' + $scope.selectedProposal.number);
+
     }
     $scope.getProposals = function (val) {
         return $http.get('./projectproposal/GetProposals', { params: { number: val } })
