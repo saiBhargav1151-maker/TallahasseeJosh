@@ -315,6 +315,32 @@ namespace Dqe.Infrastructure.Fdot
             }
         }
 
+        public Project GetProjectSlim(string number)
+        {
+            Project project = null;
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                return session
+                    .QueryOver(() => project)
+                    .Where(i => i.ProjectNumber == number)
+                    .Where(GetProjectValidRestriction())
+                    .Where(i => i.IsLatestVersion)
+                    .SingleOrDefault();
+            }
+        }
+
+        public Proposal GetProposalSlim(string number)
+        {
+            Proposal proposal = null;
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                return session
+                    .QueryOver(() => proposal)
+                    .Where(i => i.ProposalNumber == number)
+                    .SingleOrDefault();
+            }
+        }
+
         public IEnumerable<Project> GetProjectsByProposalId(long id)
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())

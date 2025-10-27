@@ -206,6 +206,11 @@
         if ($route.current.params.project != 'undefined' && $route.current.params.project != null) {
             $http.get('./projectproposal/GetProject', { params: { number: $route.current.params.project } }).success(function (result) {
                 stateService.currentProject = $route.current.params.project;
+                if (result.data.project.projectType == null || result.data.project.projectType == undefined) {
+                    $http.get('./projectproposal/GetWtProjectType', { params: { number: $route.current.params.project } }).success(function (wtResult) {
+                        result.data.project.projectType = wtResult.data.projectType;
+                    });
+                }
                 processResult(result);
                 checkSync(result);
             });
