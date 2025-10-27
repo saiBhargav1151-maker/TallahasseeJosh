@@ -315,6 +315,11 @@ namespace Dqe.Infrastructure.Fdot
             }
         }
 
+        /// <summary>
+        /// Getting a slim version of the project record, without any joins.
+        /// </summary>
+        /// <param name="number">Project Number</param>
+        /// <returns><see cref="Domain.Model.Wt.Project"/></returns>
         public Project GetProjectSlim(string number)
         {
             Project project = null;
@@ -329,6 +334,11 @@ namespace Dqe.Infrastructure.Fdot
             }
         }
 
+        /// <summary>
+        /// Getting a slim version of the proposal record, without any joins.
+        /// </summary>
+        /// <param name="number">Proposal Number</param>
+        /// <returns><see cref="Domain.Model.Wt.Proposal"/></returns>
         public Proposal GetProposalSlim(string number)
         {
             Proposal proposal = null;

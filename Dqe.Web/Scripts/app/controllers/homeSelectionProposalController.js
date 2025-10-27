@@ -75,8 +75,9 @@
     if ($route.current.params != 'undefined' && $route.current.params != null) {
         if ($route.current.params.proposal != 'undefined' && $route.current.params.proposal != null) {
             $http.get('./projectproposal/GetProposal', { params: { number: $route.current.params.proposal } }).success(function (result) {
+                //tries fetching the contract Type again if it didn't come through the first time
                 if (result.data.proposal.contractType == null || result.data.proposal.contractType == undefined) {
-                    $http.get('./projectproposal/GetWtProposalType', { params: { number: $route.current.params.proposal } }).success(function (wtResult) {
+                    $http.get('./projectproposal/GetWtProposalContractType', { params: { number: $route.current.params.proposal } }).success(function (wtResult) {
                         result.data.proposal.contractType = wtResult.data.contractType;
                     });
                 }
