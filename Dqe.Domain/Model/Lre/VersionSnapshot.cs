@@ -10,6 +10,9 @@ namespace Dqe.Domain.Model.Lre
 
         public virtual int ProjectVersionNumber { get; set; }
 
+        /// <summary>
+        /// 00 - 70
+        /// </summary>
         public virtual string LabelCode { get; set; }
 
         public virtual string VersionStatusCode { get; set; }

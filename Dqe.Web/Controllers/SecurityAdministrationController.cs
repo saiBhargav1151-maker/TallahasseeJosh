@@ -12,7 +12,7 @@ using Dqe.Web.Attributes;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new [] {DqeRole.Administrator, DqeRole.DistrictAdministrator})]
+    [CustomAuthorize(Roles = new [] {DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.MaintenanceDistrictAdmin, DqeRole.AdminReadOnly})]
     public class SecurityAdministrationController : Controller
     {
         private readonly IStaffService _staffService;
@@ -37,6 +37,10 @@ namespace Dqe.Web.Controllers
             _projectRepository = projectRepository;
         }
 
+        /// <summary>
+        /// Gets all users
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public ActionResult GetAllUsers()
         {
@@ -45,23 +49,15 @@ namespace Dqe.Web.Controllers
             if (district == "CO") district = string.Empty;
             return
                 new DqeResult(
-                    _dqeUserRepository.GetAll(currentUser.Id, district)
-                        .Select(i => i.GetTransformer())
+                    _dqeUserRepository.GetAll(currentUser.Id, district, false)
+                        .Select(i => i.GetTransformer())                        
                         .Select(i =>
                             new
                             {
                                 id = i.SrsId,
                                 fullName = i.FullName,
                                 district = i.District,
-                                role = i.Role == DqeRole.Administrator
-                                 ? "A"
-                                 : i.Role == DqeRole.DistrictAdministrator
-                                    ? "D"
-                                    : i.Role == DqeRole.Estimator
-                                        ? "E"
-                                        : i.Role == DqeRole.PayItemAdministrator
-                                            ? "P"
-                                            : "T",
+                                role = ((char)i.Role).ToString(),
                                 costGroupAuthorization = i.CostGroupAuthorization,
                                 roleAsString = i.RoleAsString,
                                 selected = false
@@ -69,6 +65,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator })]
         public ActionResult UpdateUser(dynamic user)
         {
             var currentUser = (DqeIdentity)User.Identity;
@@ -81,15 +78,7 @@ namespace Dqe.Web.Controllers
                 t.IsActive = true;
                 t.SrsId = user.id;
                 t.District = user.district;
-                t.Role = user.role == "A"
-                    ? DqeRole.Administrator
-                    : user.role == "D"
-                        ? DqeRole.DistrictAdministrator
-                        : user.role == "T"
-                            ? DqeRole.CostBasedTemplateAdministrator
-                            : user.role == "P"
-                                ? DqeRole.PayItemAdministrator
-                                : DqeRole.Estimator;
+                t.Role = (DqeRole)user.role.ToString()[0]; 
                 t.CostGroupAuthorization = user.costGroupAuthorization;
                 u.Transform(t, currentDqeUser);
                 _commandRepository.Add(u);
@@ -99,15 +88,7 @@ namespace Dqe.Web.Controllers
                 var t = (Domain.Transformers.DqeUser)u.GetTransformer();
                 t.IsActive = true;
                 t.District = user.district;
-                t.Role = user.role == "A"
-                    ? DqeRole.Administrator
-                    : user.role == "D"
-                        ? DqeRole.DistrictAdministrator
-                        : user.role == "T"
-                            ? DqeRole.CostBasedTemplateAdministrator
-                            : user.role == "P"
-                                ? DqeRole.PayItemAdministrator
-                                : DqeRole.Estimator;
+                t.Role = (DqeRole)user.role.ToString()[0];
                 t.CostGroupAuthorization = user.costGroupAuthorization;
                 u.Transform(t, currentDqeUser);
             }
@@ -115,6 +96,7 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator})]
         public ActionResult RemoveUsers(dynamic users)
         {
             var currentUser = (DqeIdentity)User.Identity;

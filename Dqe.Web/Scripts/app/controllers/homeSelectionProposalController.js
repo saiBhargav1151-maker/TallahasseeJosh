@@ -1,4 +1,4 @@
-﻿dqeControllers.controller('HomeSelectionProposalController', ['$scope', '$rootScope', '$http', '$route', 'stateService', function ($scope, $rootScope, $http, $route, stateService) {
+﻿dqeControllers.controller('HomeSelectionProposalController', ['$scope', '$rootScope', '$http', '$location', '$route', 'stateService', function ($scope, $rootScope, $http, $location, $route, stateService) {
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
         if (!containsDqeError(result)) {
@@ -75,6 +75,12 @@
     if ($route.current.params != 'undefined' && $route.current.params != null) {
         if ($route.current.params.proposal != 'undefined' && $route.current.params.proposal != null) {
             $http.get('./projectproposal/GetProposal', { params: { number: $route.current.params.proposal } }).success(function (result) {
+                //tries fetching the contract Type again if it didn't come through the first time
+                if (result.data.proposal.contractType == null || result.data.proposal.contractType == undefined) {
+                    $http.get('./projectproposal/GetWtProposalContractType', { params: { number: $route.current.params.proposal } }).success(function (wtResult) {
+                        result.data.proposal.contractType = wtResult.data.contractType;
+                    });
+                }
                 stateService.currentProposal = $route.current.params.proposal;
                 processResult(result);
             });
@@ -84,21 +90,28 @@
             });
         }
     }
+    //Previously this was just reloading the data on the page, but decided on refreshing the page altogether because of hard to isolate occasional non syncronous loading of data. MB. 
     $scope.loadProposal = function () {
-        $http.get('./projectproposal/GetProposal', { params: { number: $scope.selectedProposal.number } }).success(function (result) {
-            stateService.currentProposal = $scope.selectedProposal.number;
-            processResult(result);
-        });
+
+         $location.url('/home_proposal/' + $scope.selectedProposal.number);
+
     }
     $scope.getProposals = function (val) {
         return $http.get('./projectproposal/GetProposals', { params: { number: val } })
             .then(function (response) {
                 var proposals = [];
                 angular.forEach(response.data, function (item) {
+                    item.displayName = item.number;
+                    if ((item.contractType[0] == 'M')){
+                        item.displayName = '(M) ' + item.displayName;
+                    }
+                    else {
+                        item.displayName = '(C) ' + item.displayName;
+                    }
                     proposals.push(item);
                 });
                 return proposals;
-            });
+           });
     };
     $scope.snapshotWorkingEstimate = function (proposal) {
         if (proposal.takeLabeledSnapshot == undefined) {

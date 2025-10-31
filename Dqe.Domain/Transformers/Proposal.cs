@@ -14,5 +14,7 @@ namespace Dqe.Domain.Transformers
         public DateTime? LettingDate { get; set; }
         public string Description { get; set; }
         public string District { get; set; }
+
+        public string ContractType { get; set; }
     }
 }

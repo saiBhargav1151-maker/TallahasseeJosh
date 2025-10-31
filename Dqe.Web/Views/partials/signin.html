@@ -9,7 +9,7 @@
 <hr/>
 <div class="row" ng-if="impersonate">
     <div class="col-lg-4">
-        <input type="text" ng-model="impersonateUser.selected" placeholder="Enter a user name" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="user as user.fullName for user in getUsers($viewValue)" typeahead-editable="false" typeahead-on-select="setDistrict()" class="form-control">
+        <input type="text" ng-model="impersonateUser.selected" placeholder="Enter first and last name" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="user as user.fullName for user in getUsers($viewValue)" typeahead-editable="false" typeahead-on-select="setDistrict()" class="form-control">
     </div>
     <div class="col-lg-2">
         <select class="form-control" ng-model="impersonateUser.district">
@@ -26,15 +26,24 @@
     </div>
     <div class="col-lg-2" ng-show="impersonateUser.district == 'CO'">
         <select class="form-control" ng-model="impersonateUser.role">
-            <option value="A">System Administrator</option>
+            <option value="A">CO Administrator</option>
             <option value="P">Pay Item Administrator</option>
             <option value="T">Cost-Based Template Administrator</option>
             <option value="E">Estimator</option>
+            <option value="B">State Reviewer</option>
+            <!--<option value="C">Coder</option>-->
+            <!--<option value="F">Maintenance District Admin</option>-->
+            <!--<option value="M">Maintenance Estimator</option>-->
+            <option value="O">Admin Read Only</option>
         </select>
     </div>
     <div class="col-lg-2" ng-show="impersonateUser.district.startsWith('D') || impersonateUser.district == 'TP'">
         <select class="form-control" ng-model="impersonateUser.role">
             <option value="D">District Administrator</option>
+            <option value="R">District Reviewer</option>
+            <option value="B">State Reviewer</option>
+            <!--<option value="F">Maintenance District Admin</option>
+            <option value="M">Maintenance Estimator</option>-->
             <option value="E">Estimator</option>
         </select>
     </div>
@@ -93,7 +102,7 @@
     </form>
 </div>
 <div ng-if="canImpersonate && !impersonate">
-    <a href="" ng-click="showImpersonation()">Impersonate Security</a>
+    <a href="" ng-click="showImpersonation()" title="This should only be">Impersonate and Switch User Role </a>
 </div>
 <div ng-if="impersonate">
     <a href="" ng-click="showLogin()">RACF Login</a>

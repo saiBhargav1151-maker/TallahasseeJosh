@@ -44,7 +44,15 @@ namespace Dqe.Domain.Model.Wt
 
         public virtual string FederalProjectNumber { get; set; }
 
+        public virtual string ProjectType { get; set; }
+
         public virtual string ProjectWorkType { get; set; }
+
+        /// <summary>
+        /// LRE Column - Dictates to user if they want DQE as the primary program instead of LRE
+        /// It is in the DB as a single char byte
+        /// </summary>
+        public virtual string QuantityComplete { get; set; }
 
         #region "pricing"
 

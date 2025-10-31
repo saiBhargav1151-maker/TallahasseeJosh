@@ -17,7 +17,7 @@
     .scroll-item {
         scroll-margin-top: 100px;
     }
-    
+
 </style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -26,10 +26,17 @@
         <h4>Search:</h4>
     </div>
     <div class="col-lg-2">
-        <input id="projectNumber" title="Project number" type="text" ng-model="selectedProject" placeholder="12345615201" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="project as project.number for project in getProjects($viewValue)" typeahead-editable="false" typeahead-on-select="loadProject()" class="form-control">
+        <input id="projectNumber" title="Project number" type="text" ng-model="selectedProject" placeholder="12345615201"
+               typeahead-min-length="3"
+               typeahead-wait-ms="500"
+               typeahead="project as project.displayName for project in getProjects($viewValue)"
+               typeahead-editable="false"
+               typeahead-on-select="loadProject()"
+               typeahead-input-formatter="$model.number"
+               class="form-control">
     </div>
     <div class="col-lg-7">
-       
+
     </div>
     <div class="col-lg-2" ng-show="project != undefined && project != null && versions.length > 0">
         <button ng-click="scrollTo('reviewSectionHeader')" style="float:right" title="Scroll to Reviews section">Go to Reviews</button>
@@ -42,25 +49,42 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="row">
-                        <div class="col-lg-3">
+                        <div class="col-lg-6">
                             <h5>
-                                Project: <strong>{{project.number}}</strong> &nbsp;&nbsp; Proposal:
+                                <strong> Project: </strong>
+                                {{project.number}}
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <strong> Proposal: </strong>
                                 <span ng-repeat="proposal in proposals">
                                     <a href="#/home_proposal/{{proposal.number}}" title="Click to view proposal {{proposal.number}}">
-                                        <strong>{{proposal.number}}</strong>
+                                        {{proposal.number}}
                                     </a>
                                 </span>
+                                <span ng-if="proposals.length == 0">N/A </span>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <span>
+                                    <strong>Preferred Estimate: </strong>
+                                    {{prefferedApplication}}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                </span>
+
+
                             </h5>
+
                         </div>
-                        <div class="col-lg-9" style="text-align: right;">
+                        <div class="col-lg-6" style="text-align: right;">
                             <span>
-                                <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">Check In</button>
-                                <span ng-if="security.isAuthorized">
-                                    <button type="button" title="Click to check out the project" focus-me="userCheckedIn" ng-if="project.isAvailable == true" class="btn btn-primary" ng-click="userCheckedIn = false; userCheckedOut = true; aquireCustody(project);">Check Out</button>
+                                <button type="button" title="Click to check in the project" focus-me="userCheckedOut" ng-if="project.userHasCustody == true || (!project.isAvailable && (security.isSystemAdmin || security.isDistrictAdmin || security.isMaintenanceDistrictAdmin))" class="btn btn-default" ng-click="userCheckedIn = true; userCheckedOut = false; releaseCustody(project);">
+                                    Check In
+                                </button>
+                                <span>
+                                    <button type="button" title="Click to check out the project" focus-me="userCheckedIn" ng-if="project.isAvailable == true && canCheckOut" class="btn btn-primary" ng-click="userCheckedIn = false; userCheckedOut = true; aquireCustody(project);">
+                                        Check Out
+                                    </button>
                                 </span>
                             </span>
                             &nbsp;&nbsp;
-                            <span ng-show="project.userHasCustody == true && security.isAuthorized">
+                            <span ng-show="(project.userHasCustody == true && security.isAuthorized) || security.isCoderRole">
                                 <button type="button" class="btn btn-primary" title="Click to create a new version and estimate from Project Preconstruction" focus-me="confirmCreateNewVersionFromWtReset" ng-show="!confirmCreateNewVersionFromWt && !project.isOfficial" ng-click="confirmCreateNewVersionFromWt = true; confirmCreateNewVersionFromWtReset = false;">Create New Version from Project Preconstruction</button>
                                 <span class="alert alert-warning" ng-show="confirmCreateNewVersionFromWt">
                                     Click 'Yes' to create a new project version from Project Preconstruction or 'No' to cancel&nbsp;&nbsp;
@@ -89,6 +113,12 @@
                         <div class="col-lg-2">
                             <strong>Item Year:</strong> {{project.filenumber}}
                         </div>
+                        <div class="col-lg-2">
+                            <strong> Project Type: </strong>
+                            <span ng-if="project.projectType">
+                                {{project.projectType == 'M' ? "Maintenance" : "Construction"}}
+                            </span>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-lg-1">
@@ -107,12 +137,12 @@
                                 <input type="radio" name="reportFormat" title="Output - Excel" ng-model="reportFormat.type" value="EXCELOPENXML"> Excel
                                 &nbsp;&nbsp;
                                 <button type="button" title="Click to download the report - file type: {{reportFormat.type}} file size: unknown" class="btn btn-primary" ng-click="viewScopeTrackingGraph()">View Scope Tracking Graph</button>
-                               <!-- <button type="button" title="Click to download the report - file type: {{reportFormat.type}} file size: unknown" class="btn btn-primary" ng-click="viewReviewTrackingGraph()">View Review Tracking Graph</button>-->
+                                <!-- <button type="button" title="Click to download the report - file type: {{reportFormat.type}} file size: unknown" class="btn btn-primary" ng-click="viewReviewTrackingGraph()">View Review Tracking Graph</button>-->
                             </div>
                         </div>
                         <input type="hidden" id="hiddenProjectNumber" name="hiddenProjectNumber" value="">
                     </form>
-                    <div ng-show="(security.isSystemAdmin || security.isDistrictAdmin) && project != undefined">
+                    <div ng-show="(security.isSystemAdmin || security.isDistrictAdmin || security.isMaintenanceDistrictAdmin) && project != undefined">
                         <a href="" title="click to show/hide other authorized users for this project" ng-click="securityControls.isExpanded = !securityControls.isExpanded">
                             <i class="glyphicon glyphicon-plus" title="Show Security Controls" ng-show="!securityControls.isExpanded"></i>
                             <i class="glyphicon glyphicon-minus" title="Hide Security Controls" ng-show="securityControls.isExpanded"></i>
@@ -162,9 +192,9 @@
                             <h5>Working Estimate</h5>
                         </div>
                         <div class="col-lg-10" style="text-align: right;">
-                            <span ng-if="project.userHasCustody == true && security.isAuthorized">
+                            <span ng-if="(project.userHasCustody == true && security.isAuthorized) || security.isCoderRole">
                                 <span ng-show="!project.isOfficial">
-                                    <span ng-show="project.nextLabel != undefined && project.nextLabel != null && project.nextLabel != ''">
+                                    <span ng-show="project.nextLabel != undefined && project.nextLabel != null && project.nextLabel != '' && !security.isCoderRole">
                                         <label>
                                             <strong>Apply {{project.nextLabel}} Label</strong>
                                             <input type="checkbox" title="Take labeled snapshot" ng-model="project.takeLabeledSnapshot">
@@ -199,7 +229,7 @@
                         <div class="col-lg-3">
                             <strong>Source:</strong> {{workingEstimate.source}}
                         </div>
-                        <div class="col-lg-3">
+                        <div class="col-lg-3" ng-if="!security.isCoderRole">
                             <strong>Estimate:</strong> {{workingEstimate.estimate.Total | currency}}
                         </div>
                     </div>
@@ -282,8 +312,8 @@
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-lg-12">
-                                <div ng-repeat="version in versions | filter:{versionLabel:'!Review'} | orderBy:'displayOrder':true" >
-                                    <div id="versionHeader{{version.projectVersion}}" ng-class="(version.isCurrentOwner && version.hasWorkingEstimate) ? 'panel panel-primary' : 'panel panel-default'" class="scroll-item" >
+                                <div ng-repeat="version in versions | filter:{versionLabel:'!Review'} | orderBy:'displayOrder':true">
+                                    <div id="versionHeader{{version.projectVersion}}" ng-class="(version.isCurrentOwner && version.hasWorkingEstimate) ? 'panel panel-primary' : 'panel panel-default'" class="scroll-item">
                                         <div class="panel-heading">
                                             <div class="row">
                                                 <div class="col-lg-2" style="max-width:200px">
@@ -312,7 +342,7 @@
                                                 <thead>
                                                     <tr>
                                                         <td style="width: 5%" ng-if="project.userHasCustody == true && security.isAuthorized && !project.isOfficial"></td>
-                                                        <td style="width: 5%" ng-if="security.isSystemAdmin"></td> <!--ng-if="security.isSystemAdmin"-->
+                                                        <td style="width: 5%" ng-if="security.isSystemAdmin || security.isReviewRole"></td> <!--ng-if="security.isSystemAdmin"-->
                                                         <td style="width: 5%; text-align: center;">Existing Review</td>
                                                         <td style="width: 5%">Estimate</td>
                                                         <td style="width: 5%">Working Estimate</td>
@@ -335,7 +365,7 @@
                                                                 <a href="" title="Click to cancel the creation of the new version" ng-click="confirmCreateVersionFromEstimate = false">No</a>
                                                             </div>
                                                         </td>
-                                                        <td ng-if="security.isSystemAdmin">
+                                                        <td ng-if="security.isSystemAdmin || security.isReviewRole">
                                                             <a href="" title="Click to create a new review version from this estimate" ng-show="!confirmCreateReviewVersionFromEstimate" ng-click="confirmCreateReview = true">Create New <b>Review</b></a>
                                                             <div ng-show="confirmCreateReview">
                                                                 <div>Confirm?</div>
@@ -349,14 +379,14 @@
                                                         </td>
                                                         <td>{{snapshot.projectSnapshot}}</td>
                                                         <td>{{snapshot.isWorkingEstimate}}</td>
-                                                        <td>{{snapshot.created}}</td>
+                                                        <td>{{snapshot.created}}<span hidden="hidden">{{snapshot.projectSnapshotId}}</span></td>
                                                         <td>{{snapshot.lastUpdated}}</td>
 
 
                                                         <td style="">
                                                             <div ng-if="(project.userHasCustody && version.isCurrentOwner)">
                                                                 <div style="text-align: right;">
-                                                                    <a href="" title="edit comment" ng-show="!snapshot.isEditingComment" ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
+                                                                    <a href="" title="edit comment" ng-show="!snapshot.isEditingComment && user.role != 'O'" ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
                                                                 </div>
                                                                 <br />
                                                                 <div ng-show="!snapshot.isEditingComment">
@@ -413,8 +443,8 @@
                             *************Review Versions*************
                             ***************************************-->
 
-                            <div id="reviewSectionHeader" class="col-lg-12 scroll-item" >
-                                <h2  style="color:#214c2c">Reviews</h2>
+                            <div id="reviewSectionHeader" class="col-lg-12 scroll-item">
+                                <h2 style="color:#214c2c">Reviews</h2>
                                 <div ng-hide="hasReviewsInProject" style="font-style: italic;">No Reviews</div>
                                 <div ng-repeat="version in versions | filter:{versionLabel:'Review'}" id="reviewVersions" class="scroll-item">
                                     <div ng-class="'panel panel-default'" style="border-color: #214c2c;">
@@ -450,7 +480,7 @@
                                                         <td style="width: 40%" ng-if="!project.userHasCustody">Comment</td>
                                                         <td style="width: 10%; text-align: center;">Estimate</td>
                                                         <td style="width: 5%">Label</td>
-                                                        <td style="width: 5%">Select for Report</td>
+                                                        <td style="width: 5%" ng-if="!security.isCoderRole">Select for Report</td>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -461,7 +491,7 @@
                                                         <td>
                                                             <div ng-if="version.isCurrentOwner">
                                                                 <div style="text-align: right;">
-                                                                    <a href="" title="edit comment" ng-show="!snapshot.isEditingComment" ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
+                                                                    <a href="" title="edit comment" ng-show="!snapshot.isEditingComment && user.role != 'O' " ng-click="editComment(snapshot)" focus-me="snapshot.isEditingComment == false">Edit</a>
                                                                 </div>
                                                                 <br />
                                                                 <div ng-show="!snapshot.isEditingComment">
@@ -487,6 +517,8 @@
                                                                 </div>
                                                             </div>
                                                             <div ng-if="!version.isCurrentOwner">
+
+                                                                <span>{{snapshot.comment}}</span>
                                                                 <div ng-show="!snapshot.showFullComment">
                                                                     {{snapshot.comment == undefined ? '' : snapshot.comment.length < 51 ? snapshot.comment : snapshot.comment.substring(0, 49)}}
                                                                     <span ng-show="snapshot.comment != undefined && snapshot.comment.length > 50">...</span>
@@ -507,7 +539,7 @@
 
                                                         <td style="text-align: right;">{{snapshot.estimate.Total | currency}}</td>
                                                         <td>{{snapshot.label}}</td>
-                                                        <td><input type="checkbox" title="Select snapshot &#013;--Max 2--" name="selected" ng-model="snapshot.selected" ng-change="updateSelection(versions)" ng-disabled="snapshot.disabled"></td>
+                                                        <td ng-if="!security.isCoderRole"><input type="checkbox" title="Select snapshot &#013;--Max 2--" name="selected" ng-model="snapshot.selected" ng-change="updateSelection(versions)" ng-disabled="snapshot.disabled"></td>
                                                     </tr>
                                                 </tbody>
                                             </table>

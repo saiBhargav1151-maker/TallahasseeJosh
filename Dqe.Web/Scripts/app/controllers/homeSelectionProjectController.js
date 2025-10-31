@@ -1,16 +1,36 @@
-﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$route', 'stateService', function ($scope, $rootScope, $http, $route,stateService) {
- 
+﻿dqeControllers.controller('HomeSelectionProjectController', ['$scope', '$rootScope', '$http', '$location', '$route', 'stateService', 'securityService', function ($scope, $rootScope, $http, $location, $route, stateService, securityService) {
     $rootScope.$broadcast('initializeNavigation');
     function processResult(result) {
+        setUser();
         if (!containsDqeError(result)) {
             var r = getDqeData(result);
             stateService.currentEstimateId = r.workingEstimate == undefined ? 0 : r.workingEstimate.projectSnapshotId;
+            passOnfieldsFromOutsideDqeOn(r);
             $scope.security = r.security;
-            $scope.project = r.project;
+            $scope.project = r.project;            
             $scope.proposals = r.proposals;
             $scope.workingEstimate = r.workingEstimate;
             $scope.versions = r.versions;
             $scope.hasReviewsInProject = false;
+            $scope.security.role = $scope.security.role.toString();
+
+            //Takes the char field of QTY_CMPLT_CD in LRE table ('Y' or 'N' which has defalut 'N')
+            if ($scope.prefferedApplication == "" || $scope.prefferedApplication === null || $scope.prefferedApplication === undefined) {
+                $scope.prefferedApplication = r.project.quantityComplete == null ? "Project not in LRE" : r.project.quantityComplete.toUpperCase() === 'Y' ? "DQE" : r.project.quantityComplete.toUpperCase() === 'N' ? "LRE" : "Project not in LRE";     
+            }
+          
+            $scope.canCheckOut = false;
+            $scope.canSeePrices = false;
+            //if is on list, then make can checkout var as true.
+            $scope.user = null;
+            securityService.getCurrentUser(function (user) {
+                let role = user.role.toString()[0];
+                let allowedRoles = ['A', 'D', 'E', 'C', 'F', 'M'];
+                if (!(role.length === 0) && allowedRoles.includes(role)) {
+                    $scope.canCheckOut = true;
+                    $scope.user = user;
+                }
+            });
 
             ///checking the first estimate of every version to see if it is a review, if so marking a bool field as true.
             for (var i = 0; i < $scope.versions.length; i++) {
@@ -97,7 +117,6 @@
                     if ((latestRunningModifiedVersion == -1)) {
                         $scope.versions[i].displayOrder = topDisplayNumber;
                         latestRunningModifiedVersion = i;
-                        //break;
                     }
 
                     //set some dates for comparrison
@@ -111,8 +130,22 @@
                         latestRunningModifiedVersion = i;
                     }
                 }
+            }            
+        }
+    }
+
+    function setUser() {
+        $http.get('./security/GetCurrentUser').success(function (result) {
+            $scope.user = result;
+        });
+    };
+
+    function passOnfieldsFromOutsideDqeOn(r) {
+        //if page scope is already loaded with the project type, it will be always unchanged
+        if ($scope.project && r.project && $scope.project.projectType != null && r.project.projectType == null) {
+            if (r.project != null) {
+                r.project.projectType = $scope.project.projectType;
             }
-            
         }
     }
 
@@ -173,6 +206,12 @@
         if ($route.current.params.project != 'undefined' && $route.current.params.project != null) {
             $http.get('./projectproposal/GetProject', { params: { number: $route.current.params.project } }).success(function (result) {
                 stateService.currentProject = $route.current.params.project;
+                //tries fetching the Project Type again if it didn't come through the first time
+                if (result.data.project.projectType == null || result.data.project.projectType == undefined) {
+                    $http.get('./projectproposal/GetWtProjectType', { params: { number: $route.current.params.project } }).success(function (wtResult) {
+                        result.data.project.projectType = wtResult.data.projectType;
+                    });
+                }
                 processResult(result);
                 checkSync(result);
             });
@@ -214,6 +253,7 @@
             }
         });
     }
+    
     $scope.synchronizeWorkingEstimate = function (estimate, project) {
         $http.post('./projectproposal/SyncWorkingEstimate', estimate).success(function (result) {
             //processResult(result);
@@ -226,12 +266,18 @@
             }
         });
     }
+    //Previously this was just reloading the data on the page, but decided on refreshing the page altogether because of hard to isolate occasional non syncronous loading of data. MB. 
     $scope.loadProject = function () {
-        $http.get('./projectproposal/GetProject', { params: { number: $scope.selectedProject.number } }).success(function (result) {
-            stateService.currentProject = $scope.selectedProject.number;
-            processResult(result);
-        });
+        $location.url('/home_project/' + $scope.selectedProject.number);
+        //$http.get('./projectproposal/GetProject', { params: { number: $scope.selectedProject.number } }).success(function (result) {
+        //    //this fixes a hidden bug only seen occasionally from a non syncronous call down the line
+        //    //unreached older way
+        //    //$scope.prefferedApplication = "";        
+        //    //stateService.currentProject = $scope.selectedProject.number;
+        //    //processResult(result);
+        //});
     };
+
     $scope.createProjectVersionFromWt = function (project) {
         $http.post('./projectproposal/CreateProjectVersionFromWt', project).success(function (result) {
             processResult(result);
@@ -253,7 +299,18 @@
         });
     }
     $scope.snapshotWorkingEstimate = function (project) {
+
         $http.post('./projectproposal/SnapshotWorkingEstimate', project).success(function (result) {
+            $scope.prefferedApplication = "";
+            if (project.quantityComplete === 'N' && project.takeLabeledSnapshot != null && project.takeLabeledSnapshot) {
+                result.data.project.quantityComplete = 'Y';
+            }
+            else if (project.quantityComplete === 'Y') {
+                result.data.project.quantityComplete = 'Y';
+            }
+            else if (project.quantityComplete === 'N') {
+                result.data.project.quantityComplete = 'N';
+            }
             processResult(result);
         });
     }
@@ -311,10 +368,20 @@
         });
     }
     $scope.getProjects = function (val) {
-        return $http.get('./projectproposal/GetProjects', { params: { number: val } })
+        const stringWithoutDashes = val.replace(/-/g, "");
+        return $http.get('./projectproposal/GetProjects', { params: { number: stringWithoutDashes } })
             .then(function (response) {
                 var projects = [];
                 angular.forEach(response.data, function (item) {
+                    item.displayName = item.number;
+                    if (item.projectType) {
+                        if ((item.projectType[0] == 'M')) {
+                            item.displayName = '(M) ' + item.displayName;
+                        }
+                        else {
+                            item.displayName = '(C) ' + item.displayName;
+                        }
+                    }                  
                     projects.push(item);
                 });
                 return projects;

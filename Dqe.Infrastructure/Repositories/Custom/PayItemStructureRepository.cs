@@ -80,6 +80,7 @@ namespace Dqe.Infrastructure.Repositories.Custom
                         Id = i.Id,
                         StructureId = i.StructureId,
                         Title = i.Title,
+                        IsObsolete = i.IsObsolete,
                         Units = i.PayItemMasters
                             .Where(ii => !ii.ObsoleteDate.HasValue || ii.ObsoleteDate.Value.Date > DateTime.Now.Date)
                             .Select(ii => ii.BidAsLumpSum ? string.Format("LS/{0}", ii.Unit) : ii.Unit)
@@ -143,6 +144,7 @@ namespace Dqe.Infrastructure.Repositories.Custom
                     Id = i.Id,
                     StructureId = i.StructureId,
                     Title = i.Title,
+                    IsObsolete = i.IsObsolete,
                     Units = i.PayItemMasters
                         .Where(ii => !ii.ObsoleteDate.HasValue || ii.ObsoleteDate.Value.Date > DateTime.Now.Date)
                         .Select(ii => ii.BidAsLumpSum ? string.Format("LS/{0}", ii.Unit) : ii.Unit)
