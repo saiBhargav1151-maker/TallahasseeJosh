@@ -2,11 +2,11 @@
     <!-- Input -->
     <div class="row input-section">
         <!-- Group 1: Item Filters -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div>
                 <h4 class="inflation-title">Item Filters</h4>
             </div>
-            <!-- Proposal Input -->
+            <!-- Proposal Input, Need to work on this in version two of the Bid Price search -->
             <!--<div class="form-group search-input-group">
                 <label for="projectNumberInput" class="modern-label"
                        data-original-title="Enter a valid FDOT Proposal Number (e.g., E2R22, 43633015201).">
@@ -37,14 +37,14 @@
                         <i class="fas fa-info-circle info-icon"></i>
                         <div class="tooltip">
                             <div class="tooltip-item">
-                <strong>Search Process:</strong> Type at least <span class="tooltip-highlight">3 characters</span>, then click the search button or press Enter.
-            </div>
-            <div class="tooltip-item">
-                <strong>Results:</strong> Select from the dropdown list that appears after searching.
-            </div>
-            <div class="tooltip-item">
-                <strong>Search Options:</strong> You can search by Pay Item Number or Description.
-            </div>
+                                <strong>Search Process:</strong> Type at least <span class="tooltip-highlight">3 characters</span>, then click the search button or press Enter.
+                            </div>
+                            <div class="tooltip-item">
+                                <strong>Results:</strong> Select from the dropdown list that appears after searching.
+                            </div>
+                            <div class="tooltip-item">
+                                <strong>Search Options:</strong> You can search by Pay Item Number or Description.
+                            </div>
                             <!--<div class="tooltip-item">
                                 <strong>Pay Item Number Format:</strong> Use leading zeros and exact spacing.
                                 <br><strong>Example:</strong> For pay item "0334 1 15", enter: <span class="tooltip-highlight">0334</span> followed by <span class="tooltip-highlight">two spaces</span>, then <span class="tooltip-highlight">1</span>, and <span class="tooltip-highlight">one space</span> before <span class="tooltip-highlight">15</span>
@@ -59,13 +59,15 @@
                 <div class="input-wrapper">
                     <input type="text" id="payItemInput"
                            ng-model="searchText"
-                           ng-keypress="onSearchKeyPress($event)"
-                           placeholder="e.g., 0120  6, embankment, or asphalt"
+                           ng-keyup="onSearchKeyPress($event)"
+                           placeholder="e.g., 0120  6, embankment"
                            autocomplete="off"
                            class="form-control modern-input"
                            maxlength="180"
                            required
-                           data-original-title="A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system." />
+                           title="{{searchText || 'A unique identifier assigned to each item in the Reference Item List for each Spec Book in the system.'}}"
+                           data-toggle="tooltip"
+                           data-placement="top" />
                     <button type="button"
                             class="clear-btn"
                             ng-click="clearSearchText()"
@@ -77,8 +79,10 @@
                             class="search-btn"
                             ng-click="fetchPayItemSuggestions()"
                             ng-disabled="!searchText || searchText.length < 3 || isSearching"
-                            title="Search Pay Items">
-                        <i class="fas" ng-class="isSearching ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+                            title="Search for Pay Items">
+                        <i class="fas" ng-class="isSearching ? 'fa-spinner fa-spin' : 'fa-search'"></i>&nbsp;
+                        <span style="font-weight:600;" ng-if="!isSearching">Search Item</span>
+                        <span ng-if="isSearching">Searching...</span>
                     </button>
 
                 </div>
@@ -91,15 +95,12 @@
                 <!-- Search reminder notification -->
                 <div ng-if="searchText && searchText.length >= 3 && !selectedPayItemNumber && !showSuggestions && !isSearching" class="search-reminder">
                     <i class="fas fa-lightbulb"></i>
-                    <span>Click the search button or press Enter to find pay items</span>
+                    <span>Click the Search Item button or press Enter to find pay items</span>
                 </div>
-
-
-
                 <!-- Selection reminder notification -->
-                <div ng-if="showSuggestions && items.length > 0 && !selectedPayItemNumber" class="selection-reminder">
+                <div ng-if="showSuggestions && items.length > 0 && !selectedPayItemNumber" class="search-reminder">
                     <i class="fas fa-hand-pointer"></i>
-                    <span>Click on an item from the list above to select it</span>
+                    <span>Click on an item from the list below to select it</span>
                 </div>
                 <div ng-show="unitPriceForm.payItemInput.$touched && unitPriceForm.payItemInput.$invalid" class="error-message">
                     <div ng-show="unitPriceForm.payItemInput.$error.required">
@@ -109,14 +110,22 @@
                         <i class="fas fa-exclamation-circle"></i> Only letters, numbers, spaces, hyphens, and periods are allowed.
                     </div>
                 </div>
-                <ul class="suggestions-dropdown" ng-show="showSuggestions && items.length > 0">
+                <ul class="suggestions-dropdown" 
+                    ng-show="showSuggestions && items.length > 0"
+                    role="listbox"
+                    aria-label="Pay item search results">
                     <li class="suggestion-header">
                         <i class="fas fa-list"></i>
                         Search Results ({{ items.length }} items)
                     </li>
-                    <li class="suggestion-item" 
-                        ng-repeat="item in items" 
-                        ng-click="selectPayItem(item)">
+                    <li class="suggestion-item"
+                        ng-repeat="item in items track by $index"
+                        ng-click="selectPayItem(item)"
+                        ng-keydown="onSuggestionKeyDown($event, item, $index)"
+                        tabindex="0"
+                        role="option"
+                        aria-selected="{{ selectedSuggestionIndex === $index }}"
+                        ng-class="{ 'suggestion-item-focused': selectedSuggestionIndex === $index }">
                         <i class="fas fa-search suggestion-icon"></i>
                         <div class="suggestion-content">
                             <div class="suggestion-name">{{ item.Name }}</div>
@@ -125,13 +134,12 @@
                     </li>
                 </ul>
                 <!-- No results message -->
-                <div ng-if="showSuggestions && items.length === 0 && searchText.length >= 3 && !isSearching"
+                <div ng-if="noMatchingSuggestionsFlag && showSuggestions && items.length === 0 && searchText.length >= 3 && !isSearching"
                      class="no-results">
                     <i class="fas fa-info-circle"></i>
                     <span>No pay items found matching "{{ searchText }}"</span>
                 </div>
             </div>
-
             <!-- Bid Amount Range Filter -->
             <div class="form-group">
                 <label class="modern-label">
@@ -149,10 +157,10 @@
                                id="minBidAmount"
                                class="form-control  modern-input date-input-compact"
                                ng-model="selectedMinBidAmount"
-                               placeholder="$0.00"
+                               placeholder="Min amount"
                                ng-blur="formatBidAmount('min')"
                                ng-focus="unformatBidAmount('min')"
-                               maxlength="20" />
+                               maxlength="14" />
                     </div>
                     <div class="separator">to</div>
                     <div>
@@ -168,13 +176,20 @@
                                placeholder="Leave blank for max"
                                ng-blur="formatBidAmount('max')"
                                ng-focus="unformatBidAmount('max')"
-                               maxlength="20" />
+                               maxlength="14" />
                     </div>
                 </div>
-
-
+                <!-- Bid Amount Validation Errors -->
+                <div class="error-message" ng-show="validationErrors.bidAmountMin">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.bidAmountMin }}
+                </div>
+                <div class="error-message" ng-show="validationErrors.bidAmountMax">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.bidAmountMax }}
+                </div>
+                <div class="error-message" ng-show="validationErrors.bidAmountRange">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.bidAmountRange }}
+                </div>
             </div>
-
             <!-- Quantity Range -->
             <div class="form-group">
                 <label class="modern-label">
@@ -184,16 +199,20 @@
                 <div class="date-inputs-compact">
                     <div>
                         <label class="modern-label" for="minQuantity">Minimum:</label>
-                        <input type="number" id="minQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMinQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/"  placeholder="Min quantity"
-                               maxlength="15" />
+                        <input type="text" id="minQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMinQuantity"
+                               step="0.1" placeholder="Min quantity"
+                               maxlength="12"  inputmode="decimal"
+                               pattern="[0-9,.]*"  onkeypress="return event.charCode === 0 || /[0-9,.]/.test(String.fromCharCode(event.charCode))"
+                               oninput="this.value = this.value.replace(/[^0-9,.]/g, '')" />
                     </div>
                     <div class="separator">to</div>
                     <div>
                         <label class="modern-label" for="maxQuantity">Maximum:</label>
-                        <input type="number" id="maxQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMaxQuantity"
-                               step="0.1" ng-pattern="/^\d+(\.\d{1,2})?$/" min="1" placeholder="Leave blank for max"
-                               maxlength="15" />
+                        <input type="text" id="maxQuantity" class="form-control modern-input date-input-compact" ng-model="selectedMaxQuantity"
+                               step="0.1" placeholder="Leave blank for max"
+                               maxlength="12"   inputmode="decimal"
+                               pattern="[0-9,.]*" onkeypress="return event.charCode === 0 || /[0-9,.]/.test(String.fromCharCode(event.charCode))"
+                               oninput="this.value = this.value.replace(/[^0-9,.]/g, '')"/>
                     </div>
                 </div>
                 <div class="quantity-preview" ng-show="selectedMinQuantity && selectedMaxQuantity">
@@ -205,66 +224,101 @@
                         Preview: Showing {{selectedMinQuantity}} to {{selectedMaxQuantity}} Quantities ({{getQuantityRange()}} total range)
                     </span>
                 </div>
+                <!-- Quantity Validation Errors -->
+                <div class="error-message" ng-show="validationErrors.quantityMin">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.quantityMin }}
+                </div>
+                <div class="error-message" ng-show="validationErrors.quantityMax">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.quantityMax }}
+                </div>
+                <div class="error-message" ng-show="validationErrors.quantityRange">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.quantityRange }}
+                </div>
             </div>
         </div>
-
         <!-- Group 2: Contract Filters -->
         <div class="col-md-3">
             <div class="section-header">
                 <h4 class="inflation-title">Contract Filters</h4>
             </div>
-
             <div class="form-group">
-                <label for="contractTypeSelect" class="modern-label">
+                <label class="modern-label">
                     <i class="fas fa-file-contract label-icon"></i>
-                    Contract Type:
+                    Contract Type <span class="text-muted months-hint" style="color: #000000; ">(Default is Const Contract):</span>
                 </label>
-                <div class="select-wrapper">
-                    <select id="contractTypeSelect"
-                            class="form-control modern-input"
-                            multiple
-                            ng-model="selectedContractTypes">
-
-                        <option value="ALL">-- All Contract Types --</option>
-                        <option ng-repeat="type in contractTypes"
-                                ng-value="type">
-                            {{ contractTypeMap[type] }}
-                        </option>
-                    </select>
+                <div class="county-filter-compact">
+                    <div class="county-actions-compact">
+                        <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllContractTypes()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn-xs btn-outline-secondary" ng-click="clearAllContractTypes()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <span class="selected-count-compact">{{selectedContractTypes.length}} selected</span>
+                    </div>
+                    <div class="county-checkboxes-compact">
+                        <div class="county-checkbox-grid">
+                            <label class="county-checkbox-label-compact" ng-repeat="type in contractTypes">
+                                <input type="checkbox" ng-model="contractTypeSelected[type]" ng-change="toggleContractType(type)">
+                                <span class="county-name-compact">{{contractTypeMap[type]}}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <!--<div class="selected-counties-inline" ng-if="selectedContractTypes.length > 0">
+                        <span class="county-tag-compact" ng-repeat="type in selectedContractTypes">
+                            {{contractTypeMap[type]}}
+                            <button type="button" class="remove-tag-compact" ng-click="removeContractType(type); $event.stopPropagation()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>-->
                 </div>
-                <div class="form-text text-muted months-hint">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
             <div class="form-group">
-                <label for="contractWorkTypeSelect" class="modern-label">
+                <label class="modern-label">
                     <i class="fas fa-tools label-icon"></i>
-                    Work Type:
+                    Work Type <span class="text-muted months-hint" style="color: #000000; ">(Default is All):</span>
                 </label>
-                <div class="multiselect-wrapper">
-                    <select id="contractWorkTypeSelect"
-                            class="form-control modern-input "
-                            ng-model="selectedWorkTypeCodes"
-                            multiple>
-                        <option value="ALL">-- All Work Types --</option>
-                        <option ng-repeat="(code, label) in workTypeMap"
-                                ng-value="code">
-                            {{ label }}
-                        </option>
-                    </select>
+                <div class="county-filter-compact">
+                    <div class="county-actions-compact">
+                        <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllWorkTypes()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn-xs btn-outline-secondary" ng-click="clearAllWorkTypes()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <span class="selected-count-compact">{{selectedWorkTypeCodes.length}} selected</span>
+                    </div>
+                    <div class="county-checkboxes-compact">
+                        <div class="county-checkbox-grid">
+                            <label class="county-checkbox-label-compact" ng-repeat="(code, label) in workTypeMap">
+                                <input type="checkbox" ng-model="workTypeSelected[code]" ng-change="toggleWorkType(code)">
+                                <span class="county-name-compact">{{label}}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <!--<div class="selected-counties-inline" ng-if="selectedWorkTypeCodes.length > 0">
+                        <span class="county-tag-compact" ng-repeat="code in selectedWorkTypeCodes">
+                            {{workTypeMap[code]}}
+                            <button type="button" class="remove-tag-compact" ng-click="removeWorkType(code); $event.stopPropagation()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>-->
                 </div>
-                <div class="form-text text-muted months-hint">Hold Ctrl (Cmd on Mac) to select multiple options</div>
             </div>
         </div>
-
         <!-- Group 3: Bid Filters -->
-        <div class="col-md-2">
+        <div class="col-md-3">
             <div class="section-header">
                 <h4 class="inflation-title">Bid Filters</h4>
             </div>
-
             <div class="form-group">
                 <label for="bidStatusFilter" class="modern-label">
                     <i class="fas fa-flag-checkered label-icon"></i>
-                    Bid Status:
+                    Bid Status<span class="text-muted months-hint" style="color: #000000; ">
+                        (Default is Bid Rank 1-3):
+                    </span>
                 </label>
                 <div class="select-wrapper">
                     <select id="bidStatusFilter" class="form-control modern-select" ng-model="selectedBidStatus">
@@ -277,68 +331,11 @@
             </div>
 
             <div class="form-group">
-                <label for="monthsInput" class="modern-label">
-                    <i class="fas fa-calendar-alt label-icon"></i>
-                    Months of Bid History:
-                </label>
-
-                <input type="number"
-                       id="monthsInput"
-                       name="monthsInput"
-                       class="form-control modern-input date-input-compact"
-                       ng-model="monthsOfHistory"
-                       required
-                       min="1"
-                       max="120"
-                       placeholder="36"
-                       aria-describedby="monthsHint"
-                       title="Enter number of months (1 to 120). Default is 36." />
-
-                <small id="monthsHint" class="form-text text-muted months-hint">
-                    Enter a value between 1 and 120. Default is 36.
-                </small>
-
-                <div class="error-message"
-                     ng-show="unitPriceForm.monthsInput.$touched && unitPriceForm.monthsInput.$invalid">
-
-                    <div ng-show="unitPriceForm.monthsInput.$error.required">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Months value is required.
-                    </div>
-                    <div ng-show="unitPriceForm.monthsInput.$error.min || unitPriceForm.monthsInput.$error.max">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Please enter a value between 1 and 120 months.
-                    </div>
-                </div>
-            </div>
-
-            <!-- Inflation Adjustment Toggle -->
-            <div class="form-group">
-                <label class="modern-label">
-                    <i class="fas fa-chart-line label-icon"></i>
-                    Inflation Adjustment:
-                </label>
-                <div class="toggle-wrapper">
-                    <label class="toggle-switch">
-                        <input type="checkbox"
-                               ng-model="useInflationAdjustedPrices"
-                               ng-change="onInflationToggleChange()"
-                               checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">
-                        {{ useInflationAdjustedPrices ? 'Use Inflation-Adjusted Prices' : 'Use Raw Prices' }}
-                    </span>
-                </div>
-                <small class="form-text text-muted months-hint">
-                    When enabled, charts and calculations use inflation-adjusted prices. Table shows both columns.
-                </small>
-            </div>
-
-            <div class="form-group">
                 <label class="modern-label">
                     <i class="fas fa-calendar-week label-icon"></i>
-                    Letting Date Range:
+                    Letting Date Range:<span class="form-text text-muted months-hint" style="color: red;">
+    * required
+</span>
                 </label>
                 <div class="date-inputs-compact">
                     <input type="date" class="form-control modern-input date-input-compact" ng-model="startDate"
@@ -347,11 +344,40 @@
                     <input type="date" class="form-control modern-input date-input-compact" ng-model="endDate"
                            max="{{ today | date:'yyyy-MM-dd' }}" min="{{ minAllowedDate | date:'yyyy-MM-dd' }}" />
                 </div>
-                <div class="error-message" ng-show="isInvalidDateRange()">
+                <!--<div class="error-message" ng-show="isInvalidDateRange()">
                     <i class="fas fa-exclamation-circle"></i> Start date cannot be later than end date.
+                </div>-->
+                <!-- Date Range Validation Error -->
+                <div class="error-message" ng-show="validationErrors.dateRange">
+                    <i class="fas fa-exclamation-circle"></i> {{ validationErrors.dateRange }}
+                </div>
+                <!--<small class="form-text text-muted months-hint">
+                    Use months filter OR date range (date range overrides months)
+                </small>-->
+            </div>
+            <!-- Inflation Adjustment Toggle -->
+            <div class="form-group">
+                <label class="modern-label" for="inflation-toggle">
+                    <i class="fas fa-chart-line label-icon"></i>
+                    Inflation Adjustment<span class="text-muted months-hint" style="color:#000000; display:inline;">(Enabled by default):</span>
+                </label>
+                <div class="toggle-wrapper">
+                    <label class="toggle-switch" for="inflation-toggle">
+                        <input type="checkbox"
+                               id="inflation-toggle"
+                               ng-model="useInflationAdjustedPrices"
+                               ng-change="onInflationToggleChange()"
+                               ng-keydown="onInflationToggleKeyDown($event)"
+                               checked
+                               aria-describedby="inflation-help-text">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label" id="inflation-help-text">
+                        {{ useInflationAdjustedPrices ? 'Use Inflation-Adjusted Prices' : 'Use Raw Prices' }}
+                    </span>
                 </div>
                 <small class="form-text text-muted months-hint">
-                    Use months filter OR date range (date range overrides months)
+                    When enabled, charts and calculations use inflation-adjusted prices. Table shows both columns.
                 </small>
             </div>
         </div>
@@ -359,9 +385,10 @@
             <div class="section-header">
                 <h4 class="inflation-title">Regional Filters</h4>
             </div>
-
             <div class="form-group">
-                <label class="modern-label"> <i class="fas fa-map-marker-alt label-icon"></i> Region Type:</label>
+                <label class="modern-label"> <i class="fas fa-map-marker-alt label-icon"></i> Region Type<span class="text-muted months-hint" style="color: #000000; ">
+    (Default is Statewide):
+</span></label>
                 <div class="select-wrapper">
                     <select class="form-control modern-select " ng-model="regionType" ng-change="onRegionTypeChange()">
                         <option value="">-- Statewide --</option>
@@ -374,7 +401,7 @@
             </div>
             <div class="form-group" ng-show="regionType === 'district' || regionType === 'market' || regionType === 'county'">
                 <label class="sub-label">
-                    {{ regionType === 'district' ? 'Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
+                    {{ regionType === 'district' ? 'Managing Districts:' : regionType === 'market' ? 'Market Areas:' : 'Counties:' }}
                     <span ng-if="regionType === 'market'" class="hover-card-trigger">
                         <i class="fas fa-info-circle info-icon"></i>
                         <div class="hover-card">
@@ -403,36 +430,35 @@
                         </div>
                     </span>
                 </label>
-                <div class="multi-select-wrapper">
-                    <div class="multi-select-dropdown" ng-click="toggleMultiSelectDropdown()">
-                        <div class="multi-select-trigger">
-                            <div class="multi-select-values">
-                                <span ng-if="!selectedRegions.length" class="multi-select-placeholder">
-                                    Select {{ regionType === 'district' ? 'Districts' : regionType === 'market' ? 'Market Areas' : 'Counties' }}
-                                </span>
-                                <span class="multi-select-tag" ng-repeat="region in selectedRegions">
-                                    {{region}}
-                                    <button type="button" class="remove-tag" ng-click="toggleRegionSelection(region)">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </span>
-                            </div>
-                            <i class="fas fa-chevron-down multi-select-arrow"></i>
-                        </div>
-                        <div class="multi-select-options" ng-class="{'show': isRegionDropdownOpen}">
-                            <div class="multi-select-option" ng-repeat="option in regionOptions"
-                                 ng-class="{'selected': selectedRegions.indexOf(option) !== -1}" ng-click="toggleRegionSelection(option)">
-                                <div class="multi-select-checkbox"></div>
-                                <span>{{option}}</span>
-                            </div>
+                <div class="county-filter-compact">
+                    <div class="county-actions-compact">
+                        <button type="button" class="btn-xs btn-outline-primary" ng-click="selectAllRegions()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn-xs btn-outline-secondary" ng-click="clearAllRegions()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <span class="selected-count-compact">{{selectedRegions.length}} selected</span>
+                    </div>
+                    <div class="county-checkboxes-compact">
+                        <div class="county-checkbox-grid">
+                            <label class="county-checkbox-label-compact" ng-repeat="option in regionOptions">
+                                <input type="checkbox" ng-model="regionSelected[option]" ng-change="toggleRegionSelection(option)">
+                                <span class="county-name-compact">{{option}}</span>
+                            </label>
                         </div>
                     </div>
-                    <select multiple class="form-control modern-select" style="display: none;"
-                            ng-model="selectedRegions" ng-change="onMultiRegionChange()" ng-options="opt for opt in regionOptions">
-                    </select>
+                    <!--<div class="selected-counties-inline" ng-if="selectedRegions.length > 0">
+                        <span class="county-tag-compact" ng-repeat="region in selectedRegions">
+                            {{region}}
+                            <button type="button" class="remove-tag-compact" ng-click="removeRegion(region); $event.stopPropagation()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>-->
                 </div>
             </div>
-            <div class="form-group" ng-if="relatedCounties.length > 0 && regionType !== 'county'">
+            <div class="form-group" ng-if="relatedCounties.length > 0 && (regionType === 'market')">
                 <label class="sub-label">Counties:</label>
                 <div class="county-filter-compact">
                     <div class="county-actions-compact">
@@ -452,15 +478,19 @@
                             </label>
                         </div>
                     </div>
-                    <div class="selected-counties-inline" ng-if="selectedRegionCounties.length > 0">
+                    <!--<div class="selected-counties-inline" ng-if="selectedRegionCounties.length > 0">
                         <span class="county-tag-compact" ng-repeat="county in selectedRegionCounties">
                             {{county}}
                             <button type="button" class="remove-tag-compact" ng-click="removeCounty(county); $event.stopPropagation()">
                                 <i class="fas fa-times"></i>
                             </button>
                         </span>
-                    </div>
+                    </div>-->
                 </div>
+            </div>
+            <!-- Region Selection Validation Error - Moved outside conditional block -->
+            <div class="error-message" ng-show="validationErrors.regionSelection">
+                <i class="fas fa-exclamation-circle"></i> {{ validationErrors.regionSelection }}
             </div>
         </div>
     </div>
@@ -469,7 +499,7 @@
             <i class="fas fa-search"></i> Search Bids
         </button>
         <button class="btn btn-secondary btn-lg" ng-click="clearFilters()">
-            <i class="fas fa-times-circle"></i> Clear Filters
+            <i class="fas fa-times-circle"></i>Reset Filters
         </button>
         <button ng-if="bidHistoryData && !isLargeDataset && bidHistoryData.length > 0 && !shouldHideGraphForLumpSum()" class="btn btn-lg export-button" ng-click="downloadPDF()">
             <i class="fas fa-file-pdf"></i> Download PDF
@@ -485,8 +515,9 @@
 
     <!-- Simple Data Info Display -->
     <div class="simple-data-info" ng-if="bidHistoryData && bidHistoryData.length > 0">
-        <span><strong>Bid Data Updated Through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
-        <span><strong>NHCCI Index Load:</strong> Q4, 2024</span>
+        <span><strong>Bid Data for search criteria available through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
+        <span ng-if="dataAgeWarning" class="data-age-warning-inline" style="color: #856404; font-weight: bold;">{{ dataAgeWarning }}</span>
+        <span><strong>FDOT CCI  Index Calendar Year Load:</strong> Q2, 2025</span>
     </div>
 
     <!-- Large Dataset Warning -->
@@ -521,10 +552,7 @@
          class="no-data-section">
         <div class="no-data-content">
             <i class="fas fa-search-minus no-data-icon"></i>
-            <div class="no-data-title">No Data Found</div>
-            <div class="no-data-message">
-                No bid history found for Pay Item <strong>{{ lastSearchedPayItem }}</strong>
-            </div>
+            <div class="no-data-title">No bid history found for Pay Item with the selected filters</div>
         </div>
     </div>
     <!-- Chart Stale Overlay - Now inside the results section -->
@@ -537,16 +565,15 @@
 
     <div class="results-section" ng-if="bidHistoryData && bidHistoryData.length > 0" ng-class="{ 'blurred': isChartStale }">
 
-
         <!-- NHCCI Inflation Adjustment Information -->
-        <div class="inflation-info-section" ng-if="bidHistoryData && bidHistoryData.length > 0">
+        <div class="inflation-info-section" ng-if="bidHistoryData && bidHistoryData.length > 0 && !shouldHideGraphForLumpSum()">
             <div class="inflation-info-content">
                 <i class="fas fa-chart-line inflation-icon"></i>
                 <div class="inflation-info-text">
-                    <h5 class="inflation-title">NHCCI Inflation Adjustment - {{ useInflationAdjustedPrices ? 'Enabled' : 'Disabled' }}</h5>
+                    <h5 class="inflation-title">FDOT CCI Inflation Adjustment - {{ useInflationAdjustedPrices ? 'Enabled' : 'Disabled' }}</h5>
                     <p class="inflation-description">
                         <span ng-if="useInflationAdjustedPrices">
-                            Charts and calculations are using inflation-adjusted prices (normalized to 2024 Q4 levels using NHCCI).
+                            Charts and calculations are using inflation-adjusted prices (normalized to 2025 Q2 levels using FDOT CCI).
                             This allows for more accurate price comparisons across different time periods.
                         </span>
                         <span ng-if="!useInflationAdjustedPrices">
@@ -558,7 +585,11 @@
                 </div>
             </div>
         </div>
-
+        
+        <!-- Lump Sum Info Message -->
+        <div class="ls-item-msg text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
+            <i class="fas fa-exclamation-triangle"></i> Charts and statistics are not available for LS/LS units.
+        </div>
         <div class="results-section">
             <div class="container-fluid results-container">
                 <div class="table-section">
@@ -566,10 +597,10 @@
                         <div class="chart-header" ng-if="!shouldHideGraphForLumpSum()">
                             <h4 class="inflation-title">
                                 <i class="fas fa-chart-line"></i> Unit Price Bid Analysis
-                                <span  ng-if="useInflationAdjustedPrices">
+                                <span ng-if="useInflationAdjustedPrices">
                                     (Inflation-Adjusted)
                                 </span>
-                                <span  ng-if="!useInflationAdjustedPrices">
+                                <span ng-if="!useInflationAdjustedPrices">
                                     (Raw Prices)
                                 </span>
                             </h4>
@@ -591,14 +622,14 @@
                                     <div class="stat-label">Total Contracts</div>
                                     <div class="stat-value">{{ chartStats.totalContracts }}</div>
                                 </div>
-                                <div class="stat-card">
+                                <!--<div class="stat-card">
                                     <div class="stat-label">Total Amount</div>
                                     <div class="stat-value">{{ chartStats.totalBidAmount | smartCurrency }}</div>
-                                </div>
-                                <div class="stat-card">
+                                </div>-->
+                                <!--<div class="stat-card">
                                     <div class="stat-label">Total Quantity</div>
                                     <div class="stat-value">{{ chartStats.totalQuantity | number:2 }}</div>
-                                </div>
+                                </div>-->
                                 <div class="stat-card">
                                     <div class="stat-label">Average Quantity</div>
                                     <div class="stat-value">{{ chartStats.avgQty | number:2 }}</div>
@@ -611,19 +642,6 @@
                                     <div class="stat-label">Total Outliers</div>
                                     <div class="stat-value">{{ chartStats.outlierCount }}</div>
                                 </div>
-                                <!--<div class="stat-card primary">
-                                    <div class="stat-label">Avg Inflation-Adjusted Price</div>
-                                    <div class="stat-value">${{ chartStats.avgInflationAdjustedPrice | number:2 }}</div>
-                                </div>-->
-                                <!--<div class="stat-card" ng-if="useInflationAdjustedPrices">
-                                    <div class="stat-label">Max Inflation Increase</div>
-                                    <div class="stat-value">{{ chartStats.maxInflationIncrease | number:1 }}%</div>
-                                </div>
-                                <div class="stat-card" ng-if="useInflationAdjustedPrices">
-                                    <div class="stat-label">Avg Unit Price Inflation Increase</div>
-                                    <div class="stat-value">{{ chartStats.avgInflationIncrease | number:1 }}%</div>
-                                </div>-->
-
                             </div>
                         </div>
 
@@ -641,7 +659,7 @@
                                     <label for="trendAnalysis" class="modern-label">
                                         <i class="fas fa-clock label-icon"></i>
                                         Select an Interval:
-                                    </label>
+                                    </label> 
                                     <div class="select-wrapper">
                                         <select id="trendAnalysis" class="form-control modern-select"
                                                 ng-model="trendAnalysisData.trendTimeGrouping"
@@ -661,7 +679,23 @@
                                     <span ng-bind="trendWarning"></span>
                                 </div>
                             </div>
-
+                            <!-- Data Age Warning -->
+                            <!--<div ng-if="dataAgeWarning" class="data-age-warning">
+                                <div class="alert alert-warning" role="alert" style="background-color: #fff3cd; border-color: #ffeaa7; color: #856404;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span ng-bind="dataAgeWarning"></span>
+                                </div>
+                            </div>-->
+                            <!-- Contract Count Summary -->
+                            <!--<div ng-if="showTrendChart && trendData && trendData.length > 0" class="trend-summary">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Contract Distribution:</strong> 
+                                    <span ng-repeat="period in trendData" class="contract-count-item">
+                                        {{formatTimeKey(period.timeKey)}}: {{period.uniqueContractCount}} contract{{period.uniqueContractCount !== 1 ? 's' : ''}}<span ng-if="!$last">, </span>
+                                    </span>
+                                </div>
+                            </div>-->
                             <div ng-if="showTrendChart" class="trend-chart-container">
                                 <div class="chart-loader" ng-show="isTrendChartLoading">
                                     <div class="loading-spinner">
@@ -674,8 +708,6 @@
                         </div>
                         <!-- Custom Quantity Analysis Section -->
                         <div ng-if="bidHistoryData && bidHistoryData.length > 0 && !shouldHideGraphForLumpSum()" class="custom-quantity-section">
-
-
                             <div class="custom-quantity-header">
                                 <h5 class="inflation-title">
                                     <i class="fas fa-calculator"></i> Custom Quantity Analysis
@@ -685,36 +717,61 @@
                                 </h5>
                             </div>
                             <div class="custom-quantity-input">
-                                <div class="input-group">
-                                    <label class="modern-label" for="userQuantity">
-                                        <i class="fas fa-hashtag"></i> Enter Quantity:
-                                    </label>
-                                    <input type="number"
-                                           id="userQuantity"
-                                           class="modern-input"
-                                           ng-model="customQuantityData.userQuantity"
-                                           placeholder="Enter quantity for LOESS prediction"
-                                           min="{{ getValidQuantityRange().min }}"
-                                           max="{{ getValidQuantityRange().max }}"
-                                           step="0.01"
-                                           maxlength="15" />
-                                    <button class="btn btn-primary"
-                                            ng-click="calculateCustomQuantityStats()"
-                                            ng-disabled="!customQuantityData.userQuantity || customQuantityData.userQuantity <= 0 || isCalculatingPrediction || !isUserQuantityInRange()">
-                                        <i class="fas" ng-class="isCalculatingPrediction ? 'fa-spinner fa-spin' : 'fa-calculator'"></i>
-                                        {{ isCalculatingPrediction ? 'Calculating...' : 'Calculate' }}
-                                    </button>
-                                </div>
-
-                                <!-- Warning if quantity is out of range -->
-                                <div ng-if="customQuantityData.userQuantity && !isUserQuantityInRange()"
-                                     class="quantity-warning">
-                                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                                    <strong>Warning:</strong> Your quantity ({{ customQuantityData.userQuantity | number:2 }}) is outside the valid range for LOESS prediction.
-                                    Please enter a quantity within 10x the historical range ({{ getValidQuantityRange().min | number:2 }} - {{ getValidQuantityRange().max | number:2 }}).
+                                <div class="input-group" style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <label class="modern-label" for="userQuantity">
+                                            <i class="fas fa-hashtag"></i> Enter Quantity:
+                                        </label>
+                                        <input type="number"
+                                               id="userQuantity"
+                                               class="modern-input"
+                                               ng-model="customQuantityData.userQuantity"
+                                               placeholder="Enter quantity"
+                                               step="0.15"
+                                               maxlength="15" 
+                                               ng-keypress="($event.which === 13) && !(!customQuantityData.userQuantity || customQuantityData.userQuantity <= 0 || isCalculatingPrediction || !isUserQuantityInRange()) && calculateCustomQuantityStats()"
+                                               />
+                                        <button class="btn btn-primary"
+                                                ng-click="calculateCustomQuantityStats()"
+                                                ng-disabled="!customQuantityData.userQuantity || customQuantityData.userQuantity <= 0 || isCalculatingPrediction || !isUserQuantityInRange()">
+                                            <i class="fas" ng-class="isCalculatingPrediction ? 'fa-spinner fa-spin' : 'fa-calculator'"></i>
+                                            {{ isCalculatingPrediction ? 'Calculating...' : 'Calculate' }}
+                                        </button>
+                                    </div>
+                                    <div class="chart-js-controls" ng-if="!shouldHideGraphForLumpSum()" style="display: flex; align-items: center; gap: 10px;">
+                                        <label class="modern-label">
+                                            <i class="fas fa-sliders-h label-icon"></i>
+                                            LOESS Bandwidth:
+                                        </label>
+                                        <div class="bandwidth-control">
+                                            <div class="bandwidth-inputs" style="display: flex; align-items: center; gap: 10px;">
+                                                <span class="range-label">0.2</span>
+                                                <input type="range"
+                                                       class="form-control bandwidth-slider"
+                                                       ng-model="chartSettings.loessBandwidth"
+                                                       ng-mouseup="onChartBandwidthChange()"
+                                                       ng-touchend="onChartBandwidthChange()"
+                                                       min="0.2"
+                                                       max="0.8"
+                                                       step="0.05"
+                                                       style="width: 150px;">
+                                                <span class="range-label">0.8</span>
+                                                <span style="font-weight: bold; min-width: 40px;">{{chartSettings.loessBandwidth | number:2}}</span>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                Lower values = more local smoothing, Higher values = more global smoothing
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
+                            <!-- Warning if quantity is out of range -->
+                            <div ng-if="customQuantityData.userQuantity && !isUserQuantityInRange()"
+                                 class="quantity-warning">
+                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                <strong>Warning:</strong> Your quantity ({{ customQuantityData.userQuantity | number:2 }}) is outside the valid range.
+                                Please enter a quantity between {{ getValidQuantityRange().min | number:2 }} and {{ getValidQuantityRange().max | number:2 }}.
+                            </div>
                             <!-- LOESS Prediction Results -->
                             <div ng-if="customQuantityPrediction" class="prediction-results">
                                 <div ng-if="customQuantityPrediction.success" class="prediction-success">
@@ -750,7 +807,6 @@
                                                     <span class="band-label">Lower:</span>
                                                     <span class="band-value">{{ customQuantityPrediction.loessFilteredLower | smartCurrency }}</span>
                                                 </div>
-
                                             </div>
                                         </div>
                                         <div class="stat-card">
@@ -770,10 +826,7 @@
                                         ({{ customQuantityPrediction.dataPointsNoOutliers }} after outlier removal).
                                         Multiple calculation methods are shown for comparison.
                                     </div>
-
-
                                 </div>
-
                                 <div ng-if="!customQuantityPrediction.success" class="prediction-error">
                                     <div class="alert alert-warning" role="alert">
                                         <i class="fas fa-exclamation-triangle"></i>
@@ -783,7 +836,6 @@
                             </div>
                             <div class="chart-container-glass" ng-if="!shouldHideGraphForLumpSum()">
                                 <div class="canvas-wrapper" ng-class="{ 'blurred': isChartStale }">
-
                                     <div class="chart-loader" ng-show="isChartLoading">
                                         <div class="loading-spinner">
                                             <i class="fas fa-spinner fa-spin"></i>
@@ -792,9 +844,6 @@
                                     </div>
                                     <canvas id="priceChart" style="width: 100%; height: 400px; background: white;"></canvas>
                                 </div>
-                            </div>
-                            <div class="text-muted text-center mt-3" ng-if="shouldHideGraphForLumpSum()">
-                                <i class="fas fa-info-circle"></i> Charts and statistics are not available when all Lump Sum items have quantity = 1.
                             </div>
                             <!-- Summary stats -->
                         </div>
@@ -872,7 +921,7 @@
                                             <span ng-if="column.key === 'Description'">{{ item.Description }}</span>
                                             <span ng-if="column.key === 'SupplementalDescription'">{{ item.SupplementalDescription }}</span>
                                             <span ng-if="column.key === 'CalculatedUnit'">{{ item.CalculatedUnit }}</span>
-                                            <span ng-if="column.key === 'Quantity'">{{ item.Quantity }}</span>
+                                            <span ng-if="column.key === 'Quantity'">{{ item.Quantity | numberFormat }}</span>
                                             <span ng-if="column.key === 'b'">
                                                 <span ng-if="item.CalculatedUnit === 'LS - Lump Sum'"
                                                       title="Calculated Unit Price: {{ item.b | smartCurrency }} ÷ {{ item.Quantity }} = {{ (item.b / item.Quantity) | smartCurrency }}">
@@ -884,7 +933,7 @@
                                                     {{ item.b | smartCurrency }}
                                                 </span>
                                             </span>
-                                           
+
                                             <span ng-if="column.key === 'InflationAdjustedPrice'"
                                                   title="{{ getInflationInfo(item) }}"
                                                   style="cursor: help;">
@@ -924,24 +973,14 @@
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div>
-
-    <script src="
-https://cdn.jsdelivr.net/npm/science@1.9.3/science.v1.min.js
-"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="
 https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
 "></script>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
-
     <style>
-        /* Global Font Consistency System */
         :root {
             --primary-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
             --monospace-font: 'Courier New', 'Consolas', 'Monaco', monospace;
@@ -960,12 +999,10 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             line-height: 1.5;
         }
 
-        /* Consistent Font Application */
         * {
             font-family: var(--primary-font);
         }
 
-        /* Monospace for specific elements only */
         .numeric-cell,
         .date-cell,
         code,
@@ -974,7 +1011,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-family: var(--monospace-font);
         }
 
-        /* Unify font for all UI elements */
         .btn,
         .btn-xs,
         .btn-outline-primary,
@@ -995,7 +1031,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .form-group,
         .input-group,
         .quantity-input,
-        .county-name-compact,
         .multi-select-tag,
         .multi-select-trigger,
         .multi-select-option,
@@ -1018,7 +1053,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .modern-panel {
             background: #ffffff;
             border: 2px solid #1F4283;
-            padding: 25px;
+            padding: 12px;
             position: relative;
         }
 
@@ -1143,15 +1178,11 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 cursor: not-allowed;
                 opacity: 0.6;
             }
-
-
-
         /* Date Inputs */
         .date-inputs-compact {
             display: flex;
             align-items: center;
             gap: 8px;
-            
             flex-wrap: wrap;
         }
 
@@ -1252,10 +1283,19 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             display: flex;
             align-items: center;
             gap: 8px;
+            outline: none;
         }
 
-            .suggestion-item:hover {
+            .suggestion-item:hover,
+            .suggestion-item-focused {
                 background: #EAF0FA;
+                border-left: 3px solid #1F4283;
+            }
+
+            .suggestion-item:focus {
+                background: #EAF0FA;
+                border-left: 3px solid #1F4283;
+                box-shadow: inset 0 0 0 1px #1F4283;
             }
 
             .suggestion-item:last-child {
@@ -1277,14 +1317,22 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             padding: 8px 12px;
             margin-top: 6px;
             font-size: var(--small-font-size);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            width: 100%;
+            max-width: 358px; /* Match date-inputs-compact container width (2 * 175px + 8px gap) */
+            box-sizing: border-box;
         }
 
-            .error-message div {
+            <!--.error-message div {
                 display: flex;
                 align-items: center;
                 gap: 6px;
                 margin-bottom: 2px;
-            }
+            }-->
 
                 .error-message div:last-child {
                     margin-bottom: 0;
@@ -1435,7 +1483,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border: 2px solid #1F4283;
             position: relative;
-            white-space:nowrap;
+            white-space: nowrap;
         }
 
         /* Optimized table styling */
@@ -1443,14 +1491,15 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             width: 100%;
             word-wrap: break-word;
             border-collapse: separate;
-            text-align:center;
+            text-align: center;
             border-spacing: 0;
             font-size: var(--small-font-size);
             background-color: #ffffff;
             min-width: auto;
-            table-layout:auto;
+            table-layout: auto;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
+
             .bid-table th {
                 position: sticky;
                 top: 0;
@@ -1486,7 +1535,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 transition: all 0.2s ease;
             }
 
-            /* Sticky columns for Contract and Project Number */
             .bid-table th:nth-child(1),
             .bid-table th:nth-child(2) {
                 position: sticky;
@@ -1527,7 +1575,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 background: #D6E1F5;
             }
 
-            /* Column alignments */
             .bid-table td:nth-child(4),
             .bid-table td:nth-child(5),
             .bid-table td:nth-child(14),
@@ -1564,47 +1611,46 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 text-transform: capitalize;
             }
 
-                    .bid-table td:nth-child(19) {
-            min-width: 120px;
-            max-width: 150px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-            .bid-table td:nth-child(19):hover {
-                white-space: normal;
-                overflow: visible;
-                position: relative;
-                z-index: 100;
-                background: #D6E1F5;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-                border-radius: 4px;
+            .bid-table td:nth-child(19) {
+                min-width: 120px;
+                max-width: 150px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
-        /* Work Type and Work Mix specific styling */
-        .bid-table td:nth-child(20),
-        .bid-table td:nth-child(21) {
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            word-break: break-word !important;
-            overflow-wrap: break-word !important;
-            hyphens: auto;
-            line-height: 1.3;
-            padding: 8px 6px;
-            vertical-align: top;
-        }
+                .bid-table td:nth-child(19):hover {
+                    white-space: normal;
+                    overflow: visible;
+                    position: relative;
+                    z-index: 100;
+                    background: #D6E1F5;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                    border-radius: 4px;
+                }
 
-        .bid-table th:nth-child(20),
-        .bid-table th:nth-child(21) {
-            white-space: normal;
-            word-wrap: break-word;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            line-height: 1.3;
-            padding: 10px 6px;
-            vertical-align: top;
-        }
+            .bid-table td:nth-child(20),
+            .bid-table td:nth-child(21) {
+                white-space: normal !important;
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                hyphens: auto;
+                line-height: 1.3;
+                padding: 8px 6px;
+                vertical-align: top;
+            }
+
+            .bid-table th:nth-child(20),
+            .bid-table th:nth-child(21) {
+                white-space: normal;
+                word-wrap: break-word;
+                word-break: break-word;
+                overflow-wrap: break-word;
+                line-height: 1.3;
+                padding: 10px 6px;
+                vertical-align: top;
+            }
 
             .bid-table tbody tr {
                 min-height: 42px;
@@ -1630,30 +1676,45 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             background: #ffffff;
             max-width: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: #1F4283 #f8f9fa;
+            scroll-behavior: smooth;
+            transform: translateZ(0);
+            will-change: scroll-position;
         }
 
-            /* Scrollbar */
+            /* Enhanced Scrollbar for Better UX */
             .table-wrapper::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
+                width: 12px;
+                height: 12px;
             }
 
             .table-wrapper::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 5px;
+                background: #f8f9fa;
+                border-radius: 6px;
+                border: 1px solid #e9ecef;
             }
 
             .table-wrapper::-webkit-scrollbar-thumb {
-                background: #1F4283;
-                border-radius: 5px;
-                border: 1px solid #f1f1f1;
+                background: linear-gradient(180deg, #1F4283 0%, #152C57 100%);
+                border-radius: 6px;
+                border: 1px solid #f8f9fa;
+                transition: background 0.2s ease;
             }
 
-                .table-wrapper::-webkit-scrollbar-thumb:hover {
-                    background: #152C57;
-                }
+            .table-wrapper::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(180deg, #152C57 0%, #0B172D 100%);
+                box-shadow: 0 2px 4px rgba(31, 66, 131, 0.3);
+            }
 
-        /* Sortable headers */
+            .table-wrapper::-webkit-scrollbar-thumb:active {
+                background: #0B172D;
+            }
+
+            .table-wrapper::-webkit-scrollbar-corner {
+                background: #f8f9fa;
+            }
+
         .bid-table th.sortable {
             cursor: pointer;
             user-select: none;
@@ -1738,27 +1799,43 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             max-width: 100%;
             border: 1px solid #e1e5e9;
             margin-top: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: #1F4283 #f8f9fa;
+            scroll-behavior: smooth;
+            transform: translateZ(0);
+            will-change: scroll-position;
         }
 
             .table-wrapper::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
+                width: 12px;
+                height: 12px;
             }
 
             .table-wrapper::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 5px;
+                background: #f8f9fa;
+                border-radius: 6px;
+                border: 1px solid #e9ecef;
             }
 
             .table-wrapper::-webkit-scrollbar-thumb {
-                background: #1F4283;
-                border-radius: 5px;
-                border: 1px solid #f1f1f1;
+                background: linear-gradient(180deg, #1F4283 0%, #152C57 100%);
+                border-radius: 6px;
+                border: 1px solid #f8f9fa;
+                transition: background 0.2s ease;
             }
 
-                .table-wrapper::-webkit-scrollbar-thumb:hover {
-                    background: #152C57;
-                }
+            .table-wrapper::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(180deg, #152C57 0%, #0B172D 100%);
+                box-shadow: 0 2px 4px rgba(31, 66, 131, 0.3);
+            }
+
+            .table-wrapper::-webkit-scrollbar-thumb:active {
+                background: #0B172D;
+            }
+
+            .table-wrapper::-webkit-scrollbar-corner {
+                background: #f8f9fa;
+            }
 
         .column-selector {
             background: #ffffff;
@@ -1856,7 +1933,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-size: var(--small-font-size);
         }
 
-        /* Table controls styling */
         .table-controls {
             display: flex;
             align-items: center;
@@ -1887,7 +1963,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             border: 1px solid #e9ecef;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 1200px) {
             .column-grid {
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -1913,7 +1988,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: 11px;
             }
 
-                /* Table Column Formatting and Alignment */
                 .bid-table th,
                 .bid-table td {
                     padding: 8px 6px;
@@ -1922,7 +1996,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     font-family: var(--primary-font);
                 }
 
-                /* Right-justify numeric columns */
                 .bid-table .numeric-cell {
                     text-align: center !important;
                     font-family: var(--monospace-font);
@@ -1930,7 +2003,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     font-size: var(--small-font-size);
                 }
 
-                /* Center-justify location columns */
                 .bid-table .location-cell {
                     text-align: center !important;
                     font-weight: 500;
@@ -1939,20 +2011,15 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     font-size: var(--small-font-size);
                 }
 
-                /* Left-justify text columns */
                 .bid-table .text-cell {
                     text-align: center !important;
                     font-size: var(--small-font-size);
                 }
-
-                /* Currency and quantity formatting */
                 .bid-table .numeric-cell {
                     font-family: var(--monospace-font);
                     font-weight: 600;
                     color: #2c5aa0;
                 }
-
-                /* Date formatting */
                 .bid-table .date-cell {
                     text-align: center !important;
                     font-family: var(--monospace-font);
@@ -1960,21 +2027,18 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     color: #666;
                 }
 
-                /* Status and Type formatting */
                 .bid-table .status-cell {
                     text-align: center !important;
                     font-weight: 500;
                     font-size: var(--small-font-size);
                 }
 
-                /* Outlier formatting */
                 .bid-table .outlier-cell {
                     text-align: center !important;
                     font-weight: 600;
                     font-size: var(--small-font-size);
                 }
 
-            /* Responsive adjustments */
             @media (max-width: 1200px) {
                 .bid-table th,
                 .bid-table td {
@@ -2053,7 +2117,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-weight: bold;
         }
 
-        th[ng-click] {
+        th[ng-click] .sortable {
             cursor: pointer;
         }
 
@@ -2103,7 +2167,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .hover-card-trigger:hover .hover-card {
             display: block;
         }
-        /* Chart Section */
         .chart-section {
             background: #ffffff;
             padding: 24px;
@@ -2202,7 +2265,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        /* Loading States */
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -2226,7 +2288,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             border-radius: 15px;
         }
 
-        /* Large Dataset Warning */
         .large-dataset-warning {
             background: #fff3cd;
             border: 1px solid #ffeaa7;
@@ -2259,6 +2320,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             margin: 0 0 15px 0;
             color: #856404;
             line-height: 1.5;
+            font-weight:var(--small-font-size);
         }
 
         .warning-actions {
@@ -2271,7 +2333,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: var(--base-font-size);
             }
 
-        /* NHCCI Inflation Information Section */
         .inflation-info-section {
             background: linear-gradient(135deg, #EAF0FA 0%, #B1C6EC 100%);
             border: 2px solid #1F4283;
@@ -2311,7 +2372,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             margin: 0;
         }
 
-        /* No Data Section */
         .no-data-section {
             text-align: center;
             padding: 60px 20px;
@@ -2344,7 +2404,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             line-height: 1.5;
         }
 
-        /* Results Section */
         .results-section {
             position: relative;
         }
@@ -2357,7 +2416,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             margin-top: 20px;
         }
 
-        /* Export Buttons */
         .export-buttons {
             display: flex;
             gap: 10px;
@@ -2405,7 +2463,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 transform: none;
             }
 
-        /* PDF Generation Loading */
         .pdf-loading {
             display: inline-flex;
             align-items: center;
@@ -2418,7 +2475,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 border-width: 2px;
             }
 
-        /* Summary Statistics Section */
         .stats-section {
             background: #EAF0FA;
             padding: 14px;
@@ -2529,7 +2585,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-family: var(--monospace-font);
             font-size: var(--small-font-size);
         }
-        /* Region Type Dropdown & Multi-Select */
         .region-type-section {
             margin-bottom: 18px;
             display: flex;
@@ -2639,7 +2694,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 color: #0B172D;
             }
 
-        /* District/County Filter Styles */
         .district-county-group-compact {
             background: #EAF0FA;
             border: 2px solid #B1C6EC;
@@ -2704,6 +2758,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .btn-outline-primary {
             color: #1F4283;
             border-color: #1F4283;
+            font-size: var(--small-font-size);
         }
 
             .btn-outline-primary:hover {
@@ -2729,16 +2784,17 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         }
 
         .county-checkboxes-compact {
-            max-height: 80px;
+            max-height: 135px;
             overflow-y: auto;
             border: 1px solid #D6E1F5;
-            padding: 4px;
+            padding: 14px;
         }
 
         .county-checkbox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 2px;
+            gap:4px;
+            line-height: 1.4;
         }
 
         .no-district-message-compact {
@@ -2772,9 +2828,9 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
         .county-name-compact {
             font-size: var(--small-font-size);
             color: #152C57;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.3;
         }
 
         .selected-counties-inline {
@@ -2818,7 +2874,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             box-shadow: 0 0 0 0.2rem rgba(31, 66, 131, 0.25);
         }
 
-        /* Quantity Filter */
         .quantity-filter {
             max-width: 400px;
             height: 130px;
@@ -2906,7 +2961,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-weight: 400;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .modern-panel {
                 padding: 25px;
@@ -2958,7 +3012,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             cursor: pointer;
         }
 
-        /* Trigger Box */
         .multi-select-trigger {
             width: 100%;
             padding: 12px 40px 12px 16px;
@@ -3017,7 +3070,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                     opacity: 1;
                 }
 
-        /* Arrow Icon */
         .multi-select-arrow {
             color: #a0aec0;
             transition: all 0.2s ease;
@@ -3028,7 +3080,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             color: #003366;
         }
 
-        /* Dropdown Menu */
         .multi-select-options {
             position: absolute;
             top: 100%;
@@ -3053,7 +3104,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 transform: translateY(0);
             }
 
-        /* Dropdown Items */
         .multi-select-option {
             padding: 10px 16px;
             cursor: pointer;
@@ -3073,7 +3123,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-weight: 600;
             }
 
-        /* Checkbox Style */
         .multi-select-checkbox {
             width: 16px;
             height: 16px;
@@ -3099,7 +3148,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 transform: translate(-50%, -50%);
             }
 
-        /* Scrollbar Styling */
         .multi-select-options::-webkit-scrollbar {
             width: 6px;
         }
@@ -3116,6 +3164,43 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             .multi-select-options::-webkit-scrollbar-thumb:hover {
                 background: #002244;
             }
+
+        #payItemInput[title] {
+            position: relative;
+        }
+
+        #payItemInput[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1F4283;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 300px;
+            word-wrap: break-word;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        #payItemInput[title]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1F4283;
+            z-index: 1000;
+            margin-bottom: -5px;
+        }
 
         .filter-container {
             background: white;
@@ -3137,7 +3222,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             z-index: 10;
             border-radius: 0 0 6px 6px;
         }
-    
+
         .category-group .suggestion-item {
             padding: 10px 12px;
             cursor: pointer;
@@ -3158,7 +3243,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-weight: 500;
             }
 
-        /* Chart Stale Blurring Functionality */
         .results-section {
             transition: filter 0.3s ease;
             position: relative;
@@ -3179,7 +3263,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             justify-content: center;
             align-items: flex-start;
             text-align: center;
-            z-index: 1000; /* Must be higher than anything else */
+            z-index: 1000; 
             pointer-events: none;
             padding-top: 20px;
         }
@@ -3270,13 +3354,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 margin-bottom: 0;
             }
 
-        /* Quantity Warning Styling */
         .quantity-warning {
             background: #fff3cd;
             border: 1px solid #ffeaa7;
             color: #856404;
             padding: 12px 16px;
-            margin-top: 12px;
+            margin: 10px;
             border-radius: 8px;
             font-size: var(--base-font-size);
             font-weight: 500;
@@ -3296,7 +3379,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 color: #856404;
             }
 
-        /* Trend Analysis Section - Using stats-section styling */
         .trend-controls {
             margin-bottom: 20px;
             padding: 15px;
@@ -3363,14 +3445,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-weight: 600;
                 font-size: var(--base-font-size);
             }
-        /* Responsive adjustments for trend section */
         @media (max-width: 768px) {
             .trend-controls .form-group {
                 max-width: 100%;
             }
         }
 
-        /* Toggle Switch Styles */
         .toggle-wrapper {
             display: flex;
             align-items: center;
@@ -3385,11 +3465,11 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             height: 24px;
         }
 
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
 
         .toggle-slider {
             position: absolute;
@@ -3403,25 +3483,25 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             border-radius: 24px;
         }
 
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 18px;
+                width: 18px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+            }
 
         input:checked + .toggle-slider {
             background-color: #1F4283;
         }
 
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
+            input:checked + .toggle-slider:before {
+                transform: translateX(26px);
+            }
 
         .toggle-label {
             font-weight: 500;
@@ -3429,7 +3509,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             font-size: var(--base-font-size);
         }
 
-        /* Responsive adjustments for toggle switch */
         @media (max-width: 768px) {
             .toggle-switch {
                 width: 56px;
@@ -3440,12 +3519,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 border-radius: 28px;
             }
 
-            .toggle-slider:before {
-                height: 22px;
-                width: 22px;
-                left: 3px;
-                bottom: 3px;
-            }
+                .toggle-slider:before {
+                    height: 22px;
+                    width: 22px;
+                    left: 3px;
+                    bottom: 3px;
+                }
 
             input:checked + .toggle-slider:before {
                 transform: translateX(28px);
@@ -3471,12 +3550,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 border-radius: 32px;
             }
 
-            .toggle-slider:before {
-                height: 26px;
-                width: 26px;
-                left: 3px;
-                bottom: 3px;
-            }
+                .toggle-slider:before {
+                    height: 26px;
+                    width: 26px;
+                    left: 3px;
+                    bottom: 3px;
+                }
 
             input:checked + .toggle-slider:before {
                 transform: translateX(28px);
@@ -3493,7 +3572,6 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: var(--heading-font-size);
             }
         }
-        /* Character count notification */
         .character-notification {
             background: #e3f2fd;
             border: 1px solid #2196f3;
@@ -3526,13 +3604,25 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             gap: 6px;
             font-weight: 500;
         }
+        .ls-item-msg {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 8px 12px;
+            margin-top: 6px;
+            font-size: var(--large-font-size);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
 
             .no-results i {
                 color: #f39c12;
                 font-size: var(--small-font-size);
             }
 
-        /* Search reminder notification */
         .search-reminder {
             background: #fff8e1;
             border: 1px solid #ffd54f;
@@ -3552,25 +3642,77 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
                 font-size: var(--small-font-size);
             }
 
-        /* Selection reminder notification */
-        .selection-reminder {
-            background: #e8f5e8;
-            border: 1px solid #4caf50;
-            color: #2e7d32;
-            padding: 8px 12px;
-            margin-top: 6px;
-            font-size: var(--small-font-size);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
+        .chart-js-controls {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(31, 66, 131, 0.1);
+            border: 1px solid #B1C6EC;
         }
 
-            .selection-reminder i {
-                color: #4caf50;
-                font-size: var(--small-font-size);
-            }
+        .bandwidth-control {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
 
+        .bandwidth-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bandwidth-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .bandwidth-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1f4283;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .bandwidth-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1f4283;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .bandwidth-slider:hover {
+            background: #ccc;
+        }
+
+        .bandwidth-slider::-webkit-slider-thumb:hover {
+            background: #0f2a5a;
+        }
+
+        .bandwidth-slider::-moz-range-thumb:hover {
+            background: #0f2a5a;
+        }
+
+        .range-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            min-width: 25px;
+            text-align: center;
+        }
 
     </style>

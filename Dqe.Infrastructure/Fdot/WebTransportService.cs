@@ -18,18 +18,13 @@ using ProjectItem = Dqe.Domain.Model.Wt.ProjectItem;
 using Proposal = Dqe.Domain.Model.Wt.Proposal;
 using ProposalItem = Dqe.Domain.Model.Wt.ProposalItem;
 using NHibernate;
-using NHibernate.Type;
 
 namespace Dqe.Infrastructure.Fdot
 {
-
     public class WebTransportService : IWebTransportService
     {
-
         private static readonly IDictionary<string, CodeTable> CodeTables = new Dictionary<string, CodeTable>();
-
         private static readonly object Lock = new object();
-
         /// <summary>
         /// Retrieves a list of pay item details (name and description) based on the input string.
         /// Supports case-insensitive searching by pay item number (Name) or partial description. Results are filtered to SpecBook "13".
@@ -42,12 +37,17 @@ namespace Dqe.Infrastructure.Fdot
             {
                 RefItem ri = null;
 
-                var sanitizedInput = input.Replace(" ", "").Trim();
+                // Normalize input: remove spaces and hyphens, convert to lowercase
+                var sanitizedInput = input.Replace(" ", "").Replace("-", "").Trim().ToLower();
 
                 var rawResults = session.QueryOver(() => ri)
                     .Where(() => ri.SpecBook == "13")
                     .And(Restrictions.Or(
-                        Expression.Sql("LOWER(REPLACE(RTRIM(LTRIM(REFITEM_NM)) + ' - ' + RTRIM(LTRIM(DESCR)), ' ', '')) LIKE ?", $"%{input.Trim().ToLower().Replace(" ", "")}%", NHibernateUtil.String),
+                        Expression.Sql(
+                            "LOWER(REPLACE(REPLACE(RTRIM(LTRIM(REFITEM_NM)) + ' - ' + RTRIM(LTRIM(DESCR)), ' ', ''), '-', '')) LIKE ?",
+                            $"%{sanitizedInput}%",
+                            NHibernateUtil.String
+                        ),
                         Restrictions.On(() => ri.Description).IsLike(input.Trim(), MatchMode.Anywhere)
                     ))
                     .SelectList(list => list
@@ -71,9 +71,6 @@ namespace Dqe.Infrastructure.Fdot
 
                 return finalResults;
             }
-
-
-
         }
 
         /// <summary>
@@ -94,12 +91,12 @@ namespace Dqe.Infrastructure.Fdot
         decimal? maxRank = null,
         List<string> workTypeNames = null,
         string projectNumber = null,
-        decimal? minBidAmount = null, decimal? maxBidAmount = null
+        decimal? minBidAmount = null, decimal? maxBidAmount = null,
+         string[] district = null
             )
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
             {
-
                 var categorySubquery = DetachedCriteria.For<Category>("catSub")
                     .CreateAlias("catSub.ProjectItems", "piSub")
                     .CreateAlias("piSub.MyRefItem", "riSub")
@@ -107,8 +104,6 @@ namespace Dqe.Infrastructure.Fdot
                     .Add(Restrictions.EqProperty("piSub.MyProposalItem.Id", "this.Id"))
                     .SetProjection(Projections.Property("catSub.Description"))
                     .SetMaxResults(1);
-
-
                 var projectNumberSubquery = DetachedCriteria.For<ProjectItem>("pitem")
                     .CreateAlias("pitem.MyProject", "prjSub")
                     .Add(Restrictions.EqProperty("pitem.MyProposalItem.Id", "this.Id"))
@@ -125,7 +120,6 @@ namespace Dqe.Infrastructure.Fdot
                     .Add(Subqueries.PropertyEq("prj.Id", projectIdSubquery))
                     .SetProjection(Projections.Property("prj.Pjcde1"))
                     .SetMaxResults(1);
-
                 // Subquery: Work Mix Description (for projection)
                 var workMixSubquery = DetachedCriteria.For<CodeValue>("cv")
                     .CreateAlias("cv.MyCodeTable", "ct")
@@ -133,7 +127,6 @@ namespace Dqe.Infrastructure.Fdot
                     .Add(Subqueries.PropertyEq("cv.CodeValueName", projectCodeSubquery))
                     .SetProjection(Projections.Property("cv.Description"))
                     .SetMaxResults(1);
-
                 // Main query
                 var query = session.CreateCriteria<ProposalItem>()
                     .CreateAlias("MyRefItem", "ri")
@@ -145,7 +138,6 @@ namespace Dqe.Infrastructure.Fdot
                     .CreateAlias("p.District", "d")
                     .CreateAlias("p.Milestones", "m")
                     .CreateAlias("pv.MyRefVendor", "rv")
-
                     .Add(Restrictions.Or(
                         Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
                         Restrictions.IsNull("pv.BidType")
@@ -178,7 +170,8 @@ namespace Dqe.Infrastructure.Fdot
 
                 if (counties != null && counties.Length > 0)
                     query.Add(Restrictions.In("c.Description", counties));
-
+                if (district != null && district.Length > 0)
+                    query.Add(Restrictions.In("d.Description", district));
                 if (!string.IsNullOrEmpty(bidStatus))
                 {
                     if (bidStatus == "FMV")
@@ -186,13 +179,10 @@ namespace Dqe.Infrastructure.Fdot
                     else
                         query.Add(Restrictions.Eq("pv.BidStatus", bidStatus));
                 }
-
                 if (contractType != null && contractType.Any())
                     query.Add(Restrictions.In("p.ContractType", contractType));
-
                 if (marketCounties != null && marketCounties.Any())
                     query.Add(Restrictions.In("c.Description", marketCounties));
-
                 if (minRank > 0 && maxRank > 0)
                     query.Add(Restrictions.Between("Quantity", minRank, maxRank));
                 else if (minRank > 0)
@@ -215,19 +205,6 @@ namespace Dqe.Infrastructure.Fdot
                 {
                     query.Add(Restrictions.Le("pv.BidTotal", maxBidAmount.Value));
                 }
-                if (workTypeNames != null && workTypeNames.Any())
-                {
-                    var workMixFilterSubquery = DetachedCriteria.For<CodeValue>("cv")
-                        .CreateAlias("cv.MyCodeTable", "ct")
-                        .Add(Restrictions.Eq("ct.Id", 203L))
-                        .Add(Restrictions.In("cv.Description", workTypeNames))
-                        .Add(Subqueries.PropertyEq("cv.CodeValueName", projectCodeSubquery))
-                        .SetProjection(Projections.Id());
-
-                    // Apply EXISTS filter
-                    query.Add(Subqueries.Exists(workMixFilterSubquery));
-                }
-                // Projection
                 query.SetProjection(Projections.ProjectionList()
                     .Add(Projections.Property("pv.BidStatus"), "BidStatus")
                     .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
@@ -257,7 +234,6 @@ namespace Dqe.Infrastructure.Fdot
                     .Add(Projections.SubQuery(categorySubquery), "CategoryDescription")
                     .Add(Projections.SubQuery(workMixSubquery), "WorkMixDescription"))
                     .SetResultTransformer(NHibernate.Transform.Transformers.AliasToBean<ProposalItemDTO>());
-
                 var res = query.List<ProposalItemDTO>();
                 return res.Distinct().ToList();
             }
