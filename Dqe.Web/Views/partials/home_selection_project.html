@@ -192,7 +192,7 @@
                             <h5>Working Estimate</h5>
                         </div>
                         <div class="col-lg-10" style="text-align: right;">
-                            <span ng-if="(project.userHasCustody == true && security.isAuthorized) || security.isCoderRole">
+                            <span ng-if="project.userHasCustody == true && security.isAuthorized && project.canEstimate">
                                 <span ng-show="!project.isOfficial">
                                     <span ng-show="project.nextLabel != undefined && project.nextLabel != null && project.nextLabel != '' && !security.isCoderRole">
                                         <label>
@@ -210,7 +210,7 @@
                                     &nbsp;&nbsp;
                                 </span>
                             </span>
-                            <span ng-show="isSynced == false && !project.isOfficial && project.userHasCustody == true && security.isAuthorized">
+                            <span ng-show="isSynced == false && !project.isOfficial && project.userHasCustody == true && security.isAuthorized && project.canEstimate">
                                 <button type="button" title="Click to synchronize the working estimate with the current project design" class="btn btn-primary" ng-click="synchronizeWorkingEstimate(workingEstimate, project)">
                                     Synchronize Design
                                 </button>
