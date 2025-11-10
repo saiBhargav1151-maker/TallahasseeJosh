@@ -102,7 +102,7 @@
     };
     $scope.toggleColumn = function (column) { if (!column.visible) { column.selectionOrder = $scope.nextSelectionOrder++; } else { column.selectionOrder = 0; } column.visible = !column.visible; };
     $scope.workTypeMap = { I: 'Maintenance Other', X0: 'Interstate Construction (new)', X1: 'New Construction', X2: 'Reconstruction', X3: 'Resurfacing', X4: 'Widening & Resurfacing', X5: 'Bridge Construction', X6: 'Bridge Repair', X7: 'Traffic Operations', X8: 'Miscellaneous Construction', X9: 'Interstate Rehabilition', Z: 'Other' };
-    $scope.contractTypeMap = { CC: 'Const Contract', CEC: 'Const Emergency Contract', CFR: 'Const Fast Response', CPB: 'Const Push Button', CSL: 'Construction Streamline', MC: 'Maint Contract', MEC: 'Maint Emergency Contract', MFR: 'Maint Fast Response', MLC: 'MT Landscape Install Establish', TO: 'Traffic Operations', TOPB: 'Traffic Operations Push Button' };
+    $scope.contractTypeMap = { CC: 'Const Contract', MC: 'Maint Contract', MPE: 'Maintenance Pre Event', MMOA: 'Maint Memorandum of Agreement', MLC: 'MT Landscape Install Establish', TOPB: 'Traffic Operations Push Button', MFR: 'Maint Fast Response', MAM: 'Maint Asset Management', CDB: 'Const Design Build', CDBL: 'Const Design Build - Low Bid', CFR: 'Const Fast Response', MEC: 'Maint Emergency Contract', CPB: 'Const Push Button', CLS: 'Const Lump Sum', MLBP: 'Maint Low Bid Performance', CEC: 'Const Emergency Contract', TO: 'Traffic Operations', CDBP: 'Const Design Build Push button', MBVP: 'Maint Best Value Performance', MLBF: 'Maint Landscape Bid Factor', CMGC: 'Const Mgt/Gen.Contractor' };
     $scope.bidTypeMap = { RESP: 'Responsive', NONR: 'Non-Responsive', IRR: 'Irregular', OTH: 'Other' };
     $scope.proposalTypeMap = { DIST: 'District', CENT: 'Central Office' };
     $scope.bidStatusMap = { W: 'Won', L: 'Loss', I: 'Irregular', FMV: 'Fair Market Value (Bidder Rank 1, 2, 3)' };
@@ -1401,7 +1401,7 @@
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
               y += 15;
-              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to 2025 Q2 levels)' : 'Disabled (using raw prices)'), 40, y);
+              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to 2025 Q3 levels)' : 'Disabled (using raw prices)'), 40, y);
               y += 15;
               //doc.text(
               //    'Date Range: ' +

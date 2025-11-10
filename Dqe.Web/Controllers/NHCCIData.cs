@@ -103,8 +103,9 @@ namespace Dqe.Web.Controllers
             { "2024 Q2", 320.6700704m },
             { "2024 Q3", 317.0124438m },
             { "2024 Q4", 310.3445904m },
-            { "2025 Q1", 313.2363962m },
-            { "2025 Q2", 319.9377476m }
+            { "2025 Q1", 312.6333259m },
+            { "2025 Q2", 312.6481098m },
+             { "2025 Q3", 315.5709694m }
         };
 
         /// <summary>
@@ -121,7 +122,7 @@ namespace Dqe.Web.Controllers
         /// </summary>
         public static decimal GetLatestIndex()
         {
-            return IndexByQuarter["2025 Q2"]; 
+            return IndexByQuarter["2025 Q3"]; 
         }
 
         /// <summary>
