@@ -1488,6 +1488,7 @@ namespace Dqe.Web.Controllers
                 {
                     id = project.Id,
                     wtId = project.WtId,
+                    canEstimate = project.ProjectHasWorkingEstimateForUser(currentUser),
                     number = project.ProjectNumber,
                     description = project.Description,
                     district = project.District,
