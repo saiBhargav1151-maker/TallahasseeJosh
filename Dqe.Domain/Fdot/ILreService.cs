@@ -7,6 +7,7 @@ namespace Dqe.Domain.Fdot
     public interface ILreService
     {
         IEnumerable<Model.Lre.Project> GetProjects(string projectName);
+        Model.Lre.Project GetProject(string projectName);
         ProjectSnapshot GetProjectSnapshot(long id);
         IEnumerable<PayItemGroup> GetLrePickLists();
         PayItem GetLrePayItem(string payItemName);

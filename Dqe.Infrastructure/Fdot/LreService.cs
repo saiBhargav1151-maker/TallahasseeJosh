@@ -21,6 +21,17 @@ namespace Dqe.Infrastructure.Fdot
                 return ps;
             }
         }
+        public Domain.Model.Lre.Project GetProject(string projectName)
+        {
+            using (var session = Initializer.LreSessionFactory.OpenSession())
+            {
+                var ps = session.QueryOver<Domain.Model.Lre.Project>()
+                    .Where(i => i.ProjectName == projectName)
+                    .Take(1) // Limit to one result
+                    .SingleOrDefault();
+                return ps;
+            }
+        }
 
         public ProjectSnapshot GetProjectSnapshot(long id)
         {

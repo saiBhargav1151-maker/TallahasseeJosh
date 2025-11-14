@@ -1171,7 +1171,7 @@ namespace Dqe.Web.Controllers
         {
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
-            var p = _projectRepository.Get((int)project.id);
+            var p = _projectRepository.Get((int)project.id);         
             if (p.CustodyOwner != currentDqeUser && currentDqeUser.Role != DqeRole.Coder)
             {
                 return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = string.Format("Project {0} is not currently owned by {1}", project.number, currentDqeUser.Name) });
@@ -1464,6 +1464,8 @@ namespace Dqe.Web.Controllers
                 posibleOwner = false;
             }
 
+            var lreProject = _lreService.GetProject(project.ProjectNumber.ToString());
+
             var result = new DqeResult(new
             {
                 security = new
@@ -1518,7 +1520,7 @@ namespace Dqe.Web.Controllers
                         : string.Empty,
                     isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                     removeLabelComment = string.Empty,
-                    quantityComplete = project.QuantityComplete
+                    quantityComplete = lreProject != null ? lreProject.QuantityComplete : null
                 },
                 proposals = project.Proposals.Select(i => new
                 {
