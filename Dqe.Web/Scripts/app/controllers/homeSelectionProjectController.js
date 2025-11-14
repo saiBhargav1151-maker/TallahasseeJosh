@@ -302,15 +302,17 @@
 
         $http.post('./projectproposal/SnapshotWorkingEstimate', project).success(function (result) {
             $scope.prefferedApplication = "";
-            if (project.quantityComplete === 'N' && project.takeLabeledSnapshot != null && project.takeLabeledSnapshot) {
-                result.data.project.quantityComplete = 'Y';
-            }
-            else if (project.quantityComplete === 'Y') {
-                result.data.project.quantityComplete = 'Y';
-            }
-            else if (project.quantityComplete === 'N') {
-                result.data.project.quantityComplete = 'N';
-            }
+            $scope.project.quantityComplete = result.data.project.quantityComplete;
+
+            //if (project.quantityComplete === 'N' && project.takeLabeledSnapshot != null && project.takeLabeledSnapshot) {
+            //    result.data.project.quantityComplete = 'Y';
+            //}
+            //else if (project.quantityComplete === 'Y') {
+            //    result.data.project.quantityComplete = 'Y';
+            //}
+            //else if (project.quantityComplete === 'N') {
+            //    result.data.project.quantityComplete = 'N';
+            //}
             processResult(result);
         });
     }
