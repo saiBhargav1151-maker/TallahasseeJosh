@@ -108,7 +108,18 @@
                             title: 'Basis of Estimates',
                             url: '/boe',
                             active: $location.url().startsWith('/boe') ? 'active' : ''
+                        },
+                        {
+                            title: 'Master Pay Item List',
+                            url: '/payitems',
+                            active: $location.url().startsWith('/payitems') ? 'active' : ''
+                        },
+                        {
+                            title: 'Unit Price Search',
+                            url: '/unitpricesearch',
+                            active: $location.url().startsWith('/unitpricesearch') ? 'active' : ''
                         }
+
                     ];
                 }
                 else {
@@ -148,7 +159,8 @@
                 if ($location.url().startsWith('/home')) {
                     //co admin, district admin, or estimator
                     if (currentUser.role == 'A' || currentUser.role == 'D' || currentUser.role == 'E' || 
-                        currentUser.role == 'F' || currentUser.role == 'M' || currentUser.role == 'O') {
+                        currentUser.role == 'F' || currentUser.role == 'M' || currentUser.role == 'O' ||
+                        currentUser.role == 'C' || currentUser.role == 'R' || currentUser.role == 'B') {
                         return [
                             {
                                 title: 'My Estimates',
@@ -187,27 +199,6 @@
                             }
                         ];
                     }
-                  
-                    else if (currentUser.role == 'C' || currentUser.role == 'R' || currentUser.role == 'B') {
-                        return [
-                            {
-                                title: 'My Estimates',
-                                active: $location.url().startsWith('/home_estimates'),
-                                url: '/home_estimates'
-                            },
-                            {
-                                title: 'Project',
-                                active: $location.url().startsWith('/home_project'),
-                                url: '/home_project'
-                            },
-                            {
-                                title: 'Proposal',
-                                active: $location.url().startsWith('/home_proposal'),
-                                url: '/home_proposal'
-                            }
-                        ];
-                    }
-
                 }
                 if ($location.url().startsWith('/profile')) {
                     if (currentUser.role == 'E') {
