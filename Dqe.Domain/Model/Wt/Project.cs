@@ -67,7 +67,7 @@ namespace Dqe.Domain.Model.Wt
         public virtual string PricedBy { get; set; }
 
         public virtual DateTime? PricedDate { get; set; }
-
+        public virtual string Pjcde1 { get; set; }
         #endregion
 
         public virtual void AddCategory(Category category)

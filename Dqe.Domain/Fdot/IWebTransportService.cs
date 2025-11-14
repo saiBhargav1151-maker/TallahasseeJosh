@@ -45,8 +45,13 @@ namespace Dqe.Domain.Fdot
         Letting GetResponsiveLettings(string number);
         bool IsProposalReadyForOfficialEstimate(string proposalNumber);
         Exception InsertRefItems(IEnumerable<PayItemMaster> payItemMasters, DqeUser user);
+        // SB 05/30/2025 - Added interfaces for retrieving Unit Price and Pay Item details
+        IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, List<string> contractType, int months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, string projectNumber, decimal? minBidAmount, decimal? maxBidAmount, string[]  district);
+        IList<PayItemDTO> GetPayItemDetails(string input);
 
         //not needed since DSS is decommissioned, dont need to pass to DSS
         //void UpdateProposalReadyForDssPass(Proposal proposal);
+
+      
     }
 }

@@ -35,6 +35,10 @@ dqeApp.config(['$routeProvider', function ($routeProvider) {
             templateUrl: './Views/partials/home_payitems.html',
             controller: 'HomePayItemsController'
         }).
+        when('/unitpricesearch', {
+            templateUrl: './Views/partials/unit_price_search.html',
+            controller: 'UnitPriceSearchController'
+        }).
         when('/home_estimates', {
             templateUrl: './Views/partials/profile_projects.html',
             controller: 'ProfileProjectsController'
@@ -295,7 +299,7 @@ dqeApp.run(function ($rootScope, $templateCache, $cookies, $location) {
             if ($cookies.DQE_AUTH_TICKET == undefined) {
                 if (currentUrl != '/signin') {
                     //if signed out, only allow access to select urls
-                    if (nextUrl != '' && !nextUrl.startsWith('/boe') && nextUrl != '/payitems' && nextUrl != '/signin') {
+                    if (nextUrl != '' && !nextUrl.startsWith('/boe') && nextUrl != '/unitpricesearch' && nextUrl != '/payitems' && nextUrl != '/signin') {
                         //event.preventDefault();
                         $location.path('/signin');
                     }
