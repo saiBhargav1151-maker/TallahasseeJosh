@@ -47,7 +47,22 @@
     $scope.dataAgeWarning = '';
     $scope.useInflationAdjustedPrices = true;
     $scope.isExporting = false;
+    $scope.latestNHCCIQuarter = 'Q3, 2025'; 
+    $scope.latestNHCCIQuarterKey = '2025 Q3';
     $scope.customQuantityData = { userQuantity: null };
+    $scope.loadLatestNHCCIQuarter = function() {
+      $http.get('/UnitPriceSearch/GetLatestNHCCIQuarter')
+        .then(function(response) {
+          if (response.data && response.data.display) {
+            $scope.latestNHCCIQuarter = response.data.display;
+            $scope.latestNHCCIQuarterKey = response.data.quarterKey || '2025 Q3';
+          }
+        })
+        .catch(function(error) {
+          console.error('Error loading latest NHCCI quarter:', error);
+        });
+    };
+    $scope.loadLatestNHCCIQuarter();
     $scope.customQuantityPrediction = null;
     $scope.isCalculatingPrediction = false;
     $scope.chartSettings = { loessBandwidth: 0.3 };
@@ -1401,7 +1416,7 @@
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
               y += 15;
-              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to 2025 Q3 levels)' : 'Disabled (using raw prices)'), 40, y);
+              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to ' + ($scope.latestNHCCIQuarter || '2025 Q3') + ' levels)' : 'Disabled (using raw prices)'), 40, y);
               y += 15;
               //doc.text(
               //    'Date Range: ' +

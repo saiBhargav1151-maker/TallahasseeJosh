@@ -526,7 +526,7 @@
     <div class="simple-data-info" ng-if="bidHistoryData && bidHistoryData.length > 0">
         <span><strong>Bid Data for search criteria available through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
         <span ng-if="dataAgeWarning" class="data-age-warning-inline" style="color: #856404; font-weight: bold;">{{ dataAgeWarning }}</span>
-        <span><strong>FDOT CCI  Index Calendar Year Load:</strong> Q3, 2025</span>
+        <span><strong>FDOT CCI  Index Calendar Year Load:</strong> {{ latestNHCCIQuarter }}</span>
     </div>
 
     <!-- Large Dataset Warning -->
@@ -582,7 +582,7 @@
                     <h5 class="inflation-title">FDOT CCI Inflation Adjustment - {{ useInflationAdjustedPrices ? 'Enabled' : 'Disabled' }}</h5>
                     <p class="inflation-description">
                         <span ng-if="useInflationAdjustedPrices">
-                            Charts and calculations are using inflation-adjusted prices (normalized to 2025 Q3 levels using FDOT CCI).
+                            Charts and calculations are using inflation-adjusted prices (normalized to {{ latestNHCCIQuarter }} levels using FDOT CCI).
                             This allows for more accurate price comparisons across different time periods.
                         </span>
                         <span ng-if="!useInflationAdjustedPrices">

@@ -10,7 +10,6 @@ namespace Dqe.Web.Controllers
 {
     /// <summary>
     /// Controller responsible for handling Unit Price Search functionality,
-    /// including pay item autocomplete suggestions and historical bid data retrieval.
     /// </summary>
     public class UnitPriceSearchController : Controller
     {
@@ -24,7 +23,7 @@ namespace Dqe.Web.Controllers
         }
         // <summary>
         /// Returns a list of pay item suggestions based on the input text.
-        /// Input must be at least 2 characters long.
+        /// Input must be at least 2 characters long. 
         /// </summary>
         /// <returns> JSON data
         [HttpGet]
@@ -87,17 +86,33 @@ namespace Dqe.Web.Controllers
                             decimal adjustedPrice = NHCCIData.CalculateInflationAdjustedPrice(item.b, lettingDate);
                             item.InflationAdjustedPrice = adjustedPrice;
 
+                            var indexByQuarter = NHCCIData.IndexByQuarter;
                             string quarterKey = NHCCIData.GetQuarterKey(lettingDate);
-                            if (NHCCIData.IndexByQuarter.ContainsKey(quarterKey))
-                            {
-                                decimal lettingDateIndex = NHCCIData.IndexByQuarter[quarterKey];
-                                decimal latestIndex = NHCCIData.GetLatestIndex();
-                                decimal inflationFactor = latestIndex / lettingDateIndex;
-                                decimal percentIncrease = (inflationFactor - 1) * 100;
 
-                                item.InflationFactor = inflationFactor;
-                                item.InflationPercentIncrease = percentIncrease;
+                            if (indexByQuarter.TryGetValue(quarterKey, out var lettingDateIndex))
+                            {
+                                decimal latestIndex = NHCCIData.GetLatestIndex();
+                                if (latestIndex > 0m && lettingDateIndex > 0m)
+                                {
+                                    decimal inflationFactor = latestIndex / lettingDateIndex;
+                                    decimal percentIncrease = (inflationFactor - 1) * 100;
+
+                                    item.InflationFactor = inflationFactor;
+                                    item.InflationPercentIncrease = percentIncrease;
+                                }
+                                else
+                                {
+                                    item.InflationFactor = 1.0m;
+                                    item.InflationPercentIncrease = 0.0m;
+                                }
+
                                 item.NHCCIQuarter = quarterKey;
+                            }
+                            else
+                            {
+                                item.InflationFactor = 1.0m;
+                                item.InflationPercentIncrease = 0.0m;
+                                item.NHCCIQuarter = "Unknown";
                             }
                         }
                         catch (Exception ex)
@@ -220,6 +235,36 @@ namespace Dqe.Web.Controllers
             catch
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the latest NHCCI quarter information for display purposes.
+        /// </summary>
+        /// <returns>JSON result with latest quarter key and display format</returns>
+        [HttpGet]
+        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")]
+        public ActionResult GetLatestNHCCIQuarter()
+        {
+            try
+            {
+                var latestQuarterKey = NHCCIData.GetLatestQuarterKey();
+                var latestQuarterDisplay = NHCCIData.GetLatestQuarterDisplay();
+                
+                return Json(new
+                {
+                    quarterKey = latestQuarterKey,
+                    display = latestQuarterDisplay
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetLatestNHCCIQuarter: {ex.Message}");
+                return Json(new
+                {
+                    quarterKey = "Unknown",
+                    display = "Unknown"
+                }, JsonRequestBehavior.AllowGet);
             }
         }
 
