@@ -7,12 +7,38 @@
     $scope.bidHistoryData = [];
     $scope.lastSearchedPayItem = $scope.searchText;
     $scope.isLoading = false;
+    
+    // Helper function to format date in EST as YYYY-MM-DD
+    function formatDateInEST(date) {
+      const month = date.getUTCMonth();
+      const day = date.getUTCDate();
+       let isDST = false;
+      if (month >= 2 && month <= 9) {
+        isDST = true;
+      } else if (month === 10) {
+        isDST = day <= 7;
+      } else if (month === 1) {
+        isDST = day > 7;
+      }
+      const offsetHours = isDST ? 4 : 5; 
+      const estTime = date.getTime() - (offsetHours * 60 * 60 * 1000);
+      const estDate = new Date(estTime);
+      const estYear = estDate.getUTCFullYear();
+      const estMonth = estDate.getUTCMonth() + 1;
+      const estDay = estDate.getUTCDate();
+      
+      const monthStr = String(estMonth).padStart(2, '0');
+      const dayStr = String(estDay).padStart(2, '0');
+      
+      return `${estYear}-${monthStr}-${dayStr}`;
+    }
+    
     // Set default date range: end date = today, start date = today - 36 months
     const todayDate = new Date();
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 36);
-    $scope.endDate = todayDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-    $scope.startDate = startDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    $scope.endDate = formatDateInEST(todayDate); 
+    $scope.startDate = formatDateInEST(startDate);
     $scope.regionType = '';
     $scope.regionOptions = [];
     $scope.selectedRegions = [];
@@ -426,8 +452,8 @@
       const todayDate = new Date();
       const startDate = new Date();
       startDate.setMonth(startDate.getMonth() - 36);
-      $scope.endDate = todayDate.toISOString().split('T')[0];
-      $scope.startDate = startDate.toISOString().split('T')[0];
+      $scope.endDate = formatDateInEST(todayDate);
+      $scope.startDate = formatDateInEST(startDate);
       $scope.selectedMinBidAmount = null;
       $scope.selectedMaxBidAmount = null;
       $scope.selectedBidStatus = 'FMV';
