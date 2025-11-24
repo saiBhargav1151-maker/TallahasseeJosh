@@ -46,6 +46,8 @@
             </strong>
         </h5>
     </div>
+    <div ng-show="!confidentialNotice" class="col-lg-7">
+    </div>
 
     <div class="col-lg-2" ng-show="project != undefined && project != null && versions.length > 0">
         <button ng-click="scrollTo('reviewSectionHeader')" style="float:right" title="Scroll to Reviews section">Go to Reviews</button>

@@ -906,12 +906,12 @@ namespace Dqe.Web.Controllers
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
             var itemsCount = proposal.SectionGroups.Sum(i => i.ProposalItems.Count());
-            var wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
+            //TODO: need to set wt proposal here, to create confidential data flag. MB.
 
             if ((currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && proposal.CurrentEstimator != currentDqeUser) || itemsCount == 0)
             {
                 proposal.SetCurrentEstimator(currentDqeUser);
-                //var wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
+                var wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
                 proposal.SynchronizeStructure(wtp, currentDqeUser, false);
             }
 

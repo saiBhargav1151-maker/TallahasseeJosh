@@ -112,10 +112,6 @@ namespace Dqe.Web.Controllers
             var role = ((char)user.Role).ToString();
             var roleName = Helper.GetRoleDisplayLabel(user.Role);
 
-            if(user.Role == DqeRole.AdminReadOnly && user.District != "CO")
-            {
-                roleName = "Elevated Read Only";
-            }
             return
                 Json(
                     new

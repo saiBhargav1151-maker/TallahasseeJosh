@@ -54,7 +54,7 @@ namespace Dqe.Domain.Model
         public virtual string ProjectType { get; set; }
 
         /// <summary>
-        /// Project is confidential if it
+        /// Project is confidential if it is marked as Official Estimate and is NOT Executed (status 03)
         /// </summary>
         public virtual bool ConfidentialData { get; set; } = false;
 
