@@ -325,7 +325,8 @@ namespace Dqe.Domain.Model
                 if (transformer.Role != DqeRole.DistrictAdministrator 
                     && transformer.Role != DqeRole.Estimator 
                     && transformer.Role != DqeRole.DistrictReviewer 
-                    && transformer.Role != DqeRole.StateReviewer)
+                    && transformer.Role != DqeRole.StateReviewer
+                    && transformer.Role != DqeRole.AdminReadOnly)
                 {
                     throw new InvalidOperationException(string.Format("Role {0} is invalid for district {1}.", transformer.Role, transformer.District));
                 }

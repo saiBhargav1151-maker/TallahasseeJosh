@@ -569,7 +569,8 @@ namespace Dqe.Web.Controllers
                     authorizationTotal = authorizationTotal,
                     officialTotal = officialTotal,
                     contractType = wtp.ContractType,
-                    removeLabelComment = string.Empty
+                    removeLabelComment = string.Empty,
+                    confidentialData = wtp.OfficialEstimate == "Y" && wtp.ProposalStatus != "03"
                 },
                 projects = prop.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
                 {
@@ -625,6 +626,23 @@ namespace Dqe.Web.Controllers
             //this needs an await
             var wtp = _webTransportService.GetProject(number);
             var project = _projectRepository.GetByProjectNumber(number);
+
+            if (wtp == null)
+            {
+                return new DqeResult(null,
+                              new ClientMessage
+                              {
+                                  Severity = ClientMessageSeverity.Error,
+                                  text = string.Format("Project not found - {0}", number)
+                              },
+                              JsonRequestBehavior.AllowGet);
+            }
+
+            //This determines if the
+            if (wtp.MyProposal?.OfficialEstimate == "Y" && wtp.MyProposal?.ProposalStatus != "03")
+            {
+                project.ConfidentialData = true;
+            }
 
             //Maintenance can only view maintenance proposal types and construction view construction types.
             //if(project?.Proposals != null && project.Proposals.Any())
@@ -1519,6 +1537,7 @@ namespace Dqe.Web.Controllers
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4 ? "Phase IV"
                         : string.Empty,
                     isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
+                    confidentialData = project.ConfidentialData, 
                     removeLabelComment = string.Empty,
                     quantityComplete = lreProject != null ? lreProject.QuantityComplete : null
                 },

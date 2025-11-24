@@ -115,7 +115,8 @@ namespace Dqe.Domain.Model
         MaintenanceEstimator = 'M',
 
         /// <summary>
-        /// CO Only. Spelled with an "Oh" not a zero
+        /// CO or District. Spelled with an "Oh" not a zero. This is "Admin Read Only" for CO users and called "Elevated Read Only" for District users. 
+        /// This is the SAME role with the same functions. Only shows different names.Only CO-Admin should be able to assign users to this role regardless if co or district.
         /// </summary>
         AdminReadOnly = 'O'
     }

@@ -241,6 +241,7 @@
                     if (!containsDqeError(result)) {
                         $scope.estimate = getDqeData(result);
 
+                        //set confidential data flag here.MB.
                         if ($scope.pricingLevel == 'project') {
                             $http.get('./projectproposal/GetLsDbProject', { params: { number: $scope.estimate.project.number } }).success(function (rlt) {
                                 if (!containsDqeError(rlt)) {

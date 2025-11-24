@@ -84,7 +84,7 @@
     var coRoles = [systemAdminRole, payItemAdminRole, costBasedTemplateAdminRole,
         estimatorRole, stateReviewerRole, adminReadOnlyRole]; 
 
-    var districtRoles = [districtAdminRole, estimatorRole, adminReadOnlyRole];
+    var districtRoles = [districtAdminRole, estimatorRole];
 
     //We are only giving co system admin the right to assign any Reviewer roles
    
@@ -93,6 +93,7 @@
             if ($scope.thisUser.district == "CO") {
                 districtRoles.push(districtReviewerRole);
                 districtRoles.push(stateReviewerRole);
+                districtRoles.push(adminReadOnlyRole);
             }            
         });
         
@@ -130,7 +131,7 @@
         return coRoles;
     }
     function validDistrictRoles() {
-        if ($scope.role != districtAdminRole.value && $scope.role != estimatorRole.value && $scope.role != districtReviewerRole.value && $scope.role != stateReviewerRole.value  ) {
+        if ($scope.role != districtAdminRole.value && $scope.role != estimatorRole.value && $scope.role != districtReviewerRole.value && $scope.role != stateReviewerRole.value && $scope.role != adminReadOnlyRole.value   ) {
             $scope.role = undefined;
         }
         return districtRoles;

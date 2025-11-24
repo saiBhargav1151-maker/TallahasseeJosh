@@ -53,6 +53,13 @@ namespace Dqe.Domain.Model
         /// </summary>
         public virtual string ProjectType { get; set; }
 
+        /// <summary>
+        /// Project is confidential if it
+        /// </summary>
+        public virtual bool ConfidentialData { get; set; } = false;
+
+
+
         //public virtual DateTime? LettingDate { get; protected internal set; }
 
         public virtual DqeUser CustodyOwner { get; protected internal set; }
