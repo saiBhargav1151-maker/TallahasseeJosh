@@ -906,7 +906,8 @@ namespace Dqe.Web.Controllers
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
             var itemsCount = proposal.SectionGroups.Sum(i => i.ProposalItems.Count());
-            
+            //TODO: need to set wt proposal here, to create confidential data flag. MB.
+
             if ((currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && proposal.CurrentEstimator != currentDqeUser) || itemsCount == 0)
             {
                 proposal.SetCurrentEstimator(currentDqeUser);
@@ -1373,6 +1374,8 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [OverrideAuthorization]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.AdminReadOnly, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
         public ActionResult GetBidHistory(dynamic itemToPrice)
         {
             var itemGroup = itemToPrice.itemGroup;

@@ -205,13 +205,14 @@
     if ($route.current.params != 'undefined' && $route.current.params != null) {
         if ($route.current.params.project != 'undefined' && $route.current.params.project != null) {
             $http.get('./projectproposal/GetProject', { params: { number: $route.current.params.project } }).success(function (result) {
-                stateService.currentProject = $route.current.params.project;
+                stateService.currentProject = $route.current.params.project;               
                 //tries fetching the Project Type again if it didn't come through the first time
                 if (result.data.project.projectType == null || result.data.project.projectType == undefined) {
                     $http.get('./projectproposal/GetWtProjectType', { params: { number: $route.current.params.project } }).success(function (wtResult) {
                         result.data.project.projectType = wtResult.data.projectType;
                     });
                 }
+                $scope.confidentialNotice = result.data.project.confidentialData
                 processResult(result);
                 checkSync(result);
             });

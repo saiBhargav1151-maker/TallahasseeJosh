@@ -115,7 +115,7 @@ namespace Dqe.Domain.Model
         MaintenanceEstimator = 'M',
 
         /// <summary>
-        /// CO Only. Spelled with an "Oh" not a zero
+        /// CO or District. Spelled with an "Oh" not a zero. 
         /// </summary>
         AdminReadOnly = 'O'
     }
