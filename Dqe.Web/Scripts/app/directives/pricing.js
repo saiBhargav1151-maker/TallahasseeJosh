@@ -240,6 +240,7 @@
                 $http.post(loadLink, { loadId: loadId }).success(function (result) {
                     if (!containsDqeError(result)) {
                         $scope.estimate = getDqeData(result);
+                        $scope.confidentialNotice = $scope.estimate.proposal.confidentialData;
 
                         //set confidential data flag here.MB.
                         if ($scope.pricingLevel == 'project') {
@@ -248,7 +249,7 @@
                                     $scope.estimate.hasDetailProject = getDqeData(rlt).hasDetailProject;                                  
                                 }
                             });                      
-                        }         
+                        }
                         //document.getElementById("hiddenProposalId").value = $scope.estimate.proposal.id;
                         //document.getElementById("hiddenProposalNumber").value = $scope.estimate.proposal.number;
                         $http.get('./marketarea/GetMarketAreas').success(function (res) {

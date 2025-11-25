@@ -14,6 +14,15 @@
             </div>
         </div>
     </div>
+    <div ng-show="confidentialNotice" class="row" style="color: red; text-align: center;">
+        <h4> <strong>NOTICE - CONFIDENTIAL INFORMATION - NOT TO BE DISCLOSED </strong></h4>
+        <h5>
+            <strong>
+                ANY INFORMATION related to the Department's official estimate is CONFIDENTIAL until the contract is executed, per
+                <a target="_blank" title="Florida Statutes 337.168 . Opens in a new window." href="https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&Search_String=&URL=0300-0399/0337/Sections/0337.168.html">Florida Statutes 337.168</a>
+            </strong>
+        </h5>
+    </div>
     <div ng-if="estimate.canEstimate || estimate.viewOnly">
         <div class="row">
             <div class="col-lg-12">

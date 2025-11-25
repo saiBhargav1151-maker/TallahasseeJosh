@@ -570,7 +570,7 @@ namespace Dqe.Web.Controllers
                     officialTotal = officialTotal,
                     contractType = wtp.ContractType,
                     removeLabelComment = string.Empty,
-                    confidentialData = wtp.OfficialEstimate == "Y" && wtp.ProposalStatus != "03"
+                    confidentialData = wtp?.OfficialEstimate == "Y" && wtp?.ProposalStatus != "03"
                 },
                 projects = prop.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
                 {

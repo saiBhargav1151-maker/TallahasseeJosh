@@ -507,6 +507,15 @@ namespace Dqe.Web.Controllers
                 }    
             }
             var wtProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
+
+            Domain.Model.Wt.Proposal wtp = null;
+
+            if (wtProposal != null)
+            {
+                //set actual wt proposal entity here, to create confidential data flag. MB.
+                wtp = _webTransportService.GetProposal(wtProposal.ProposalNumber);
+            }
+           
             var l = BuildProjectItemGroups(estimate);
             var result = new
             {
@@ -517,7 +526,8 @@ namespace Dqe.Web.Controllers
                 isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                 proposal = new
                 {
-                    id = 0
+                    id = 0,
+                    confidentialData = wtp?.OfficialEstimate == "Y" && wtp?.ProposalStatus != "03" //data is confidential iff official estimate AND not executed yet.
                 },
                 project = new
                 {
@@ -907,11 +917,17 @@ namespace Dqe.Web.Controllers
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
             var itemsCount = proposal.SectionGroups.Sum(i => i.ProposalItems.Count());
             //TODO: need to set wt proposal here, to create confidential data flag. MB.
+            Domain.Model.Wt.Proposal wtp = null;
+
+            if (proposal != null)
+            {
+                //set actual wt proposal entity here, to create confidential data flag. MB.
+                wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
+            }
 
             if ((currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && proposal.CurrentEstimator != currentDqeUser) || itemsCount == 0)
             {
                 proposal.SetCurrentEstimator(currentDqeUser);
-                var wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
                 proposal.SynchronizeStructure(wtp, currentDqeUser, false);
             }
 
@@ -960,7 +976,8 @@ namespace Dqe.Web.Controllers
                     id = proposal.Id,
                     number = proposal.ProposalNumber,
                     description = proposal.Description,
-                    county = proposal.County.Name
+                    county = proposal.County.Name,
+                    confidentialData = wtp?.OfficialEstimate == "Y" && wtp?.ProposalStatus != "03" //data is confidential if official estimate but not executed yet.
                 },
                 project = new
                 {
