@@ -78,7 +78,7 @@
     //var maintenanceDistrictAdminRole = { name: 'Maintenance District Admin Role', value: 'F' };
     //var maintenanceEstimatorRole = { name: 'Maintenance Estimator Role', value: 'M' };
     var stateReviewerRole = { name: 'State Reviewer', value: 'B' };
-    var adminReadOnlyRole = { name: 'Admin Read Only', value: 'O' };
+    var adminReadOnlyRole = { name: 'Admin Read-Only', value: 'O' };
 
     //CoderRole
     var coRoles = [systemAdminRole, payItemAdminRole, costBasedTemplateAdminRole,
