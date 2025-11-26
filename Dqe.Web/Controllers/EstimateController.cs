@@ -527,7 +527,8 @@ namespace Dqe.Web.Controllers
                 proposal = new
                 {
                     id = 0,
-                    confidentialData = wtp?.OfficialEstimate == "Y" && wtp?.ProposalStatus != "03" //data is confidential iff official estimate AND not executed yet.
+                    //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
+                    confidentialData = (project.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtp?.OfficialEstimate == "Y") && wtp?.ProposalStatus != "03" 
                 },
                 project = new
                 {
@@ -977,7 +978,8 @@ namespace Dqe.Web.Controllers
                     number = proposal.ProposalNumber,
                     description = proposal.Description,
                     county = proposal.County.Name,
-                    confidentialData = wtp?.OfficialEstimate == "Y" && wtp?.ProposalStatus != "03" //data is confidential if official estimate but not executed yet.
+                    //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
+                    confidentialData = (proposal.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtp?.OfficialEstimate == "Y") && wtp?.ProposalStatus != "03" //data is confidential if official estimate but not executed yet.
                 },
                 project = new
                 {

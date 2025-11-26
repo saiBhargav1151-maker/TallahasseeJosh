@@ -123,6 +123,7 @@
                 var data = getDqeData(res);
                 if (data != null && data.isOfficial) {
                     proposal.isOfficial = true;
+                    proposal.confidentialData = true;
                 }
 
                 for (var i = 0; i < $scope.projects.length; i++) {

@@ -570,7 +570,8 @@ namespace Dqe.Web.Controllers
                     officialTotal = officialTotal,
                     contractType = wtp.ContractType,
                     removeLabelComment = string.Empty,
-                    confidentialData = wtp?.OfficialEstimate == "Y" && wtp?.ProposalStatus != "03"
+                    //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
+                    confidentialData = (prop.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtp?.OfficialEstimate == "Y") && wtp?.ProposalStatus != "03"
                 },
                 projects = prop.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
                 {
@@ -638,8 +639,8 @@ namespace Dqe.Web.Controllers
                               JsonRequestBehavior.AllowGet);
             }
 
-            //This determines if the
-            if (wtp.MyProposal?.OfficialEstimate == "Y" && wtp.MyProposal?.ProposalStatus != "03")
+            //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
+            if ((project.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtp.MyProposal?.OfficialEstimate == "Y") && wtp.MyProposal?.ProposalStatus != "03")
             {
                 project.ConfidentialData = true;
             }
@@ -1529,6 +1530,7 @@ namespace Dqe.Web.Controllers
                     isAvailable = project.CustodyOwner == null,
                     userHasCustody = posibleOwner && project.CustodyOwner == currentUser,
                     custodyOwner = project.CustodyOwner == null ? string.Empty : project.CustodyOwner.Name,
+                    ///****NOTE***** THIS DOES NOT INCLUDE AE AND OE.
                     nextLabel = project.GetNextSnapshotLabel() == SnapshotLabel.Initial ? "Initial"
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Scope ? "Scope"
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Phase1 ? "Phase1"
