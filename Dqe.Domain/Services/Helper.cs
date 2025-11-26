@@ -48,7 +48,7 @@ namespace Dqe.Domain.Services
                     displayLabel = "Maintenance Estimator";
                     break;
                 case DqeRole.AdminReadOnly:
-                    displayLabel = "Admin Read Only";
+                    displayLabel = "Admin Read-Only";
                     break;
                 default:
                     displayLabel = "No role";
