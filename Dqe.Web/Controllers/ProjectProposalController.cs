@@ -639,12 +639,6 @@ namespace Dqe.Web.Controllers
                               JsonRequestBehavior.AllowGet);
             }
 
-            //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
-            if ((project.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtp.MyProposal?.OfficialEstimate == "Y") && wtp.MyProposal?.ProposalStatus != "03")
-            {
-                project.ConfidentialData = true;
-            }
-
             //Maintenance can only view maintenance proposal types and construction view construction types.
             //if(project?.Proposals != null && project.Proposals.Any())
             //{
@@ -697,6 +691,12 @@ namespace Dqe.Web.Controllers
                         _transactionManager.Abort();
                         return (DqeResult)result;
                     }
+                }
+
+                //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
+                if (wtp.MyProposal?.OfficialEstimate == "Y" && wtp.MyProposal?.ProposalStatus != "03")
+                {
+                    p.ConfidentialData = true;
                 }
                 return ResultStructureFromProjectSelection(p, currentDqeUser);
             }
@@ -870,6 +870,11 @@ namespace Dqe.Web.Controllers
                 }
             }
             project.ProjectType = wtp.ProjectType;
+            //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
+            if ((project?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtp.MyProposal?.OfficialEstimate == "Y") && wtp.MyProposal?.ProposalStatus != "03")
+            {
+                project.ConfidentialData = true;
+            }
             //in DQE
             return ResultStructureFromProjectSelection(project, currentDqeUser, successMessage);
         }
