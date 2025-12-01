@@ -1338,6 +1338,8 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [OverrideAuthorization]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.AdminReadOnly, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
         public ActionResult UpdateBidHistory(dynamic itemToPrice)
         {
             var itemGroup = itemToPrice.itemGroup;
