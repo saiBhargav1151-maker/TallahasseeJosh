@@ -542,6 +542,7 @@ namespace Dqe.Web.Controllers
                     officialTotal = est == null ? 0 : est.Total;
                 }
             }
+            var isConfidentialData = IsConfidentialData(prop.ProposalNumber, wtp, prop);
 
             return new DqeResult(new
             {
@@ -570,8 +571,7 @@ namespace Dqe.Web.Controllers
                     officialTotal = officialTotal,
                     contractType = wtp.ContractType,
                     removeLabelComment = string.Empty,
-                    //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
-                    confidentialData = (prop.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtp?.OfficialEstimate == "Y") && wtp?.ProposalStatus != "03"
+                    confidentialData = isConfidentialData
                 },
                 projects = prop.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
                 {
@@ -692,12 +692,7 @@ namespace Dqe.Web.Controllers
                         return (DqeResult)result;
                     }
                 }
-
-                //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
-                if (wtp.MyProposal?.OfficialEstimate == "Y" && wtp.MyProposal?.ProposalStatus != "03")
-                {
-                    p.ConfidentialData = true;
-                }
+                
                 return ResultStructureFromProjectSelection(p, currentDqeUser);
             }
             //if project is in DQE
@@ -869,13 +864,7 @@ namespace Dqe.Web.Controllers
                     }
                 }
             }
-            project.ProjectType = wtp.ProjectType;
-            //data is confidential if it is not executed yet and it has an official estimate (either flagged as OE in wtp proposal table or OE snapshotlabel in dqe db).
-            if ((project?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtp.MyProposal?.OfficialEstimate == "Y") && wtp.MyProposal?.ProposalStatus != "03")
-            {
-                project.ConfidentialData = true;
-            }
-            //in DQE
+            project.ProjectType = wtp.ProjectType;     
             return ResultStructureFromProjectSelection(project, currentDqeUser, successMessage);
         }
 
@@ -1462,8 +1451,16 @@ namespace Dqe.Web.Controllers
 
         private ActionResult ResultStructureFromProjectSelection(Project project, DqeUser currentUser, string message = "")
         {
-            var wtProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
+            var wtSourceProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
             Dqe.Domain.Model.ProjectVersion version = null;
+            bool isConfidentialData = false;
+            if (wtSourceProposal != null)
+            {
+                var wtp = _webTransportService.GetProposal(wtSourceProposal.ProposalNumber);
+                isConfidentialData = IsConfidentialData(wtSourceProposal.ProposalNumber, wtp, wtSourceProposal);
+            }
+           
+
             if (User.IsInRole(DqeRole.Administrator.ToString()) || User.IsInRole(DqeRole.AdminReadOnly.ToString()))
             {
                 version = project.ProjectVersions.OrderByDescending(v => v.Version).FirstOrDefault(i => i.ProjectEstimates.FirstOrDefault(ii => ii.IsWorkingEstimate) != null);
@@ -1523,12 +1520,12 @@ namespace Dqe.Web.Controllers
                     projectType = project.ProjectType,
                     filenumber = project.MyMasterFile.FileNumber,
                     comment = snapshot == null ? string.Empty : snapshot.EstimateComment,
-                    lettingDate = wtProposal == null 
+                    lettingDate = wtSourceProposal == null 
                         ? projectLetting.HasValue
                             ? projectLetting.Value.ToShortDateString()
                             : string.Empty
-                        : wtProposal.LettingDate.HasValue 
-                            ? wtProposal.LettingDate.Value.ToShortDateString()
+                        : wtSourceProposal.LettingDate.HasValue 
+                            ? wtSourceProposal.LettingDate.Value.ToShortDateString()
                             : projectLetting.HasValue
                                 ? projectLetting.Value.ToShortDateString()
                                 : string.Empty,
@@ -1544,7 +1541,7 @@ namespace Dqe.Web.Controllers
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4 ? "Phase IV"
                         : string.Empty,
                     isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
-                    confidentialData = project.ConfidentialData, 
+                    confidentialData = isConfidentialData, 
                     removeLabelComment = string.Empty,
                     quantityComplete = lreProject != null ? lreProject.QuantityComplete : null
                 },
@@ -1554,6 +1551,7 @@ namespace Dqe.Web.Controllers
                     wtId = i.WtId,
                     number = i.ProposalNumber,
                     source = i.ProposalSource == ProposalSourceType.Wt ? "Project Preconstruction" : "Gaming",
+                    confidentialData = isConfidentialData,
                     comment = i.Comment,
                     contractType = i.ContractType,
                     created = i.Created,
@@ -1772,5 +1770,48 @@ namespace Dqe.Web.Controllers
                 },
                 JsonRequestBehavior.AllowGet);
         }
+
+
+        /// <summary>
+        /// This is the logic used to indicate to the the user if a project/proposal is considered to possibly have confidential data.
+        /// **NOTE** - Any changes made here should be replicated in the other associated method.
+        /// Duplicated in two controllers, better than splitting to different Repositories
+        /// <see cref="ProjectProposalController.IsConfidentialData"/>
+        /// <see cref="EstimateController.IsConfidentialData"/>
+        /// </summary>
+        /// <param name="propNumber">Proposal Number</param>
+        /// <param name="wtProp">Proposal WTP entity</param>
+        /// <param name="dqeProp">Proposal DQE entity</param>
+        /// <returns>bool</returns>
+        private bool IsConfidentialData(string propNumber, Domain.Model.Wt.Proposal wtProp, Proposal dqeProp)
+        {
+            if (string.IsNullOrEmpty(propNumber))
+            {
+                return false;
+            }
+            //determine if confidential data -  the DQE or AWP proposal are Official and NOT - Executed (03)
+            var isConfidentialData = (dqeProp?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtProp?.OfficialEstimate == "Y") && wtProp?.ProposalStatus != "03";
+
+            //if not confidential and it is a special proposal, then check it's parent
+            if (!isConfidentialData && DynamicHelper.ContainsSpecialSuffix(dqeProp.ProposalNumber))
+            {
+                var suffix = DynamicHelper.GetSpecialSuffix(dqeProp.ProposalNumber);
+                var parentProposalNumber = DynamicHelper.RemoveSuffixFromString(dqeProp.ProposalNumber, suffix);
+                if (string.IsNullOrEmpty(parentProposalNumber))
+                {
+                    return false;
+                }
+                var wtpParent = _webTransportService.GetProposalSlim(parentProposalNumber);
+                var dqewtParent = _proposalRepository.GetWtByNumber(parentProposalNumber);
+
+                //check if parent dqe or awp proposal are confidential
+                if ((dqewtParent?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtpParent?.OfficialEstimate == "Y") && wtpParent?.ProposalStatus != "03")
+                {
+                    return true;
+                }
+            }
+            return isConfidentialData;
+        }
+
     }
 }
