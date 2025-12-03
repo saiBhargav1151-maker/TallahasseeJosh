@@ -551,7 +551,7 @@ namespace Dqe.Web.Controllers
                   new ClientMessage
                   {
                       Severity = ClientMessageSeverity.Error,
-                      text = string.Format("This proposal has no associated projects.")
+                      text = string.Format("The proposal {0} has no associated projects.", prop.ProposalNumber)
                   },
                   JsonRequestBehavior.AllowGet);
             }
