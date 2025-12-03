@@ -154,27 +154,27 @@ namespace Dqe.Web.Controllers
             var p = _webTransportService.GetProposal(number);
 
             //Maintenance can only view maintenance proposal types and construction view construction types.
-            if (currentDqeUser.Role == DqeRole.MaintenanceEstimator && !p.ContractType.StartsWith("M"))
-            {
-                return new DqeResult(null,
-                  new ClientMessage
-                  {
-                      Severity = ClientMessageSeverity.Error,
-                      text = string.Format("Authorization to Construction Contract Type required.")
-                  },
-                  JsonRequestBehavior.AllowGet);
+            //if (currentDqeUser.Role == DqeRole.MaintenanceEstimator && !p.ContractType.StartsWith("M"))
+            //{
+            //    return new DqeResult(null,
+            //      new ClientMessage
+            //      {
+            //          Severity = ClientMessageSeverity.Error,
+            //          text = string.Format("Authorization to Construction Contract Type required.")
+            //      },
+            //      JsonRequestBehavior.AllowGet);
 
-            }
-            else if ((currentDqeUser.Role == DqeRole.Estimator) && p.ContractType.StartsWith("M"))
-            {
-                return new DqeResult(null,
-                   new ClientMessage
-                   {
-                       Severity = ClientMessageSeverity.Error,
-                       text = string.Format("Authorization to Maintenance Contract Type required")
-                   },
-                   JsonRequestBehavior.AllowGet);
-            }
+            //}
+            //else if ((currentDqeUser.Role == DqeRole.Estimator) && p.ContractType.StartsWith("M"))
+            //{
+            //    return new DqeResult(null,
+            //       new ClientMessage
+            //       {
+            //           Severity = ClientMessageSeverity.Error,
+            //           text = string.Format("Authorization to Maintenance Contract Type required")
+            //       },
+            //       JsonRequestBehavior.AllowGet);
+            //}
             //is proposal in DQE?
             var prop = _proposalRepository.GetWtByNumber(number);
             if (prop == null)
@@ -544,6 +544,18 @@ namespace Dqe.Web.Controllers
             }
             var isConfidentialData = IsConfidentialData(prop.ProposalNumber, wtp, prop);
 
+            //this was thowing generic erroring on proposals that did not have any associated projects (null reference).MB.
+            if (!prop.Projects.Any())
+            {
+                return new DqeResult(null,
+                  new ClientMessage
+                  {
+                      Severity = ClientMessageSeverity.Error,
+                      text = string.Format("The proposal {0} has no associated projects.", prop.ProposalNumber)
+                  },
+                  JsonRequestBehavior.AllowGet);
+            }
+
             return new DqeResult(new
             {
                 security = new
@@ -807,6 +819,9 @@ namespace Dqe.Web.Controllers
                 }
                 else
                 {
+                    //TODO:This does some odd stuff when dealing with proposals/projects prior to PRP's integration (in late 2022 I think)
+                    //I talked with Lee, this is a pre-exhisting bug but should not be a problem with current proposals/projects. MB.
+                    //MyProposal looks to just be the first proposal to match with the given project number...
                     if (wtp != null && wtp.MyProposal != null)
                     {
                         //synchronization error when project disassociated from proposal in wT
