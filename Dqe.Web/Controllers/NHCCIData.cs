@@ -15,12 +15,12 @@ namespace Dqe.Web.Controllers
     public static class NHCCIData
     {
         private const string DataSourceUrl = "https://fdotwww.blob.core.windows.net/sitefinity/docs/default-source/fpo/fpc/apps/dqe/cci-inflation-indexs.xlsx";
-        private static readonly TimeSpan RefreshInterval = TimeSpan.FromHours(12);
+        private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(15);
         private static readonly object SyncRoot = new object();
-
         private static Dictionary<string, decimal> _cachedIndexByQuarter = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
-        private static DateTime _cacheExpirationUtc = DateTime.MinValue;
-        private static DateTime _lastRefreshUtc = DateTime.MinValue;
+        private static DateTime _cacheExpirationEst = DateTime.MinValue;
+        private static DateTime _lastRefreshEst = DateTime.MinValue;
+        private static readonly TimeZoneInfo EasternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
 
         /// <summary>
         /// Gets the cached inflation index table, refreshing from the remote source when needed.
@@ -28,13 +28,13 @@ namespace Dqe.Web.Controllers
         public static IReadOnlyDictionary<string, decimal> IndexByQuarter => EnsureData();
 
         /// <summary>
-        /// Forces a cache refresh immediately (useful for testing).
+        /// Forces a cache refresh immediately ( for testing).
         /// </summary>
         public static void ForceRefresh()
         {
             lock (SyncRoot)
             {
-                _cacheExpirationUtc = DateTime.MinValue;
+                _cacheExpirationEst = DateTime.MinValue;
                 EnsureData();
             }
         }
@@ -44,14 +44,14 @@ namespace Dqe.Web.Controllers
         /// </summary>
         public static string GetCacheStatus()
         {
-            var nowUtc = DateTime.UtcNow;
-            var timeUntilExpiration = _cacheExpirationUtc > nowUtc 
-                ? _cacheExpirationUtc - nowUtc 
+            var nowEst = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, EasternTimeZone);
+            var timeUntilExpiration = _cacheExpirationEst > nowEst 
+                ? _cacheExpirationEst - nowEst 
                 : TimeSpan.Zero;
             
             return $"Cache Status - Records: {_cachedIndexByQuarter.Count}, " +
-                   $"Last Refresh: {_lastRefreshUtc:yyyy-MM-dd HH:mm:ss} UTC, " +
-                   $"Expires: {_cacheExpirationUtc:yyyy-MM-dd HH:mm:ss} UTC, " +
+                   $"Last Refresh: {_lastRefreshEst:yyyy-MM-dd HH:mm:ss} EST, " +
+                   $"Expires: {_cacheExpirationEst:yyyy-MM-dd HH:mm:ss} EST, " +
                    $"Time Until Expiration: {timeUntilExpiration.TotalMinutes:F1} minutes, " +
                    $"Latest Quarter: {GetLatestQuarterKey()}";
         }
@@ -165,27 +165,30 @@ namespace Dqe.Web.Controllers
                 return originalPrice;
             }
         }
-
         private static Dictionary<string, decimal> EnsureData()
         {
             var nowUtc = DateTime.UtcNow;
-            if (_cachedIndexByQuarter.Count == 0 || nowUtc >= _cacheExpirationUtc)
+            var nowEst = TimeZoneInfo.ConvertTimeFromUtc(nowUtc, EasternTimeZone);
+            if (_cachedIndexByQuarter.Count == 0 || nowEst >= _cacheExpirationEst)
             {
                 lock (SyncRoot)
                 {
-                    if (_cachedIndexByQuarter.Count == 0 || nowUtc >= _cacheExpirationUtc)
+                    nowUtc = DateTime.UtcNow;
+                    nowEst = TimeZoneInfo.ConvertTimeFromUtc(nowUtc, EasternTimeZone);
+
+                    if (_cachedIndexByQuarter.Count == 0 || nowEst >= _cacheExpirationEst)
                     {
                         var wasEmpty = _cachedIndexByQuarter.Count == 0;
-                        var wasExpired = nowUtc >= _cacheExpirationUtc;
-                        
-                        Debug.WriteLine($"[NHCCI] Starting data refresh. WasEmpty: {wasEmpty}, WasExpired: {wasExpired}, CurrentTime: {nowUtc:yyyy-MM-dd HH:mm:ss} UTC");
-                        
+                        var wasExpired = nowEst >= _cacheExpirationEst;
+
+                        Debug.WriteLine($"[NHCCI] Starting data refresh. WasEmpty: {wasEmpty}, WasExpired: {wasExpired}, CurrentTime: {nowEst:yyyy-MM-dd HH:mm:ss} EST");
+
                         try
                         {
                             _cachedIndexByQuarter = LoadIndexesFromSource();
-                            _lastRefreshUtc = nowUtc;
-                            _cacheExpirationUtc = nowUtc.Add(RefreshInterval);
-                            Debug.WriteLine($"[NHCCI] Data refresh successful. Loaded {_cachedIndexByQuarter.Count} records. Next refresh at {_cacheExpirationUtc:yyyy-MM-dd HH:mm:ss} UTC");
+                            _lastRefreshEst = nowEst;
+                            _cacheExpirationEst = nowEst.Add(RefreshInterval);
+                            Debug.WriteLine($"[NHCCI] Data refresh successful. Loaded {_cachedIndexByQuarter.Count} records. Next refresh at {_cacheExpirationEst:yyyy-MM-dd HH:mm:ss} EST");
                         }
                         catch (Exception ex)
                         {
@@ -198,10 +201,8 @@ namespace Dqe.Web.Controllers
                             {
                                 Debug.WriteLine($"[NHCCI] Keeping existing cached data ({_cachedIndexByQuarter.Count} records). Will retry at next refresh interval.");
                             }
-
-                            // Schedule next refresh attempt using RefreshInterval
-                            _cacheExpirationUtc = nowUtc.Add(RefreshInterval);
-                            Debug.WriteLine($"[NHCCI] Next refresh scheduled for {_cacheExpirationUtc:yyyy-MM-dd HH:mm:ss} UTC");
+                            _cacheExpirationEst = nowEst.Add(RefreshInterval);
+                            Debug.WriteLine($"[NHCCI] Next refresh scheduled for {_cacheExpirationEst:yyyy-MM-dd HH:mm:ss} EST");
                         }
                     }
                 }

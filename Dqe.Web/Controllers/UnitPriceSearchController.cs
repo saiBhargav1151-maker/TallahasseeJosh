@@ -4,7 +4,7 @@ using System.Web.Mvc;
 using Dqe.Domain.Fdot;
 using Dqe.Domain.Model;
 using System.Linq;
-
+using System.Web;
 
 namespace Dqe.Web.Controllers
 {
@@ -248,24 +248,73 @@ namespace Dqe.Web.Controllers
         {
             try
             {
+                Response.Cache.SetCacheability(HttpCacheability.NoCache);
+                Response.Cache.SetNoStore();
+                Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
+                Response.Cache.AppendCacheExtension("no-cache, no-store, must-revalidate");
+                Response.Headers.Add("Pragma", "no-cache");
+                Response.Headers.Add("Expires", "0");
+
                 var latestQuarterKey = NHCCIData.GetLatestQuarterKey();
                 var latestQuarterDisplay = NHCCIData.GetLatestQuarterDisplay();
+                var cacheStatus = NHCCIData.GetCacheStatus();
+                var lastRefreshEst = ExtractLastRefreshTime(cacheStatus);
                 
                 return Json(new
                 {
                     quarterKey = latestQuarterKey,
-                    display = latestQuarterDisplay
+                    display = latestQuarterDisplay,
+                    cacheTimestamp = lastRefreshEst?.ToString("yyyy-MM-ddTHH:mm:ss") ?? DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    _cacheBuster = DateTime.UtcNow.Ticks
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error in GetLatestNHCCIQuarter: {ex.Message}");
+                Response.Cache.SetCacheability(HttpCacheability.NoCache);
+                Response.Cache.SetNoStore();
+                
                 return Json(new
                 {
                     quarterKey = "Unknown",
-                    display = "Unknown"
+                    display = "Unknown",
+                    cacheTimestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    _cacheBuster = DateTime.UtcNow.Ticks
                 }, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        /// <summary>
+        /// Extracts the last refresh time from cache status string.
+        /// </summary>
+        private DateTime? ExtractLastRefreshTime(string cacheStatus)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(cacheStatus))
+                    return null;
+
+                var lastRefreshIndex = cacheStatus.IndexOf("Last Refresh: ", StringComparison.OrdinalIgnoreCase);
+                if (lastRefreshIndex < 0)
+                    return null;
+
+                var startIndex = lastRefreshIndex + "Last Refresh: ".Length;
+                var endIndex = cacheStatus.IndexOf(" EST", startIndex);
+                if (endIndex < 0)
+                    return null;
+
+                var dateTimeString = cacheStatus.Substring(startIndex, endIndex - startIndex);
+                if (DateTime.TryParse(dateTimeString, out var dateTime))
+                {
+                    var estTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+                    return TimeZoneInfo.ConvertTimeToUtc(dateTime, estTimeZone);
+                }
+            }
+            catch
+            {
+            }
+
+            return null;
         }
 
         /// <summary>
