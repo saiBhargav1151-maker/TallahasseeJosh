@@ -236,15 +236,15 @@ namespace Dqe.Domain.Model
             }
             if (phase1)
             {
-                return SnapshotLabel.Phase1;
+                return SnapshotLabel.Phase2;
             }
             if (scope)
             {
-                return SnapshotLabel.Scope;
+                return SnapshotLabel.Phase1;
             }
             if (initial)
             {
-                return SnapshotLabel.Initial;
+                return SnapshotLabel.Scope;
             }
             //if (review)
             //{
