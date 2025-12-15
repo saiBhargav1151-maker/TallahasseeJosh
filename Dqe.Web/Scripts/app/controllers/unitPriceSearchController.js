@@ -49,20 +49,47 @@
     $scope.isExporting = false;
     $scope.latestNHCCIQuarter = 'Q3, 2025'; 
     $scope.latestNHCCIQuarterKey = '2025 Q3';
+    $scope.latestNHCCICacheTimestamp = null;
     $scope.customQuantityData = { userQuantity: null };
+    
     $scope.loadLatestNHCCIQuarter = function() {
-      $http.get('/UnitPriceSearch/GetLatestNHCCIQuarter')
+      var cacheBuster = '?t=' + new Date().getTime();
+      $http.get('/UnitPriceSearch/GetLatestNHCCIQuarter' + cacheBuster, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
         .then(function(response) {
           if (response.data && response.data.display) {
-            $scope.latestNHCCIQuarter = response.data.display;
-            $scope.latestNHCCIQuarterKey = response.data.quarterKey || '2025 Q3';
+            var newTimestamp = response.data.cacheTimestamp;
+            if ($scope.latestNHCCICacheTimestamp !== newTimestamp) {
+              $scope.latestNHCCIQuarter = response.data.display;
+              $scope.latestNHCCIQuarterKey = response.data.quarterKey || '2025 Q3';
+              $scope.latestNHCCICacheTimestamp = newTimestamp;
+              if ($scope.latestNHCCICacheTimestamp) {
+                console.log('NHCCI data updated. New quarter: ' + response.data.display + ', Cache timestamp: ' + newTimestamp);
+              }
+            }
           }
         })
         .catch(function(error) {
           console.error('Error loading latest NHCCI quarter:', error);
         });
     };
+    
     $scope.loadLatestNHCCIQuarter();
+  
+    var cacheCheckInterval = setInterval(function() {
+      $scope.loadLatestNHCCIQuarter();
+    }, 10 * 60 * 1000); 
+    
+    $scope.$on('$destroy', function() {
+      if (cacheCheckInterval) {
+        clearInterval(cacheCheckInterval);
+      }
+    });
     $scope.customQuantityPrediction = null;
     $scope.isCalculatingPrediction = false;
     $scope.chartSettings = { loessBandwidth: 0.3 };
@@ -400,14 +427,14 @@
       $scope.workTypeSelected[code] = true; // All selected by default
     });
     $scope.districtCountyMap = {
-      'District 1 (Southwest Florida)': ['01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY', '09 - HIGHLANDS', '12 - LEE', '13 - MANATEE', '16 - POLK', '17 - SARASOTA', '91 - OKEECHOBEE'],
-      'District 2 (Northeast Florida)': ['26 - ALACHUA', '27 - BAKER', '28 - BRADFORD', '29 - COLUMBIA', '30 - DIXIE', '31 - GILCHRIST', '32 - HAMILTON', '33 - LAFAYETTE', '34 - LEVY', '35 - MADISON', '37 - SUWANNEE', '38 - TAYLOR', '39 - UNION', '71 - CLAY', '72 - DUVAL', '74 - NASSAU', '76 - PUTNAM', '78 - ST JOHNS'],
-      'District 3 (Northwest Florida)': ['46 - BAY', '47 - CALHOUN', '48 - ESCAMBIA', '49 - FRANKLIN', '50 - GADSDEN', '51 - GULF', '52 - HOLMES', '53 - JACKSON', '54 - JEFFERSON', '55 - LEON', '56 - LIBERTY', '57 - OKALOOSA', '58 - SANTA ROSA', '59 - WAKULLA', '60 - WALTON', '61 - WASHINGTON'],
-      'District 4 (Southeast Florida)': ['86 - BROWARD', '88 - INDIAN RIVER', '89 - MARTIN', '93 - PALM BEACH', '94 - ST LUCIE'],
-      'District 5 (Central Florida)': ['11 - LAKE', '18 - SUMTER', '36 - MARION', '70 - BREVARD', '73 - FLAGLER', '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA'],
-      'District 6 (South Florida)': ['87 - MIAMI-DADE', '90 - MONROE'],
-      'District 7 (West Central Florida)': ['02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS'],
-        'District 8 (Turnpike)': ['TURNPIKE']
+      'District 1 (Southwest Florida)': ['01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY', '09 - HIGHLANDS', '12 - LEE', '13 - MANATEE', '16 - POLK', '17 - SARASOTA', '91 - OKEECHOBEE', 'DIST/ST-WIDE'],
+      'District 2 (Northeast Florida)': ['26 - ALACHUA', '27 - BAKER', '28 - BRADFORD', '29 - COLUMBIA', '30 - DIXIE', '31 - GILCHRIST', '32 - HAMILTON', '33 - LAFAYETTE', '34 - LEVY', '35 - MADISON', '37 - SUWANNEE', '38 - TAYLOR', '39 - UNION', '71 - CLAY', '72 - DUVAL', '74 - NASSAU', '76 - PUTNAM', '78 - ST JOHNS', 'DIST/ST-WIDE'],
+      'District 3 (Northwest Florida)': ['46 - BAY', '47 - CALHOUN', '48 - ESCAMBIA', '49 - FRANKLIN', '50 - GADSDEN', '51 - GULF', '52 - HOLMES', '53 - JACKSON', '54 - JEFFERSON', '55 - LEON', '56 - LIBERTY', '57 - OKALOOSA', '58 - SANTA ROSA', '59 - WAKULLA', '60 - WALTON', '61 - WASHINGTON', 'DIST/ST-WIDE'],
+      'District 4 (Southeast Florida)': ['86 - BROWARD', '88 - INDIAN RIVER', '89 - MARTIN', '93 - PALM BEACH', '94 - ST LUCIE', 'DIST/ST-WIDE'],
+      'District 5 (Central Florida)': ['11 - LAKE', '18 - SUMTER', '36 - MARION', '70 - BREVARD', '73 - FLAGLER', '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA', 'DIST/ST-WIDE'],
+      'District 6 (South Florida)': ['87 - MIAMI-DADE', '90 - MONROE', 'DIST/ST-WIDE'],
+      'District 7 (West Central Florida)': ['02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS', 'DIST/ST-WIDE'],
+        'District 8 (Turnpike)': ['TURNPIKE', 'DIST/ST-WIDE']
     };
     $scope.marketAreaToCountiesMap = {
       'Area 01': ['BAY', 'ESCAMBIA', 'OKALOOSA', 'SANTA ROSA', 'WALTON'],
@@ -426,6 +453,29 @@
       'Area 14': ['MONROE'],
       'Area 99': ['DIST/ST-WIDE', 'TURNPIKE']
     };
+    function getAllCountiesList() {
+      const allCounties = new Set();
+      Object.values($scope.districtCountyMap).forEach((countyList) =>
+        countyList.forEach((c) => {
+          const cleaned = c.includes(' - ')
+            ? c.split(' - ')[1].trim()
+            : c.trim();
+          const upper = cleaned.toUpperCase();
+          if (cleaned && upper !== 'TURNPIKE' && upper !== 'DIST/ST-WIDE') {
+            allCounties.add(cleaned);
+          }
+        })
+      );
+      Object.values($scope.marketAreaToCountiesMap).forEach((countyList) =>
+        countyList.forEach((c) => {
+          const cleaned = c.trim();
+          if (cleaned && cleaned !== 'TURNPIKE') {
+            allCounties.add(cleaned);
+          }
+        })
+      );
+      return Array.from(allCounties).sort();
+    }
     $scope.searchProjectNumber = '';
     $scope.clearFilters = function () {
       $scope.regionType = '';
@@ -617,8 +667,7 @@
                 : null,
             startDate: $scope.startDate || null,
             endDate: $scope.endDate || null,
-            // Pass counties only for market and county region types, district for district type
-            counties: ($scope.regionType === 'market' || $scope.regionType === 'county') ? $scope.selectedRegionCounties : null,
+            counties: ($scope.regionType === 'market' || $scope.regionType === 'county' || $scope.regionType === 'district') ? $scope.selectedRegionCounties : null,
             district: districtParam,
             bidStatus: $scope.selectedBidStatus || null,
             contractType:
@@ -813,30 +862,19 @@
       } else if ($scope.regionType === 'market') {
         $scope.regionOptions = Object.keys($scope.marketAreaToCountiesMap);
       } else if ($scope.regionType === 'county') {
-        const allCounties = new Set();
-        Object.values($scope.districtCountyMap).forEach((countyList) =>
-          countyList.forEach((c) => {
-            const cleaned = c.includes(' - ')
-              ? c.split(' - ')[1].trim()
-              : c.trim();
-            allCounties.add(cleaned);
-          })
-        );
-        Object.values($scope.marketAreaToCountiesMap).forEach((countyList) =>
-          countyList.forEach((c) => {
-            const cleaned = c.trim();
-            if (cleaned !== 'TURNPIKE' ) {
-              allCounties.add(cleaned);
-            }
-          })
-        );
-        $scope.regionOptions = Array.from(allCounties).sort();
+        $scope.regionOptions = getAllCountiesList();
+        if (!$scope.regionOptions.includes('TURNPIKE')) {
+          $scope.regionOptions.push('TURNPIKE');
+        }
+        if (!$scope.regionOptions.includes('DIST/ST-WIDE')) {
+          $scope.regionOptions.push('DIST/ST-WIDE');
+        }
+        $scope.regionOptions.sort();
       } else {
         $scope.regionOptions = [];
         $scope.relatedCounties = [];
         $scope.selectedRegionCounties = null;
       }
-      // Initialize checkbox states
       $scope.regionOptions.forEach((option) => {
         $scope.regionSelected[option] = false;
       });
@@ -881,7 +919,15 @@
         if ($scope.regionType === 'market') {
           rawList = $scope.marketAreaToCountiesMap[region] || [];
         } else if ($scope.regionType === 'district') {
-          rawList = $scope.districtCountyMap[region] || [];
+          const isTurnpike =
+            region === 'District 8 (Turnpike)' || region === 'Turnpike';
+          if (isTurnpike) {
+            rawList = getAllCountiesList();
+            rawList.push('TURNPIKE');
+            rawList.push('DIST/ST-WIDE');
+          } else {
+            rawList = $scope.districtCountyMap[region] || [];
+          }
         } else if ($scope.regionType === 'county') {
           rawList = [region];
         }
@@ -922,8 +968,6 @@
     $scope.selectAllRegionCounties = function () { $scope.relatedCounties.forEach((c) => (c.selected = true)); $scope.selectedRegionCounties = $scope.relatedCounties.map((c) => c.name); };
     $scope.clearAllRegionCounties = function () { $scope.relatedCounties.forEach((c) => (c.selected = false)); $scope.selectedRegionCounties = []; };
     $scope.removeCounty = function (countyName) { const idx = $scope.selectedRegionCounties.indexOf(countyName); if (idx > -1) $scope.selectedRegionCounties.splice(idx, 1); const match = $scope.relatedCounties.find((c) => c.name === countyName); if (match) match.selected = false; };
-    
-    // Contract Type functions
     $scope.toggleContractType = function (type) {
       const idx = $scope.selectedContractTypes.indexOf(type);
       if ($scope.contractTypeSelected[type] && idx === -1) {
@@ -953,8 +997,6 @@
         $scope.contractTypeSelected[type] = false;
       }
     };
-    
-    // Work Type functions
     $scope.toggleWorkType = function (code) {
       const idx = $scope.selectedWorkTypeCodes.indexOf(code);
       if ($scope.workTypeSelected[code] && idx === -1) {
