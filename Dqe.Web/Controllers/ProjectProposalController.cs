@@ -542,7 +542,7 @@ namespace Dqe.Web.Controllers
                     officialTotal = est == null ? 0 : est.Total;
                 }
             }
-            var isConfidentialData = IsConfidentialData(prop.ProposalNumber, wtp, prop);
+            var isConfidentialData = IsConfidentialData(prop?.ProposalNumber, wtp, prop);
 
             //this was thowing generic erroring on proposals that did not have any associated projects (null reference).MB.
             if (!prop.Projects.Any())
@@ -598,7 +598,9 @@ namespace Dqe.Web.Controllers
                     owner = i.CustodyOwner == null ? string.Empty : i.CustodyOwner.Name,
                     hasCustody = i.CustodyOwner == currentDqeUser,
                     label = DynamicHelper.GetSnapshotLabelString(i.GetCurrentSnapshotLabel()),
-                    hasWorkingEstimate = i.ProjectVersions.Any(pv => pv.ProjectEstimates.Any(e => e.IsWorkingEstimate))
+                    //TODO: I think this field could be better named to say "Working Estimate (owned by me)", I was thinking it meant has any working estimate. MB.
+                    //hasWorkingEstimate = i.ProjectVersions.Any(pv => pv.ProjectEstimates.Any(e => e.IsWorkingEstimate)),
+                    hasWorkingEstimate = i.ProjectHasWorkingEstimateForUser(currentDqeUser)
                 })
             },
                 new ClientMessage
@@ -1279,17 +1281,24 @@ namespace Dqe.Web.Controllers
             var currentLabel = p.GetCurrentSnapshotLabel();
             return new DqeResult(new
             {
-                label = currentLabel == SnapshotLabel.Phase2
-                    ? "Phase II"
-                    : currentLabel == SnapshotLabel.Phase3
-                        ? "Phase III"
-                        : currentLabel == SnapshotLabel.Phase4
-                            ? "Phase IV"
-                            : currentLabel == SnapshotLabel.Authorization
-                                ? "Authorization"
-                                : currentLabel == SnapshotLabel.Official
-                                    ? "Official"
-                                    : string.Empty
+                label = 
+                currentLabel == SnapshotLabel.Initial
+                    ? "Initial"
+                    :currentLabel == SnapshotLabel.Scope
+                        ? "Scope"
+                        :currentLabel == SnapshotLabel.Phase1
+                            ? "Phase I"
+                            :currentLabel == SnapshotLabel.Phase2
+                                ? "Phase II"
+                                : currentLabel == SnapshotLabel.Phase3
+                                    ? "Phase III"
+                                    : currentLabel == SnapshotLabel.Phase4
+                                        ? "Phase IV"
+                                        : currentLabel == SnapshotLabel.Authorization
+                                            ? "Authorization"
+                                            : currentLabel == SnapshotLabel.Official
+                                                ? "Official"
+                                                : string.Empty
             });
         }
 
@@ -1550,7 +1559,7 @@ namespace Dqe.Web.Controllers
                     ///****NOTE***** THIS DOES NOT INCLUDE AE AND OE.
                     nextLabel = project.GetNextSnapshotLabel() == SnapshotLabel.Initial ? "Initial"
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Scope ? "Scope"
-                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase1 ? "Phase1"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase1 ? "Phase I"
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Phase2 ? "Phase II"
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Phase3 ? "Phase III"
                         : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4 ? "Phase IV"
