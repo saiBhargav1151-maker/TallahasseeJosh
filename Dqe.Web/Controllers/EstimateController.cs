@@ -516,9 +516,9 @@ namespace Dqe.Web.Controllers
                 //set actual wt proposal entity here, to create confidential data flag. MB.
                 wtp = _webTransportService.GetProposal(wtProposal.ProposalNumber);
             }
-           
+  
             var l = BuildProjectItemGroups(estimate);
-            var isConfidentialData = IsConfidentialData(wtProposal.ProposalNumber, wtp, wtProposal);
+            var isConfidentialData = IsConfidentialData(wtProposal?.ProposalNumber, wtp, wtProposal);
             var result = new
             {
                 viewOnly = (currentDqeUser.Role == DqeRole.Administrator && project.CustodyOwner != currentDqeUser) || currentDqeUser.Role == DqeRole.AdminReadOnly ,
@@ -965,7 +965,7 @@ namespace Dqe.Web.Controllers
                 }    
             }
 
-            var isConfidentialData = IsConfidentialData(proposal.ProposalNumber, wtp, proposal);
+            var isConfidentialData = IsConfidentialData(proposal?.ProposalNumber, wtp, proposal);
 
             var l = BuildProposalItemGroups(proposal);
             var result = new
@@ -1583,10 +1583,10 @@ namespace Dqe.Web.Controllers
             var isConfidentialData = (dqeProp?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtProp?.OfficialEstimate == "Y") && wtProp?.ProposalStatus != "03";
 
             //if not confidential and it is a special proposal, then check it's parent
-            if (!isConfidentialData && DynamicHelper.ContainsSpecialSuffix(dqeProp.ProposalNumber))
+            if (!isConfidentialData && DynamicHelper.ContainsSpecialSuffix(dqeProp?.ProposalNumber))
             {
-                var suffix = DynamicHelper.GetSpecialSuffix(dqeProp.ProposalNumber);
-                var parentProposalNumber = DynamicHelper.RemoveSuffixFromString(dqeProp.ProposalNumber, suffix);
+                var suffix = DynamicHelper.GetSpecialSuffix(dqeProp?.ProposalNumber);
+                var parentProposalNumber = DynamicHelper.RemoveSuffixFromString(dqeProp?.ProposalNumber, suffix);
                 if (string.IsNullOrEmpty(parentProposalNumber))
                 {
                     return false;
