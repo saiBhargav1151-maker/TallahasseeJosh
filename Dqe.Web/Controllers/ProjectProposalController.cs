@@ -18,7 +18,12 @@ using Proposal = Dqe.Domain.Model.Proposal;
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+    [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer,
+        DqeRole.DistrictReviewer,
+        DqeRole.Coder,
+        DqeRole.MaintenanceEstimator,
+        DqeRole.MaintenanceDistrictAdmin,
+        DqeRole.AdminReadOnly})]
     public class ProjectProposalController : Controller
     {
         private readonly IWebTransportService _webTransportService;
@@ -63,7 +68,7 @@ namespace Dqe.Web.Controllers
             _payItemMasterRepository = payItemMasterRepository;
             _reportRepository = reportRepository;
             _systemParametersRepository = systemParametersRepository;
-            _lreService = lreService;
+            _lreService = lreService;            
             _environmentProvider = environmentProvider;
         }
 
@@ -113,7 +118,29 @@ namespace Dqe.Web.Controllers
             return null;
         }
 
+        /// <summary>
+        /// Grabs the Project ContractType field from the wT Project
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
         [HttpGet]
+        public ActionResult GetWtProposalContractType(string number)
+        {
+            var wtp = _webTransportService.GetProposalSlim(number);
+            var result = new DqeResult(new
+            {
+                contractType = wtp.ContractType
+            }, JsonRequestBehavior.AllowGet);
+            return result;
+        }
+
+        [HttpGet]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.StateReviewer,
+        DqeRole.DistrictReviewer,
+        DqeRole.Coder,
+        DqeRole.MaintenanceEstimator,
+        DqeRole.MaintenanceDistrictAdmin,
+        DqeRole.AdminReadOnly})]
         public ActionResult GetProposal(string number)
         {
             return GetProposal(number, string.Empty);
@@ -123,12 +150,36 @@ namespace Dqe.Web.Controllers
         {
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
+            //create proposal and load projects
+            var p = _webTransportService.GetProposal(number);
+
+            //Maintenance can only view maintenance proposal types and construction view construction types.
+            //if (currentDqeUser.Role == DqeRole.MaintenanceEstimator && !p.ContractType.StartsWith("M"))
+            //{
+            //    return new DqeResult(null,
+            //      new ClientMessage
+            //      {
+            //          Severity = ClientMessageSeverity.Error,
+            //          text = string.Format("Authorization to Construction Contract Type required.")
+            //      },
+            //      JsonRequestBehavior.AllowGet);
+
+            //}
+            //else if ((currentDqeUser.Role == DqeRole.Estimator) && p.ContractType.StartsWith("M"))
+            //{
+            //    return new DqeResult(null,
+            //       new ClientMessage
+            //       {
+            //           Severity = ClientMessageSeverity.Error,
+            //           text = string.Format("Authorization to Maintenance Contract Type required")
+            //       },
+            //       JsonRequestBehavior.AllowGet);
+            //}
             //is proposal in DQE?
             var prop = _proposalRepository.GetWtByNumber(number);
             if (prop == null)
             {
-                //create proposal and load projects
-                var p = _webTransportService.GetProposal(number);
+
                 if (p == null)
                     throw new InvalidOperationException(string.Format("Proposal {0} was not found in WT", number));
                 var pro = AddProposal(p, currentDqeUser);
@@ -145,13 +196,14 @@ namespace Dqe.Web.Controllers
             else
             {
                 //update
-                var p = _webTransportService.GetProposal(number);
+                
                 if (p == null)
                     throw new InvalidOperationException(string.Format("Proposal {0} was not found in WT", number));
                 var propt = prop.GetTransformer();
                 propt.LettingDate = p.MyLetting == null ? (DateTime?)null : p.MyLetting.LettingDate;
                 propt.District = p.District.Name;
                 propt.Description = p.Description;
+                propt.ContractType = p.ContractType;
                 prop.Transform(propt, currentDqeUser);
                 var proposalCounty = p.County;
                 var county = _marketAreaRepository.GetCountyByCode(proposalCounty.Name);
@@ -229,7 +281,7 @@ namespace Dqe.Web.Controllers
             if (p != null)
             {
                 var cl = p.GetCurrentSnapshotLabel();
-                if (cl == SnapshotLabel.Phase4 || cl == SnapshotLabel.Phase3 || cl == SnapshotLabel.Phase2)
+                if (cl == SnapshotLabel.Phase4 || cl == SnapshotLabel.Phase3 || cl == SnapshotLabel.Phase2 || cl == SnapshotLabel.Phase1 || cl == SnapshotLabel.Scope || cl == SnapshotLabel.Initial)
                 {
                     p.RemoveLabel(cl, project.removeLabelComment);
                     return GetProject(p.ProjectNumber, "Project snapshot was removed from DQE");
@@ -451,6 +503,31 @@ namespace Dqe.Web.Controllers
 
         private ActionResult ResultStructureFromProposal(Proposal prop, DqeUser currentDqeUser, string successMessage)
         {
+
+            //Maintenance can only view maintenance proposal types and construction view construction types.
+            //if ((currentDqeUser.Role == DqeRole.MaintenanceEstimator || currentDqeUser.Role == DqeRole.MaintenanceDistrictAdmin) && !prop.ContractType.StartsWith("M"))
+            //{
+            //    return new DqeResult(null,
+            //      new ClientMessage
+            //      {
+            //          Severity = ClientMessageSeverity.Error,
+            //          text = string.Format("This proposal is authorized as a Construction Contract Type")
+            //      },
+            //      JsonRequestBehavior.AllowGet);
+
+            //}
+            //else if ((currentDqeUser.Role == DqeRole.Estimator) && prop.ContractType.StartsWith("M"))
+            //{
+            //    return new DqeResult(null,
+            //       new ClientMessage
+            //       {
+            //           Severity = ClientMessageSeverity.Error,
+            //           text = string.Format("This proposal is authorized as a Maintenance Contract Type")
+            //       },
+            //       JsonRequestBehavior.AllowGet);
+            //}
+            var wtp = _webTransportService.GetProposal(prop.ProposalNumber);
+
             var nextSnapshot = prop.GetNextSnapshotLabel();
             var currentSnapshot = prop.GetCurrentSnapshotLabel();
             var authorizationTotal = (Decimal)0;
@@ -464,6 +541,19 @@ namespace Dqe.Web.Controllers
                     est = _reportRepository.GetReportProposal(prop.ProposalNumber, ReportProposalLevel.Official);
                     officialTotal = est == null ? 0 : est.Total;
                 }
+            }
+            var isConfidentialData = IsConfidentialData(prop?.ProposalNumber, wtp, prop);
+
+            //this was thowing generic erroring on proposals that did not have any associated projects (null reference).MB.
+            if (!prop.Projects.Any())
+            {
+                return new DqeResult(null,
+                  new ClientMessage
+                  {
+                      Severity = ClientMessageSeverity.Error,
+                      text = string.Format("The proposal {0} has no associated projects.", prop.ProposalNumber)
+                  },
+                  JsonRequestBehavior.AllowGet);
             }
 
             return new DqeResult(new
@@ -487,21 +577,13 @@ namespace Dqe.Web.Controllers
                     comment = prop.Comment,
                     hasCustody = prop.Projects.All(i => i.CustodyOwner == currentDqeUser),
                     canSnapshot = prop.Projects.All(i => i.ProjectHasWorkingEstimateForUser(currentDqeUser)),
-                    nextEstimate = nextSnapshot == SnapshotLabel.Official
-                        ? "Official"
-                        : nextSnapshot == SnapshotLabel.Authorization
-                            ? "Authorization"
-                            : nextSnapshot == SnapshotLabel.Phase4
-                                ? "Phase IV"
-                                : nextSnapshot == SnapshotLabel.Phase3
-                                    ? "Phase III"
-                                    : nextSnapshot == SnapshotLabel.Phase2
-                                        ? "Phase II"
-                                        : string.Empty,
+                    nextEstimate = DynamicHelper.GetSnapshotLabelString(nextSnapshot),
                     isOfficial = prop.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                     authorizationTotal = authorizationTotal,
                     officialTotal = officialTotal,
-                    removeLabelComment = string.Empty
+                    contractType = wtp.ContractType,
+                    removeLabelComment = string.Empty,
+                    confidentialData = isConfidentialData
                 },
                 projects = prop.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
                 {
@@ -512,19 +594,12 @@ namespace Dqe.Web.Controllers
                     description = i.Description,
                     designer = i.DesignerName,
                     county = i.MyCounty.Name,
+                    projectType = i.ProjectType,
                     owner = i.CustodyOwner == null ? string.Empty : i.CustodyOwner.Name,
                     hasCustody = i.CustodyOwner == currentDqeUser,
-                    label = i.GetCurrentSnapshotLabel() == SnapshotLabel.Official
-                        ? "Official"
-                        : i.GetCurrentSnapshotLabel() == SnapshotLabel.Authorization
-                            ? "Authorization"
-                            : i.GetCurrentSnapshotLabel() == SnapshotLabel.Phase4
-                                ? "Phase IV"
-                                : i.GetCurrentSnapshotLabel() == SnapshotLabel.Phase3
-                                    ? "Phase III"
-                                    : i.GetCurrentSnapshotLabel() == SnapshotLabel.Phase2
-                                        ? "Phase II"
-                                        : string.Empty,
+                    label = DynamicHelper.GetSnapshotLabelString(i.GetCurrentSnapshotLabel()),
+                    //TODO: I think this field could be better named to say "Working Estimate (owned by me)", I was thinking it meant has any working estimate. MB.
+                    //hasWorkingEstimate = i.ProjectVersions.Any(pv => pv.ProjectEstimates.Any(e => e.IsWorkingEstimate)),
                     hasWorkingEstimate = i.ProjectHasWorkingEstimateForUser(currentDqeUser)
                 })
             },
@@ -536,6 +611,23 @@ namespace Dqe.Web.Controllers
                 JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Grabs the Project Type field from the wT Project
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult GetWtProjectType(string number)
+        {
+            var wtp = _webTransportService.GetProjectSlim(number);
+            var result = new DqeResult(new
+            {
+                projectType = wtp.ProjectType
+            },JsonRequestBehavior.AllowGet);
+            return result;
+        }
+
+
         [HttpGet]
         public ActionResult GetProject(string number)
         {
@@ -546,8 +638,49 @@ namespace Dqe.Web.Controllers
         {
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
-            //is project in DQE?
+            //this needs an await
+            var wtp = _webTransportService.GetProject(number);
             var project = _projectRepository.GetByProjectNumber(number);
+
+            if (wtp == null)
+            {
+                return new DqeResult(null,
+                              new ClientMessage
+                              {
+                                  Severity = ClientMessageSeverity.Error,
+                                  text = string.Format("Project not found - {0}", number)
+                              },
+                              JsonRequestBehavior.AllowGet);
+            }
+
+            //Maintenance can only view maintenance proposal types and construction view construction types.
+            //if(project?.Proposals != null && project.Proposals.Any())
+            //{
+            //    if (currentDqeUser.Role == DqeRole.MaintenanceEstimator  && !wtp.ProjectType.StartsWith("M"))
+            //    {
+            //        return new DqeResult(null,
+            //          new ClientMessage
+            //          {
+            //              Severity = ClientMessageSeverity.Error,
+            //              text = string.Format("Authorization to Construction Type Projects required.")
+            //          },
+            //          JsonRequestBehavior.AllowGet);
+
+            //    }
+            //    else if ((currentDqeUser.Role == DqeRole.Estimator) && wtp.ProjectType.StartsWith("M"))
+            //    {
+            //        return new DqeResult(null,
+            //           new ClientMessage
+            //           {
+            //               Severity = ClientMessageSeverity.Error,
+            //               text = string.Format("Authorization to Maintenance Type Projects required.")
+            //           },
+            //           JsonRequestBehavior.AllowGet);
+            //    }
+            //}
+
+
+            //is project not in DQE?
             if (project == null)
             {
                 var r = AddProjectToDqe(number, currentDqeUser);
@@ -560,7 +693,6 @@ namespace Dqe.Web.Controllers
                 if (p == null) throw new InvalidOperationException("Expected project cast");
                 currentDqeUser.SetRecentProject(p);
                 //does WT have a proposal
-                var wtp = _webTransportService.GetProject(p.ProjectNumber);
                 if (wtp != null && wtp.MyProposal != null)
                 {
                     var result = AddProposal(wtp.MyProposal, currentDqeUser);
@@ -574,18 +706,19 @@ namespace Dqe.Web.Controllers
                         return (DqeResult)result;
                     }
                 }
+                
                 return ResultStructureFromProjectSelection(p, currentDqeUser);
             }
+            //if project is in DQE
             else
             {
                 //TODO: should I check the synchronization status of the proposal here?
                 //should the proposal in DQE be matched against the proposal in wT at this point to remove the proposal from DQE its not a match?
-
+                project.ProjectType = wtp.ProjectType;
                 currentDqeUser.SetRecentProject(project);
                 LoadLreSnapshotData(project);
                 var proposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
                 currentDqeUser.SetRecentProposal(proposal);
-                var wtp = _webTransportService.GetProject(project.ProjectNumber);
                 if (wtp != null)
                 {
                     //sync project
@@ -688,6 +821,9 @@ namespace Dqe.Web.Controllers
                 }
                 else
                 {
+                    //TODO:This does some odd stuff when dealing with proposals/projects prior to PRP's integration (in late 2022 I think)
+                    //I talked with Lee, this is a pre-exhisting bug but should not be a problem with current proposals/projects. MB.
+                    //MyProposal looks to just be the first proposal to match with the given project number...
                     if (wtp != null && wtp.MyProposal != null)
                     {
                         //synchronization error when project disassociated from proposal in wT
@@ -745,7 +881,7 @@ namespace Dqe.Web.Controllers
                     }
                 }
             }
-            //in DQE
+            project.ProjectType = wtp.ProjectType;     
             return ResultStructureFromProjectSelection(project, currentDqeUser, successMessage);
         }
 
@@ -952,7 +1088,7 @@ namespace Dqe.Web.Controllers
                     {
                         initialEstimate = 0;
                     }
-                    p.SetSeedEstimateValues(initialEstimate, scopeEstimate, phase1Estimate, phase2Estimate, phase3Estimate, phase4Estimate);
+                    p.SetSeedEstimateValues(initialEstimate, scopeEstimate, phase1Estimate, phase2Estimate, phase3Estimate, phase4Estimate, lreProject.QuantityComplete);
                 }
             }
             return null;
@@ -1018,7 +1154,13 @@ namespace Dqe.Web.Controllers
             }
             //TODO: add call to determine whether to initialize prices from wT
             //var loadPrices = Convert.ToBoolean(ConfigurationManager.AppSettings["loadPrices"]);
-            var loadPrices = _systemParametersRepository.Get().LoadPrices;
+            var loadPrices = false;
+            if(currentDqeUser.Role != DqeRole.Coder)
+            {
+                loadPrices = _systemParametersRepository.Get().LoadPrices;
+            }
+
+
             var ss = project.CreateNewVersionFromWt(string.Empty, wtProjectEstimate, loadPrices
                 , currentDqeUser);
             return ResultStructureFromProjectSelection(project, currentDqeUser);
@@ -1059,8 +1201,8 @@ namespace Dqe.Web.Controllers
         {
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
-            var p = _projectRepository.Get((int)project.id);
-            if (p.CustodyOwner != currentDqeUser)
+            var p = _projectRepository.Get((int)project.id);         
+            if (p.CustodyOwner != currentDqeUser && currentDqeUser.Role != DqeRole.Coder)
             {
                 return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = string.Format("Project {0} is not currently owned by {1}", project.number, currentDqeUser.Name) });
             }
@@ -1139,17 +1281,24 @@ namespace Dqe.Web.Controllers
             var currentLabel = p.GetCurrentSnapshotLabel();
             return new DqeResult(new
             {
-                label = currentLabel == SnapshotLabel.Phase2
-                    ? "Phase II"
-                    : currentLabel == SnapshotLabel.Phase3
-                        ? "Phase III"
-                        : currentLabel == SnapshotLabel.Phase4
-                            ? "Phase IV"
-                            : currentLabel == SnapshotLabel.Authorization
-                                ? "Authorization"
-                                : currentLabel == SnapshotLabel.Official
-                                    ? "Official"
-                                    : string.Empty
+                label = 
+                currentLabel == SnapshotLabel.Initial
+                    ? "Initial"
+                    :currentLabel == SnapshotLabel.Scope
+                        ? "Scope"
+                        :currentLabel == SnapshotLabel.Phase1
+                            ? "Phase I"
+                            :currentLabel == SnapshotLabel.Phase2
+                                ? "Phase II"
+                                : currentLabel == SnapshotLabel.Phase3
+                                    ? "Phase III"
+                                    : currentLabel == SnapshotLabel.Phase4
+                                        ? "Phase IV"
+                                        : currentLabel == SnapshotLabel.Authorization
+                                            ? "Authorization"
+                                            : currentLabel == SnapshotLabel.Official
+                                                ? "Official"
+                                                : string.Empty
             });
         }
 
@@ -1162,17 +1311,15 @@ namespace Dqe.Web.Controllers
             var nextLabel = p == null ? SnapshotLabel.Estimator : p.GetNextSnapshotLabel();
             return new DqeResult(new
             {
-                label = nextLabel == SnapshotLabel.Phase2
-                    ? "Phase II"
-                    : nextLabel == SnapshotLabel.Phase3
-                        ? "Phase III"
-                        : nextLabel == SnapshotLabel.Phase4
-                            ? "Phase IV"
-                            : nextLabel == SnapshotLabel.Authorization
-                                ? "Authorization"
-                                : nextLabel == SnapshotLabel.Official
-                                    ? "Official"
-                                    : string.Empty,
+                label = nextLabel == SnapshotLabel.Initial ? "Intial"
+                : nextLabel == SnapshotLabel.Scope ? "Scope"
+                : nextLabel == SnapshotLabel.Phase1 ? "Phase I"
+                : nextLabel == SnapshotLabel.Phase2 ? "Phase II"
+                : nextLabel == SnapshotLabel.Phase3 ? "Phase III"
+                : nextLabel == SnapshotLabel.Phase4 ? "Phase IV"
+                : nextLabel == SnapshotLabel.Authorization ? "Authorization"
+                : nextLabel == SnapshotLabel.Official ? "Official"
+                : string.Empty,
                 isOfficial = p != null && p.GetCurrentSnapshotLabel() == SnapshotLabel.Official
             });
         }
@@ -1221,6 +1368,52 @@ namespace Dqe.Web.Controllers
             return ResultStructureFromProjectSelection(p, currentDqeUser);
         }
 
+        /// <summary>
+        /// This creates a new Version with a single estimate of type Review 'R'. 
+        /// This does NOT update info to LRE, this is intended to be read only (except the notes). MB. 
+        /// </summary>
+        /// <param name="snapshot">The snapshot in which the review will be based upon</param>
+        [HttpPost]
+        public ActionResult CreateCoderProjectVersionFromWorkingEstimate(dynamic project)
+        {
+            var currentUser = (DqeIdentity)User.Identity;
+            var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
+            var p = _projectRepository.Get((int)project.id);
+            if (p.CustodyOwner != currentDqeUser && currentDqeUser.Role != DqeRole.Coder)
+            {
+                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = string.Format("Project {0} is not currently owned by {1}", project.number, currentDqeUser.Name) });
+            }
+
+            //prevent snapshot of prior let projects
+#if !DEBUG
+            var en = _environmentProvider.GetEnvironment().ToUpper();
+            if (!en.StartsWith("U"))
+            {
+                if (p.Proposals.Any())
+                {
+                    var prop = p.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
+                    if (prop != null)
+                    {
+                        if (prop.LettingDate.HasValue)
+                        {
+                            if (prop.LettingDate.Value.Date < new DateTime(2015, 6, 1).Date)
+                            {
+                                return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = string.Format("Project {0} was let prior to 6/1/2015, so a snapshot cannot be taken.", project.number) });
+                            }
+                        }
+                    }
+                }
+            }
+#endif
+            //end snapshot prevent
+
+            p.CoderSnapshotWorkingEstimate(currentDqeUser, _lreService);
+            //var currentLabel = p.GetCurrentSnapshotLabel();
+            return new DqeResult(new
+            {
+            });
+        }
+
         [HttpPost]
         public ActionResult SaveComment(dynamic snapshot)
         {
@@ -1243,6 +1436,7 @@ namespace Dqe.Web.Controllers
                 {
                     id = i.Id,
                     number = i.ProjectNumber,
+                    projectType = i.ProjectType
                 }),
                 JsonRequestBehavior.AllowGet);
         }
@@ -1256,6 +1450,7 @@ namespace Dqe.Web.Controllers
                 {
                     id = i.Id,
                     number = i.ProposalNumber,
+                    contractType = i.ContractType
                 }),
                 JsonRequestBehavior.AllowGet);
         }
@@ -1280,8 +1475,25 @@ namespace Dqe.Web.Controllers
 
         private ActionResult ResultStructureFromProjectSelection(Project project, DqeUser currentUser, string message = "")
         {
-            var wtProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
-            var version = project.ProjectVersions.Where(i => i.VersionOwner == currentUser).FirstOrDefault(i => i.ProjectEstimates.FirstOrDefault(ii => ii.IsWorkingEstimate) != null);
+            var wtSourceProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
+            Dqe.Domain.Model.ProjectVersion version = null;
+            bool isConfidentialData = false;
+            if (wtSourceProposal != null)
+            {
+                var wtp = _webTransportService.GetProposal(wtSourceProposal.ProposalNumber);
+                isConfidentialData = IsConfidentialData(wtSourceProposal.ProposalNumber, wtp, wtSourceProposal);
+            }
+           
+
+            if (User.IsInRole(DqeRole.Administrator.ToString()) || User.IsInRole(DqeRole.AdminReadOnly.ToString()))
+            {
+                version = project.ProjectVersions.OrderByDescending(v => v.Version).FirstOrDefault(i => i.ProjectEstimates.FirstOrDefault(ii => ii.IsWorkingEstimate) != null);
+            }
+            else
+            {
+                version = project.ProjectVersions.Where(i => i.VersionOwner == currentUser).FirstOrDefault(i => i.ProjectEstimates.FirstOrDefault(ii => ii.IsWorkingEstimate) != null);
+            }
+
             ProjectEstimate snapshot = null;
             if (version != null)
             {
@@ -1290,14 +1502,28 @@ namespace Dqe.Web.Controllers
             }
 
             var projectLetting = _webTransportService.GetProjectLetting(project.WtId);
+            var posibleOwner = true;
+
+            if (currentUser.Role == DqeRole.DistrictReviewer || currentUser.Role == DqeRole.StateReviewer)
+            {
+                posibleOwner = false;
+            }
+
+            var lreProject = _lreService.GetProject(project.ProjectNumber.ToString());
 
             var result = new DqeResult(new
             {
                 security = new
                 {
+                    role = currentUser.Role.ToString(),
+                    district = project.District,
+                    userInDistrict = currentUser.IsInDqeDistrict(project.District),
                     isAuthorized = currentUser.Role == DqeRole.Administrator || currentUser.IsInDqeDistrict(project.District) || currentUser.IsAuthorizedOnProject(project),
                     isSystemAdmin = currentUser.Role == DqeRole.Administrator,
-                    isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(project.District)    
+                    isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(project.District),
+                    isMaintenanceDistrictAdmin = currentUser.Role == DqeRole.MaintenanceDistrictAdmin && currentUser.IsInDqeDistrict(project.District),
+                    isReviewRole = (currentUser.Role == DqeRole.DistrictReviewer && currentUser.IsInDqeDistrict(project.District) ) || (currentUser.Role == DqeRole.StateReviewer),
+                    isCoderRole = (currentUser.Role == DqeRole.Coder)
                 },
                 authorizedUsers = project.AssignedUsers.Select(i => new
                 {
@@ -1309,34 +1535,39 @@ namespace Dqe.Web.Controllers
                 {
                     id = project.Id,
                     wtId = project.WtId,
+                    canEstimate = project.ProjectHasWorkingEstimateForUser(currentUser),
                     number = project.ProjectNumber,
                     description = project.Description,
                     district = project.District,
                     designer = project.DesignerName,
                     county = project.MyCounty.Name,
+                    projectType = project.ProjectType,
                     filenumber = project.MyMasterFile.FileNumber,
                     comment = snapshot == null ? string.Empty : snapshot.EstimateComment,
-                    lettingDate = wtProposal == null 
+                    lettingDate = wtSourceProposal == null 
                         ? projectLetting.HasValue
                             ? projectLetting.Value.ToShortDateString()
                             : string.Empty
-                        : wtProposal.LettingDate.HasValue 
-                            ? wtProposal.LettingDate.Value.ToShortDateString()
+                        : wtSourceProposal.LettingDate.HasValue 
+                            ? wtSourceProposal.LettingDate.Value.ToShortDateString()
                             : projectLetting.HasValue
                                 ? projectLetting.Value.ToShortDateString()
                                 : string.Empty,
                     isAvailable = project.CustodyOwner == null,
-                    userHasCustody = project.CustodyOwner == currentUser,
+                    userHasCustody = posibleOwner && project.CustodyOwner == currentUser,
                     custodyOwner = project.CustodyOwner == null ? string.Empty : project.CustodyOwner.Name,
-                    nextLabel = project.GetNextSnapshotLabel() == SnapshotLabel.Phase2 
-                        ? "Phase II" 
-                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase3 
-                            ? "Phase III"
-                            : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4
-                                ? "Phase IV"
-                                    : string.Empty,
+                    ///****NOTE***** THIS DOES NOT INCLUDE AE AND OE.
+                    nextLabel = project.GetNextSnapshotLabel() == SnapshotLabel.Initial ? "Initial"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Scope ? "Scope"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase1 ? "Phase I"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase2 ? "Phase II"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase3 ? "Phase III"
+                        : project.GetNextSnapshotLabel() == SnapshotLabel.Phase4 ? "Phase IV"
+                        : string.Empty,
                     isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
-                    removeLabelComment = string.Empty
+                    confidentialData = isConfidentialData, 
+                    removeLabelComment = string.Empty,
+                    quantityComplete = lreProject != null ? lreProject.QuantityComplete : null
                 },
                 proposals = project.Proposals.Select(i => new
                 {
@@ -1344,7 +1575,9 @@ namespace Dqe.Web.Controllers
                     wtId = i.WtId,
                     number = i.ProposalNumber,
                     source = i.ProposalSource == ProposalSourceType.Wt ? "Project Preconstruction" : "Gaming",
+                    confidentialData = isConfidentialData,
                     comment = i.Comment,
+                    contractType = i.ContractType,
                     created = i.Created,
                     lastUpdated = i.LastUpdated,
                     filenumber = i.Projects.FirstOrDefault().MyMasterFile.FileNumber
@@ -1382,8 +1615,9 @@ namespace Dqe.Web.Controllers
                             ? "Project Preconstruction"
                             : string.Format("Version {0} Estimate {1}", snapshot.MyProjectVersion.EstimateSource.MyProjectVersion.Version, snapshot.MyProjectVersion.EstimateSource.Estimate)
                 },
-                versions = project
+            versions = project
                     .ProjectVersions
+                    .Where(v => !(currentUser.Role == DqeRole.Coder) || (v.ProjectEstimates.Any() && v.ProjectEstimates.ToList()[0].Label == SnapshotLabel.Coder)) //if coder user then only pull in coder estimates
                     .OrderByDescending(i => i.Version)
                     .Select(i => new
                     {
@@ -1417,19 +1651,7 @@ namespace Dqe.Web.Controllers
                                 snapshotRemovedComment = string.IsNullOrWhiteSpace(ii.LabelRemovedComment)
                                     ? string.Empty
                                     : ii.LabelRemovedComment,
-                                label = ii.Label == SnapshotLabel.Phase2
-                                        ? "Phase II"
-                                        : ii.Label == SnapshotLabel.Phase3
-                                            ? "Phase III"
-                                            : ii.Label == SnapshotLabel.Phase4
-                                                ? "Phase IV"
-                                                : ii.Label == SnapshotLabel.Authorization
-                                                    ? "Authorization"
-                                                    : ii.Label == SnapshotLabel.Official
-                                                        ? "Official"
-                                                         : ii.Label == SnapshotLabel.Review
-                                                            ? "Review"  
-                                                        : string.Empty,
+                                label = DynamicHelper.GetSnapshotLabelString(ii.Label),
                                 isWorkingEstimate = ii.IsWorkingEstimate ? "Yes" : string.Empty
                             })
                     })
@@ -1440,6 +1662,7 @@ namespace Dqe.Web.Controllers
                     text = string.IsNullOrWhiteSpace(message) ? string.Empty : message
                 },
                 JsonRequestBehavior.AllowGet);
+
             return result;
         }
 
@@ -1447,13 +1670,21 @@ namespace Dqe.Web.Controllers
         {
             var wtProposal = snapshot.MyProjectVersion.MyProject.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
             var projectLetting = _webTransportService.GetProjectLetting(snapshot.MyProjectVersion.MyProject.WtId);
+            var posibleOwner = true;
+
+            if(currentUser.Role == DqeRole.DistrictReviewer || currentUser.Role == DqeRole.StateReviewer)
+            {
+                posibleOwner = false;
+            }
+
             return new DqeResult(new
             {
                 security = new
                 {
                     isAuthorized = currentUser.Role == DqeRole.Administrator || currentUser.IsInDqeDistrict(snapshot.MyProjectVersion.MyProject.District) || currentUser.IsAuthorizedOnProject(snapshot.MyProjectVersion.MyProject),
                     isSystemAdmin = currentUser.Role == DqeRole.Administrator,
-                    isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(snapshot.MyProjectVersion.MyProject.District)    
+                    isDistrictAdmin = currentUser.Role == DqeRole.DistrictAdministrator && currentUser.IsInDqeDistrict(snapshot.MyProjectVersion.MyProject.District),
+                    isMaintenanceDistrictAdmin = currentUser.Role == DqeRole.MaintenanceDistrictAdmin && currentUser.IsInDqeDistrict(snapshot.MyProjectVersion.MyProject.District)
                 },
                 authorizedUsers = snapshot.MyProjectVersion.MyProject.AssignedUsers.Select(i => new
                 {
@@ -1483,16 +1714,9 @@ namespace Dqe.Web.Controllers
                                 ? projectLetting.Value.ToShortDateString()
                                 : string.Empty,
                     isAvailable = snapshot.MyProjectVersion.MyProject.CustodyOwner == null,
-                    userHasCustody = snapshot.MyProjectVersion.MyProject.CustodyOwner == currentUser,
+                    userHasCustody = posibleOwner && snapshot.MyProjectVersion.MyProject.CustodyOwner == currentUser,
                     custodyOwner = snapshot.MyProjectVersion.MyProject.CustodyOwner == null ? string.Empty : snapshot.MyProjectVersion.MyProject.CustodyOwner.Name,
-                    nextLabel = snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel() == SnapshotLabel.Phase2 
-                        ? "Phase II" 
-                        : snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel() == SnapshotLabel.Phase3 
-                            ? "Phase III"
-                            : snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel() == SnapshotLabel.Phase4
-                                ? "Phase IV"
-                                : string.Empty,
-                    isOfficial = snapshot.MyProjectVersion.MyProject.GetCurrentSnapshotLabel() == SnapshotLabel.Official
+                    nextLabel =  DynamicHelper.GetSnapshotLabelString(snapshot.MyProjectVersion.MyProject.GetNextSnapshotLabel())
                 },
                 proposals = snapshot.MyProjectVersion.MyProject.Proposals.Select(i => new
                 {
@@ -1558,17 +1782,7 @@ namespace Dqe.Web.Controllers
                                 snapshotRemovedComment = string.IsNullOrWhiteSpace(ii.LabelRemovedComment)
                                     ? string.Empty
                                     : ii.LabelRemovedComment,
-                                label = ii.Label == SnapshotLabel.Phase2
-                                        ? "Phase II"
-                                        : ii.Label == SnapshotLabel.Phase3 
-                                            ? "Phase III"
-                                            : ii.Label == SnapshotLabel.Phase4
-                                                ? "Phase IV"
-                                                : ii.Label == SnapshotLabel.Authorization
-                                                    ? "Authorization"
-                                                    : ii.Label == SnapshotLabel.Official
-                                                        ? "Official"
-                                                        : string.Empty,
+                                label = DynamicHelper.GetSnapshotLabelString(ii.Label),
                                 isWorkingEstimate = ii.IsWorkingEstimate ? "Yes" : string.Empty
                             })
                     })
@@ -1580,5 +1794,48 @@ namespace Dqe.Web.Controllers
                 },
                 JsonRequestBehavior.AllowGet);
         }
+
+
+        /// <summary>
+        /// This is the logic used to indicate to the the user if a project/proposal is considered to possibly have confidential data.
+        /// **NOTE** - Any changes made here should be replicated in the other associated method.
+        /// Duplicated in two controllers, better than splitting to different Repositories
+        /// <see cref="ProjectProposalController.IsConfidentialData"/>
+        /// <see cref="EstimateController.IsConfidentialData"/>
+        /// </summary>
+        /// <param name="propNumber">Proposal Number</param>
+        /// <param name="wtProp">Proposal WTP entity</param>
+        /// <param name="dqeProp">Proposal DQE entity</param>
+        /// <returns>bool</returns>
+        private bool IsConfidentialData(string propNumber, Domain.Model.Wt.Proposal wtProp, Proposal dqeProp)
+        {
+            if (string.IsNullOrEmpty(propNumber))
+            {
+                return false;
+            }
+            //determine if confidential data -  the DQE or AWP proposal are Official and NOT - Executed (03)
+            var isConfidentialData = (dqeProp?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtProp?.OfficialEstimate == "Y") && wtProp?.ProposalStatus != "03";
+
+            //if not confidential and it is a special proposal, then check it's parent
+            if (!isConfidentialData && DynamicHelper.ContainsSpecialSuffix(dqeProp.ProposalNumber))
+            {
+                var suffix = DynamicHelper.GetSpecialSuffix(dqeProp.ProposalNumber);
+                var parentProposalNumber = DynamicHelper.RemoveSuffixFromString(dqeProp.ProposalNumber, suffix);
+                if (string.IsNullOrEmpty(parentProposalNumber))
+                {
+                    return false;
+                }
+                var wtpParent = _webTransportService.GetProposalSlim(parentProposalNumber);
+                var dqewtParent = _proposalRepository.GetWtByNumber(parentProposalNumber);
+
+                //check if parent dqe or awp proposal are confidential
+                if ((dqewtParent?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtpParent?.OfficialEstimate == "Y") && wtpParent?.ProposalStatus != "03")
+                {
+                    return true;
+                }
+            }
+            return isConfidentialData;
+        }
+
     }
 }

@@ -10,8 +10,29 @@
         <h4>Search:</h4>
     </div>
     <div class="col-lg-2">
-        <input id="proposalNumber" title="Proposal number" type="text" ng-model="selectedProposal" placeholder="12345" typeahead-min-length="3" typeahead-wait-ms="500" typeahead="proposal as proposal.number for proposal in getProposals($viewValue)" typeahead-editable="false" typeahead-on-select="loadProposal()" class="form-control">
+        <input id="proposalNumber" title="Proposal number"
+               type="text"
+               ng-model="selectedProposal"
+               placeholder="12345"
+               typeahead-min-length="2"
+               typeahead-wait-ms="500"
+               typeahead="proposal as proposal.displayName for proposal in getProposals($viewValue)"
+               typeahead-editable="false"
+               typeahead-on-select="loadProposal()"
+               typeahead-input-formatter="$model.number"
+               class="form-control">
     </div>
+
+    <div ng-show="proposal.confidentialData" class="col-lg-7" style="color: red; text-align: center;">
+        <h4> <strong>NOTICE - CONFIDENTIAL INFORMATION - NOT TO BE DISCLOSED </strong></h4>
+        <h5>
+            <strong>
+                ANY INFORMATION related to the Department's official estimate is CONFIDENTIAL until the contract is executed, per
+                <a target="_blank" title="Florida Statutes 337.168 . Opens in a new window." href="https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&Search_String=&URL=0300-0399/0337/Sections/0337.168.html">Florida Statutes 337.168</a>
+            </strong>
+        </h5>
+    </div>
+
 </div>
 <div ng-show="proposal != undefined && proposal != null">
     <div class="row">
@@ -19,8 +40,11 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-3">
                             <h5>Proposal: <strong>{{proposal.number}}</strong></h5>
+                        </div>
+                        <div class="col-lg-3">
+                            <h5>Contract Type: <strong ng-if="proposal.contractType">{{proposal.contractType}}</strong> - <span ng-if="proposal.contractType">{{proposal.contractType[0] == 'M'? "Maintenanace" : "Construction"}}</span></h5>
                         </div>
                         <div class="col-lg-6" ng-show="proposal.authorizationTotal != 0 && proposal.authorizationTotal != undefined">
                             <div style="text-align: right;">

@@ -11,12 +11,13 @@ using Dqe.Domain.Model.Reports;
 using Dqe.Domain.Repositories.Custom;
 using Dqe.Web.ActionResults;
 using Dqe.Web.Attributes;
+using Dqe.Web.Services;
 using BidHistory = Dqe.Domain.Model.BidHistory;
 
 namespace Dqe.Web.Controllers
 {
     [RemoteRequireHttps]
-    [CustomAuthorize(Roles = new[] {DqeRole.Administrator, DqeRole.DistrictAdministrator, DqeRole.Estimator})]
+    [CustomAuthorize(Roles = new[] {DqeRole.Administrator, DqeRole.AdminReadOnly, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder })]
     public class EstimateController : Controller
     {
         private readonly IDqeUserRepository _dqeUserRepository;
@@ -494,29 +495,41 @@ namespace Dqe.Web.Controllers
             var estimate = _projectRepository.GetEstimate(estimateId);
             var project = estimate.MyProjectVersion.MyProject;
             var currentUser = (DqeIdentity)User.Identity;
-            var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
-            if (project.CustodyOwner != currentDqeUser)
+            var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);       
+            if (currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && project.CustodyOwner != currentDqeUser)
             {
                 return new DqeResult(null, new ClientMessage{ Severity = ClientMessageSeverity.Error, text = "You must have custody to price the project."});
             }
-            if (currentDqeUser.Role != DqeRole.Administrator)
+            if (currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly)
             {
-                if (!currentDqeUser.IsInDqeDistrict(project.District) && !currentDqeUser.IsAuthorizedOnProject(project))
+                if (!currentDqeUser.IsInDqeDistrict(project.District) && !currentDqeUser.IsAuthorizedOnProject(project) && currentDqeUser.Role != DqeRole.Coder)
                 {
                     return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "You are not authorized to price the project." });
                 }    
             }
             var wtProposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
+
+            Domain.Model.Wt.Proposal wtp = null;
+
+            if (wtProposal != null)
+            {
+                //set actual wt proposal entity here, to create confidential data flag. MB.
+                wtp = _webTransportService.GetProposal(wtProposal.ProposalNumber);
+            }
+  
             var l = BuildProjectItemGroups(estimate);
+            var isConfidentialData = IsConfidentialData(wtProposal?.ProposalNumber, wtp, wtProposal);
             var result = new
             {
-                canEstimate = true,
+                viewOnly = (currentDqeUser.Role == DqeRole.Administrator && project.CustodyOwner != currentDqeUser) || currentDqeUser.Role == DqeRole.AdminReadOnly ,
+                canEstimate = project.CustodyOwner == currentDqeUser ? true : false,
                 isSystemSync = true,
                 estimateId = estimate.Id,
                 isOfficial = project.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
                 proposal = new
                 {
-                    id = 0
+                    id = 0,
+                    confidentialData = isConfidentialData
                 },
                 project = new
                 {
@@ -883,6 +896,7 @@ namespace Dqe.Web.Controllers
             //        var wtProposal = letting.Proposals.First(i => i.ProposalNumber == p.ProposalNumber);
             //        if (!string.IsNullOrEmpty(wtProposal.PassToDss) && (wtProposal.PassToDss == "B" || wtProposal.PassToDss == "D"))
             //        {
+
             //            _webTransportService.UpdateProposalReadyForDssPass(wtProposal);
             //        }
             //    }
@@ -904,25 +918,46 @@ namespace Dqe.Web.Controllers
             var currentUser = (DqeIdentity)User.Identity;
             var currentDqeUser = _dqeUserRepository.GetBySrsId(currentUser.SrsId);
             var itemsCount = proposal.SectionGroups.Sum(i => i.ProposalItems.Count());
+            //TODO: need to set wt proposal here, to create confidential data flag. MB.
+            Domain.Model.Wt.Proposal wtp = null;
 
-            if (proposal.CurrentEstimator != currentDqeUser || itemsCount == 0)
+            if (proposal != null)
+            {
+                //set actual wt proposal entity here, to create confidential data flag. MB.
+                wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
+            }
+
+            if ((currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly && proposal.CurrentEstimator != currentDqeUser) || itemsCount == 0)
             {
                 proposal.SetCurrentEstimator(currentDqeUser);
-                var wtp = _webTransportService.GetProposal(proposal.ProposalNumber);
                 proposal.SynchronizeStructure(wtp, currentDqeUser, false);
             }
+
 
             var projects = proposal.Projects.OrderBy(i => i.ProjectNumber).Select(i => new
             {
                 HasCustody = i.CustodyOwner == currentDqeUser,
                 HasWorkingEstimate = i.ProjectHasWorkingEstimateForUser(currentDqeUser)
             }).ToList();
-            if (projects.Any(i => !i.HasCustody) || projects.Any(i => !i.HasWorkingEstimate))
+
+            if (currentDqeUser.Role == DqeRole.Administrator || currentDqeUser.Role == DqeRole.AdminReadOnly)
+            {
+                projects = proposal.Projects.OrderBy(i => i.ProjectNumber).Select(ii => new
+                {
+                    HasCustody = ii.CustodyOwner == currentDqeUser,
+                    HasWorkingEstimate = ii.ProjectVersions.Any(pv => pv.ProjectEstimates.Any(e => e.IsWorkingEstimate))
+                }).ToList();
+                if (projects.Any(i => !i.HasWorkingEstimate))
+                {
+                    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "A working estimate for each project is required to price the proposal." });
+                }
+            }
+            else if (projects.Any(i => !i.HasCustody) || projects.Any(i => !i.HasWorkingEstimate) )
             {
                 return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Error, text = "You must have custody and a working estimate for each project to price the proposal." });
             }
 
-            if (currentDqeUser.Role != DqeRole.Administrator)
+            if (currentDqeUser.Role != DqeRole.Administrator && currentDqeUser.Role != DqeRole.AdminReadOnly)
             {
                 if (!proposal.Projects.All(i => currentDqeUser.IsInDqeDistrict(i.District)) && !proposal.Projects.All(currentDqeUser.IsAuthorizedOnProject))
                 {
@@ -930,10 +965,13 @@ namespace Dqe.Web.Controllers
                 }    
             }
 
+            var isConfidentialData = IsConfidentialData(proposal?.ProposalNumber, wtp, proposal);
+
             var l = BuildProposalItemGroups(proposal);
             var result = new
             {
-                canEstimate = true,
+                viewOnly = (currentDqeUser.Role == DqeRole.Administrator && projects.Any(i => !i.HasCustody)) || currentDqeUser.Role == DqeRole.AdminReadOnly ,
+                canEstimate = projects.Any(i => !i.HasCustody) ? false : true,
                 isSystemSync = true,
                 estimateId = proposal.Id,
                 isOfficial = proposal.GetCurrentSnapshotLabel() == SnapshotLabel.Official,
@@ -942,7 +980,8 @@ namespace Dqe.Web.Controllers
                     id = proposal.Id,
                     number = proposal.ProposalNumber,
                     description = proposal.Description,
-                    county = proposal.County.Name
+                    county = proposal.County.Name,
+                    confidentialData = isConfidentialData
                 },
                 project = new
                 {
@@ -1010,6 +1049,7 @@ namespace Dqe.Web.Controllers
                 }
                 pi.Transform(pit, currentDqeUser);
             }
+            //push prices means transfer prices to PrP
             if (estimate.pushPrices)
             {
                 var pricesPushed = false;
@@ -1054,7 +1094,7 @@ namespace Dqe.Web.Controllers
                 //    return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved - {0}", pricesPushed ? "Project Preconstruction fixed price items updated" : "Project Preconstruction fixed price items not updated because a project is not synchronized") }, JsonRequestBehavior.AllowGet);
                 //}
             }
-            return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate saved") }, JsonRequestBehavior.AllowGet);
+            return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate Saved") }, JsonRequestBehavior.AllowGet);
         }
 
         private bool IsProjectSynced(long projectId)
@@ -1123,7 +1163,7 @@ namespace Dqe.Web.Controllers
                                                     : PriceSetType.Parameter;
                 }
                 pi.Transform(pit, currentDqeUser);
-            }
+            }         
             if (estimate.pushPrices)
             {
                 var proposal = project.Proposals.FirstOrDefault(i => i.ProposalSource == ProposalSourceType.Wt);
@@ -1300,6 +1340,8 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [OverrideAuthorization]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.AdminReadOnly, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
         public ActionResult UpdateBidHistory(dynamic itemToPrice)
         {
             var itemGroup = itemToPrice.itemGroup;
@@ -1355,6 +1397,8 @@ namespace Dqe.Web.Controllers
         }
 
         [HttpPost]
+        [OverrideAuthorization]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.AdminReadOnly, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
         public ActionResult GetBidHistory(dynamic itemToPrice)
         {
             var itemGroup = itemToPrice.itemGroup;
@@ -1517,5 +1561,47 @@ namespace Dqe.Web.Controllers
             };
             return new DqeResult(history);
         }
+
+        /// <summary>
+        /// This is the logic used to indicate to the the user if a project/proposal is considered to possibly have confidential data.
+        /// **NOTE** - Any changes made here should be replicated in the other associated method.
+        /// Duplicated in two controllers, better than splitting to different Repositories
+        /// <see cref="ProjectProposalController.IsConfidentialData"/>
+        /// <see cref="EstimateController.IsConfidentialData"/>
+        /// </summary>
+        /// <param name="propNumber">Proposal Number</param>
+        /// <param name="wtProp">Proposal WTP entity</param>
+        /// <param name="dqeProp">Proposal DQE entity</param>
+        /// <returns>bool</returns>
+        private bool IsConfidentialData(string propNumber, Domain.Model.Wt.Proposal wtProp, Proposal dqeProp)
+        {
+            if (string.IsNullOrEmpty(propNumber))
+            {
+                return false;
+            }
+            //determine if confidential data -  the DQE or AWP proposal are Official and NOT - Executed (03)
+            var isConfidentialData = (dqeProp?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtProp?.OfficialEstimate == "Y") && wtProp?.ProposalStatus != "03";
+
+            //if not confidential and it is a special proposal, then check it's parent
+            if (!isConfidentialData && DynamicHelper.ContainsSpecialSuffix(dqeProp?.ProposalNumber))
+            {
+                var suffix = DynamicHelper.GetSpecialSuffix(dqeProp?.ProposalNumber);
+                var parentProposalNumber = DynamicHelper.RemoveSuffixFromString(dqeProp?.ProposalNumber, suffix);
+                if (string.IsNullOrEmpty(parentProposalNumber))
+                {
+                    return false;
+                }
+                var wtpParent = _webTransportService.GetProposalSlim(parentProposalNumber);
+                var dqewtParent = _proposalRepository.GetWtByNumber(parentProposalNumber);
+
+                //check if parent dqe or awp proposal are confidential
+                if ((dqewtParent?.GetCurrentSnapshotLabel() == SnapshotLabel.Official || wtpParent?.OfficialEstimate == "Y") && wtpParent?.ProposalStatus != "03")
+                {
+                    return true;
+                }
+            }
+            return isConfidentialData;
+        }
+
     }
 }

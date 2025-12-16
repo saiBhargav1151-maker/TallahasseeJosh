@@ -211,6 +211,7 @@
     <Compile Include="Repositories\Custom\ISystemTaskRepository.cs" />
     <Compile Include="Repositories\ICommandRepository.cs" />
     <Compile Include="Services\AuthenticationToken.cs" />
+    <Compile Include="Services\Helper.cs" />
     <Compile Include="Services\IDocumentService.cs" />
     <Compile Include="Services\IStaffService.cs" />
     <Compile Include="Transformers\AveragePrice.cs" />

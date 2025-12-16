@@ -177,7 +177,12 @@ dqeApp.config(['growlProvider', '$httpProvider', function (growlProvider, $httpP
 dqeApp.factory('myInterceptor', ['$q', 'growl', function ($q, growl) {
     var responseInterceptor = {
         'responseError': function (rejection) {
-            growl.addErrorMessage("An unexpected error has occurred.");
+            if (rejection.status == 401) {
+                growl.addErrorMessage("You are not authorized to perform this operation.");
+            }
+            else {
+                growl.addErrorMessage("An unexpected error has occurred.");
+            }
             return $q.reject(rejection);
         }
     };

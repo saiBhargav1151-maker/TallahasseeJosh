@@ -76,6 +76,7 @@ namespace Dqe.Web.Controllers
                 case DqeRole.Estimator:
                     ((Domain.Transformers.EstimatorPricingParameter) transformer).User = currentDqeUser;
                     break;
+                
             }
 
             transformer.Bidders = (BiddersType)defaultPricingParameter.bidders;

@@ -25,4 +25,5 @@ namespace Dqe.Domain.Transformers
     {
         public Model.DqeUser User { get; set; }
     }
+
 }

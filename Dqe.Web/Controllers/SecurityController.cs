@@ -109,28 +109,9 @@ namespace Dqe.Web.Controllers
                     }, JsonRequestBehavior.AllowGet);    
             }
             var user = _dqeUserRepository.Get(dqeIdenetity.Id);
-            var role = user.Role == DqeRole.Administrator
-                ? "A"
-                : user.Role == DqeRole.DistrictAdministrator
-                    ? "D"
-                    : user.Role == DqeRole.CostBasedTemplateAdministrator
-                        ? "T"
-                        : user.Role == DqeRole.Estimator
-                            ? "E"
-                            : user.Role == DqeRole.PayItemAdministrator
-                                ? "P"
-                                : string.Empty;
-            var roleName = user.Role == DqeRole.Administrator
-                ? "Administrator"
-                : user.Role == DqeRole.DistrictAdministrator
-                    ? "District Coordinator"
-                    : user.Role == DqeRole.CostBasedTemplateAdministrator
-                        ? "Cost Based Template Administrator"
-                        : user.Role == DqeRole.Estimator
-                            ? "Estimator"
-                            : user.Role == DqeRole.PayItemAdministrator
-                                ? "Pay Item Administrator"
-                                : string.Empty;
+            var role = ((char)user.Role).ToString();
+            var roleName = Helper.GetRoleDisplayLabel(user.Role);
+
             return
                 Json(
                     new
@@ -140,7 +121,7 @@ namespace Dqe.Web.Controllers
                         role,
                         name = dqeIdenetity.Name,
                         district = dqeIdenetity.District,
-                        userNameAndRole = string.Format("{0} - {1} {2}", dqeIdenetity.Name, dqeIdenetity.District, roleName)
+                        userNameAndRole = string.Format("{0} - {1} - {2}", dqeIdenetity.Name, dqeIdenetity.District, roleName)
                     }, JsonRequestBehavior.AllowGet);
         }
 
@@ -251,6 +232,7 @@ namespace Dqe.Web.Controllers
 #endif
             var u = _dqeUserRepository.GetBySrsId(user.id);
             var sys = _dqeUserRepository.GetSystemAccount();
+
             if (u == null)
             {
                 u = new DqeUser(_staffService, _dqeUserRepository, _proposalRepository, _projectRepository);
@@ -259,15 +241,17 @@ namespace Dqe.Web.Controllers
                 t.SrsId = user.id;
                 t.District = user.district;
                 t.CostGroupAuthorization = "U";
-                t.Role = user.role == "A"
-                    ? DqeRole.Administrator
-                    : user.role == "D"
-                        ? DqeRole.DistrictAdministrator
-                        : user.role == "P"
-                            ? DqeRole.PayItemAdministrator
-                            : user.role == "T"
-                                ? DqeRole.CostBasedTemplateAdministrator
-                                : DqeRole.Estimator;
+                //This is needed since the addition of roles that have numerical char values. It auto defines them as int's as opposed to chars
+                if (user.role is int)
+                {
+                    user.role = Convert.ToString(user.role);
+                    t.Role = (DqeRole)user.role[0];
+                }
+                else if (user.role is string)
+                {
+                    t.Role = (DqeRole)user.role[0];
+                }
+
                 u.Transform(t, sys);
                 _commandRepository.Add(u);
             }
@@ -276,15 +260,16 @@ namespace Dqe.Web.Controllers
                 var t = u.GetTransformer();
                 t.IsActive = true;
                 t.District = user.district;
-                t.Role = user.role == "A"
-                    ? DqeRole.Administrator
-                    : user.role == "D"
-                        ? DqeRole.DistrictAdministrator
-                        : user.role == "P"
-                            ? DqeRole.PayItemAdministrator
-                            : user.role == "T"
-                                ? DqeRole.CostBasedTemplateAdministrator
-                                : DqeRole.Estimator;
+                if (user.role is int)
+                {
+                    user.role = Convert.ToString(user.role);
+                    t.Role = (DqeRole)user.role[0];
+                }
+                else if(user.role is string)
+                {
+                    t.Role = (DqeRole)user.role[0];
+                }
+                
                 u.Transform(t, sys);
             }
             var encryptedTicket = CreateAuthenticationTicket(u);

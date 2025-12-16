@@ -14,17 +14,28 @@ namespace Dqe.Infrastructure.Repositories.Custom
             Session = session;
         }
 
-        public IEnumerable<DqeUser> GetAll(long currentUserId, string district)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="currentUserId"></param>
+        /// <param name="district"></param>
+        /// <param name="includeCurrentUser"></param>
+        /// <returns></returns>
+        public IEnumerable<DqeUser> GetAll(long currentUserId, string district, bool includeCurrentUser = false)
         {
             InitializeSession();
             var q = Session
                 .QueryOver<DqeUser>()
                 .Where(i => i.IsActive)
-                .Where(i => i.Role != DqeRole.System)
-                .Where(i => i.Id != currentUserId);
+                .Where(i => i.Role != DqeRole.System);
+
             if (!string.IsNullOrWhiteSpace(district))
             {
                 q.Where(i => i.District == district);
+            }
+            if (!includeCurrentUser)
+            {
+                q.Where(i => i.Id != currentUserId);
             }
             return q.List();
         }
