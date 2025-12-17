@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -14,8 +14,18 @@ namespace Dqe.Web.Controllers
     /// </summary>
     public static class NHCCIData
     {
-        private const string DataSourceUrl = "https://fdotwww.blob.core.windows.net/sitefinity/docs/default-source/fpo/fpc/apps/dqe/cci-inflation-indexs.xlsx";
+        private static readonly string DataSourceUrl = GetDataSourceUrl();
         private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(15);
+        private static string GetDataSourceUrl()
+        {
+            var configUrl = ConfigurationManager.AppSettings["cciInflationIndexUrl"];
+            if (!string.IsNullOrWhiteSpace(configUrl))
+            {
+                return configUrl;
+            }
+            // Fallback to default URL
+            return "https://fdotwww.blob.core.windows.net/sitefinity/docs/default-source/fpo/fpc/apps/dqe/cci-inflation-indexs.xlsx";
+        }
         private static readonly object SyncRoot = new object();
         private static Dictionary<string, decimal> _cachedIndexByQuarter = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
         private static DateTime _cacheExpirationEst = DateTime.MinValue;
@@ -161,7 +171,6 @@ namespace Dqe.Web.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error calculating inflation-adjusted price: {ex}");
                 return originalPrice;
             }
         }
@@ -181,28 +190,24 @@ namespace Dqe.Web.Controllers
                         var wasEmpty = _cachedIndexByQuarter.Count == 0;
                         var wasExpired = nowEst >= _cacheExpirationEst;
 
-                        Debug.WriteLine($"[NHCCI] Starting data refresh. WasEmpty: {wasEmpty}, WasExpired: {wasExpired}, CurrentTime: {nowEst:yyyy-MM-dd HH:mm:ss} EST");
 
                         try
                         {
                             _cachedIndexByQuarter = LoadIndexesFromSource();
                             _lastRefreshEst = nowEst;
                             _cacheExpirationEst = nowEst.Add(RefreshInterval);
-                            Debug.WriteLine($"[NHCCI] Data refresh successful. Loaded {_cachedIndexByQuarter.Count} records. Next refresh at {_cacheExpirationEst:yyyy-MM-dd HH:mm:ss} EST");
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine($"[NHCCI] Data refresh failed: {ex}");
                             if (_cachedIndexByQuarter.Count == 0)
                             {
-                                Debug.WriteLine($"[NHCCI] No cached data available. Application will continue with empty data until next refresh attempt.");
+                                //Debug.WriteLine($"[NHCCI] No cached data available. Application will continue with empty data until next refresh attempt.");
                             }
                             else
                             {
-                                Debug.WriteLine($"[NHCCI] Keeping existing cached data ({_cachedIndexByQuarter.Count} records). Will retry at next refresh interval.");
+                                //Debug.WriteLine($"[NHCCI] Keeping existing cached data ({_cachedIndexByQuarter.Count} records). Will retry at next refresh interval.");
                             }
                             _cacheExpirationEst = nowEst.Add(RefreshInterval);
-                            Debug.WriteLine($"[NHCCI] Next refresh scheduled for {_cacheExpirationEst:yyyy-MM-dd HH:mm:ss} EST");
                         }
                     }
                 }

@@ -9,7 +9,7 @@ using System.Web;
 namespace Dqe.Web.Controllers
 {
     /// <summary>
-    /// Controller responsible for handling Unit Price Search functionality,
+    /// Controller responsible for handling Unit Price Search functionality
     /// </summary>
     public class UnitPriceSearchController : Controller
     {
