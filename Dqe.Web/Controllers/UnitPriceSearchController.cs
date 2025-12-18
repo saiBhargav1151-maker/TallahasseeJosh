@@ -43,8 +43,7 @@ namespace Dqe.Web.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in GetPayItemSuggestions: {ex.Message}");
-                return new HttpStatusCodeResult(500, "An error occurred while fetching pay item suggestions.");
+                throw new InvalidOperationException($"Unit Price Search: Failed to get pay item suggestions. Input: '{input}', Input length: {input?.Length ?? 0}, Error: {ex.Message}", ex);
             }
         }
 
@@ -199,9 +198,13 @@ namespace Dqe.Web.Controllers
                     MaxJsonLength = Int32.MaxValue
                 };
             }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                return new HttpStatusCodeResult(500, "An error occurred: " + ex.Message);
+                throw new InvalidOperationException($"Unit Price Search: Failed to get pay item details. Pay item number: '{number}', Contract types: {string.Join(", ", contractType ?? new List<string>())}, Months: {months}, Start date: {startDate}, End date: {endDate}, Counties: {string.Join(", ", counties ?? new string[0])}, Error: {ex.Message}", ex);
             }
         }
 
@@ -256,9 +259,9 @@ namespace Dqe.Web.Controllers
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                throw new InvalidOperationException($"Unit Price Search: Failed to validate basic inputs. Pay item number: '{number}', Months: {months}, Start date: {startDate}, End date: {endDate}, Min bid amount: {minBidAmount}, Max bid amount: {maxBidAmount}, Min rank: {minRank}, Max rank: {maxRank}, Error: {ex.Message}", ex);
             }
         }
 
@@ -294,17 +297,7 @@ namespace Dqe.Web.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in GetLatestNHCCIQuarter: {ex.Message}");
-                Response.Cache.SetCacheability(HttpCacheability.NoCache);
-                Response.Cache.SetNoStore();
-                
-                return Json(new
-                {
-                    quarterKey = "Unknown",
-                    display = "Unknown",
-                    cacheTimestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    _cacheBuster = DateTime.UtcNow.Ticks
-                }, JsonRequestBehavior.AllowGet);
+                throw new InvalidOperationException($"Unit Price Search: Failed to get latest NHCCI quarter information. Error: {ex.Message}", ex);
             }
         }
 
@@ -367,9 +360,10 @@ namespace Dqe.Web.Controllers
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return true;
+                var clientIp = Request?.UserHostAddress ?? "Unknown";
+                throw new InvalidOperationException($"Unit Price Search: Failed to check rate limit. Client IP: {clientIp}, Error: {ex.Message}", ex);
             }
         }
     }
