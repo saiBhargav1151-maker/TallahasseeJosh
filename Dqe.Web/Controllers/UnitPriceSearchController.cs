@@ -58,6 +58,9 @@ namespace Dqe.Web.Controllers
         [ValidateInput(true)]
         public ActionResult GetPayItemDetails(string number, List<string> contractType, int? months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, string projectNumber, decimal? minBidAmount, decimal? maxBidAmount, string[] district)
         {
+            object processedData = null;
+            InvalidOperationException refreshExceptionToLog = null;
+            
             try
             {
                 if (!ValidateBasicInputs(number, months, startDate, endDate, minBidAmount, maxBidAmount, minRank, maxRank))
@@ -75,6 +78,17 @@ namespace Dqe.Web.Controllers
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
                
+                System.Collections.Generic.IReadOnlyDictionary<string, decimal> indexByQuarter;
+                try
+                {
+                    indexByQuarter = NHCCIData.IndexByQuarter;
+                }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("Using cached data"))
+                {
+                    indexByQuarter = NHCCIData.GetCachedIndexByQuarter();
+                    refreshExceptionToLog = ex;
+                }
+               
                 foreach (var item in historyData)
                 {
                     if (item.l.HasValue)
@@ -86,7 +100,6 @@ namespace Dqe.Web.Controllers
                             decimal adjustedPrice = NHCCIData.CalculateInflationAdjustedPrice(item.b, lettingDate);
                             item.InflationAdjustedPrice = adjustedPrice;
 
-                            var indexByQuarter = NHCCIData.IndexByQuarter;
                             string quarterKey = NHCCIData.GetQuarterKey(lettingDate);
 
                             if (indexByQuarter.TryGetValue(quarterKey, out var lettingDateIndex))
@@ -117,11 +130,7 @@ namespace Dqe.Web.Controllers
                         }
                         catch (Exception ex)
                         {
-                            item.InflationAdjustedPrice = item.b;
-                            item.InflationFactor = 1.0m;
-                            item.InflationPercentIncrease = 0.0m;
-                            item.NHCCIQuarter = "Unknown";
-                            System.Diagnostics.Debug.WriteLine($"Error calculating inflation adjustment: {ex.Message}");
+                            throw new InvalidOperationException($"NHCCI: Failed to calculate inflation adjustment for pay item {item.ri} with letting date {item.l}. Original price: {item.b}, Error: {ex.Message}", ex);
                         }
                     }
                     else
@@ -168,9 +177,24 @@ namespace Dqe.Web.Controllers
                     NHCCIQuarter = item.NHCCIQuarter
                 }).ToList();
 
+                processedData = filteredData;
+                if (refreshExceptionToLog != null)
+                {
+                    throw refreshExceptionToLog;
+                }
+                
                 return new JsonResult
                 {
                     Data = filteredData,
+                    JsonRequestBehavior = JsonRequestBehavior.AllowGet,
+                    MaxJsonLength = Int32.MaxValue
+                };
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("NHCCI") && ex.Message.Contains("Using cached data") && processedData != null)
+            {
+                return new JsonResult
+                {
+                    Data = processedData,
                     JsonRequestBehavior = JsonRequestBehavior.AllowGet,
                     MaxJsonLength = Int32.MaxValue
                 };
@@ -310,8 +334,9 @@ namespace Dqe.Web.Controllers
                     return TimeZoneInfo.ConvertTimeToUtc(dateTime, estTimeZone);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                throw new InvalidOperationException($"NHCCI: Failed to extract last refresh time from cache status. Status: '{cacheStatus}', Error: {ex.Message}", ex);
             }
 
             return null;

@@ -38,6 +38,17 @@ namespace Dqe.Web.Controllers
         public static IReadOnlyDictionary<string, decimal> IndexByQuarter => EnsureData();
 
         /// <summary>
+        /// Gets the cached inflation index table directly without triggering a refresh.
+        /// </summary>
+        public static IReadOnlyDictionary<string, decimal> GetCachedIndexByQuarter()
+        {
+            lock (SyncRoot)
+            {
+                return _cachedIndexByQuarter;
+            }
+        }
+
+        /// <summary>
         /// Forces a cache refresh immediately ( for testing).
         /// </summary>
         public static void ForceRefresh()
@@ -171,7 +182,7 @@ namespace Dqe.Web.Controllers
             }
             catch (Exception ex)
             {
-                return originalPrice;
+                throw new InvalidOperationException($"NHCCI: Failed to calculate inflation-adjusted price. Original price: {originalPrice}, Letting date: {lettingDate:yyyy-MM-dd}, Quarter key: {GetQuarterKey(lettingDate)}, Error: {ex.Message}", ex);
             }
         }
         private static Dictionary<string, decimal> EnsureData()
@@ -201,13 +212,12 @@ namespace Dqe.Web.Controllers
                         {
                             if (_cachedIndexByQuarter.Count == 0)
                             {
-                                //Debug.WriteLine($"[NHCCI] No cached data available. Application will continue with empty data until next refresh attempt.");
+                                throw new InvalidOperationException($"NHCCI: Failed to load inflation data from source and no cached data available. DataSourceUrl: {DataSourceUrl}, Error: {ex.Message}", ex);
                             }
                             else
                             {
-                                //Debug.WriteLine($"[NHCCI] Keeping existing cached data ({_cachedIndexByQuarter.Count} records). Will retry at next refresh interval.");
+                                throw new InvalidOperationException($"NHCCI: Failed to refresh inflation data from source. Using cached data ({_cachedIndexByQuarter.Count} records). DataSourceUrl: {DataSourceUrl}, Last refresh: {_lastRefreshEst:yyyy-MM-dd HH:mm:ss} EST, Error: {ex.Message}", ex);
                             }
-                            _cacheExpirationEst = nowEst.Add(RefreshInterval);
                         }
                     }
                 }
