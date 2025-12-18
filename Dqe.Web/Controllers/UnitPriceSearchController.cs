@@ -43,8 +43,7 @@ namespace Dqe.Web.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in GetPayItemSuggestions: {ex.Message}");
-                return new HttpStatusCodeResult(500, "An error occurred while fetching pay item suggestions.");
+                throw new InvalidOperationException($"Unit Price Search: Failed to get pay item suggestions. Input: '{input}', Input length: {input?.Length ?? 0}, Error: {ex.Message}", ex);
             }
         }
 
@@ -58,6 +57,9 @@ namespace Dqe.Web.Controllers
         [ValidateInput(true)]
         public ActionResult GetPayItemDetails(string number, List<string> contractType, int? months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, string projectNumber, decimal? minBidAmount, decimal? maxBidAmount, string[] district)
         {
+            object processedData = null;
+            InvalidOperationException refreshExceptionToLog = null;
+            
             try
             {
                 if (!ValidateBasicInputs(number, months, startDate, endDate, minBidAmount, maxBidAmount, minRank, maxRank))
@@ -75,6 +77,17 @@ namespace Dqe.Web.Controllers
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
                
+                System.Collections.Generic.IReadOnlyDictionary<string, decimal> indexByQuarter;
+                try
+                {
+                    indexByQuarter = NHCCIData.IndexByQuarter;
+                }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("Using cached data"))
+                {
+                    indexByQuarter = NHCCIData.GetCachedIndexByQuarter();
+                    refreshExceptionToLog = ex;
+                }
+               
                 foreach (var item in historyData)
                 {
                     if (item.l.HasValue)
@@ -86,7 +99,6 @@ namespace Dqe.Web.Controllers
                             decimal adjustedPrice = NHCCIData.CalculateInflationAdjustedPrice(item.b, lettingDate);
                             item.InflationAdjustedPrice = adjustedPrice;
 
-                            var indexByQuarter = NHCCIData.IndexByQuarter;
                             string quarterKey = NHCCIData.GetQuarterKey(lettingDate);
 
                             if (indexByQuarter.TryGetValue(quarterKey, out var lettingDateIndex))
@@ -117,11 +129,7 @@ namespace Dqe.Web.Controllers
                         }
                         catch (Exception ex)
                         {
-                            item.InflationAdjustedPrice = item.b;
-                            item.InflationFactor = 1.0m;
-                            item.InflationPercentIncrease = 0.0m;
-                            item.NHCCIQuarter = "Unknown";
-                            System.Diagnostics.Debug.WriteLine($"Error calculating inflation adjustment: {ex.Message}");
+                            throw new InvalidOperationException($"NHCCI: Failed to calculate inflation adjustment for pay item {item.ri} with letting date {item.l}. Original price: {item.b}, Error: {ex.Message}", ex);
                         }
                     }
                     else
@@ -168,6 +176,12 @@ namespace Dqe.Web.Controllers
                     NHCCIQuarter = item.NHCCIQuarter
                 }).ToList();
 
+                processedData = filteredData;
+                if (refreshExceptionToLog != null)
+                {
+                    throw refreshExceptionToLog;
+                }
+                
                 return new JsonResult
                 {
                     Data = filteredData,
@@ -175,9 +189,22 @@ namespace Dqe.Web.Controllers
                     MaxJsonLength = Int32.MaxValue
                 };
             }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("NHCCI") && ex.Message.Contains("Using cached data") && processedData != null)
+            {
+                return new JsonResult
+                {
+                    Data = processedData,
+                    JsonRequestBehavior = JsonRequestBehavior.AllowGet,
+                    MaxJsonLength = Int32.MaxValue
+                };
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                return new HttpStatusCodeResult(500, "An error occurred: " + ex.Message);
+                throw new InvalidOperationException($"Unit Price Search: Failed to get pay item details. Pay item number: '{number}', Contract types: {string.Join(", ", contractType ?? new List<string>())}, Months: {months}, Start date: {startDate}, End date: {endDate}, Counties: {string.Join(", ", counties ?? new string[0])}, Error: {ex.Message}", ex);
             }
         }
 
@@ -232,9 +259,9 @@ namespace Dqe.Web.Controllers
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                throw new InvalidOperationException($"Unit Price Search: Failed to validate basic inputs. Pay item number: '{number}', Months: {months}, Start date: {startDate}, End date: {endDate}, Min bid amount: {minBidAmount}, Max bid amount: {maxBidAmount}, Min rank: {minRank}, Max rank: {maxRank}, Error: {ex.Message}", ex);
             }
         }
 
@@ -270,17 +297,7 @@ namespace Dqe.Web.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in GetLatestNHCCIQuarter: {ex.Message}");
-                Response.Cache.SetCacheability(HttpCacheability.NoCache);
-                Response.Cache.SetNoStore();
-                
-                return Json(new
-                {
-                    quarterKey = "Unknown",
-                    display = "Unknown",
-                    cacheTimestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    _cacheBuster = DateTime.UtcNow.Ticks
-                }, JsonRequestBehavior.AllowGet);
+                throw new InvalidOperationException($"Unit Price Search: Failed to get latest NHCCI quarter information. Error: {ex.Message}", ex);
             }
         }
 
@@ -310,8 +327,9 @@ namespace Dqe.Web.Controllers
                     return TimeZoneInfo.ConvertTimeToUtc(dateTime, estTimeZone);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                throw new InvalidOperationException($"NHCCI: Failed to extract last refresh time from cache status. Status: '{cacheStatus}', Error: {ex.Message}", ex);
             }
 
             return null;
@@ -342,9 +360,10 @@ namespace Dqe.Web.Controllers
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return true;
+                var clientIp = Request?.UserHostAddress ?? "Unknown";
+                throw new InvalidOperationException($"Unit Price Search: Failed to check rate limit. Client IP: {clientIp}, Error: {ex.Message}", ex);
             }
         }
     }
