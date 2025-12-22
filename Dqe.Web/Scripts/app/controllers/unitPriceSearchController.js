@@ -256,7 +256,7 @@
       const decimalDigits = parts[1] ? parts[1].length : 0;
       
       if (wholeDigits >=9 || decimalDigits > 2 || (wholeDigits + decimalDigits) > 10) {
-        $scope.validationErrors[`quantity${type}`] = 'Quantity cannot exceed 9 whole digits and 2 decimal places (11 total digits).';
+        $scope.validationErrors[`quantity${type}`] = 'Quantity cannot exceed 8 whole digits and 2 decimal places (10 total digits).';
         return false;
       }
 
