@@ -255,7 +255,7 @@
       const wholeDigits = parts[0].length;
       const decimalDigits = parts[1] ? parts[1].length : 0;
       
-      if (wholeDigits > 9 || decimalDigits > 2 || (wholeDigits + decimalDigits) > 12) {
+      if (wholeDigits >=9 || decimalDigits > 2 || (wholeDigits + decimalDigits) > 10) {
         $scope.validationErrors[`quantity${type}`] = 'Quantity cannot exceed 9 whole digits and 2 decimal places (11 total digits).';
         return false;
       }
@@ -517,6 +517,9 @@
       $scope.trendData = [];
       $scope.trendWarning = '';
       $scope.dataAgeWarning = '';
+      $scope.useInflationAdjustedPrices = true;
+      $scope.customQuantityData.userQuantity = null;
+      $scope.customQuantityPrediction = null;
       if ($scope.trendChartInstance) {
         $scope.trendChartInstance.destroy();
         $scope.trendChartInstance = null;
@@ -573,7 +576,6 @@
             renderTrendChart();
           }, 0);
         }
-        $scope.isChartStale = false;
         if (
           $scope.customQuantityData.userQuantity &&
           $scope.customQuantityData.userQuantity > 0
@@ -655,6 +657,45 @@
         });
       }
 
+      let countiesToSearch = null;
+      if ($scope.regionType === 'market' || $scope.regionType === 'county' || $scope.regionType === 'district') {
+        if ($scope.selectedRegionCounties && $scope.selectedRegionCounties.length > 0) {
+          countiesToSearch = $scope.selectedRegionCounties;
+        } else if ($scope.regionType === 'market' && $scope.selectedRegions && $scope.selectedRegions.length > 0) {
+          let allMarketAreaCounties = [];
+          $scope.selectedRegions.forEach((marketArea) => {
+            const counties = $scope.marketAreaToCountiesMap[marketArea] || [];
+            counties.forEach((county) => {
+              const cleaned = county.trim();
+              if (!allMarketAreaCounties.includes(cleaned)) {
+                allMarketAreaCounties.push(cleaned);
+              }
+            });
+          });
+          countiesToSearch = allMarketAreaCounties.length > 0 ? allMarketAreaCounties : null;
+        } else if ($scope.regionType === 'district' && $scope.selectedRegions && $scope.selectedRegions.length > 0) {
+          let allDistrictCounties = [];
+          $scope.selectedRegions.forEach((district) => {
+            const isTurnpike = district === 'District 8 (Turnpike)' || district === 'Turnpike';
+            let counties = [];
+            if (isTurnpike) {
+              counties = getAllCountiesList();
+              counties.push('TURNPIKE');
+              counties.push('DIST/ST-WIDE');
+            } else {
+              counties = $scope.districtCountyMap[district] || [];
+            }
+            counties.forEach((county) => {
+              const cleaned = county.includes(' - ') ? county.split(' - ')[1].trim() : county.trim();
+              if (!allDistrictCounties.includes(cleaned)) {
+                allDistrictCounties.push(cleaned);
+              }
+            });
+          });
+          countiesToSearch = allDistrictCounties.length > 0 ? allDistrictCounties : null;
+        }
+      }
+
       $http
         .get('/UnitPriceSearch/GetPayItemDetails', {
           params: {
@@ -667,7 +708,7 @@
                 : null,
             startDate: $scope.startDate || null,
             endDate: $scope.endDate || null,
-            counties: ($scope.regionType === 'market' || $scope.regionType === 'county' || $scope.regionType === 'district') ? $scope.selectedRegionCounties : null,
+            counties: countiesToSearch,
             district: districtParam,
             bidStatus: $scope.selectedBidStatus || null,
             contractType:
@@ -946,11 +987,29 @@
           }
         });
       });
-      $scope.relatedCounties = combined.map((c) => ({
-        name: c,
-        selected: true,
-      }));
-      $scope.selectedRegionCounties = combined;
+      combined.sort();
+      
+      const previousRelatedCounties = $scope.relatedCounties || [];
+      const previousSelectedCounties = $scope.selectedRegionCounties || [];
+      
+      $scope.relatedCounties = combined.map((c) => {
+        const previousCounty = previousRelatedCounties.find((pc) => pc.name === c);
+        if (previousCounty) {
+          return {
+            name: c,
+            selected: previousCounty.selected,
+          };
+        } else {
+          return {
+            name: c,
+            selected: true,
+          };
+        }
+      });
+      
+      $scope.selectedRegionCounties = $scope.relatedCounties
+        .filter((c) => c.selected)
+        .map((c) => c.name);
     };
     $scope.toggleMultiSelectDropdown = function () { $scope.isRegionDropdownOpen = !$scope.isRegionDropdownOpen; };
     document.addEventListener('click', function (event) {
@@ -2458,6 +2517,7 @@
     // Line Graph rendering
     function waitForCanvasAndRender() {
       $scope.isChartLoading = true;
+      const wasStaleBeforeRender = $scope.isChartStale;
 
       $timeout(function () {
         if (typeof requestAnimationFrame === 'function') {
@@ -3133,13 +3193,18 @@
                 : 'Raw',
             };
             $scope.isChartLoading = false;
-            $scope.isChartStale = false;
+            // Only clear stale flag if it wasn't stale before rendering (i.e., filters haven't changed)
+            if (!wasStaleBeforeRender) {
+              $scope.isChartStale = false;
+            }
             $scope.$apply();
           });
         } else {
           setTimeout(function () {
             $scope.isChartLoading = false;
-            $scope.isChartStale = false;
+            if (!wasStaleBeforeRender) {
+              $scope.isChartStale = false;
+            }
           }, 16);
         }
       }, 0);
