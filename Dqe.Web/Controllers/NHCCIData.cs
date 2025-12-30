@@ -210,14 +210,12 @@ namespace Dqe.Web.Controllers
                         }
                         catch (Exception ex)
                         {
-                            if (_cachedIndexByQuarter.Count == 0)
-                            {
-                                throw new InvalidOperationException($"NHCCI: Failed to load inflation data from source and no cached data available. DataSourceUrl: {DataSourceUrl}, Error: {ex.Message}", ex);
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException($"NHCCI: Failed to refresh inflation data from source. Using cached data ({_cachedIndexByQuarter.Count} records). DataSourceUrl: {DataSourceUrl}, Last refresh: {_lastRefreshEst:yyyy-MM-dd HH:mm:ss} EST, Error: {ex.Message}", ex);
-                            }
+                            // Exceptions disabled - use cached data if available, or return empty dictionary
+                            // Extend expiration to prevent immediate retry loops
+                            _cacheExpirationEst = nowEst.Add(RefreshInterval);
+                            
+                            // If no cached data exists, _cachedIndexByQuarter will remain empty
+                            // Execution continues and returns whatever is in _cachedIndexByQuarter (cached data or empty)
                         }
                     }
                 }
