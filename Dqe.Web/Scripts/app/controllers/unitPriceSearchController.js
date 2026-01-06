@@ -1746,10 +1746,9 @@
             $scope.bidHistoryData &&
             $scope.bidHistoryData.length > 0 &&
             $scope.searchAttempted &&
-            $scope.chartStats &&
-            $scope.chartInstance &&
             filter !== 'useInflationAdjustedPrices'
           ) {
+            
             $scope.isChartStale = true;
           }
         },
