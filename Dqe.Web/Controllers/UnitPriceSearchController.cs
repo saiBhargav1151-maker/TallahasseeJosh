@@ -76,16 +76,23 @@ namespace Dqe.Web.Controllers
                 var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months ?? 36, contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames, projectNumber, minBidAmount, maxBidAmount, district);
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
-               
-                System.Collections.Generic.IReadOnlyDictionary<string, decimal> indexByQuarter;
-                try
+                System.Collections.Generic.IReadOnlyDictionary<string, decimal> indexByQuarter = NHCCIData.GetCachedIndexByQuarter();
+                
+                decimal latestIndex = 0m;
+                if (indexByQuarter.Count > 0)
                 {
-                    indexByQuarter = NHCCIData.IndexByQuarter;
-                }
-                catch (InvalidOperationException ex) when (ex.Message.Contains("Using cached data"))
-                {
-                    indexByQuarter = NHCCIData.GetCachedIndexByQuarter();
-                    refreshExceptionToLog = ex;
+                    var latest = indexByQuarter.Keys
+                        .Select(NHCCIData.ParseQuarterKey)
+                        .Where(info => info.HasValue)
+                        .Select(info => info.Value)
+                        .OrderBy(info => info.Year)
+                        .ThenBy(info => info.Quarter)
+                        .LastOrDefault();
+                    
+                    if (!string.IsNullOrEmpty(latest.QuarterKey) && indexByQuarter.TryGetValue(latest.QuarterKey, out var value))
+                    {
+                        latestIndex = value;
+                    }
                 }
                
                 foreach (var item in historyData)
@@ -95,33 +102,32 @@ namespace Dqe.Web.Controllers
                         try
                         {
                             DateTime lettingDate = item.l.Value;
-
-                            decimal adjustedPrice = NHCCIData.CalculateInflationAdjustedPrice(item.b, lettingDate);
-                            item.InflationAdjustedPrice = adjustedPrice;
-
                             string quarterKey = NHCCIData.GetQuarterKey(lettingDate);
 
                             if (indexByQuarter.TryGetValue(quarterKey, out var lettingDateIndex))
                             {
-                                decimal latestIndex = NHCCIData.GetLatestIndex();
                                 if (latestIndex > 0m && lettingDateIndex > 0m)
                                 {
                                     decimal inflationFactor = latestIndex / lettingDateIndex;
+                                    decimal adjustedPrice = item.b * inflationFactor;
                                     decimal percentIncrease = (inflationFactor - 1) * 100;
 
+                                    item.InflationAdjustedPrice = adjustedPrice;
                                     item.InflationFactor = inflationFactor;
                                     item.InflationPercentIncrease = percentIncrease;
+                                    item.NHCCIQuarter = quarterKey;
                                 }
                                 else
                                 {
+                                    item.InflationAdjustedPrice = item.b;
                                     item.InflationFactor = 1.0m;
                                     item.InflationPercentIncrease = 0.0m;
+                                    item.NHCCIQuarter = quarterKey;
                                 }
-
-                                item.NHCCIQuarter = quarterKey;
                             }
                             else
                             {
+                                item.InflationAdjustedPrice = item.b;
                                 item.InflationFactor = 1.0m;
                                 item.InflationPercentIncrease = 0.0m;
                                 item.NHCCIQuarter = "Inflation data not available";
@@ -129,7 +135,10 @@ namespace Dqe.Web.Controllers
                         }
                         catch (Exception ex)
                         {
-                            throw new InvalidOperationException($"NHCCI: Failed to calculate inflation adjustment for pay item {item.ri} with letting date {item.l}. Original price: {item.b}, Error: {ex.Message}", ex);
+                            item.InflationAdjustedPrice = item.b;
+                            item.InflationFactor = 1.0m;
+                            item.InflationPercentIncrease = 0.0m;
+                            item.NHCCIQuarter = "Inflation data not available";
                         }
                     }
                     else

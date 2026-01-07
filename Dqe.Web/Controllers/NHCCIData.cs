@@ -185,35 +185,42 @@ namespace Dqe.Web.Controllers
                 throw new InvalidOperationException($"NHCCI: Failed to calculate inflation-adjusted price. Original price: {originalPrice}, Letting date: {lettingDate:yyyy-MM-dd}, Quarter key: {GetQuarterKey(lettingDate)}, Error: {ex.Message}", ex);
             }
         }
+        private static volatile bool _refreshInProgress = false;
+        
         private static Dictionary<string, decimal> EnsureData()
         {
             var nowUtc = DateTime.UtcNow;
             var nowEst = TimeZoneInfo.ConvertTimeFromUtc(nowUtc, EasternTimeZone);
-            if (_cachedIndexByQuarter.Count == 0 || nowEst >= _cacheExpirationEst)
+            
+            if (_cachedIndexByQuarter.Count > 0 && nowEst < _cacheExpirationEst)
+            {
+                return _cachedIndexByQuarter;
+            }
+            
+            if (!_refreshInProgress && (nowEst >= _cacheExpirationEst || _cachedIndexByQuarter.Count == 0))
             {
                 lock (SyncRoot)
                 {
                     nowUtc = DateTime.UtcNow;
                     nowEst = TimeZoneInfo.ConvertTimeFromUtc(nowUtc, EasternTimeZone);
 
-                    if (_cachedIndexByQuarter.Count == 0 || nowEst >= _cacheExpirationEst)
+                    if ((_cachedIndexByQuarter.Count == 0 || nowEst >= _cacheExpirationEst) && !_refreshInProgress)
                     {
-                        var wasEmpty = _cachedIndexByQuarter.Count == 0;
-                        var wasExpired = nowEst >= _cacheExpirationEst;
-
-
+                        _refreshInProgress = true;
                         try
                         {
                             _cachedIndexByQuarter = LoadIndexesFromSource();
                             _lastRefreshEst = nowEst;
                             _cacheExpirationEst = nowEst.Add(RefreshInterval);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
-                           
                             _cacheExpirationEst = nowEst.Add(RefreshInterval);
-                            
-                             }
+                        }
+                        finally
+                        {
+                            _refreshInProgress = false;
+                        }
                     }
                 }
             }
@@ -225,8 +232,8 @@ namespace Dqe.Web.Controllers
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             var request = (HttpWebRequest)WebRequest.Create(DataSourceUrl);
-            request.Timeout = 2000;
-            request.ReadWriteTimeout = 2000;
+            request.Timeout = 1500;
+            request.ReadWriteTimeout = 1500;
             request.UserAgent = "DQE-NHCCI-Loader/1.0";
             request.Method = "GET";
 
@@ -234,23 +241,39 @@ namespace Dqe.Web.Controllers
             try
             {
                 using (var response = (HttpWebResponse)request.GetResponse())
-                using (var responseStream = response.GetResponseStream())
                 {
-                    if (responseStream == null)
+                    if (response.StatusCode == HttpStatusCode.NotFound)
                     {
-                        throw new InvalidOperationException("NHCCI: Response stream is null.");
+                        throw new InvalidOperationException($"NHCCI: Source file not found at {DataSourceUrl}.");
+                    }
+                    
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        throw new InvalidOperationException($"NHCCI: Unexpected HTTP status code {response.StatusCode} from {DataSourceUrl}.");
                     }
 
-                    using (var memoryStream = new MemoryStream())
+                    using (var responseStream = response.GetResponseStream())
                     {
-                        responseStream.CopyTo(memoryStream);
-                        dataBytes = memoryStream.ToArray();
+                        if (responseStream == null)
+                        {
+                            throw new InvalidOperationException("NHCCI: Response stream is null.");
+                        }
+
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            responseStream.CopyTo(memoryStream);
+                            dataBytes = memoryStream.ToArray();
+                        }
                     }
                 }
             }
             catch (WebException ex) when (ex.Status == WebExceptionStatus.Timeout)
             {
-                throw new InvalidOperationException($"NHCCI: Request timed out after 3 seconds while attempting to download from {DataSourceUrl}.", ex);
+                throw new InvalidOperationException($"NHCCI: Request timed out after 1.5 seconds while attempting to download from {DataSourceUrl}.", ex);
+            }
+            catch (WebException ex) when (ex.Response is HttpWebResponse httpResponse && httpResponse.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new InvalidOperationException($"NHCCI: Source file not found at {DataSourceUrl}.", ex);
             }
             catch (WebException ex)
             {
@@ -369,7 +392,7 @@ namespace Dqe.Web.Controllers
             return decimal.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out index);
         }
 
-        private static QuarterKeyInfo? ParseQuarterKey(string quarterKey)
+        internal static QuarterKeyInfo? ParseQuarterKey(string quarterKey)
         {
             if (string.IsNullOrWhiteSpace(quarterKey))
             {
@@ -406,7 +429,7 @@ namespace Dqe.Web.Controllers
             return new QuarterKeyInfo(quarterKey, year, quarter);
         }
 
-        private struct QuarterKeyInfo
+        internal struct QuarterKeyInfo
         {
             public QuarterKeyInfo(string quarterKey, int year, int quarter)
             {
