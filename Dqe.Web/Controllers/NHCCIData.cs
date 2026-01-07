@@ -210,13 +210,10 @@ namespace Dqe.Web.Controllers
                         }
                         catch (Exception ex)
                         {
-                            // Exceptions disabled - use cached data if available, or return empty dictionary
-                            // Extend expiration to prevent immediate retry loops
+                           
                             _cacheExpirationEst = nowEst.Add(RefreshInterval);
                             
-                            // If no cached data exists, _cachedIndexByQuarter will remain empty
-                            // Execution continues and returns whatever is in _cachedIndexByQuarter (cached data or empty)
-                        }
+                             }
                     }
                 }
             }
@@ -227,58 +224,84 @@ namespace Dqe.Web.Controllers
         private static Dictionary<string, decimal> LoadIndexesFromSource()
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            var request = (HttpWebRequest)WebRequest.Create(DataSourceUrl);
+            request.Timeout = 2000;
+            request.ReadWriteTimeout = 2000;
+            request.UserAgent = "DQE-NHCCI-Loader/1.0";
+            request.Method = "GET";
 
-            using (var webClient = new WebClient())
+            byte[] dataBytes;
+            try
             {
-                webClient.Headers.Add(HttpRequestHeader.UserAgent, "DQE-NHCCI-Loader/1.0");
-                var dataBytes = webClient.DownloadData(DataSourceUrl);
-
-                using (var stream = new MemoryStream(dataBytes))
-                using (var workbook = new XLWorkbook(stream))
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var responseStream = response.GetResponseStream())
                 {
-                    var worksheet = workbook.Worksheets.FirstOrDefault()
-                                     ?? throw new InvalidOperationException("NHCCI workbook is empty.");
-
-                    var result = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
-                    bool headerSkipped = false;
-
-                    foreach (var row in worksheet.RowsUsed())
+                    if (responseStream == null)
                     {
-                        if (!headerSkipped)
-                        {
-                            headerSkipped = true;
-                            continue;
-                        }
-
-                        if (!TryGetYear(row, out var year))
-                        {
-                            continue;
-                        }
-
-                        if (!TryGetQuarter(row, out var quarter))
-                        {
-                            continue;
-                        }
-
-                        if (!TryGetIndex(row, out var index))
-                        {
-                            continue;
-                        }
-
-                        var quarterKey = $"{year} {quarter}";
-                        if (!result.ContainsKey(quarterKey))
-                        {
-                            result[quarterKey] = decimal.Round(index, 6);
-                        }
+                        throw new InvalidOperationException("NHCCI: Response stream is null.");
                     }
 
-                    if (result.Count == 0)
+                    using (var memoryStream = new MemoryStream())
                     {
-                        throw new InvalidOperationException("NHCCI workbook did not contain any data rows.");
+                        responseStream.CopyTo(memoryStream);
+                        dataBytes = memoryStream.ToArray();
                     }
-
-                    return result;
                 }
+            }
+            catch (WebException ex) when (ex.Status == WebExceptionStatus.Timeout)
+            {
+                throw new InvalidOperationException($"NHCCI: Request timed out after 3 seconds while attempting to download from {DataSourceUrl}.", ex);
+            }
+            catch (WebException ex)
+            {
+                throw new InvalidOperationException($"NHCCI: Failed to download data from {DataSourceUrl}. Error: {ex.Message}", ex);
+            }
+
+            using (var stream = new MemoryStream(dataBytes))
+            using (var workbook = new XLWorkbook(stream))
+            {
+                var worksheet = workbook.Worksheets.FirstOrDefault()
+                                 ?? throw new InvalidOperationException("NHCCI workbook is empty.");
+
+                var result = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+                bool headerSkipped = false;
+
+                foreach (var row in worksheet.RowsUsed())
+                {
+                    if (!headerSkipped)
+                    {
+                        headerSkipped = true;
+                        continue;
+                    }
+
+                    if (!TryGetYear(row, out var year))
+                    {
+                        continue;
+                    }
+
+                    if (!TryGetQuarter(row, out var quarter))
+                    {
+                        continue;
+                    }
+
+                    if (!TryGetIndex(row, out var index))
+                    {
+                        continue;
+                    }
+
+                    var quarterKey = $"{year} {quarter}";
+                    if (!result.ContainsKey(quarterKey))
+                    {
+                        result[quarterKey] = decimal.Round(index, 6);
+                    }
+                }
+
+                if (result.Count == 0)
+                {
+                    throw new InvalidOperationException("NHCCI workbook did not contain any data rows.");
+                }
+
+                return result;
             }
         }
 
