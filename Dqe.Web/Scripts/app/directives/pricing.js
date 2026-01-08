@@ -5,10 +5,25 @@
             pricingLevel: '='
         },
         templateUrl: './Views/directives/pricing.html',
-        controller: ['$scope', '$rootScope', '$http', '$filter', '$location', 'stateService', 'fileUpload', '$localStorage', '$route',  function ($scope, $rootScope, $http, $filter, $location, stateService, fileUpload, $localStorage, $route) {
+        controller: ['$scope', '$rootScope', '$http', '$filter', '$location', 'stateService', 'fileUpload', '$localStorage', '$route', 'securityService', function ($scope, $rootScope, $http, $filter, $location, stateService, fileUpload, $localStorage, $route, securityService) {
                 $scope.prp = {
                     syncPrices: true
-                };
+            };
+
+            $scope.canSyncPrices = true;    
+            //if is on list, then make can checkout var as true.
+            $scope.user = null;
+            securityService.getCurrentUser(function (user) {
+                let role = user.role.toString()[0];
+                if (role === 'C') {
+                    $scope.canSyncPrices = false;
+                    $scope.prp = {
+                        syncPrices: false
+                    };
+                    $scope.user = user;
+                }
+            });
+
             $scope.transferLsDbEstimate = function (estimate) {
                 var lsdbLoad = {
                     number: estimate.project.number,
@@ -189,6 +204,7 @@
             };
             var loadLink = $scope.pricingLevel == 'project' ? './estimate/LoadProjectEstimate' : './estimate/LoadProposalEstimate';
             var loadSummaryLink = $scope.pricingLevel == 'project' ? './estimate/LoadProjectEstimateSummary' : './estimate/LoadProposalEstimateSummary';
+            //Make sure the currentEstimateId/currentProposalId is loaded properly to the stateService from previous pages. MB.
             var loadId = $scope.pricingLevel == 'project' ? stateService.currentEstimateId : stateService.currentProposalId;
             if (loadId == '' || loadId == 0) {
                 if ($scope.pricingLevel == 'project') {
@@ -224,13 +240,15 @@
                 $http.post(loadLink, { loadId: loadId }).success(function (result) {
                     if (!containsDqeError(result)) {
                         $scope.estimate = getDqeData(result);
+                        $scope.confidentialNotice = $scope.estimate.proposal.confidentialData;
 
+                        //set confidential data flag here.MB.
                         if ($scope.pricingLevel == 'project') {
                             $http.get('./projectproposal/GetLsDbProject', { params: { number: $scope.estimate.project.number } }).success(function (rlt) {
                                 if (!containsDqeError(rlt)) {
-                                    $scope.estimate.hasDetailProject = getDqeData(rlt).hasDetailProject;
+                                    $scope.estimate.hasDetailProject = getDqeData(rlt).hasDetailProject;                                  
                                 }
-                            });
+                            });                      
                         }
                         //document.getElementById("hiddenProposalId").value = $scope.estimate.proposal.id;
                         //document.getElementById("hiddenProposalNumber").value = $scope.estimate.proposal.number;
@@ -346,7 +364,7 @@
             }
 
 
-            $scope.setPendingChanges = function() {
+            $scope.setPendingChanges = function () {
                 $scope.estimate.hasPendingChanges = true;
             }
             $scope.clearPendingChanges = function () {
@@ -561,7 +579,8 @@
                 return Math.round(price * 100) / 100 * quantity;
                 
             }
-            $scope.saveEstimate = function (updatePreviousPrices, pushPrices) {
+            //the name of this is misleading as it is being multipurposed for loading Estimate data also
+            $scope.saveEstimate = function (updatePreviousPrices, pushPrices) {             
                 var siteManagerDssMaximum = false;                
                 angular.forEach($scope.estimate.itemGroups, function (itemGroup) {
            
@@ -583,7 +602,7 @@
                         isSystemSync: $scope.estimate.isSystemSync,
                         itemGroups: [],
                         pushPrices: pushPrices
-                    }
+                    }           
                     for (var i = 0; i < $scope.estimate.itemGroups.length; i++) {
                         est.itemGroups.push({
                             itemId: $scope.estimate.itemGroups[i].itemId,
@@ -861,7 +880,7 @@
                     }
                 }
             }
-            function updateBidHistory (itemGroup, county) {
+            function updateBidHistory(itemGroup, county) {
                 itemGroup.history.omitOutliers = true;
                 if (itemGroup.history.useStraightAverage == undefined) itemGroup.history.useStraightAverage = false;
                 var itemToPrice = $scope.isPricingInterface ? {

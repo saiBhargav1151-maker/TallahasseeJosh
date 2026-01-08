@@ -33,7 +33,7 @@ namespace Dqe.Web.Controllers
             _documentService = documentService;
         }
 
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.CostBasedTemplateAdministrator, DqeRole.PayItemAdministrator})]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.CostBasedTemplateAdministrator, DqeRole.PayItemAdministrator, DqeRole.AdminReadOnly})]
         [HttpGet]
         public ActionResult GetAll()
         {
@@ -111,7 +111,7 @@ namespace Dqe.Web.Controllers
             }, new ClientMessage { Severity = ClientMessageSeverity.Success, text = successMsg });
         }
 
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.CostBasedTemplateAdministrator, DqeRole.DistrictAdministrator, DqeRole.Estimator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.CostBasedTemplateAdministrator, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.AdminReadOnly })]
         [HttpGet]
         public ActionResult DownloadTemplate(int id)
         {

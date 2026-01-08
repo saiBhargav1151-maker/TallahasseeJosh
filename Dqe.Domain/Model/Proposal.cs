@@ -29,6 +29,13 @@ namespace Dqe.Domain.Model
         [Required]
         public virtual string ProposalNumber { get; protected internal set; }
 
+        /// <summary>
+        /// Pulls in from Transport as a 'CC', 'CLS', 'TOPB'..... 'MC', 'MMOA', etc. 
+        /// Everything that starts with a 'M' will be maintenance type contract as I was told that they know that naming convention. 
+        /// Construction contract types usually start with 'C' or 'T'
+        /// </summary>
+        public virtual string ContractType { get; set; }
+
         public virtual ProposalSourceType ProposalSource { get; protected internal set; }
 
         [StringLength(500)]
@@ -89,6 +96,10 @@ namespace Dqe.Domain.Model
             if (ProposalSource != ProposalSourceType.Wt) return SnapshotLabel.Estimator;
             if (!Projects.Any()) return SnapshotLabel.Estimator;
             var dict = Projects.ToDictionary(project => project, project => project.GetCurrentSnapshotLabel());
+            //var review = dict.All(i => i.Value == SnapshotLabel.Review);
+            var initial = dict.All(i => i.Value == SnapshotLabel.Initial);
+            var scope = dict.All(i => i.Value == SnapshotLabel.Scope);
+            var phase1 = dict.All(i => i.Value == SnapshotLabel.Phase1);
             var phase2 = dict.All(i => i.Value == SnapshotLabel.Phase2);
             var phase3 = dict.All(i => i.Value == SnapshotLabel.Phase3);
             var phase4 = dict.All(i => i.Value == SnapshotLabel.Phase4);
@@ -114,6 +125,23 @@ namespace Dqe.Domain.Model
             {
                 return SnapshotLabel.Phase2;
             }
+            if (phase1)
+            {
+                return SnapshotLabel.Phase1;
+            }
+            if (scope)
+            {
+                return SnapshotLabel.Scope;
+            }
+            if (initial)
+            {
+                return SnapshotLabel.Initial;
+            }
+            //if (review)
+            //{
+            //    return SnapshotLabel.Review;
+            //}
+
             return SnapshotLabel.Estimator;
             //var inSync = dict.All(i => i.Value == dict.First().Value);
             //return inSync ? SnapshotLabel.Estimator : SnapshotLabel.Estimator;
@@ -128,6 +156,10 @@ namespace Dqe.Domain.Model
             var phase4 = dict.Any(i => i.Value == SnapshotLabel.Phase4);
             var phase3 = dict.Any(i => i.Value == SnapshotLabel.Phase3);
             var phase2 = dict.Any(i => i.Value == SnapshotLabel.Phase2);
+            var phase1 = dict.All(i => i.Value == SnapshotLabel.Phase1);
+            var scope = dict.All(i => i.Value == SnapshotLabel.Scope);
+            var initial = dict.All(i => i.Value == SnapshotLabel.Initial);
+            var review = dict.All(i => i.Value == SnapshotLabel.Review);
             if (official)
             {
                 return SnapshotLabel.Official;
@@ -148,6 +180,22 @@ namespace Dqe.Domain.Model
             {
                 return SnapshotLabel.Phase2;
             }
+            if (phase1)
+            {
+                return SnapshotLabel.Phase1;
+            }
+            if (scope)
+            {
+                return SnapshotLabel.Scope;
+            }
+            if (initial)
+            {
+                return SnapshotLabel.Initial;
+            }
+            if (review)
+            {
+                return SnapshotLabel.Review;
+            }
             return SnapshotLabel.Estimator;
             //var inSync = dict.All(i => i.Value == dict.First().Value);
             //return inSync ? SnapshotLabel.Estimator : SnapshotLabel.Estimator;
@@ -157,6 +205,10 @@ namespace Dqe.Domain.Model
         {
             if (ProposalSource != ProposalSourceType.Wt) return SnapshotLabel.Estimator;
             var dict = Projects.ToDictionary(project => project, project => project.GetCurrentSnapshotLabel());
+            //var review = dict.All(i => i.Value == SnapshotLabel.Review);
+            var initial = dict.All(i => i.Value == SnapshotLabel.Initial);
+            var scope = dict.All(i => i.Value == SnapshotLabel.Scope);
+            var phase1 = dict.All(i => i.Value == SnapshotLabel.Phase1);
             var phase2 = dict.All(i => i.Value == SnapshotLabel.Phase2);
             var phase3 = dict.All(i => i.Value == SnapshotLabel.Phase3);
             var phase4 = dict.All(i => i.Value == SnapshotLabel.Phase4);
@@ -182,9 +234,25 @@ namespace Dqe.Domain.Model
             {
                 return SnapshotLabel.Phase3;
             }
+            if (phase1)
+            {
+                return SnapshotLabel.Phase2;
+            }
+            if (scope)
+            {
+                return SnapshotLabel.Phase1;
+            }
+            if (initial)
+            {
+                return SnapshotLabel.Scope;
+            }
+            //if (review)
+            //{
+            //    return SnapshotLabel.Review;
+            //}
             //return SnapshotLabel.Phase2;
             var inSync = dict.All(i => i.Value == dict.First().Value);
-            return inSync ? SnapshotLabel.Phase2 : SnapshotLabel.Estimator;
+            return inSync ? SnapshotLabel.Initial : SnapshotLabel.Estimator;
         }
 
         //public virtual void SnapshotWorkingEstimate(DqeUser account, bool labelSnapshot)
@@ -362,8 +430,10 @@ namespace Dqe.Domain.Model
                                 Set = itemSet,
                                 Member = itemMember,
                                 //Total = memberItems.Sum(i => i.ProjectItems.Sum(ii => ii.Quantity * ii.Price))
-
-                                Total = memberItems.Sum(i => i.GetEstimatorProjectItems(estimator).Sum(ii => Math.Round(ii.Quantity * ii.Price, 2, MidpointRounding.AwayFromZero)))
+                                //this is not pulling properly if co admin are viewing
+                                Total = estimator.Role == DqeRole.Administrator  || estimator.Role == DqeRole.AdminReadOnly
+                                ? memberItems.Sum(i => i.ProjectItems.Sum(ii => Math.Round(ii.Quantity * ii.Price, 2, MidpointRounding.AwayFromZero)))
+                                : memberItems.Sum(i => i.GetEstimatorProjectItems(estimator).Sum(ii => Math.Round(ii.Quantity * ii.Price, 2, MidpointRounding.AwayFromZero)))
                             };
                             cSet.ItemSets.Add(iSet);
                         }
@@ -574,7 +644,8 @@ namespace Dqe.Domain.Model
                 LastUpdated = LastUpdated,
                 Description = Description,
                 LettingDate = LettingDate,
-                District = District
+                District = District,
+                //ContractType = ContractType
             };
         }
 
@@ -582,7 +653,17 @@ namespace Dqe.Domain.Model
         {
             if (transformer == null) throw new ArgumentNullException("transformer");
             if (account == null) throw new ArgumentNullException("account");
-            if (account.Role != DqeRole.System && account.Role != DqeRole.Administrator && account.Role != DqeRole.DistrictAdministrator && account.Role != DqeRole.Estimator)
+            if (account.Role != DqeRole.System && 
+                account.Role != DqeRole.Administrator && 
+                account.Role != DqeRole.AdminReadOnly &&
+                account.Role != DqeRole.DistrictAdministrator && 
+                account.Role != DqeRole.Estimator && 
+                account.Role != DqeRole.Coder && 
+                account.Role != DqeRole.MaintenanceDistrictAdmin && 
+                account.Role != DqeRole.MaintenanceEstimator &&
+                account.Role != DqeRole.DistrictReviewer && 
+                account.Role != DqeRole.StateReviewer
+                )
             {
                 throw new SecurityException(string.Format("Account role {0} is not authorized for this transaction.", account.Role));
             }
@@ -597,6 +678,7 @@ namespace Dqe.Domain.Model
             District = transformer.District;
             Description = transformer.Description;
             LettingDate = transformer.LettingDate;
+            ContractType = transformer.ContractType;
         }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

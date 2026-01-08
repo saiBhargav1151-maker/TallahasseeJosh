@@ -7,12 +7,24 @@
     $scope.bidHistoryData = [];
     $scope.lastSearchedPayItem = $scope.searchText;
     $scope.isLoading = false;
-    // Set default date range: end date = today, start date = today - 36 months
+    
+    // Helper function to format date in EST as YYYY-MM-DD (required for HTML date inputs) using Browser timezone API
+    function formatDateInEST(date) {
+        const estDateString = date.toLocaleDateString('en-US', {
+            timeZone: 'America/New_York',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        const parts = estDateString.split('/');
+        return `${parts[2]}-${parts[0]}-${parts[1]}`;
+    }
+    
     const todayDate = new Date();
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 36);
-    $scope.endDate = todayDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-    $scope.startDate = startDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    $scope.endDate = formatDateInEST(todayDate); 
+    $scope.startDate = formatDateInEST(startDate);
     $scope.regionType = '';
     $scope.regionOptions = [];
     $scope.selectedRegions = [];
@@ -45,9 +57,51 @@
     $scope.showTrendChart = false;
     $scope.trendWarning = '';
     $scope.dataAgeWarning = '';
-    $scope.useInflationAdjustedPrices = true;
+    $scope.useIndexAdjustedPrices = true;
     $scope.isExporting = false;
+    $scope.latestNHCCIQuarter = 'Q3, 2025'; 
+    $scope.latestNHCCIQuarterKey = '2025 Q3';
+    $scope.latestNHCCICacheTimestamp = null;
     $scope.customQuantityData = { userQuantity: null };
+    
+    $scope.loadLatestNHCCIQuarter = function() {
+      var cacheBuster = '?t=' + new Date().getTime();
+      $http.get('/UnitPriceSearch/GetLatestNHCCIQuarter' + cacheBuster, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
+        .then(function(response) {
+          if (response.data && response.data.display) {
+            var newTimestamp = response.data.cacheTimestamp;
+            if ($scope.latestNHCCICacheTimestamp !== newTimestamp) {
+              $scope.latestNHCCIQuarter = response.data.display;
+              $scope.latestNHCCIQuarterKey = response.data.quarterKey || '2025 Q3';
+              $scope.latestNHCCICacheTimestamp = newTimestamp;
+              if ($scope.latestNHCCICacheTimestamp) {
+                console.log('NHCCI data updated. New quarter: ' + response.data.display + ', Cache timestamp: ' + newTimestamp);
+              }
+            }
+          }
+        })
+        .catch(function(error) {
+          console.error('Error loading latest NHCCI quarter:', error);
+        });
+    };
+    
+    $scope.loadLatestNHCCIQuarter();
+  
+    var cacheCheckInterval = setInterval(function() {
+      $scope.loadLatestNHCCIQuarter();
+    }, 10 * 60 * 1000); 
+    
+    $scope.$on('$destroy', function() {
+      if (cacheCheckInterval) {
+        clearInterval(cacheCheckInterval);
+      }
+    });
     $scope.customQuantityPrediction = null;
     $scope.isCalculatingPrediction = false;
     $scope.chartSettings = { loessBandwidth: 0.3 };
@@ -67,7 +121,7 @@
       { key: 'CalculatedUnit', label: 'Units', visible: false, sortable: false, selectionOrder: 0 },
       { key: 'Quantity', label: 'Quantity', visible: true, sortable: true, selectionOrder: 4 },
       { key: 'b', label: 'Unit Price Bid', visible: true, sortable: true, selectionOrder: 5 },
-        { key: 'InflationAdjustedPrice', label: 'Inflation Adj. Unit Price', visible: true, sortable: true, selectionOrder: 6 },
+        { key: 'InflationAdjustedPrice', label: 'Index Adj. Unit Price', visible: true, sortable: true, selectionOrder: 6 },
       { key: 'IsOutlier', label: 'Outlier', visible: false, sortable: true, selectionOrder: 7 },
       { key: 'PvBidTotal', label: 'Contract Total Bid Amount', visible: true, sortable: true, selectionOrder: 8 },
       { key: 'd', label: 'District', visible: true, sortable: true, selectionOrder: 11 },
@@ -213,8 +267,8 @@
       const wholeDigits = parts[0].length;
       const decimalDigits = parts[1] ? parts[1].length : 0;
       
-      if (wholeDigits > 9 || decimalDigits > 2 || (wholeDigits + decimalDigits) > 12) {
-        $scope.validationErrors[`quantity${type}`] = 'Quantity cannot exceed 9 whole digits and 2 decimal places (11 total digits).';
+      if (wholeDigits >=9 || decimalDigits > 2 || (wholeDigits + decimalDigits) > 10) {
+        $scope.validationErrors[`quantity${type}`] = 'Quantity cannot exceed 8 whole digits and 2 decimal places (10 total digits).';
         return false;
       }
 
@@ -385,14 +439,14 @@
       $scope.workTypeSelected[code] = true; // All selected by default
     });
     $scope.districtCountyMap = {
-      'District 1 (Southwest Florida)': ['01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY', '09 - HIGHLANDS', '12 - LEE', '13 - MANATEE', '16 - POLK', '17 - SARASOTA', '91 - OKEECHOBEE'],
-      'District 2 (Northeast Florida)': ['26 - ALACHUA', '27 - BAKER', '28 - BRADFORD', '29 - COLUMBIA', '30 - DIXIE', '31 - GILCHRIST', '32 - HAMILTON', '33 - LAFAYETTE', '34 - LEVY', '35 - MADISON', '37 - SUWANNEE', '38 - TAYLOR', '39 - UNION', '71 - CLAY', '72 - DUVAL', '74 - NASSAU', '76 - PUTNAM', '78 - ST JOHNS'],
-      'District 3 (Northwest Florida)': ['46 - BAY', '47 - CALHOUN', '48 - ESCAMBIA', '49 - FRANKLIN', '50 - GADSDEN', '51 - GULF', '52 - HOLMES', '53 - JACKSON', '54 - JEFFERSON', '55 - LEON', '56 - LIBERTY', '57 - OKALOOSA', '58 - SANTA ROSA', '59 - WAKULLA', '60 - WALTON', '61 - WASHINGTON'],
-      'District 4 (Southeast Florida)': ['86 - BROWARD', '88 - INDIAN RIVER', '89 - MARTIN', '93 - PALM BEACH', '94 - ST LUCIE'],
-      'District 5 (Central Florida)': ['11 - LAKE', '18 - SUMTER', '36 - MARION', '70 - BREVARD', '73 - FLAGLER', '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA'],
-      'District 6 (South Florida)': ['87 - MIAMI-DADE', '90 - MONROE'],
-      'District 7 (West Central Florida)': ['02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS'],
-        'District 8 (Turnpike)': ['TURNPIKE']
+      'District 1 (Southwest Florida)': ['01 - CHARLOTTE', '03 - COLLIER', '04 - DESOTO', '05 - GLADES', '06 - HARDEE', '07 - HENDRY', '09 - HIGHLANDS', '12 - LEE', '13 - MANATEE', '16 - POLK', '17 - SARASOTA', '91 - OKEECHOBEE', 'DIST/ST-WIDE'],
+      'District 2 (Northeast Florida)': ['26 - ALACHUA', '27 - BAKER', '28 - BRADFORD', '29 - COLUMBIA', '30 - DIXIE', '31 - GILCHRIST', '32 - HAMILTON', '33 - LAFAYETTE', '34 - LEVY', '35 - MADISON', '37 - SUWANNEE', '38 - TAYLOR', '39 - UNION', '71 - CLAY', '72 - DUVAL', '74 - NASSAU', '76 - PUTNAM', '78 - ST JOHNS', 'DIST/ST-WIDE'],
+      'District 3 (Northwest Florida)': ['46 - BAY', '47 - CALHOUN', '48 - ESCAMBIA', '49 - FRANKLIN', '50 - GADSDEN', '51 - GULF', '52 - HOLMES', '53 - JACKSON', '54 - JEFFERSON', '55 - LEON', '56 - LIBERTY', '57 - OKALOOSA', '58 - SANTA ROSA', '59 - WAKULLA', '60 - WALTON', '61 - WASHINGTON', 'DIST/ST-WIDE'],
+      'District 4 (Southeast Florida)': ['86 - BROWARD', '88 - INDIAN RIVER', '89 - MARTIN', '93 - PALM BEACH', '94 - ST LUCIE', 'DIST/ST-WIDE'],
+      'District 5 (Central Florida)': ['11 - LAKE', '18 - SUMTER', '36 - MARION', '70 - BREVARD', '73 - FLAGLER', '75 - ORANGE', '77 - SEMINOLE', '79 - VOLUSIA', '92 - OSCEOLA', 'DIST/ST-WIDE'],
+      'District 6 (South Florida)': ['87 - MIAMI-DADE', '90 - MONROE', 'DIST/ST-WIDE'],
+      'District 7 (West Central Florida)': ['02 - CITRUS', '08 - HERNANDO', '10 - HILLSBOROUGH', '14 - PASCO', '15 - PINELLAS', 'DIST/ST-WIDE'],
+        'District 8 (Turnpike)': ['TURNPIKE', 'DIST/ST-WIDE']
     };
     $scope.marketAreaToCountiesMap = {
       'Area 01': ['BAY', 'ESCAMBIA', 'OKALOOSA', 'SANTA ROSA', 'WALTON'],
@@ -411,6 +465,29 @@
       'Area 14': ['MONROE'],
       'Area 99': ['DIST/ST-WIDE', 'TURNPIKE']
     };
+    function getAllCountiesList() {
+      const allCounties = new Set();
+      Object.values($scope.districtCountyMap).forEach((countyList) =>
+        countyList.forEach((c) => {
+          const cleaned = c.includes(' - ')
+            ? c.split(' - ')[1].trim()
+            : c.trim();
+          const upper = cleaned.toUpperCase();
+          if (cleaned && upper !== 'TURNPIKE' && upper !== 'DIST/ST-WIDE') {
+            allCounties.add(cleaned);
+          }
+        })
+      );
+      Object.values($scope.marketAreaToCountiesMap).forEach((countyList) =>
+        countyList.forEach((c) => {
+          const cleaned = c.trim();
+          if (cleaned && cleaned !== 'TURNPIKE') {
+            allCounties.add(cleaned);
+          }
+        })
+      );
+      return Array.from(allCounties).sort();
+    }
     $scope.searchProjectNumber = '';
     $scope.clearFilters = function () {
       $scope.regionType = '';
@@ -426,8 +503,8 @@
       const todayDate = new Date();
       const startDate = new Date();
       startDate.setMonth(startDate.getMonth() - 36);
-      $scope.endDate = todayDate.toISOString().split('T')[0];
-      $scope.startDate = startDate.toISOString().split('T')[0];
+      $scope.endDate = formatDateInEST(todayDate);
+      $scope.startDate = formatDateInEST(startDate);
       $scope.selectedMinBidAmount = null;
       $scope.selectedMaxBidAmount = null;
       $scope.selectedBidStatus = 'FMV';
@@ -452,6 +529,9 @@
       $scope.trendData = [];
       $scope.trendWarning = '';
       $scope.dataAgeWarning = '';
+      $scope.useIndexAdjustedPrices = true;
+      $scope.customQuantityData.userQuantity = null;
+      $scope.customQuantityPrediction = null;
       if ($scope.trendChartInstance) {
         $scope.trendChartInstance.destroy();
         $scope.trendChartInstance = null;
@@ -499,7 +579,7 @@
         item.WeightedAvgNoOutliers = weightedAvgNoOutliers;
       });
     };
-    $scope.onInflationToggleChange = function () {
+    $scope.onIndexToggleChange = function () {
       if ($scope.bidHistoryData && $scope.bidHistoryData.length > 0) {
         $scope.recalculateWeightedAverages();
         waitForCanvasAndRender();
@@ -508,7 +588,6 @@
             renderTrendChart();
           }, 0);
         }
-        $scope.isChartStale = false;
         if (
           $scope.customQuantityData.userQuantity &&
           $scope.customQuantityData.userQuantity > 0
@@ -523,7 +602,7 @@
       if (item.CalculatedUnit === 'LS - Lump Sum') {
         const calculatedUnitPrice =
           item.Quantity > 0 ? item.b / item.Quantity : 0;
-        if ($scope.useInflationAdjustedPrices && item.InflationAdjustedPrice) {
+        if ($scope.useIndexAdjustedPrices && item.InflationAdjustedPrice) {
           return item.Quantity > 0
             ? item.InflationAdjustedPrice / item.Quantity
             : calculatedUnitPrice;
@@ -531,7 +610,7 @@
         return calculatedUnitPrice;
       }
 
-      return $scope.useInflationAdjustedPrices && item.InflationAdjustedPrice
+      return $scope.useIndexAdjustedPrices && item.InflationAdjustedPrice
         ? item.InflationAdjustedPrice
         : item.b;
     };
@@ -590,6 +669,45 @@
         });
       }
 
+      let countiesToSearch = null;
+      if ($scope.regionType === 'market' || $scope.regionType === 'county' || $scope.regionType === 'district') {
+        if ($scope.selectedRegionCounties && $scope.selectedRegionCounties.length > 0) {
+          countiesToSearch = $scope.selectedRegionCounties;
+        } else if ($scope.regionType === 'market' && $scope.selectedRegions && $scope.selectedRegions.length > 0) {
+          let allMarketAreaCounties = [];
+          $scope.selectedRegions.forEach((marketArea) => {
+            const counties = $scope.marketAreaToCountiesMap[marketArea] || [];
+            counties.forEach((county) => {
+              const cleaned = county.trim();
+              if (!allMarketAreaCounties.includes(cleaned)) {
+                allMarketAreaCounties.push(cleaned);
+              }
+            });
+          });
+          countiesToSearch = allMarketAreaCounties.length > 0 ? allMarketAreaCounties : null;
+        } else if ($scope.regionType === 'district' && $scope.selectedRegions && $scope.selectedRegions.length > 0) {
+          let allDistrictCounties = [];
+          $scope.selectedRegions.forEach((district) => {
+            const isTurnpike = district === 'District 8 (Turnpike)' || district === 'Turnpike';
+            let counties = [];
+            if (isTurnpike) {
+              counties = getAllCountiesList();
+              counties.push('TURNPIKE');
+              counties.push('DIST/ST-WIDE');
+            } else {
+              counties = $scope.districtCountyMap[district] || [];
+            }
+            counties.forEach((county) => {
+              const cleaned = county.includes(' - ') ? county.split(' - ')[1].trim() : county.trim();
+              if (!allDistrictCounties.includes(cleaned)) {
+                allDistrictCounties.push(cleaned);
+              }
+            });
+          });
+          countiesToSearch = allDistrictCounties.length > 0 ? allDistrictCounties : null;
+        }
+      }
+
       $http
         .get('/UnitPriceSearch/GetPayItemDetails', {
           params: {
@@ -602,8 +720,7 @@
                 : null,
             startDate: $scope.startDate || null,
             endDate: $scope.endDate || null,
-            // Pass counties only for market and county region types, district for district type
-            counties: ($scope.regionType === 'market' || $scope.regionType === 'county') ? $scope.selectedRegionCounties : null,
+            counties: countiesToSearch,
             district: districtParam,
             bidStatus: $scope.selectedBidStatus || null,
             contractType:
@@ -798,30 +915,19 @@
       } else if ($scope.regionType === 'market') {
         $scope.regionOptions = Object.keys($scope.marketAreaToCountiesMap);
       } else if ($scope.regionType === 'county') {
-        const allCounties = new Set();
-        Object.values($scope.districtCountyMap).forEach((countyList) =>
-          countyList.forEach((c) => {
-            const cleaned = c.includes(' - ')
-              ? c.split(' - ')[1].trim()
-              : c.trim();
-            allCounties.add(cleaned);
-          })
-        );
-        Object.values($scope.marketAreaToCountiesMap).forEach((countyList) =>
-          countyList.forEach((c) => {
-            const cleaned = c.trim();
-            if (cleaned !== 'TURNPIKE' ) {
-              allCounties.add(cleaned);
-            }
-          })
-        );
-        $scope.regionOptions = Array.from(allCounties).sort();
+        $scope.regionOptions = getAllCountiesList();
+        if (!$scope.regionOptions.includes('TURNPIKE')) {
+          $scope.regionOptions.push('TURNPIKE');
+        }
+        if (!$scope.regionOptions.includes('DIST/ST-WIDE')) {
+          $scope.regionOptions.push('DIST/ST-WIDE');
+        }
+        $scope.regionOptions.sort();
       } else {
         $scope.regionOptions = [];
         $scope.relatedCounties = [];
         $scope.selectedRegionCounties = null;
       }
-      // Initialize checkbox states
       $scope.regionOptions.forEach((option) => {
         $scope.regionSelected[option] = false;
       });
@@ -866,7 +972,15 @@
         if ($scope.regionType === 'market') {
           rawList = $scope.marketAreaToCountiesMap[region] || [];
         } else if ($scope.regionType === 'district') {
-          rawList = $scope.districtCountyMap[region] || [];
+          const isTurnpike =
+            region === 'District 8 (Turnpike)' || region === 'Turnpike';
+          if (isTurnpike) {
+            rawList = getAllCountiesList();
+            rawList.push('TURNPIKE');
+            rawList.push('DIST/ST-WIDE');
+          } else {
+            rawList = $scope.districtCountyMap[region] || [];
+          }
         } else if ($scope.regionType === 'county') {
           rawList = [region];
         }
@@ -885,11 +999,29 @@
           }
         });
       });
-      $scope.relatedCounties = combined.map((c) => ({
-        name: c,
-        selected: true,
-      }));
-      $scope.selectedRegionCounties = combined;
+      combined.sort();
+      
+      const previousRelatedCounties = $scope.relatedCounties || [];
+      const previousSelectedCounties = $scope.selectedRegionCounties || [];
+      
+      $scope.relatedCounties = combined.map((c) => {
+        const previousCounty = previousRelatedCounties.find((pc) => pc.name === c);
+        if (previousCounty) {
+          return {
+            name: c,
+            selected: previousCounty.selected,
+          };
+        } else {
+          return {
+            name: c,
+            selected: true,
+          };
+        }
+      });
+      
+      $scope.selectedRegionCounties = $scope.relatedCounties
+        .filter((c) => c.selected)
+        .map((c) => c.name);
     };
     $scope.toggleMultiSelectDropdown = function () { $scope.isRegionDropdownOpen = !$scope.isRegionDropdownOpen; };
     document.addEventListener('click', function (event) {
@@ -907,8 +1039,6 @@
     $scope.selectAllRegionCounties = function () { $scope.relatedCounties.forEach((c) => (c.selected = true)); $scope.selectedRegionCounties = $scope.relatedCounties.map((c) => c.name); };
     $scope.clearAllRegionCounties = function () { $scope.relatedCounties.forEach((c) => (c.selected = false)); $scope.selectedRegionCounties = []; };
     $scope.removeCounty = function (countyName) { const idx = $scope.selectedRegionCounties.indexOf(countyName); if (idx > -1) $scope.selectedRegionCounties.splice(idx, 1); const match = $scope.relatedCounties.find((c) => c.name === countyName); if (match) match.selected = false; };
-    
-    // Contract Type functions
     $scope.toggleContractType = function (type) {
       const idx = $scope.selectedContractTypes.indexOf(type);
       if ($scope.contractTypeSelected[type] && idx === -1) {
@@ -938,8 +1068,6 @@
         $scope.contractTypeSelected[type] = false;
       }
     };
-    
-    // Work Type functions
     $scope.toggleWorkType = function (code) {
       const idx = $scope.selectedWorkTypeCodes.indexOf(code);
       if ($scope.workTypeSelected[code] && idx === -1) {
@@ -1104,11 +1232,11 @@
       }
     };
 
-    $scope.onInflationToggleKeyDown = function (event) {
+    $scope.onIndexToggleKeyDown = function (event) {
       if (event.keyCode === 13 || event.keyCode === 32) { 
         event.preventDefault();
-        $scope.useInflationAdjustedPrices = !$scope.useInflationAdjustedPrices;
-        $scope.onInflationToggleChange();
+        $scope.useIndexAdjustedPrices = !$scope.useIndexAdjustedPrices;
+        $scope.onIndexToggleChange();
         $scope.$apply();
       }
     };
@@ -1218,7 +1346,7 @@
             'Units',
             'Quantity',
             'Unit Price Bid',
-            'Inflation-Adjusted Unit Price',
+            'Index-Adjusted Unit Price',
             'Weighted Avg No Outliers',
             'Outlier',
             'Contract Total Bid Amount',
@@ -1246,7 +1374,7 @@
                   ? item.b / item.Quantity
                   : 0
                 : item.b;
-            const inflationAdjustedUnitPrice =
+            const indexAdjustedUnitPrice =
               item.CalculatedUnit === 'LS - Lump Sum' &&
               item.InflationAdjustedPrice
                 ? item.Quantity > 0
@@ -1254,8 +1382,8 @@
                   : 0
                 : item.InflationAdjustedPrice || item.b;
             const roundedUnitPrice = parseFloat(unitPrice).toFixed(2);
-            const roundedInflationAdjustedUnitPrice = parseFloat(
-              inflationAdjustedUnitPrice
+            const roundedIndexAdjustedUnitPrice = parseFloat(
+              indexAdjustedUnitPrice
             ).toFixed(2);
             const roundedWeightedAvgNoOutliers = parseFloat(
               item.WeightedAvgNoOutliers || 0
@@ -1272,7 +1400,7 @@
               `"${item.CalculatedUnit}"`,
               `"${item.Quantity}"`,
               `"${roundedUnitPrice}"`,
-              `"${roundedInflationAdjustedUnitPrice}"`,
+              `"${roundedIndexAdjustedUnitPrice}"`,
               `"${roundedWeightedAvgNoOutliers}"`,
               `"${item.IsOutlier ? 'Yes' : 'No'}"`,
               `"${roundedBidAmount}"`,
@@ -1401,7 +1529,7 @@
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
               y += 15;
-              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to 2025 Q3 levels)' : 'Disabled (using raw prices)'), 40, y);
+              doc.text('Index Adjustment: ' + ($scope.useIndexAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to ' + ($scope.latestNHCCIQuarter || '2025 Q3') + ' levels)' : 'Disabled (using raw prices)'), 40, y);
               y += 15;
               //doc.text(
               //    'Date Range: ' +
@@ -1454,9 +1582,9 @@
                   y += 15;
                   doc.setFontSize(10);
                   doc.setFont('helvetica', 'normal');
-                  doc.text('Weighted Average Unit Price (' + ($scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.avg || 0).toFixed(2), 40, y);
+                  doc.text('Weighted Average Unit Price (' + ($scope.useIndexAdjustedPrices ? 'Index-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.avg || 0).toFixed(2), 40, y);
                   y += 15;
-                  doc.text('Weighted Average (No Outliers) (' + ($scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.weightedAvgNoOutliers || 0).toFixed(2), 40, y);
+                  doc.text('Weighted Average (No Outliers) (' + ($scope.useIndexAdjustedPrices ? 'Index-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.weightedAvgNoOutliers || 0).toFixed(2), 40, y);
                   y += 25;
               }
               if ($scope.chartInstance && typeof $scope.chartInstance.toBase64Image === 'function') {
@@ -1618,10 +1746,9 @@
             $scope.bidHistoryData &&
             $scope.bidHistoryData.length > 0 &&
             $scope.searchAttempted &&
-            $scope.chartStats &&
-            $scope.chartInstance &&
-            filter !== 'useInflationAdjustedPrices'
+            filter !== 'useIndexAdjustedPrices'
           ) {
+            
             $scope.isChartStale = true;
           }
         },
@@ -2401,6 +2528,7 @@
     // Line Graph rendering
     function waitForCanvasAndRender() {
       $scope.isChartLoading = true;
+      const wasStaleBeforeRender = $scope.isChartStale;
 
       $timeout(function () {
         if (typeof requestAnimationFrame === 'function') {
@@ -3071,18 +3199,23 @@
                   (sum, item) => sum + (item.InflationPercentIncrease || 0),
                   0
                 ) / $scope.bidHistoryData.length,
-              currentPriceField: $scope.useInflationAdjustedPrices
-                ? 'Inflation-Adjusted'
+              currentPriceField: $scope.useIndexAdjustedPrices
+                ? 'Index-Adjusted'
                 : 'Raw',
             };
             $scope.isChartLoading = false;
-            $scope.isChartStale = false;
+            // Only clear stale flag if it wasn't stale before rendering (i.e., filters haven't changed)
+            if (!wasStaleBeforeRender) {
+              $scope.isChartStale = false;
+            }
             $scope.$apply();
           });
         } else {
           setTimeout(function () {
             $scope.isChartLoading = false;
-            $scope.isChartStale = false;
+            if (!wasStaleBeforeRender) {
+              $scope.isChartStale = false;
+            }
           }, 16);
         }
       }, 0);
@@ -3287,8 +3420,8 @@
               {
                 label:
                   'Weighted Average Unit Price (' +
-                  ($scope.useInflationAdjustedPrices
-                    ? 'Inflation-Adjusted'
+                  ($scope.useIndexAdjustedPrices
+                    ? 'Index-Adjusted'
                     : 'Raw') +
                   ')',
                 data: chartData.map((item) => item.y),
@@ -3332,8 +3465,8 @@
                   display: true,
                   text:
                     'Weighted Average Unit Price (' +
-                    ($scope.useInflationAdjustedPrices
-                      ? 'Inflation-Adjusted'
+                    ($scope.useIndexAdjustedPrices
+                      ? 'Index-Adjusted'
                       : 'Raw') +
                     ') ($)',
                   font: { size: 14, weight: 'bold' },
@@ -3443,13 +3576,13 @@
       return code ? $scope.bidStatusMap[code] || 'Unknown' : 'Unknown';
     };
 
-    $scope.getInflationInfo = function (item) {
+    $scope.getIndexInfo = function (item) {
       if (!item.InflationAdjustedPrice || !item.InflationPercentIncrease) {
-        return 'Inflation adjustment not available for this bid';
+        return 'Index adjustment not available for this bid';
       }
       
       const percentChange = item.InflationPercentIncrease.toFixed(1);
-      return `FDOT CCI Inflation Adjustment: (${percentChange}% change)`;
+      return `FDOT CCI Index Adjustment: (${percentChange}% change)`;
     };
     $scope.calculateCustomQuantityStats = function () {
       if (
@@ -3581,8 +3714,8 @@
             userQuantity: $scope.customQuantityData.userQuantity,
             predictedUnitPrice: parseFloat(predictedPrice.toFixed(4)),
             totalCost: parseFloat(totalCost.toFixed(2)),
-            priceType: $scope.useInflationAdjustedPrices
-              ? 'Inflation-Adjusted'
+            priceType: $scope.useIndexAdjustedPrices
+              ? 'Index-Adjusted'
               : 'Raw',
             loessUnfiltered: parseFloat(loessUnfilteredValue.toFixed(4)),
             loessFiltered: parseFloat(loessFilteredValue.toFixed(4)),

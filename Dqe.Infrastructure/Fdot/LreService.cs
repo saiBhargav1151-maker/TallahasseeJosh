@@ -11,14 +11,24 @@ namespace Dqe.Infrastructure.Fdot
 {
     public class LreService : ILreService
     {
-
-        public IEnumerable<Domain.Model.Lre.Project> GetProjects(string projectName)
+          public IEnumerable<Domain.Model.Lre.Project> GetProjects(string projectName)
         {
             using (var session = Initializer.LreSessionFactory.OpenSession())
             {
                 var ps = session.QueryOver<Domain.Model.Lre.Project>()
                     .Where(i => i.ProjectName == projectName)
                     .List();
+                return ps;
+            }
+        }
+        public Domain.Model.Lre.Project GetProject(string projectName)
+        {
+            using (var session = Initializer.LreSessionFactory.OpenSession())
+            {
+                var ps = session.QueryOver<Domain.Model.Lre.Project>()
+                    .Where(i => i.ProjectName == projectName)
+                    .Take(1) // Limit to one result
+                    .SingleOrDefault();
                 return ps;
             }
         }
@@ -35,6 +45,32 @@ namespace Dqe.Infrastructure.Fdot
             }
         }
 
+        /// <summary>
+        /// Updates the field "Quantity Complete" in LRE project table. 
+        /// This indicates to users if they should use DQE or LRE.MB.
+        /// </summary>
+        /// <param name="projectId"></param>
+        public void UpdateLreProjectSetDQEDefaultPlatform(string projectId)
+        {
+            using (var session = Initializer.LreSessionFactory.OpenSession())
+            {
+                using (var t = session.BeginTransaction())
+                {
+                    var pjtList = session.QueryOver<Domain.Model.Lre.Project>().Where(p => p.ProjectName == projectId.ToString()).List();
+                    var pjt = pjtList.FirstOrDefault();
+                    if (pjt == null)
+                    {
+                        Console.WriteLine("Project not found in LRE", DateTime.Now);
+                        return;
+                    }
+
+                    pjt.QuantityComplete = "Y";
+
+                    session.SaveOrUpdate(pjt);
+                    t.Commit();
+                }
+            }
+        }
         public void UpdateLrePrices(IEnumerable<PayItemMaster> items)
         {
             /*
@@ -276,6 +312,15 @@ namespace Dqe.Infrastructure.Fdot
                     VersionSnapshot version = null;
                     switch (label)
                     {
+                        case SnapshotLabel.Initial:
+                            version = ps.Versions.FirstOrDefault(i => i.ProjectVersionNumber == 0 && i.LabelCode == "10");
+                            break;
+                        case SnapshotLabel.Scope:
+                            version = ps.Versions.FirstOrDefault(i => i.ProjectVersionNumber == 0 && i.LabelCode == "20");
+                            break;
+                        case SnapshotLabel.Phase1:
+                            version = ps.Versions.FirstOrDefault(i => i.ProjectVersionNumber == 0 && i.LabelCode == "30");
+                            break;
                         case SnapshotLabel.Phase2:
                             version = ps.Versions.FirstOrDefault(i => i.ProjectVersionNumber == 0 && i.LabelCode == "40");
                             break;
@@ -310,6 +355,15 @@ namespace Dqe.Infrastructure.Fdot
                         };
                         switch (label)
                         {
+                            case SnapshotLabel.Initial:
+                                version.LabelCode = "10";
+                                break;
+                            case SnapshotLabel.Scope:
+                                version.LabelCode = "20";
+                                break;
+                            case SnapshotLabel.Phase1:
+                                version.LabelCode = "30";
+                                break;
                             case SnapshotLabel.Phase2:
                                 version.LabelCode = "40";
                                 break;

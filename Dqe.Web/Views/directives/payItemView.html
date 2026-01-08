@@ -19,7 +19,9 @@
                         <div class="col-lg-7">
                             <!-- 01/14/2025 JWW Removed 'Has Structure' checkbox and moved 'Show only Active Pay Items' in its place. -->
                             <!--                Changed label from  'Show Current Structures Only' to 'Show only active Pay Item Structures'. -->
-                            <input name="current" type="checkbox" title="Show current items only" ng-model="searchPayItems.showCurrentItems" ng-change="filterCurrent()" /> Show only Active Pay Items
+                            <label>
+                                <input name="current" type="checkbox" title="Show current items only" ng-model="searchPayItems.showCurrentItems" ng-change="filterItems()" ng- /> Show only Active Pay Items
+                            </label>
                             <!--<input name="structure" type="checkbox" title="Filter items without structures" ng-model="searchPayItems.structure" ng-change="filterStructures()" /> Has Structure-->
                         </div>
                         <div class="col-lg-5" style="text-align: right;">
@@ -86,7 +88,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat-start="payItem in filteredItems | startFrom: currentPage * pageSize  | limitTo:pageSize | orderBy:'name'">
+                <tr ng-repeat-start="payItem in filteredPayItems | startFrom: currentPage * pageSize  | limitTo:pageSize | orderBy:'name'">
                     <td>
                         <a href="" ng-if="security.isAuthorized" title="Click to show/hide the pay item bid history" ng-click="showPricingParameters(payItem)">
                             <span ng-show="!payItem.showPricingParameters" class="glyphicon glyphicon-plus"></span>

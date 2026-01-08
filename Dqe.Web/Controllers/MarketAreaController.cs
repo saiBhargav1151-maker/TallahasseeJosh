@@ -38,7 +38,7 @@ namespace Dqe.Web.Controllers
             return GetMarketAreasResult();
         }
 
-        [CustomAuthorize(Roles = new[] { DqeRole.Administrator })]
+        [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.AdminReadOnly })]
         [HttpGet]
         public ActionResult GetUnassignedCounties()
         {

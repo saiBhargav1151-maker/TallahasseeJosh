@@ -355,38 +355,39 @@
                     Use months filter OR date range (date range overrides months)
                 </small>-->
             </div>
-            <!-- Inflation Adjustment Toggle -->
+            <!-- Index Adjustment Toggle -->
             <div class="form-group">
-                <label class="modern-label" for="inflation-toggle">
+                <label class="modern-label" for="index-toggle">
                     <i class="fas fa-chart-line label-icon"></i>
-                    Inflation Adjustment<span class="text-muted months-hint" style="color:#000000; display:inline;">(Enabled by default):</span>
+                    Index Adjustment<span class="text-muted months-hint" style="color:#000000; display:inline;">(Enabled by default):</span>
                 </label>
                 <div class="toggle-wrapper">
-                    <label class="toggle-switch" for="inflation-toggle">
+                    <label class="toggle-switch" for="index-toggle">
                         <input type="checkbox"
-                               id="inflation-toggle"
-                               ng-model="useInflationAdjustedPrices"
-                               ng-change="onInflationToggleChange()"
-                               ng-keydown="onInflationToggleKeyDown($event)"
+                               id="index-toggle"
+                               ng-model="useIndexAdjustedPrices"
+                               ng-change="onIndexToggleChange()"
+                               ng-keydown="onIndexToggleKeyDown($event)"
                                checked
-                               aria-describedby="inflation-help-text">
+                               aria-describedby="index-help-text">
                         <span class="toggle-slider"></span>
                     </label>
-                    <span class="toggle-label" id="inflation-help-text">
-                        {{ useInflationAdjustedPrices ? 'Use Inflation-Adjusted Prices' : 'Use Raw Prices' }}
+                    <span class="toggle-label" id="index-help-text">
+                        {{ useIndexAdjustedPrices ? 'Use Index-Adjusted Prices' : 'Use Raw Prices' }}
                     </span>
                 </div>
                 <div style="margin-top: 8px;">
                     <a href="https://www.fdot.gov/fpo/fpc/reports/fdot-cci"
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="fdot-cci-link">
+                       class="fdot-cci-link"
+                       title="Opens FDOT Construction Cost Index (CCI) page in a new tab">
                         <i class="fas fa-external-link-alt"></i>
                         Learn more about FDOT CCI
                     </a>
                 </div>
                 <small class="form-text text-muted months-hint">
-                    When enabled, charts and calculations use inflation-adjusted prices. Table shows both columns.
+                    When enabled, charts and calculations use index-adjusted prices. Table shows both columns.
                 </small>
             </div>
         </div>
@@ -467,7 +468,7 @@
                     </div>-->
                 </div>
             </div>
-            <div class="form-group" ng-if="relatedCounties.length > 0 && (regionType === 'market')">
+            <div class="form-group" ng-if="relatedCounties.length > 0 && (regionType === 'market' ||regionType === 'district')">
                 <label class="sub-label">Counties:</label>
                 <div class="county-filter-compact">
                     <div class="county-actions-compact">
@@ -526,7 +527,7 @@
     <div class="simple-data-info" ng-if="bidHistoryData && bidHistoryData.length > 0">
         <span><strong>Bid Data for search criteria available through:</strong> {{ getLatestBidDate() | date:'MMM dd, yyyy' }}</span>
         <span ng-if="dataAgeWarning" class="data-age-warning-inline" style="color: #856404; font-weight: bold;">{{ dataAgeWarning }}</span>
-        <span><strong>FDOT CCI  Index Calendar Year Load:</strong> Q3, 2025</span>
+        <span><strong>FDOT CCI  Index Calendar Year Load:</strong> {{ latestNHCCIQuarter }}</span>
     </div>
 
     <!-- Large Dataset Warning -->
@@ -574,22 +575,22 @@
 
     <div class="results-section" ng-if="bidHistoryData && bidHistoryData.length > 0" ng-class="{ 'blurred': isChartStale }">
 
-        <!-- NHCCI Inflation Adjustment Information -->
+        <!-- NHCCI Index Adjustment Information -->
         <div class="inflation-info-section" ng-if="bidHistoryData && bidHistoryData.length > 0 && !shouldHideGraphForLumpSum()">
             <div class="inflation-info-content">
                 <i class="fas fa-chart-line inflation-icon"></i>
                 <div class="inflation-info-text">
-                    <h5 class="inflation-title">FDOT CCI Inflation Adjustment - {{ useInflationAdjustedPrices ? 'Enabled' : 'Disabled' }}</h5>
+                    <h5 class="inflation-title">FDOT CCI Index Adjustment - {{ useIndexAdjustedPrices ? 'Enabled' : 'Disabled' }}</h5>
                     <p class="inflation-description">
-                        <span ng-if="useInflationAdjustedPrices">
-                            Charts and calculations are using inflation-adjusted prices (normalized to 2025 Q3 levels using FDOT CCI).
+                        <span ng-if="useIndexAdjustedPrices">
+                            Charts and calculations are using index-adjusted prices (normalized to {{ latestNHCCIQuarter }} levels using FDOT CCI).
                             This allows for more accurate price comparisons across different time periods.
                         </span>
-                        <span ng-if="!useInflationAdjustedPrices">
+                        <span ng-if="!useIndexAdjustedPrices">
                             Charts and calculations are using raw (unadjusted) unit prices.
-                            Toggle above to enable inflation adjustment for better time-series comparisons.
+                            Toggle above to enable index adjustment for better time-series comparisons.
                         </span>
-                        Both raw and inflation-adjusted prices are visible in the table below.
+                        Both raw and index-adjusted prices are visible in the table below.
                     </p>
                 </div>
             </div>
@@ -606,10 +607,10 @@
                         <div class="chart-header" ng-if="!shouldHideGraphForLumpSum()">
                             <h4 class="inflation-title">
                                 <i class="fas fa-chart-line"></i> Unit Price Bid Analysis
-                                <span ng-if="useInflationAdjustedPrices">
-                                    (Inflation-Adjusted)
+                                <span ng-if="useIndexAdjustedPrices">
+                                    (Index-Adjusted)
                                 </span>
-                                <span ng-if="!useInflationAdjustedPrices">
+                                <span ng-if="!useIndexAdjustedPrices">
                                     (Raw Prices)
                                 </span>
                             </h4>
@@ -890,7 +891,8 @@
                             </div>
                         </div>
                         <div class="table-wrapper" ng-if="!isLargeDataset">
-                            <table class="table bid-table">
+                            <table class="table bid-table" role="table" aria-label="Bid history results based on selected filters">
+                                <caption class="table-caption">Bid history results based on selected filters</caption>
                                 <thead>
                                     <tr>
                                         <th ng-repeat="column in visibleColumns(); track by column.key"
@@ -944,12 +946,12 @@
                                             </span>
 
                                             <span ng-if="column.key === 'InflationAdjustedPrice'"
-                                                  title="{{ getInflationInfo(item) }}"
+                                                  title="{{ getIndexInfo(item) }}"
                                                   style="cursor: help;">
                                                 <span ng-if="item.CalculatedUnit === 'LS - Lump Sum' && item.InflationAdjustedPrice">
                                                     {{ (item.InflationAdjustedPrice / item.Quantity) | smartCurrency }}
                                                     <i class="fas fa-calculator" style="color: #6c757d; font-size: 10px; margin-left: 4px;"
-                                                       title="Calculated from inflation-adjusted Lump Sum bid"></i>
+                                                       title="Calculated from index-adjusted Lump Sum bid"></i>
                                                 </span>
                                                 <span ng-if="item.CalculatedUnit !== 'LS - Lump Sum' || !item.InflationAdjustedPrice">
                                                     {{ item.InflationAdjustedPrice | smartCurrency }}
@@ -1508,6 +1510,20 @@ https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
             table-layout: auto;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
+
+            .bid-table caption,
+            .table-caption {
+                caption-side: top;
+                text-align: left;
+                padding: 12px 16px;
+                background: #EAF0FA;
+                color: #1F4283;
+                font-weight: 600;
+                font-size: var(--base-font-size);
+                border-bottom: 2px solid #1F4283;
+                margin-bottom: 0;
+                font-family: var(--primary-font);
+            }
 
             .bid-table th {
                 position: sticky;
