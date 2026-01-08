@@ -130,7 +130,7 @@ namespace Dqe.Web.Controllers
                                 item.InflationAdjustedPrice = item.b;
                                 item.InflationFactor = 1.0m;
                                 item.InflationPercentIncrease = 0.0m;
-                                item.NHCCIQuarter = "Inflation data not available";
+                                item.NHCCIQuarter = "Index data not available";
                             }
                         }
                         catch (Exception ex)
@@ -138,7 +138,7 @@ namespace Dqe.Web.Controllers
                             item.InflationAdjustedPrice = item.b;
                             item.InflationFactor = 1.0m;
                             item.InflationPercentIncrease = 0.0m;
-                            item.NHCCIQuarter = "Inflation data not available";
+                            item.NHCCIQuarter = "Index data not available";
                         }
                     }
                     else
@@ -146,7 +146,7 @@ namespace Dqe.Web.Controllers
                         item.InflationAdjustedPrice = item.b;
                         item.InflationFactor = 1.0m;
                         item.InflationPercentIncrease = 0.0m;
-                        item.NHCCIQuarter = "Inflation data not available";
+                        item.NHCCIQuarter = "Index data not available";
                     }
                 }
                 var filteredData = historyData.Select(item => new
