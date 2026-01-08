@@ -121,7 +121,7 @@ namespace Dqe.Web.Controllers
             var data = IndexByQuarter;
             if (data.Count == 0)
             {
-                return "Inflation data not available";
+                return "Index data not available";
             }
 
             var latest = data.Keys
@@ -132,7 +132,7 @@ namespace Dqe.Web.Controllers
                 .ThenBy(info => info.Quarter)
                 .LastOrDefault();
 
-            return latest.QuarterKey ?? "Inflation data not available";
+            return latest.QuarterKey ?? "Index data not available";
         }
 
         /// <summary>
@@ -141,9 +141,9 @@ namespace Dqe.Web.Controllers
         public static string GetLatestQuarterDisplay()
         {
             var quarterKey = GetLatestQuarterKey();
-            if (quarterKey == "Inflation data not available")
+            if (quarterKey == "Index data not available")
             {
-                return "Inflation data not available";
+                return "Index data not available";
             }
 
             var parts = quarterKey.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
