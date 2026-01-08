@@ -57,7 +57,7 @@
     $scope.showTrendChart = false;
     $scope.trendWarning = '';
     $scope.dataAgeWarning = '';
-    $scope.useInflationAdjustedPrices = true;
+    $scope.useIndexAdjustedPrices = true;
     $scope.isExporting = false;
     $scope.latestNHCCIQuarter = 'Q3, 2025'; 
     $scope.latestNHCCIQuarterKey = '2025 Q3';
@@ -121,7 +121,7 @@
       { key: 'CalculatedUnit', label: 'Units', visible: false, sortable: false, selectionOrder: 0 },
       { key: 'Quantity', label: 'Quantity', visible: true, sortable: true, selectionOrder: 4 },
       { key: 'b', label: 'Unit Price Bid', visible: true, sortable: true, selectionOrder: 5 },
-        { key: 'InflationAdjustedPrice', label: 'Inflation Adj. Unit Price', visible: true, sortable: true, selectionOrder: 6 },
+        { key: 'InflationAdjustedPrice', label: 'Index Adj. Unit Price', visible: true, sortable: true, selectionOrder: 6 },
       { key: 'IsOutlier', label: 'Outlier', visible: false, sortable: true, selectionOrder: 7 },
       { key: 'PvBidTotal', label: 'Contract Total Bid Amount', visible: true, sortable: true, selectionOrder: 8 },
       { key: 'd', label: 'District', visible: true, sortable: true, selectionOrder: 11 },
@@ -529,7 +529,7 @@
       $scope.trendData = [];
       $scope.trendWarning = '';
       $scope.dataAgeWarning = '';
-      $scope.useInflationAdjustedPrices = true;
+      $scope.useIndexAdjustedPrices = true;
       $scope.customQuantityData.userQuantity = null;
       $scope.customQuantityPrediction = null;
       if ($scope.trendChartInstance) {
@@ -579,7 +579,7 @@
         item.WeightedAvgNoOutliers = weightedAvgNoOutliers;
       });
     };
-    $scope.onInflationToggleChange = function () {
+    $scope.onIndexToggleChange = function () {
       if ($scope.bidHistoryData && $scope.bidHistoryData.length > 0) {
         $scope.recalculateWeightedAverages();
         waitForCanvasAndRender();
@@ -602,7 +602,7 @@
       if (item.CalculatedUnit === 'LS - Lump Sum') {
         const calculatedUnitPrice =
           item.Quantity > 0 ? item.b / item.Quantity : 0;
-        if ($scope.useInflationAdjustedPrices && item.InflationAdjustedPrice) {
+        if ($scope.useIndexAdjustedPrices && item.InflationAdjustedPrice) {
           return item.Quantity > 0
             ? item.InflationAdjustedPrice / item.Quantity
             : calculatedUnitPrice;
@@ -610,7 +610,7 @@
         return calculatedUnitPrice;
       }
 
-      return $scope.useInflationAdjustedPrices && item.InflationAdjustedPrice
+      return $scope.useIndexAdjustedPrices && item.InflationAdjustedPrice
         ? item.InflationAdjustedPrice
         : item.b;
     };
@@ -1232,11 +1232,11 @@
       }
     };
 
-    $scope.onInflationToggleKeyDown = function (event) {
+    $scope.onIndexToggleKeyDown = function (event) {
       if (event.keyCode === 13 || event.keyCode === 32) { 
         event.preventDefault();
-        $scope.useInflationAdjustedPrices = !$scope.useInflationAdjustedPrices;
-        $scope.onInflationToggleChange();
+        $scope.useIndexAdjustedPrices = !$scope.useIndexAdjustedPrices;
+        $scope.onIndexToggleChange();
         $scope.$apply();
       }
     };
@@ -1346,7 +1346,7 @@
             'Units',
             'Quantity',
             'Unit Price Bid',
-            'Inflation-Adjusted Unit Price',
+            'Index-Adjusted Unit Price',
             'Weighted Avg No Outliers',
             'Outlier',
             'Contract Total Bid Amount',
@@ -1374,7 +1374,7 @@
                   ? item.b / item.Quantity
                   : 0
                 : item.b;
-            const inflationAdjustedUnitPrice =
+            const indexAdjustedUnitPrice =
               item.CalculatedUnit === 'LS - Lump Sum' &&
               item.InflationAdjustedPrice
                 ? item.Quantity > 0
@@ -1382,8 +1382,8 @@
                   : 0
                 : item.InflationAdjustedPrice || item.b;
             const roundedUnitPrice = parseFloat(unitPrice).toFixed(2);
-            const roundedInflationAdjustedUnitPrice = parseFloat(
-              inflationAdjustedUnitPrice
+            const roundedIndexAdjustedUnitPrice = parseFloat(
+              indexAdjustedUnitPrice
             ).toFixed(2);
             const roundedWeightedAvgNoOutliers = parseFloat(
               item.WeightedAvgNoOutliers || 0
@@ -1400,7 +1400,7 @@
               `"${item.CalculatedUnit}"`,
               `"${item.Quantity}"`,
               `"${roundedUnitPrice}"`,
-              `"${roundedInflationAdjustedUnitPrice}"`,
+              `"${roundedIndexAdjustedUnitPrice}"`,
               `"${roundedWeightedAvgNoOutliers}"`,
               `"${item.IsOutlier ? 'Yes' : 'No'}"`,
               `"${roundedBidAmount}"`,
@@ -1529,7 +1529,7 @@
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
               y += 15;
-              doc.text('Inflation Adjustment: ' + ($scope.useInflationAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to ' + ($scope.latestNHCCIQuarter || '2025 Q3') + ' levels)' : 'Disabled (using raw prices)'), 40, y);
+              doc.text('Index Adjustment: ' + ($scope.useIndexAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to ' + ($scope.latestNHCCIQuarter || '2025 Q3') + ' levels)' : 'Disabled (using raw prices)'), 40, y);
               y += 15;
               //doc.text(
               //    'Date Range: ' +
@@ -1582,9 +1582,9 @@
                   y += 15;
                   doc.setFontSize(10);
                   doc.setFont('helvetica', 'normal');
-                  doc.text('Weighted Average Unit Price (' + ($scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.avg || 0).toFixed(2), 40, y);
+                  doc.text('Weighted Average Unit Price (' + ($scope.useIndexAdjustedPrices ? 'Index-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.avg || 0).toFixed(2), 40, y);
                   y += 15;
-                  doc.text('Weighted Average (No Outliers) (' + ($scope.useInflationAdjustedPrices ? 'Inflation-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.weightedAvgNoOutliers || 0).toFixed(2), 40, y);
+                  doc.text('Weighted Average (No Outliers) (' + ($scope.useIndexAdjustedPrices ? 'Index-Adjusted' : 'Raw') + '): $' + ($scope.chartStats.weightedAvgNoOutliers || 0).toFixed(2), 40, y);
                   y += 25;
               }
               if ($scope.chartInstance && typeof $scope.chartInstance.toBase64Image === 'function') {
@@ -1746,7 +1746,7 @@
             $scope.bidHistoryData &&
             $scope.bidHistoryData.length > 0 &&
             $scope.searchAttempted &&
-            filter !== 'useInflationAdjustedPrices'
+            filter !== 'useIndexAdjustedPrices'
           ) {
             
             $scope.isChartStale = true;
@@ -3199,8 +3199,8 @@
                   (sum, item) => sum + (item.InflationPercentIncrease || 0),
                   0
                 ) / $scope.bidHistoryData.length,
-              currentPriceField: $scope.useInflationAdjustedPrices
-                ? 'Inflation-Adjusted'
+              currentPriceField: $scope.useIndexAdjustedPrices
+                ? 'Index-Adjusted'
                 : 'Raw',
             };
             $scope.isChartLoading = false;
@@ -3420,8 +3420,8 @@
               {
                 label:
                   'Weighted Average Unit Price (' +
-                  ($scope.useInflationAdjustedPrices
-                    ? 'Inflation-Adjusted'
+                  ($scope.useIndexAdjustedPrices
+                    ? 'Index-Adjusted'
                     : 'Raw') +
                   ')',
                 data: chartData.map((item) => item.y),
@@ -3465,8 +3465,8 @@
                   display: true,
                   text:
                     'Weighted Average Unit Price (' +
-                    ($scope.useInflationAdjustedPrices
-                      ? 'Inflation-Adjusted'
+                    ($scope.useIndexAdjustedPrices
+                      ? 'Index-Adjusted'
                       : 'Raw') +
                     ') ($)',
                   font: { size: 14, weight: 'bold' },
@@ -3576,13 +3576,13 @@
       return code ? $scope.bidStatusMap[code] || 'Unknown' : 'Unknown';
     };
 
-    $scope.getInflationInfo = function (item) {
+    $scope.getIndexInfo = function (item) {
       if (!item.InflationAdjustedPrice || !item.InflationPercentIncrease) {
-        return 'Inflation adjustment not available for this bid';
+        return 'Index adjustment not available for this bid';
       }
       
       const percentChange = item.InflationPercentIncrease.toFixed(1);
-      return `FDOT CCI Inflation Adjustment: (${percentChange}% change)`;
+      return `FDOT CCI Index Adjustment: (${percentChange}% change)`;
     };
     $scope.calculateCustomQuantityStats = function () {
       if (
@@ -3714,8 +3714,8 @@
             userQuantity: $scope.customQuantityData.userQuantity,
             predictedUnitPrice: parseFloat(predictedPrice.toFixed(4)),
             totalCost: parseFloat(totalCost.toFixed(2)),
-            priceType: $scope.useInflationAdjustedPrices
-              ? 'Inflation-Adjusted'
+            priceType: $scope.useIndexAdjustedPrices
+              ? 'Index-Adjusted'
               : 'Raw',
             loessUnfiltered: parseFloat(loessUnfilteredValue.toFixed(4)),
             loessFiltered: parseFloat(loessFilteredValue.toFixed(4)),
