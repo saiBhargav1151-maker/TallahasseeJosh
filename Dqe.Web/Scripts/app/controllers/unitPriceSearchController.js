@@ -95,7 +95,7 @@
   
     var cacheCheckInterval = setInterval(function() {
       $scope.loadLatestNHCCIQuarter();
-    }, 10 * 60 * 1000); 
+    }, 8 * 60 * 60 * 1000);  
     
     $scope.$on('$destroy', function() {
       if (cacheCheckInterval) {

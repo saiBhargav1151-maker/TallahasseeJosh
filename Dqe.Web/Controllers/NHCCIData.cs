@@ -15,7 +15,7 @@ namespace Dqe.Web.Controllers
     public static class NHCCIData
     {
         private static readonly string DataSourceUrl = GetDataSourceUrl();
-        private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(15);
+        private static readonly TimeSpan RefreshInterval = TimeSpan.FromHours(12);
         private static string GetDataSourceUrl()
         {
             var configUrl = ConfigurationManager.AppSettings["cciInflationIndexUrl"];
