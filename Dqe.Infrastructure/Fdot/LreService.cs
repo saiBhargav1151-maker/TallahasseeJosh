@@ -56,11 +56,10 @@ namespace Dqe.Infrastructure.Fdot
             {
                 using (var t = session.BeginTransaction())
                 {
-                    var pjtList = session.QueryOver<Domain.Model.Lre.Project>().Where(p => p.ProjectName == projectId.ToString()).List();
+                    var pjtList = session.QueryOver<Domain.Model.Lre.Project>().Where(p => p.ProjectName == projectId).List();
                     var pjt = pjtList.FirstOrDefault();
                     if (pjt == null)
                     {
-                        Console.WriteLine("Project not found in LRE", DateTime.Now);
                         return;
                     }
 
