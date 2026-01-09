@@ -127,6 +127,10 @@ namespace Dqe.Web.Controllers
         public ActionResult GetWtProposalContractType(string number)
         {
             var wtp = _webTransportService.GetProposalSlim(number);
+            if(wtp== null || wtp.ContractType == null)
+            {
+                return null;
+            }
             var result = new DqeResult(new
             {
                 contractType = wtp.ContractType
