@@ -6,9 +6,11 @@ using System.Text;
 
 namespace Dqe.Domain.Services
 {
+    /// <summary>
+    /// Genral Purpose Helper class for tools and operations that span the project. MB>
+    /// </summary>
     public static class Helper
     {
-
         public static string GetRoleDisplayLabel(DqeRole role)
         {
             string displayLabel = "";
