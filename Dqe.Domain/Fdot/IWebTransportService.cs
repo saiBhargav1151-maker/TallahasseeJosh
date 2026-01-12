@@ -18,10 +18,14 @@ namespace Dqe.Domain.Fdot
         IEnumerable<RefItem> GetRefItemsBySpecYear(int specYear);
         IEnumerable<Project> GetProjects(string number);
         Project GetProject(string number);
+
+        /// Getting a slim version of the project record, without any joins.
         Project GetProjectSlim(string number);
         IEnumerable<Project> GetProjectsByProposalId(long id);
         IEnumerable<Proposal> GetProposals(string number);
         Proposal GetProposal(string number);
+
+        /// Getting a slim version of the proposal record, without any joins.
         Proposal GetProposalSlim(string number);
         Project ExportProject(string projectNumber);
         Proposal ExportProposal(string proposalNumber);

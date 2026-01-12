@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Dqe.Web.Services
 {
+    /// <summary>
+    /// Genral Purpose Helper class, used for tools and operations. MB>
+    /// </summary>
     public class DynamicHelper
     {
         public static bool HasNotNullProperty(dynamic expandoObject, string propertyName)
