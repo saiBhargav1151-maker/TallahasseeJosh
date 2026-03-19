@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using Dqe.Domain.Fdot;
 using Dqe.Domain.Model;
 using System.Linq;
 using System.Web;
+using Dqe.Domain.Repositories.Custom;
+using Dqe.ApplicationServices;
 
 namespace Dqe.Web.Controllers
 {
@@ -17,9 +19,11 @@ namespace Dqe.Web.Controllers
         /// Initializes a new instance of the <see cref="UnitPriceSearchController"/> class.
         /// </summary>
         private readonly IWebTransportService _webTransportService;
-        public UnitPriceSearchController(IWebTransportService webTransportService)
+        private readonly IDqeUserRepository _dqeUserRepository;
+        public UnitPriceSearchController(IWebTransportService webTransportService, IDqeUserRepository dqeUserRepository)
         {
             _webTransportService = webTransportService;
+            _dqeUserRepository = dqeUserRepository;
         }
         // <summary>
         /// Returns a list of pay item suggestions based on the input text.
@@ -49,13 +53,36 @@ namespace Dqe.Web.Controllers
 
 
         /// <summary>
+        /// Returns a list of bidder (vendor) name suggestions based on the input text.
+        /// </summary>
+        [HttpGet]
+        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")]
+        [ValidateInput(true)]
+        public ActionResult GetBidderSuggestions(string input)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(input) || input.Trim().Length < 3)
+                {
+                    return Json(new List<string>(), JsonRequestBehavior.AllowGet);
+                }
+                var suggestions = _webTransportService.GetBidderSuggestions(input);
+                return Json(suggestions, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Unit Price Search: Failed to get bidder suggestions. Input: '{input}', Error: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
         /// Retrieves detailed historical bid data for a specified Pay Item.
         /// </summary>
         /// <param name="number">Pay item number to fetch historical unit price data for.</param>
         /// <returns>JSON result
         [HttpGet]
         [ValidateInput(true)]
-        public ActionResult GetPayItemDetails(string number, List<string> contractType, int? months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, string projectNumber, decimal? minBidAmount, decimal? maxBidAmount, string[] district)
+        public ActionResult GetPayItemDetails(string number, List<string> contractType, int? months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, List<string> projectNumbers, decimal? minBidAmount, decimal? maxBidAmount, string[] district, List<string> vendorNames)
         {
             object processedData = null;
             InvalidOperationException refreshExceptionToLog = null;
@@ -73,7 +100,20 @@ namespace Dqe.Web.Controllers
                 }
 
                 var selectedCounties = counties?.ToList() ?? new List<string>();
-                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months ?? 36, contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames, projectNumber, minBidAmount, maxBidAmount, district);
+                bool showAllProposalStatuses = false;
+                var dqeIdentity = User.Identity as DqeIdentity;
+                if (dqeIdentity != null && dqeIdentity.IsAuthenticated)
+                {
+                    var currentUser = _dqeUserRepository.Get(dqeIdentity.Id);
+                    if (currentUser != null)
+                    {
+                        showAllProposalStatuses = currentUser.Role == DqeRole.Administrator 
+                            || currentUser.Role == DqeRole.DistrictAdministrator 
+                            || currentUser.Role == DqeRole.Estimator;
+                    }
+                }
+                
+                var historyData = _webTransportService.GetUnitPriceDetails(number, contractType, months ?? 36, contractWorkType, startDate, endDate, counties, bidStatus, marketCounties, minRank, maxRank, workTypeNames, projectNumbers, minBidAmount, maxBidAmount, district, vendorNames, showAllProposalStatuses);
                 if (historyData == null)
                     return new HttpNotFoundResult("No bid history found for the specified range.");
                 System.Collections.Generic.IReadOnlyDictionary<string, decimal> indexByQuarter = NHCCIData.GetCachedIndexByQuarter();
@@ -172,7 +212,7 @@ namespace Dqe.Web.Controllers
                     VendorName = item.VendorName,
                     FullNameDescription = item.FullNameDescription,
                     Duration = item.Duration,
-                    ExecutedDate = item.ExecutedDate,
+                    ExecutedDate = item.ExecutedDate == null || item.ExecutedDate == DateTime.MinValue ? (DateTime?)null : item.ExecutedDate,
                     ObsoleteDate = item.ObsoleteDate,
                     BidType = item.BidType,
                     VendorRanking = item.VendorRanking,
@@ -182,7 +222,9 @@ namespace Dqe.Web.Controllers
                     InflationAdjustedPrice = item.InflationAdjustedPrice,
                     InflationFactor = item.InflationFactor,
                     InflationPercentIncrease = item.InflationPercentIncrease,
-                    NHCCIQuarter = item.NHCCIQuarter
+                    NHCCIQuarter = item.NHCCIQuarter,
+                    ProposalStatus = item.ProposalStatus,
+                    IsConfidential = !string.IsNullOrEmpty(item.ProposalStatus) && item.ProposalStatus != "03"
                 }).ToList();
 
                 processedData = filteredData;

@@ -12,6 +12,7 @@ using Dqe.Domain.Repositories.Custom;
 using Dqe.Web.ActionResults;
 using Dqe.Web.Attributes;
 using Dqe.Web.Services;
+//using Newtonsoft.Json.Linq;
 using BidHistory = Dqe.Domain.Model.BidHistory;
 
 namespace Dqe.Web.Controllers
@@ -1228,6 +1229,19 @@ namespace Dqe.Web.Controllers
             return new DqeResult(null, new ClientMessage { Severity = ClientMessageSeverity.Success, text = string.Format("Estimate Saved") }, JsonRequestBehavior.AllowGet);
         }
 
+        //public static List<string> ParseCommaSeparatedText(string input)
+        //{
+        //    if (string.IsNullOrWhiteSpace(input))
+        //    {
+        //        return new List<string>();
+        //    }
+
+        //    return input.Split(',')
+        //                .Select(item => item.Trim())
+        //                .Where(item => !string.IsNullOrWhiteSpace(item))
+        //                .ToList();
+        //}
+
         [HttpPost]
         public ActionResult GenerateParameterPrices(dynamic parms)
         {
@@ -1248,7 +1262,11 @@ namespace Dqe.Web.Controllers
             int.TryParse(parms.numberOfBids.ToString(), out numberOfBids);
             
             
-            var includeEstimates = parms.includeEstimates;
+            var includeLsDbEstimates = parms.includeLsDbEstimates;
+            var includeSvEstimates = parms.includeSvEstimates;
+            //var array = parms.selectedBidders as JArray;
+            //List<string> listOfContractNumbers = array.ToObject<List<string>>();
+
             var item = (PayItemMaster)_payItemMasterRepository.GetWithHistory(Convert.ToString(itemGroup.itemNumber));
             if (item == null || !item.ProposalHistories.Any())
             {
@@ -1259,6 +1277,10 @@ namespace Dqe.Web.Controllers
             {
                 var include = true;
                 if (contractType != "all" && ph.ContractType.ToUpper().StartsWith("M")) continue;
+
+                ////if user specifies any contract/proposal numbers, but this isn't one of them, then continue to next.MB.
+                //if (listOfContractNumbers.Any() && !listOfContractNumbers.Any(p => p == ph.ProposalNumber)) continue;
+
                 foreach (var workType in workTypes)
                 {
                     if (ph.ContractWorkType != workType.code.ToString()) continue;
@@ -1283,7 +1305,7 @@ namespace Dqe.Web.Controllers
                 var d2 = DateTime.Now.Date;
                 include = (d2.Day >= d1.Day ? 0 : -1) + ((d2.Year - d1.Year) * 12) + (d2.Month - d1.Month) < bidMonths;
                 if (!include) continue;
-                if (includeEstimates)
+                if (includeLsDbEstimates)
                 {
                     if (bidFilter == "AWO")
                     {
@@ -1303,6 +1325,27 @@ namespace Dqe.Web.Controllers
                         bhl.AddRange(ph.BidHistories);    
                     }
                 }
+                if (includeSvEstimates)
+                {
+                    if (bidFilter == "AWO")
+                    {
+                        bhl.AddRange(ph.BidHistories.Where(i => i.IsAwarded || i.IsEstimate));
+                    }
+                    else if (bidFilter == "BID")
+                    {
+                        var ab = ph.BidHistories.FirstOrDefault(i => i.IsAwarded || i.IsEstimate);
+                        if (ab != null)
+                        {
+                            bhl.Add(ab);
+                        }
+                        bhl.AddRange(ph.BidHistories.Where(i => !i.IsAwarded && !i.IsEstimate).OrderBy(i => i.BidTotal).Skip(0).Take(Math.Min(ab == null ? numberOfBids : numberOfBids - 1, ph.BidHistories.Count())));
+                    }
+                    else
+                    {
+                        bhl.AddRange(ph.BidHistories);
+                    }
+                }
+
                 else
                 {
                     if (ph.BidHistories.Any(i => i.IsEstimate)) continue;
@@ -1345,7 +1388,7 @@ namespace Dqe.Web.Controllers
         public ActionResult UpdateBidHistory(dynamic itemToPrice)
         {
             var itemGroup = itemToPrice.itemGroup;
-            var countyName = itemToPrice.county;
+            var countyName = itemToPrice?.county ?? "";
             County county = null;
             if (!string.IsNullOrWhiteSpace(countyName))
             {
@@ -1401,8 +1444,8 @@ namespace Dqe.Web.Controllers
         [CustomAuthorize(Roles = new[] { DqeRole.Administrator, DqeRole.AdminReadOnly, DqeRole.DistrictAdministrator, DqeRole.Estimator, DqeRole.Coder, DqeRole.DistrictReviewer, DqeRole.StateReviewer })]
         public ActionResult GetBidHistory(dynamic itemToPrice)
         {
-            var itemGroup = itemToPrice.itemGroup;
-            var countyName = itemToPrice.county;
+            var itemGroup = itemToPrice?.itemGroup ?? "";
+            var countyName = itemToPrice?.county ?? "";
             County county = null;
             if (!string.IsNullOrWhiteSpace(countyName))
             {
@@ -1430,12 +1473,35 @@ namespace Dqe.Web.Controllers
                 Price = i.Price,
                 BidTotal = i.BidTotal,
                 Quantity = i.MyProposalHistory.Quantity,
-                County = i.MyProposalHistory.County
+                County = i.MyProposalHistory.County,
+
             });
             bs.Bids = bl;
             bs = _pricingEngine.CalculateAveragePrice(bs, true, Convert.ToDecimal(itemGroup.quantity), county);
             return FormatBidHistory(bs, item, false);
         }
+
+        private bool ContainsSuffix(string proposalNumber)
+        {
+            if(proposalNumber?.Length > 2 &&
+                (proposalNumber.EndsWith("LS", StringComparison.InvariantCultureIgnoreCase) ||
+                proposalNumber.EndsWith("DB", StringComparison.InvariantCultureIgnoreCase) ||
+                proposalNumber.EndsWith("SV", StringComparison.InvariantCultureIgnoreCase)))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private string StripSuffixFromProposal(string proposalNumber)
+        {
+            if (ContainsSuffix(proposalNumber))
+            {
+                return proposalNumber.Substring(0, proposalNumber.Length - 2);
+            }
+            return proposalNumber;
+        }
+
 
         [HttpGet]
         public ActionResult GetWorkTypes()

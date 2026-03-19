@@ -99,7 +99,7 @@ namespace Dqe.Infrastructure.Fdot
             {
                 using (var t = session.BeginTransaction())
                 {
-                    items = items.OrderBy(i => i.RefItemName);
+                    items = items.OrderBy(i => i.RefItemName);                 
                     var mal = session.QueryOver<Domain.Model.Lre.MarketArea>().List().Distinct().ToList();
                     Console.WriteLine("Query all LRE items... {0}", DateTime.Now);
                     var pil = session
@@ -137,7 +137,12 @@ namespace Dqe.Infrastructure.Fdot
                         //Console.WriteLine("Updating reference price for item {0}... {1}", item.RefItemName, DateTime.Now);
                         session
                             .CreateQuery("update PayItem pi set pi.ReferencePrice = :referencePrice where pi.Id = :payItemId")
-                            .SetParameter("referencePrice", item.StateReferencePrice.HasValue && item.StateReferencePrice.Value > 0 ? item.StateReferencePrice.Value : item.RefPrice.HasValue && item.RefPrice.Value > 0 ? item.RefPrice.Value : 0)
+                            .SetParameter("referencePrice", 
+                            item.StateReferencePrice.HasValue && item.StateReferencePrice.Value > 0 
+                            ? item.StateReferencePrice.Value 
+                            : item.RefPrice.HasValue && item.RefPrice.Value > 0 
+                                ? item.RefPrice.Value 
+                                : 0)
                             .SetParameter("payItemId", item.RefItemName.ToUpper().Trim().PadRight(10, ' '))
                             .ExecuteUpdate();
                         //get the county price for the item and county
@@ -190,7 +195,7 @@ namespace Dqe.Infrastructure.Fdot
                                     //Console.WriteLine("Update county {0}:{1} price for item {2}... {3}", cp.MyCounty.Name, cp.MyCounty.Code, item.RefItemName, DateTime.Now);
                                     pic.UnitPrice = cp.Price;    
                                 }
-                                //get the TP district price
+                                //get the TP district price                               
                                 var pid = session
                                     .CreateQuery("from PayItemDistrict pid where pid.Id.PayItemId = :payItemId and pid.Id.District = '08' and pid.Id.County = :county")
                                     .SetParameter("payItemId", item.RefItemName.ToUpper().Trim().PadRight(10, ' '))

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -74,6 +74,33 @@ namespace Dqe.Infrastructure.Fdot
         }
 
         /// <summary>
+        /// Retrieves a list of bidder (vendor) name suggestions based on the input string.
+        /// </summary>
+        public IList<string> GetBidderSuggestions(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input) || input.Trim().Length < 3)
+            {
+                return new List<string>();
+            }
+            using (var session = Initializer.TransportSessionFactory.OpenSession())
+            {
+                RefVendor rv = null;
+                var searchTerm = input.Trim();
+                var rawResults = session.QueryOver(() => rv)
+                    .Where(Restrictions.IsNotNull(Projections.Property(() => rv.VendorName)))
+                    .And(Restrictions.InsensitiveLike(Projections.Property(() => rv.VendorType), "CON", MatchMode.Exact))
+                    .And(Restrictions.InsensitiveLike(Projections.Property(() => rv.CertificationType), "PREQ", MatchMode.Exact))
+                    .And(Restrictions.InsensitiveLike(Projections.Property(() => rv.VendorName), searchTerm, MatchMode.Anywhere))
+                    .SelectList(list => list.Select(() => rv.VendorName))
+                    .OrderBy(() => rv.VendorName).Asc()
+                    .Take(40)
+                    .List<string>();
+                var distinct = rawResults.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
+                return distinct;
+            }
+        }
+
+        /// <summary>
         /// Retrieves a list of bid details from WTP database.
         /// and sorted by Descending by letting date (l.LettingDate) and Ascending by bid price.
         /// </summary>
@@ -90,9 +117,11 @@ namespace Dqe.Infrastructure.Fdot
         decimal? minRank = null,
         decimal? maxRank = null,
         List<string> workTypeNames = null,
-        string projectNumber = null,
+        List<string> projectNumbers = null,
         decimal? minBidAmount = null, decimal? maxBidAmount = null,
-         string[] district = null
+        string[] district = null,
+        List<string> vendorNames = null,
+        bool showAllProposalStatuses = false
             )
         {
             using (var session = Initializer.TransportSessionFactory.OpenSession())
@@ -142,7 +171,9 @@ namespace Dqe.Infrastructure.Fdot
                         Restrictions.In("pv.BidType", new[] { "RESP", "NONR", "" }),
                         Restrictions.IsNull("pv.BidType")
                     ))
-                    .Add(Restrictions.Eq("p.ProposalStatus", "03"))
+                    .Add(showAllProposalStatuses 
+                        ? Restrictions.In("p.ProposalStatus", new[] { "01", "02", "03", "04", "06", "07", "22", "24", "SA" })
+                        : Restrictions.Eq("p.ProposalStatus", "03"))
                     .Add(Restrictions.Or(
                         Restrictions.IsNull("m.Main"),
                         Restrictions.Eq("m.Main", true)
@@ -154,9 +185,17 @@ namespace Dqe.Infrastructure.Fdot
                     .AddOrder(Order.Desc("l.LettingDate"))
                     .AddOrder(Order.Asc("p.ProposalNumber"))
                     .AddOrder(Order.Asc("b.BidPrice"));
-                if (!string.IsNullOrEmpty(projectNumber))
+                if (projectNumbers != null && projectNumbers.Any())
                 {
-                    query.Add(Restrictions.Eq("p.ProposalNumber", projectNumber));
+                    var validProjectNumbers = projectNumbers
+                        .Where(pn => !string.IsNullOrWhiteSpace(pn))
+                        .Select(pn => pn.Trim().ToUpperInvariant())
+                        .ToList();
+                    
+                    if (validProjectNumbers.Any())
+                    {
+                        query.Add(Restrictions.In("p.ProposalNumber", validProjectNumbers));
+                    }
                 }
                 if (!string.IsNullOrEmpty(payItem))
                     query.Add(Restrictions.Eq("ri.Name", payItem));
@@ -205,6 +244,14 @@ namespace Dqe.Infrastructure.Fdot
                 {
                     query.Add(Restrictions.Le("pv.BidTotal", maxBidAmount.Value));
                 }
+                if (vendorNames != null && vendorNames.Any())
+                {
+                    var validVendorNames = vendorNames.Where(v => !string.IsNullOrWhiteSpace(v)).Select(v => v.Trim()).Distinct().ToList();
+                    if (validVendorNames.Any())
+                    {
+                        query.Add(Restrictions.In("rv.VendorName", validVendorNames));
+                    }
+                }
                 query.SetProjection(Projections.ProjectionList()
                     .Add(Projections.Property("pv.BidStatus"), "BidStatus")
                     .Add(Projections.Property("pv.BidTotal"), "PvBidTotal")
@@ -216,6 +263,7 @@ namespace Dqe.Infrastructure.Fdot
                     .Add(Projections.SubQuery(projectNumberSubquery), "ProjectNumber")
                     .Add(Projections.SubQuery(projectIdSubquery), "ProjectId")
                     .Add(Projections.Property("p.ProposalNumber"), "p")
+                    .Add(Projections.Property("p.ProposalStatus"), "ProposalStatus")
                     .Add(Projections.Property("p.ProposalType"), "ProposalType")
                     .Add(Projections.Property("p.ContractType"), "ContractType")
                     .Add(Projections.Property("p.ContractWorkType"), "ContractWorkType")
@@ -1783,6 +1831,7 @@ namespace Dqe.Infrastructure.Fdot
                 var lsDbDisjunction = new Disjunction();
                 lsDbDisjunction.Add(Restrictions.On(() => proposal.ProposalNumber).IsInsensitiveLike("%LS"));
                 lsDbDisjunction.Add(Restrictions.On(() => proposal.ProposalNumber).IsInsensitiveLike("%DB"));
+                lsDbDisjunction.Add(Restrictions.On(() => proposal.ProposalNumber).IsInsensitiveLike("%SV"));
 
                 var allResults = session
                     .QueryOver(() => proposalItem)
@@ -1829,7 +1878,7 @@ namespace Dqe.Infrastructure.Fdot
                     const int maxBidders = 1;
                     var proposals = new List<ApplicationServices.ProposalHistory>();
                     foreach (var p in distinctProposals)
-                    {
+                    {                    
                         var localP = p;
                         var pResults = results.First(i => i.Id == localP);
                         var bid = new ApplicationServices.Bid
@@ -1988,7 +2037,7 @@ namespace Dqe.Infrastructure.Fdot
                     foreach (var p in distinctProposals)
                     {
                         var localP = p;
-                        var pResults = results.Where(i => i.Id == localP).ToList();
+                        var pResults = results.Where(i => i.Id == localP).ToList();                      
                         var bids = pResults.Select(i => new ApplicationServices.Bid
                         {
                             IsBlank = false,

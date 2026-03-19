@@ -1,4 +1,4 @@
-﻿//instance application
+//instance application
 var dqeApp = angular.module('dqeApp', [
     'ui.bootstrap',
     'ngRoute',
@@ -251,6 +251,12 @@ dqeApp.config(['blockUIConfigProvider', function (blockUIConfigProvider) {
         }
         if (config.url.match(/^\.\/costgroup\/GetPayItems($|\/).*/i)) {
             return false; // ... don't block it.
+        }
+        if (config.url.match(/UnitPriceSearch\/GetBidderSuggestions($|\/|\?)/i)) {
+            return false; 
+        }
+        if (config.url.match(/UnitPriceSearch\/GetPayItemSuggestions($|\/|\?)/i)) {
+            return false;
         }
         return true;
     });

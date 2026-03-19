@@ -5,7 +5,8 @@
             pricingLevel: '='
         },
         templateUrl: './Views/directives/pricing.html',
-        controller: ['$scope', '$rootScope', '$http', '$filter', '$location', 'stateService', 'fileUpload', '$localStorage', '$route', 'securityService', function ($scope, $rootScope, $http, $filter, $location, stateService, fileUpload, $localStorage, $route, securityService) {
+        controller: ['$scope', '$rootScope', '$http', '$filter', '$location', 'stateService', 'fileUpload', '$localStorage', '$route', 'securityService', '$timeout'
+            , function ($scope, $rootScope, $http, $filter, $location, stateService, fileUpload, $localStorage, $route, securityService, $timeout) {
                 $scope.prp = {
                     syncPrices: true
             };
@@ -23,6 +24,53 @@
                     $scope.user = user;
                 }
             });
+
+
+                //$scope.getContracts = function (val) {
+                //    var v = (val == null ? '' : String(val)).trim();
+                //    if (v.length < 3) return $q.when([]);
+                //    return $http.get('./projectproposal/GetProposals', { params: { number: v } })
+                //        .then(function (response) {
+                //            var proposals = [];
+                //            angular.forEach(response.data, function (item) {
+                //                proposals.push(item.number);
+                //                /* item.displayName = item.number;*/
+                //                //if ((item.contractType[0] == 'M')) {
+                //                //    item.displayName = '(M) ' + item.displayName;
+                //                //}
+                //                //else {
+                //                //    item.displayName = '(C) ' + item.displayName;
+                //                //}
+                //                //proposals.push(item);
+                //            });
+                //            return proposals;
+                //        });
+                //};
+
+                //// Bidders filter typeahead-wait-ms debounce, multi-select via tags
+                //$scope.getBidders = function (val) {
+                //    var v = (val == null ? '' : String(val)).trim();
+                //    if (v.length < 3) return $q.when([]);
+                //    return $http.get('/UnitPriceSearch/GetBidderSuggestions', { params: { input: v } })
+                //        .then(function (r) { return r.data || []; }, function () { return []; });
+                //};
+                //$scope.addBidderFromTypeahead = function (item) {
+                //    var name = item;
+                //    if (!name || $scope.parmSet.selectedBidders.indexOf(name) !== -1) {
+                //        $scope.parmSet.bidderTypeahead = null;
+                //        return;
+                //    }
+                //    $scope.parmSet.selectedBidders = $scope.parmSet.selectedBidders.concat([name]);
+                //    $scope.parmSet.selectedBidders.sort();
+                //    $timeout(function () { $scope.parmSet.bidderTypeahead = null; }, 0);
+                //    $scope.parmSet.bidderTypeahead = null;
+                //};
+                //$scope.removeBidder = function (name) {
+                //    var idx = $scope.parmSet.selectedBidders.indexOf(name);
+                //    if (idx !== -1) {
+                //        $scope.parmSet.selectedBidders = $scope.parmSet.selectedBidders.slice(0, idx).concat($scope.parmSet.selectedBidders.slice(idx + 1));
+                //    }
+                //};
 
             $scope.transferLsDbEstimate = function (estimate) {
                 var lsdbLoad = {
@@ -70,17 +118,25 @@
                 bidMonths: 36,
                 bidFilter: 'ALL',
                 numberOfBids: 0,
-                includeEstimates: false,
+                includeLsDbEstimates: false,
+                includeSvEstimates: false,
+                contractNumberFilters: "",
+                contractNumbersListed: "",
+                //bidderTypeahead: "",
+                //selectedBidders: [],
                 useStraightAverage: false,
                 fontSize: 'S',
                 showNonVisibleColumns: true
             });
-            $scope.saveMasterParameters = function() {
+            $scope.saveMasterParameters = function () {
                 $scope.$storage.contractType = $scope.parmSet.contractType;
                 $scope.$storage.bidMonths = $scope.parmSet.bidMonths;
                 $scope.$storage.bidFilter = $scope.parmSet.bidFilter,
                 $scope.$storage.numberOfBids = $scope.parmSet.numberOfBids,
-                $scope.$storage.includeEstimates = $scope.parmSet.includeEstimates,
+                $scope.$storage.includeLsDbEstimates = $scope.parmSet.includeLsDbEstimates,
+                $scope.$storage.includeSvEstimates = $scope.parmSet.includeSvEstimates,
+
+                //$scope.$storage.selectedBidders = $scope.parmSet.selectedBidders,
                 $scope.$storage.useStraightAverage = $scope.parmSet.useStraightAverage,
                 delete $scope.$storage.workTypes;
                 $scope.$storage.workTypes = [];
@@ -316,8 +372,14 @@
                         $scope.parmSet.bidMonths = $scope.$storage.bidMonths;
                         $scope.parmSet.bidFilter = $scope.$storage.bidFilter;
                         $scope.parmSet.numberOfBids = $scope.$storage.numberOfBids;
-                        $scope.parmSet.includeEstimates = $scope.$storage.includeEstimates;
+                        $scope.parmSet.includeLsDbEstimates = $scope.$storage.includeLsDbEstimates;
+                        $scope.parmSet.includeSvEstimates = $scope.$storage.includeSvEstimates;
+                        $scope.parmSet.contractNumberFilters = $scope.$storage.contractNumberFilters;
+                        //$scope.parmSet.selectedBidders = $scope.$storage.selectedBidders;
+                        //$scope.parmSet.contractNumbersListed = parseCommaSeparatedText($scope.parmSet.contractNumberFilters);
                         $scope.parmSet.useStraightAverage = $scope.$storage.useStraightAverage;
+                        //$scope.parmSet.bidderTypeahead = $scope.$storage.bidderTypeahead;
+
                         angular.forEach($scope.estimate.itemGroups, function (i) {
                             if (i.group) {
                                 i.selected = false;
@@ -759,9 +821,13 @@
             $scope.parmSet = {
                 bidMonths: 36,
                 useStraightAverage: false,
-                includeEstimates: false,
+                includeLsDbEstimates: false,
+                includeSvEstimates: false,
+                contractNumberFilters: '',
                 bidFilter: 'ALL',
                 numberOfBids: 0
+                //selectedBidders: [],
+                //bidderTypeahead: null
             }
             $scope.generateParameterPrices = function () {
                 $scope.setPendingChanges();
@@ -772,7 +838,11 @@
                     county: $scope.pricingLevel == 'project' ? $scope.estimate.project.county : $scope.estimate.proposal.county,
                     bidMonths: $scope.parmSet.bidMonths,
                     useStraightAverage: $scope.parmSet.useStraightAverage,
-                    includeEstimates: $scope.parmSet.includeEstimates,
+                    includeLsDbEstimates: $scope.parmSet.includeLsDbEstimates,
+                    includeSvEstimates: $scope.parmSet.includeSvEstimates,
+                    contractNumberFilters: $scope.parmSet.contractNumberFilters,
+                    //selectedBidders: $scope.parmSet.selectedBidders,
+                    //bidderTypeahead: $scope.parmSet.bidderTypeahead,
                     bidFilter: $scope.parmSet.bidFilter,
                     numberOfBids: $scope.parmSet.numberOfBids
                 }
@@ -794,6 +864,7 @@
             }
             function processItemParameterPricing(itemGroups, parms) {
                 var ig = null;
+                //$scope.parmSet.contractNumbersListed = parseCommaSeparatedText($scope.parmSet.contractNumberFilters);
                 for (var i = 0; i < itemGroups.length; i++) {
                     if (!itemGroups[i].processed) {
                         itemGroups[i].processed = true;
@@ -820,13 +891,33 @@
                     });
                 } else {
                     $scope.canSaveEstimate = true;
-                }
+                }          
             }
             function monthDiff(d1, d2) {
                 return (d2.getDate() >= d1.getDate() ? 0 : -1) + ((d2.getFullYear() - d1.getFullYear()) * 12) + ((d2.getMonth() + 1) - (d1.getMonth() + 1));
             }
-            function applyFilters(history) {
+            function removeSuffix(str) {
+                if (str.length >= 2 &&
+                    (str.substring(str.length - 2).toUpperCase() === 'LS' ||
+                        str.substring(str.length - 2).toUpperCase() === 'DB' ||
+                        str.substring(str.length - 2).toUpperCase() === 'SV')) {
+                    return str.substring(0, str.length - 2);
+                }
+                return str;
+            }
 
+            function containsSuffix(str, suffix) {
+                if (str.length >= 2 &&
+                    (str.substring(str.length - 2).toUpperCase() === suffix.toUpperCase())) {
+                   /* console.log("proposal " + str + " has a " + suffix + " .");*/
+                    return true;
+                }
+                return false;
+            }
+            function applyFilters(history) {
+                if (history.proposals == null) {
+                    return;
+                }
                 for (var i = 0; i < history.proposals.length; i++) {
                     for (var ii = 0; ii < history.proposals[i].bids.length; ii++) {
                         if (!history.proposals[i].bids[ii].blank) {
@@ -867,19 +958,46 @@
                         var diff = monthDiff(new Date(history.proposals[i].lettingAsDate + 'T10:20:30Z'), today);
                         includeBids = (diff < months);
                     }
-                    //check or uncheck bids
-                    for (ii = 0; ii < history.proposals[i].bids.length; ii++) {
-                        if (!history.proposals[i].bids[ii].blank) {
-                            history.proposals[i].bids[ii].include = includeBids;
-                            if (history.proposals[i].bids[ii].include) {
-                                if (history.proposals[i].bids[ii].estimate) {
-                                    history.proposals[i].bids[ii].include = history.includeEstimates;
-                                }
+                  
+                    //check or uncheck Special Bids
+                    if (containsSuffix(history.proposals[i].proposal, "LS") ||
+                        containsSuffix(history.proposals[i].proposal, "DB")) {
+                        for (ii = 0; ii < history.proposals[i].bids.length; ii++) {
+                            if (!history.proposals[i].bids[ii].blank) {
+                                history.proposals[i].bids[ii].include = history.includeLsDbEstimates && includeBids;
+                            }
+
+                        }
+                    }
+                    else if (containsSuffix(history.proposals[i].proposal, "SV")) {
+                        for (ii = 0; ii < history.proposals[i].bids.length; ii++) {
+                            if (!history.proposals[i].bids[ii].blank) {
+                                history.proposals[i].bids[ii].include = history.includeSvEstimates && includeBids;
                             }
                         }
                     }
                 }
             }
+
+            /////This function takes a string of text, turns it into a list of strings (delimited by commas)
+            ////Ignores whitespace
+            //function parseCommaSeparatedText(input) {
+            //    if (!input || typeof input !== 'string' || input.trim() === '') {
+            //        return [];
+            //    }
+
+            //    var items = input.split(',');
+            //    var result = [];
+
+            //    for (var i = 0; i < items.length; i++) {
+            //        var trimmed = items[i].trim();
+            //        if (trimmed !== '') {
+            //            var trimmed = items[i].trim().toUpperCase();
+            //        }
+            //    }
+
+            //    return result;
+            //}
             function updateBidHistory(itemGroup, county) {
                 itemGroup.history.omitOutliers = true;
                 if (itemGroup.history.useStraightAverage == undefined) itemGroup.history.useStraightAverage = false;
@@ -929,10 +1047,15 @@
                             //itemGroup.history.contractType = 'all';
 
                             itemGroup.history.contractType = $scope.parmSet.contractType;
+                            //itemGroup.history.bidderTypeahead = $scope.parmSet.bidderTypeahead;
+
                             itemGroup.history.bidMonths = $scope.parmSet.bidMonths;
 
-                            itemGroup.history.includeEstimates = $scope.parmSet.includeEstimates;
+                            itemGroup.history.includeLsDbEstimates = $scope.parmSet.includeLsDbEstimates;
+                            itemGroup.history.includeSvEstimates = $scope.parmSet.includeSvEstimates;
                             itemGroup.history.useStraightAverage = $scope.parmSet.useStraightAverage;
+                            itemGroup.history.compoundingOutlierMultiplier = 1;
+
 
                             itemGroup.history.workTypes = [];
                             for (i = 0; i < $scope.workTypes.length; i++) {

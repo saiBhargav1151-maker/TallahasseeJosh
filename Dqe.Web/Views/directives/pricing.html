@@ -193,7 +193,10 @@
                                         <hr />
                                         <div>
                                             <label>
-                                                <input title="Include LS/DB Estimates" type="checkbox" ng-model="parmSet.includeEstimates"> Include LS/DB Estimates
+                                                <input title="Include LS/DB Estimates" type="checkbox" ng-model="parmSet.includeLsDbEstimates"> Include LS/DB Estimates
+                                            </label>
+                                            <label>
+                                                <input title="Include Contractor SV Data" type="checkbox" ng-model="parmSet.includeSvEstimates"> Include Contractor SV Data
                                             </label>
                                         </div>
                                         <div>
@@ -201,6 +204,35 @@
                                                 <input title="Use Straight Average" type="checkbox" ng-model="parmSet.useStraightAverage"> Use Straight Average
                                             </label>
                                         </div>
+                                        <!--<hr>
+                                        <div>
+                                            <div class="form-group">
+                                                <label for="bidderFilterInput" class="modern-label">
+                                                    <i class="fas fa-users label-icon"></i>
+                                                    Contract Numbers <span class="text-muted months-hint" style="color: #000000;">(type 3+ chars to search):</span>
+                                                </label>-->
+                                                <!--id="bidderFilterInput"-->
+                                                <!--<input type="text"
+                                                       class="form-control modern-input"
+                                                       ng-model="parmSet.bidderTypeahead"
+                                                       placeholder="e.g., E1B82, T1000"
+                                                       autocomplete="off"
+                                                       maxlength="200"
+                                                       typeahead-min-length="3"
+                                                       typeahead-wait-ms="500"
+                                                       typeahead="name as name for name in getContracts($viewValue)"
+                                                       typeahead-editable="false"
+                                                       typeahead-on-select="addBidderFromTypeahead($item)" />
+                                                <div class="selected-counties-inline" ng-if="parmSet.selectedBidders.length > 0" style="margin-top: 8px;">
+                                                    <span class="county-tag-compact" ng-repeat="name in parmSet.selectedBidders track by name">
+                                                        {{ name }}
+                                                        <button type="button" class="remove-tag-compact" ng-click="removeBidder(name)" title="Remove Contract number">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>-->
                                     </div>
                                 </div>
                             </div>
@@ -256,12 +288,12 @@
                         </div>
                         <div class="row">
                             <div class="col-lg-12" style="text-align: right;">
-                                <button type="button" class="btn btn-default" title="save parameters" ng-if="estimate.canEstimate" ng-click="saveMasterParameters()">Save Parameters</button>
+                                <button type="button" class="btn btn-default" title="save parameters" ng-if="estimate.canEstimate" ng-click="saveMasterParameters(); state.dirtyContractNumbers = false;">Save Parameters</button>
                                 <button type="button" class="btn btn-primary" title="Click to set the parameter based prices for the selected items" ng-disabled="!canSaveEstimate" ng-show="!confirmSetParameterPrices && !estimate.isOfficial" focus-me="confirmSetParameterPricesReset" ng-click="confirmSetParameterPrices = true; confirmSetParameterPricesReset = false;">Apply Parameter Prices</button>
                                 <span class="alert alert-warning" ng-show="confirmSetParameterPrices" style="font-size: 10pt; margin-top: 10px;">
                                     Click 'Yes' to set the parameter-based historical prices for all selected items or 'No' to cancel&nbsp;&nbsp;
                                     <button type="button" class="btn btn-default" title="Click to cancel the setting of parameter based prices" focus-me="confirmSetParameterPrices" ng-click="confirmSetParameterPrices = false; confirmSetParameterPricesReset = true;">No</button>
-                                    <button type="button" class="btn btn-default" title="Click to confirm the setting of parameter based prices" ng-click="generateParameterPrices(); confirmSetParameterPrices = false; confirmSetParameterPricesReset = true;">Yes</button>
+                                    <button type="button" class="btn btn-default" title="Click to confirm the setting of parameter based prices" ng-click="generateParameterPrices(); confirmSetParameterPrices = false; confirmSetParameterPricesReset = true; state.dirtyContractNumbers = false;">Yes</button>
                                 </span>
                             </div>
                         </div>
@@ -552,7 +584,15 @@
                             <!--test-->
                             <tr ng-if="itemGroup.group" ng-show="itemGroup.showPricingParameters" ng-repeat-end>
                                 <td colspan="{{pricingLevel == 'project' ? 20 : 21}}" style="max-width: 800px; overflow-x: auto;">
-                                    <bid-history pricing-level="pricingLevel" calculate-totals="calculateTotals" close-pricing-parameters="closePricingParameters" is-pricing-interface="true" estimate="estimate" item-group="itemGroup"></bid-history>
+                                    <bid-history market-areas="marketAreas"
+                                                 work-types="workTypes"
+                                                 parm-set="parmSet"
+                                                 pricing-level="pricingLevel"
+                                                 calculate-totals="calculateTotals"
+                                                 close-pricing-parameters="closePricingParameters"
+                                                 is-pricing-interface="true"
+                                                 estimate="estimate"
+                                                 item-group="itemGroup"></bid-history>
                                 </td>
                             </tr>
                             <!--end test-->
@@ -592,3 +632,62 @@
         </div>
     </div>
 </div>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="
+
+https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
+"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
+<style>
+    .label-icon {
+        color: #1F4283;
+        font-size: 12px;
+    }
+
+    .county-tag-compact {
+        background: #1F4283;
+        color: #ffffff;
+        padding: 2px 6px;
+        font-size: var(--small-font-size);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .selected-counties-inline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-height: 60px;
+        overflow-y: auto;
+    }
+
+    .remove-tag-compact {
+        background: none;
+        border: none;
+        color: #ffffff;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        font-size: 8px;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+        .remove-tag-compact:hover {
+            opacity: 1;
+        }
+
+    .form-control:focus {
+        border-color: #1F4283;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(31, 66, 131, 0.25);
+    }
+
+    .custom-quantity-input .modern-input {
+        flex: 1;
+        min-width: 200px;
+        max-width: 300px;
+    }
+</style>

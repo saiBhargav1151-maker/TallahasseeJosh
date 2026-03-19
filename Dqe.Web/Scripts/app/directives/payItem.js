@@ -153,6 +153,16 @@
                 itemGroup.showPricingParameters = !itemGroup.showPricingParameters;
                 itemGroup.history = null;
             }
+
+            function containsSuffix(str, suffix) {
+                if (str.length >= 2 &&
+                    (str.substring(str.length - 2).toUpperCase() === suffix.toUpperCase())) {
+                    //console.log("proposal " + str + " has a " + suffix + " .");
+                    return true;
+                }
+                return false;
+            }
+
             $scope.showPricingParameters = function (itemGroup) {
                 if (!itemGroup.showPricingParameters) {
                     itemGroup.itemNumber = itemGroup.name;
@@ -166,9 +176,20 @@
                             itemGroup.history = getDqeData(result);
                             itemGroup.history.contractType = 'all';
                             itemGroup.history.omitOutliers = true;
-                            itemGroup.history.includeEstimates = false;
+                            itemGroup.history.omitSvBids = true;
+                            itemGroup.history.includeLsDbEstimates = false;
+                            itemGroup.history.includeSvEstimates = false;
+                            itemGroup.history.compoundingOutlierMultiplier = 1;
                             itemGroup.history.bidMonths = 36;
                             itemGroup.history.workTypes = [];
+                            //Per Ashley: SV's are included in LRE's averaging estimates, 
+                            //but we are not adding SV into default average pricing for DQE .MB.
+                            for (i = 0; i < itemGroup.history.proposals.length; i++) {
+                                if (containsSuffix(itemGroup.history.proposals[i].proposal, "SV")) {
+                                    itemGroup.history.proposals[i].bids[0].include = false;
+                                }
+                            }
+
                             for (var i = 0; i < $scope.workTypes.length; i++) {
                                 itemGroup.history.workTypes.push({
                                     name: $scope.workTypes[i].name,

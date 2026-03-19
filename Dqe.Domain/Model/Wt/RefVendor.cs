@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -16,6 +16,10 @@ namespace Dqe.Domain.Model.Wt
         public virtual long Id { get; set; }
 
         public virtual string VendorName { get; set; }
+
+        public virtual string VendorType { get; set; }
+
+        public virtual string CertificationType { get; set; }
 
         public virtual IEnumerable<ProposalVendor> ProposalVendors
         {

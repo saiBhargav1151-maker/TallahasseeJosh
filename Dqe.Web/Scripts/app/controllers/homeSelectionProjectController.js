@@ -388,7 +388,7 @@
                     projects.push(item);
                 });
                 return projects;
-            });
+          });
     };
 
     $scope.reportFormat = {

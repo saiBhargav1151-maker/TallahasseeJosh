@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Dqe.Domain.Model;
 using Dqe.Domain.Model.Wt;
@@ -50,8 +50,9 @@ namespace Dqe.Domain.Fdot
         bool IsProposalReadyForOfficialEstimate(string proposalNumber);
         Exception InsertRefItems(IEnumerable<PayItemMaster> payItemMasters, DqeUser user);
         // SB 05/30/2025 - Added interfaces for retrieving Unit Price and Pay Item details
-        IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, List<string> contractType, int months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, string projectNumber, decimal? minBidAmount, decimal? maxBidAmount, string[]  district);
+        IList<ProposalItemDTO> GetUnitPriceDetails(string payItem, List<string> contractType, int months, List<string> contractWorkType, DateTime? startDate, DateTime? endDate, string[] counties, string bidStatus, string[] marketCounties, decimal? minRank, decimal? maxRank, List<string> workTypeNames, List<string> projectNumbers, decimal? minBidAmount, decimal? maxBidAmount, string[] district, List<string> vendorNames = null, bool showAllProposalStatuses = false);
         IList<PayItemDTO> GetPayItemDetails(string input);
+        IList<string> GetBidderSuggestions(string input);
 
         //not needed since DSS is decommissioned, dont need to pass to DSS
         //void UpdateProposalReadyForDssPass(Proposal proposal);

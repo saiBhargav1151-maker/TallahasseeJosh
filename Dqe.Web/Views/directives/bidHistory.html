@@ -1,4 +1,8 @@
-﻿<div style="padding-left: 5px; width: 200px; float: left;">
+﻿<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<!--**Important** - This is nested within several pages, check all pages that utilize this. MB.-->
+
+<div style="padding-left: 5px; width: 200px; float: left;">
     <pre>{{itemGroup.itemNumber}}</pre>
 </div>
 <div style="float: right; width: 400px;">
@@ -7,10 +11,10 @@
     </div>
     <div style="text-align: right; padding-left: 5px; padding-right: 5px;" ng-if="!isPricingInterface">
         Current History Price: {{itemGroup.history.average | currency}}
-    </div>    
+    </div>
 </div>
 <div style="clear: both"></div>
-<br/>
+<br />
 
 
 <div class="panel panel-default">
@@ -51,7 +55,10 @@
                     <hr />
                     <div>
                         <label>
-                            <input title="Include LS/DB Estimates" type="checkbox" ng-model="itemGroup.history.includeEstimates" ng-change="toggleIncludeEstimates(itemGroup.history)"> Include LS/DB Estimates
+                            <input title="Include LS/DB Estimates" type="checkbox" ng-model="itemGroup.history.includeLsDbEstimates" ng-change="toggleIncludeLsDbEstimates(itemGroup.history)"> Include LS/DB Estimates
+                        </label>
+                        <label>
+                            <input title="Include Contractor SV Data" type="checkbox" ng-model="itemGroup.history.includeSvEstimates" ng-change="toggleIncludeSvEstimates(itemGroup.history)"> Include Contractor SV Data
                         </label>
                     </div>
                     <div>
@@ -114,21 +121,48 @@
         <div style="clear:both;"></div>
         <div style="text-align: right;">
             <!--<label>
-                    <input title="Use Straight Average" type="checkbox" ng-model="itemGroup.history.useStraightAverage"> Use Straight Average
-                </label>
-                &nbsp;&nbsp;-->
-            <!--<label>
-                    <input title="Use official estimate when bid data is not available" type="checkbox" ng-model="itemGroup.history.includeOfficialEstimate"> Use Official Estimate when Bid Data is not Available
-                </label>
-                &nbsp;&nbsp;-->
-            <label>
-                <input title="Omit outliers on recalculation" type="checkbox" ng-model="itemGroup.history.omitOutliers"> Omit Outliers on Recalculation
+                <input title="Use Straight Average" type="checkbox" ng-model="itemGroup.history.useStraightAverage"> Use Straight Average
             </label>
-            &nbsp;&nbsp;
-            <button type="button" ng-if="pricingLevel == 'project' && isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, estimate.project.county)">Recalculate Bid Price</button>
-            <button type="button" ng-if="pricingLevel == 'proposal' && isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, estimate.proposal.county)">Recalculate Bid Price</button>
-            <button type="button" ng-if="!isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, '')">Recalculate Bid Price</button>
-            &nbsp;&nbsp;
+            &nbsp;&nbsp;-->
+            <!--<label>
+                <input title="Use official estimate when bid data is not available" type="checkbox" ng-model="itemGroup.history.includeOfficialEstimate"> Use Official Estimate when Bid Data is not Available
+            </label>
+            &nbsp;&nbsp;-->
+            <!--<span style="float:left">
+                <span ng-if="!isPricingInterface">
+                    <button type="button" title="Click reset all selected bids and parameters" class="btn btn-default" ng-click="showPricingParameters(itemGroup, true)">
+                        <i class="fa fa-refresh" aria-hidden="true"></i> Reset All
+                    </button>
+                </span>
+
+                <span ng-if="isPricingInterface">
+                    <button type="button" title="Click reset all selected bids and parameters" class="btn btn-default" ng-click="resetPricingBids(itemGroup, pricingLevel == 'project' ? estimate.project.county : estimate.proposal.county)">
+                        <i class="fa fa-refresh" aria-hidden="true"></i> Reset All
+                    </button>
+                </span>
+            </span>-->
+
+            <span style="float:right">
+
+                <button type="button" ng-if="pricingLevel == 'project' && isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, estimate.project.county)"><i class="fa-solid fa-solidLarge fa-calculator">‌</i> Recalculate Bid Price</button>
+                <button type="button" ng-if="pricingLevel == 'proposal' && isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, estimate.proposal.county)"><i class="fa-solid fa-solidLarge fa-calculator">‌</i> Recalculate Bid Price</button>
+                <button type="button" ng-if="!isPricingInterface" title="Click to recalculate the average bid price for the selected bids" class="btn btn-default" ng-click="updateBidHistory(itemGroup, '')"><i class="fa fa-calculator" aria-hidden="true">‌</i> Recalculate Bid Price</button>
+                &nbsp;&nbsp;
+            </span>
+            <span style="float:right">
+                <label>
+                    <input title="Omit outliers on recalculation" type="checkbox" ng-model="itemGroup.history.omitOutliers"> Omit Outliers on Recalculation
+                    &nbsp;&nbsp;
+                </label>
+                <br />
+                <strong style="cursor: help" title='The Current History Price can have the outliers removed from each new set of selected bids, known as Rolling Median Absolute Deviation (MAD)'>
+                    <i class="fas fa-info-circle info-icon"></i> Outliers Calculated 
+                    <span style="text-decoration: underline;">{{itemGroup.history.compoundingOutlierMultiplier}}</span> time(s)
+                </strong>
+                &nbsp;&nbsp;
+            </span>
+
+
         </div>
     </div>
 </div>
@@ -143,8 +177,8 @@
 </div>-->
 <a href="" title="Click to select all bids for the item" ng-click="selectAll(itemGroup.history)">Select All Bids</a>
 <!--<div style="padding-left: 5px;" ng-show="itemGroup.history.showOtherParms">
-    
-    
+
+
 
     <div style="width: 250px; float: left;">
         <div>Contract Type</div>
@@ -220,7 +254,7 @@
                     <a href="" title="Sort ascending/descending by Quantity" ng-click="sortHistory(itemGroup.history, 'quantity')">Quantity</a>
                 </td>
                 <td colspan="3" style="text-align: center;">Rank</td>
-                
+
                 <td rowspan="2">
                     <a href="" title="Sort ascending/descending by Official Estimate" ng-click="sortHistory(itemGroup.history, 'estimate')">Official Estimate</a>
                 </td>

@@ -16,6 +16,7 @@
     <script type="text/javascript" src="./Scripts/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="./Scripts/priceFormat.min.js"></script>
     <script type="text/javascript" src="./Scripts/angular.min.js"></script>
+
     <script type="text/javascript" src="./Scripts/angular-route.min.js"></script>
     <script type="text/javascript" src="./Scripts/angular-cookies.min.js"></script>
     <script type="text/javascript" src="./Scripts/angular-ui/ui-utils.min.js"></script>
@@ -26,13 +27,56 @@
     <script type="text/javascript" src="./Scripts/angular-block-ui/angular-block-ui.js"></script>
     <script type="text/javascript" src="./Scripts/ngStorage.min.js"></script>
     <!--utilities-->
-    <script type="text/javascript" src="./Scripts/app/utilities/extensions.js?date=20251031"></script>
+    <script type="text/javascript" src="./Scripts/app/utilities/extensions.js"></script>
     <!--app driver-->
-    <script type="text/javascript" src="./Scripts/app/app.js?date=20251031"></script>
-    <!--bundles-->
-    <script type="text/javascript" src="./bundles/services?date=20251031"></script>
-    <script type="text/javascript" src="./bundles/directives?date=20251031"></script>
-    <script type="text/javascript" src="./bundles/controllers?date=20251031"></script>
+    <script type="text/javascript" src="./Scripts/app/app.js"></script>
+    <!--services-->
+    <script type="text/javascript" src="./Scripts/app/services/securityService.js"></script>
+    <script type="text/javascript" src="./Scripts/app/services/navigationService.js"></script>
+    <script type="text/javascript" src="./Scripts/app/services/stateService.js"></script>
+    <!--controllers-->
+    <script type="text/javascript" src="./Scripts/app/controllers/layoutController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminCodeValuesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminCostBasedTemplatesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminCostGroupsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/defaultValuesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminDefaultValuesMarketAreasController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminDefaultValuesGeneralController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminPayItemsFactorsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminPayItemsMaintainController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminPayItemsOpenCopyController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminSecurityController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/adminWebLinksController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeGamingController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homePayItemsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeBoeController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homePricingParametersController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeProjectPricesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeProposalPricesController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homePricingPricesMockController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeReportsProposalSummaryController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeReportsUnbalancedItemsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeReportsSummaryLettingController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeReportsBidToleranceController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionLreController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionProjectController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionProjectMockController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionProposalController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSelectionProposalMockController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeSnapshotsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeWorkingEstimateEstimateController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/homeWorkingEstimateLsdbController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/profileController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/profileProjectsController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/signinController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/controllers/UnitPriceSearchController.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/fileUpload.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/pricingParameter.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/pricing.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/payItemStructure.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/payItem.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/payItemView.js"></script>
+    <script type="text/javascript" src="./Scripts/app/directives/bidHistory.js"></script>
     <!--logging-->
     <script type="text/javascript" src="./Scripts/stacktrace.js"></script>
     <script type="text/javascript" src="./Scripts/alltech-logging.js"></script>
@@ -90,7 +134,6 @@
                 </div>
             </div>
         </div>
-
         <nav class="navbar navbar-default {{currentUser.isAuthenticated ? 'navbar-fixed-top' : ''}}" role="navigation" style="margin-top: {{showEnvironmentWarning ? '18px' : '0'}};">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -114,9 +157,6 @@
                 <ul class="nav navbar-nav navbar-right">
                     <li>
                         <a href="https://www.fdot.gov/fpo/fpc/apps/dqe/help" title="Help - opens a new browser window" target="_blank">Help</a>
-                    </li>
-                    <li ng-if="showStatisticsDetails">
-                        <a href="https://fdotwww.blob.core.windows.net/sitefinity/docs/default-source/fpo/fpc/apps/dqe/dqe-statistics-details.pdf" title="Statistics Details - opens a new browser window" target="_blank">Statistics Details</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right" ng-show="currentUser.isAuthenticated">
@@ -233,8 +273,8 @@
                             <img width="32" border="0" height="32" title="Link to FDOT's Wordpress page (opens new browser window)" alt="Link to FDOT's Wordpress page (opens new browser window)" src="https://www.fdot.gov/webtools_images/Wordpress.png">
                         </a>
                         <!--<a target="_blank" href="https://www.seefloridago.org/">
-                            <img width="32" border="0" height="32" title="Link to FDOT's See Florida Go Photography page (opens new browser window)" alt="Link to FDOT's See Florida Go Photography page (opens new browser window)" src="https://www.fdot.gov/webtools_images/SeeFloridaGo.png">
-                        </a>-->
+                        <img width="32" border="0" height="32" title="Link to FDOT's See Florida Go Photography page (opens new browser window)" alt="Link to FDOT's See Florida Go Photography page (opens new browser window)" src="https://www.fdot.gov/webtools_images/SeeFloridaGo.png">
+                    </a>-->
                         <a target="_blank" href="https://www.fdot.gov/agencyresources/rss.shtm">
                             <img width="32" border="0" height="32" title="Link to FDOT's RSS page (opens new browser window)" alt="Link to FDOT's RSS page (opens new browser window)" src="https://www.fdot.gov/webtools_images/RSS.png">
                         </a>

@@ -7,7 +7,10 @@
             closePricingParameters: '=',
             itemGroup: '=',
             estimate: '=',
-            isPricingInterface: '='
+            isPricingInterface: '=',
+            parmSet: '=',
+            workTypes: '=',
+            marketAreas: '='
         },
         templateUrl: './Views/directives/bidHistory.html',
         controller: ['$scope', '$rootScope', '$http', '$filter', function ($scope, $rootScope, $http, $filter) {
@@ -100,6 +103,10 @@
                 return (d2.getDate() >= d1.getDate() ? 0 : -1) + ((d2.getFullYear() - d1.getFullYear()) * 12) + ((d2.getMonth() + 1) - (d1.getMonth() + 1));
             }
             $scope.applyFilters = function (history) {
+                $scope.itemGroup.history.compoundingOutlierMultiplier = 0;
+                if (history.proposals == null ) {
+                    return;
+                }
                 for (var i = 0; i < history.proposals.length; i++) {
                     var includeBids = true;
                     //contract type
@@ -132,14 +139,28 @@
                         var diff = monthDiff(new Date(history.proposals[i].lettingAsDate + 'T10:20:30Z'), today);
                         includeBids = (diff < months);
                     }
-                    //check or uncheck bids
-                    for (ii = 0; ii < history.proposals[i].bids.length; ii++) {
-                        if (!history.proposals[i].bids[ii].blank) {
-                            history.proposals[i].bids[ii].include = includeBids;
-                            if (history.proposals[i].bids[ii].include) {
-                                if (history.proposals[i].bids[ii].estimate) {
-                                    history.proposals[i].bids[ii].include = history.includeEstimates;
-                                }
+
+                    //check or uncheck Special Bids
+                    if (containsSuffix(history.proposals[i].proposal, "LS") ||
+                        containsSuffix(history.proposals[i].proposal, "DB")) {
+                        for (ii = 0; ii < history.proposals[i].bids.length; ii++) {
+                            if (!history.proposals[i].bids[ii].blank) {
+                                history.proposals[i].bids[ii].include = history.includeLsDbEstimates && includeBids;
+                            }
+
+                        }
+                    }
+                    else if (containsSuffix(history.proposals[i].proposal, "SV")) {
+                        for (ii = 0; ii < history.proposals[i].bids.length; ii++) {
+                            if (!history.proposals[i].bids[ii].blank) {
+                                history.proposals[i].bids[ii].include = history.includeSvEstimates && includeBids;
+                            }
+                        }
+                    }
+                    else {
+                        for (ii = 0; ii < history.proposals[i].bids.length; ii++) {
+                            if (!history.proposals[i].bids[ii].blank) {
+                                history.proposals[i].bids[ii].include = includeBids;
                             }
                         }
                     }
@@ -187,10 +208,149 @@
                 if (history == null) return;
                 $scope.applyFilters(history);
             }
-            $scope.toggleIncludeEstimates = function(history) {
+            $scope.toggleIncludeLsDbEstimates = function (history) {
                 if (history == null) return;
                 $scope.applyFilters(history);
             }
+            $scope.toggleIncludeSvEstimates = function (history) {
+                if (history == null) return;
+                $scope.applyFilters(history);
+            }
+
+            //Duplication of work, please addionally check pricing.js $scope.showPricingParameters when 
+            ///****This is what hits for the Project Prices page!!****
+            $scope.resetPricingBids = function (itemGroup, county) {
+                itemGroup.showPricingParameters = false;
+                for (let i = 0; i < $scope.estimate.itemGroups.length; i++) {
+                    $scope.estimate.itemGroups[i].showPricingParameters = false;
+                    $scope.estimate.itemGroups[i].history = null;
+                }
+                if (!itemGroup.showPricingParameters) {
+                    var itemToPrice = {
+                        itemGroup: itemGroup,
+                        county: county,
+                        specYear: $scope.pricingLevel == 'project' ? $scope.estimate.project.specYear : $scope.estimate.proposal.specYear
+                    }
+
+                    $http.post('./estimate/GetBidHistory', itemToPrice).success(function (result) {
+                        if (!containsDqeError(result)) {
+                            itemGroup.history = getDqeData(result);
+                            //itemGroup.history.contractType = 'all';
+
+                            itemGroup.history.contractType = $scope.parmSet.contractType;
+                            itemGroup.history.bidMonths = $scope.parmSet.bidMonths;
+
+                            itemGroup.history.includeLsDbEstimates = $scope.parmSet.includeLsDbEstimates;
+                            itemGroup.history.includeSvEstimates = $scope.parmSet.includeSvEstimates;
+                            itemGroup.history.useStraightAverage = $scope.parmSet.useStraightAverage;
+                            itemGroup.history.compoundingOutlierMultiplier = 1;
+                            itemGroup.history.omitOutliers = true;
+
+                            itemGroup.history.workTypes = [];
+                            for (let i = 0; i < $scope.workTypes.length; i++) {
+                                itemGroup.history.workTypes.push({
+                                    name: $scope.workTypes[i].name,
+                                    code: $scope.workTypes[i].code,
+                                    include: $scope.workTypes[i].include
+                                });
+                            }
+                            itemGroup.history.marketAreas = [];
+                            for (i = 0; i < $scope.marketAreas.marketAreas.length; i++) {
+                                var ma = {
+                                    id: $scope.marketAreas.marketAreas[i].id,
+                                    name: $scope.marketAreas.marketAreas[i].name,
+                                    include: $scope.marketAreas.marketAreas[i].include,
+                                    counties: []
+                                };
+                                itemGroup.history.marketAreas.push(ma);
+                                for (var ii = 0; ii < $scope.marketAreas.marketAreas[i].counties.length; ii++) {
+                                    var c = {
+                                        id: $scope.marketAreas.marketAreas[i].counties[ii].id,
+                                        name: $scope.marketAreas.marketAreas[i].counties[ii].name,
+                                        code: $scope.marketAreas.marketAreas[i].counties[ii].code,
+                                        include: $scope.marketAreas.marketAreas[i].counties[ii].include
+                                    };
+                                    ma.counties.push(c);
+                                }
+                            }
+
+                            $scope.applyFilters(itemGroup.history);
+                            $scope.updateBidHistory(itemGroup, county);
+                            itemGroup.history.compoundingOutlierMultiplier = 1;
+                        }
+                    });
+                }
+                itemGroup.showPricingParameters = !itemGroup.showPricingParameters;
+            }
+
+            $scope.showPricingParameters = function (itemGroup, refreshData) {
+                if (refreshData) {
+                    itemGroup.showPricingParameters = false;
+                }
+                if (!itemGroup.showPricingParameters) {
+                    itemGroup.itemNumber = itemGroup.name;
+                    var itemToPrice = {
+                        itemGroup: itemGroup,
+                        county: ''
+                    }
+
+                    $http.post('./estimate/GetBidHistory', itemToPrice).success(function (result) {
+                        if (!containsDqeError(result)) {
+                            itemGroup.history = getDqeData(result);
+                            itemGroup.history.contractType = 'all';
+                            itemGroup.history.omitOutliers = true;
+                            itemGroup.history.includeLsDbEstimates = false;
+                            itemGroup.history.includeSvEstimates = false;
+                            itemGroup.history.compoundingOutlierMultiplier = 1;
+                            itemGroup.history.bidMonths = 36;
+                            itemGroup.history.workTypes = [];
+
+                            if (itemGroup.history.proposals != null) {
+                                //Per Ashley: SV's are included in LRE's averaging estimates, 
+                                //but we are not adding SV into default average pricing for DQE .MB.
+                                for (let i = 0; i < itemGroup.history.proposals.length; i++) {
+                                    if (containsSuffix(itemGroup.history.proposals[i].proposal, "SV")) {
+                                        itemGroup.history.proposals[i].bids[0].include = false;
+                                    }
+                                }
+                            }
+
+
+
+                            for (let i = 0; i < $scope.workTypes.length; i++) {
+                                itemGroup.history.workTypes.push({
+                                    name: $scope.workTypes[i].name,
+                                    code: $scope.workTypes[i].code,
+                                    include: true
+                                });
+                            }
+                            itemGroup.history.marketAreas = [];
+                            for (let i = 0; i < $scope.marketAreas.marketAreas.length; i++) {
+                                var ma = {
+                                    id: $scope.marketAreas.marketAreas[i].id,
+                                    name: $scope.marketAreas.marketAreas[i].name,
+                                    include: true,
+                                    counties: []
+                                };
+                                itemGroup.history.marketAreas.push(ma);
+                                for (let ii = 0; ii < $scope.marketAreas.marketAreas[i].counties.length; ii++) {
+                                    var c = {
+                                        id: $scope.marketAreas.marketAreas[i].counties[ii].id,
+                                        name: $scope.marketAreas.marketAreas[i].counties[ii].name,
+                                        code: $scope.marketAreas.marketAreas[i].counties[ii].code,
+                                        include: true
+                                    };
+                                    ma.counties.push(c);
+                                }
+                            }
+                        }
+                    });
+                }
+
+                itemGroup.showPricingParameters = !itemGroup.showPricingParameters;
+            }
+            //end bid history directive support
+
             $scope.updateBidHistory = function (itemGroup, county) {
                 if (!itemGroup.history.omitOutliers) {
                     itemGroup.history.omitOutliers = false;
@@ -206,6 +366,15 @@
                     itemGroup: itemGroup,
                     county: county
                 }
+
+                if (itemGroup.history.omitOutliers) {
+                    itemGroup.history.compoundingOutlierMultiplier = itemGroup.history.compoundingOutlierMultiplier + 1;
+                }
+                //I thought unchecking the outlier box would reset all of the bids but it does not.
+                //else {
+                //    itemGroup.history.compoundingOutlierMultiplier = 0;
+                //}
+
                 $http.post('./estimate/UpdateBidHistory', itemToPrice).success(function (result) {
                     if (!containsDqeError(result)) {
                         if (result.data == null) {
@@ -213,11 +382,14 @@
                         } else {
                             var hist = getDqeData(result);
                             itemGroup.history.average = hist.average;
-                            for (var i = 0; i < hist.proposals.length; i++) {
-                                for (var x = 0; x < itemGroup.history.proposals.length; x++) {
-                                    if (hist.proposals[i].id == itemGroup.history.proposals[x].id) {
-                                        itemGroup.history.proposals[x] = hist.proposals[i];
-                                        break;
+
+                            if (hist.proposals != null) {
+                                for (var i = 0; i < hist.proposals.length; i++) {
+                                    for (var x = 0; x < itemGroup.history.proposals.length; x++) {
+                                        if (hist.proposals[i].id == itemGroup.history.proposals[x].id) {
+                                            itemGroup.history.proposals[x] = hist.proposals[i];
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -267,7 +439,8 @@
             }
             $scope.selectAll = function (history) {
                 //estimates
-                history.includeEstimates = true;
+                history.includeLsDbEstimates = true;
+                history.includeSvEstimates = true;
                 //contract type
                 history.contractType = 'all';
                 //work type
@@ -283,14 +456,27 @@
                 }
                 //range
                 history.bidMonths = 36;
-                for (i = 0; i < history.proposals.length; i++) {
-                    for (var ii = 0; ii < history.proposals[i].bids.length; ii++) {
-                        if (!history.proposals[i].bids[ii].blank) {
-                            history.proposals[i].bids[ii].include = true;
+                if (history.proposals.length) {
+                    for (i = 0; i < history.proposals.length; i++) {
+                        for (var ii = 0; ii < history.proposals[i].bids.length; ii++) {
+                            if (!history.proposals[i].bids[ii].blank) {
+                                history.proposals[i].bids[ii].include = true;
+                            }
                         }
                     }
                 }
+               
             }
+
+            function containsSuffix(str, suffix) {
+                if (str.length >= 2 &&
+                    (str.substring(str.length - 2).toUpperCase() === suffix.toUpperCase())) {
+                    //console.log("proposal " + str + " has a " + suffix + " .");
+                    return true;
+                }
+                return false;
+            }
+
         }
-    ]}
+        ]}
 });

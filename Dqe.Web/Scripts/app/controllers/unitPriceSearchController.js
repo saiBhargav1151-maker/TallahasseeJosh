@@ -1,4 +1,4 @@
-﻿dqeControllers.controller('UnitPriceSearchController', ['$scope', '$rootScope', '$http', '$timeout', function ($scope, $rootScope, $http, $timeout) {
+dqeControllers.controller('UnitPriceSearchController', ['$scope', '$rootScope', '$http', '$timeout', 'securityService', function ($scope, $rootScope, $http, $timeout, securityService) {
     $rootScope.$broadcast('initializeNavigation');
     $rootScope.showStatisticsDetails = true;
     $scope.searchText = '';
@@ -34,6 +34,10 @@
     $scope.selectedMaxBidAmount = null;
     $scope.isRegionDropdownOpen = false;
     $scope.selectedBidStatus = 'FMV';
+    $scope.selectedBidders = [];
+    $scope.bidderTypeahead = null;
+    $scope.selectedProposalNumbers = [];
+    $scope.proposalTypeahead = null;
     $scope.searchAttempted = false;
     $scope.showNormal = true;
     $scope.showOutliers = true;
@@ -129,7 +133,8 @@
       { key: 'c', label: 'County', visible: true, sortable: true, selectionOrder: 13 },
       { key: 'VendorName', label: 'Bidder Name', visible: true, sortable: true, selectionOrder: 14 },
       { key: 'BidStatus', label: 'Bid Status', visible: true, sortable: true, selectionOrder: 15 },
-      { key: 'VendorRanking', label: 'Bidder Rank', visible: false, sortable: true, selectionOrder: 16 },
+      { key: 'IsConfidential', label: 'Confidential', visible: false, sortable: true, selectionOrder: 16 },
+      { key: 'VendorRanking', label: 'Bidder Rank', visible: false, sortable: true, selectionOrder: 17 },
       { key: 'ContractType', label: 'Contract Type', visible: true, sortable: true, selectionOrder: 9 },
       { key: 'ContractWorkType', label: 'Work Type', visible: true, sortable: true, selectionOrder: 10 },
       { key: 'WorkMixDescription', label: 'Work Mix', visible: false, sortable: true, selectionOrder: 0 },
@@ -140,7 +145,7 @@
       { key: 'ProposalType', label: 'Proposal Type', visible: false, sortable: false, selectionOrder: 0 },
       { key: 'BidType', label: 'Bid Type', visible: false, sortable: false, selectionOrder: 0 }
     ];
-    $scope.nextSelectionOrder = 16;
+    $scope.nextSelectionOrder = 18;
     $scope.visibleColumns = function () { return $scope.availableColumns.filter((col) => col.visible).sort((a, b) => a.selectionOrder - b.selectionOrder); };
     $scope.showColumnSelector = false;
     $scope.toggleColumnSelector = function () { $scope.showColumnSelector = !$scope.showColumnSelector; };
@@ -150,7 +155,7 @@
     };
     $scope.deselectAllColumns = function () { $scope.availableColumns.forEach((col) => { col.visible = false; col.selectionOrder = 0; }); };
     $scope.resetToDefaultColumns = function () {
-      $scope.availableColumns.forEach((col) => { col.visible = ['p', 'ProjectNumber', 'ri', 'Quantity', 'b', 'InflationAdjustedPrice', 'PvBidTotal', 'ContractType', 'ContractWorkType', 'd', 'MarketArea', 'c', 'VendorName', 'BidStatus', 'l'].includes(col.key); });
+      $scope.availableColumns.forEach((col) => { col.visible = ['p', 'ProjectNumber', 'ri', 'Quantity', 'b', 'InflationAdjustedPrice', 'PvBidTotal', 'ContractType', 'ContractWorkType', 'd', 'MarketArea', 'c', 'VendorName', 'BidStatus', 'IsConfidential', 'l'].includes(col.key); });
       $scope.nextSelectionOrder = 1;
       $scope.availableColumns.forEach((col) => { if (col.visible) { col.selectionOrder = $scope.nextSelectionOrder++; } else { col.selectionOrder = 0; } });
     };
@@ -488,7 +493,18 @@
       );
       return Array.from(allCounties).sort();
     }
-    $scope.searchProjectNumber = '';
+    $scope.showConfidentialNotice = false;
+    $scope.showAdvancedFilters = false;
+    $scope.isSearchOnlyByContractNumber = false;
+    
+    securityService.getCurrentUser(function (user) {
+      if (user.isAuthenticated && user.role) {
+        var role = user.role.toString().toUpperCase();
+        $scope.showConfidentialNotice = role === 'A' || role === 'D' || role === 'E';
+        $scope.showAdvancedFilters = role === 'A' || role === 'D' || role === 'E';
+      }
+    });
+    
     $scope.clearFilters = function () {
       $scope.regionType = '';
       $scope.regionOptions = [];
@@ -498,6 +514,7 @@
       $scope.isRegionDropdownOpen = false;
       $scope.searchText = '';
       $scope.selectedPayItemNumber = null;
+      $scope.isSearchOnlyByContractNumber = false;
       $scope.selectedMinQuantity = null;
       $scope.selectedMaxQuantity = null;
       const todayDate = new Date();
@@ -508,6 +525,10 @@
       $scope.selectedMinBidAmount = null;
       $scope.selectedMaxBidAmount = null;
       $scope.selectedBidStatus = 'FMV';
+      $scope.selectedBidders = [];
+      $scope.bidderTypeahead = null;
+      $scope.selectedProposalNumbers = [];
+      $scope.proposalTypeahead = null;
       $scope.items = [];
       $scope.showSuggestions = false;
       $scope.isSearching = false;
@@ -615,15 +636,16 @@
         : item.b;
     };
     $scope.searchBids = function () {
-      if (
-        (!$scope.searchProjectNumber ||
-          $scope.searchProjectNumber.trim() === '') &&
-        (!$scope.selectedPayItemNumber ||
-          $scope.selectedPayItemNumber.trim() === '')
-      ) {
-        alert(
-          'Please enter and select a valid Pay Item Number before searching.'
-        );
+      var hasPayItem = $scope.selectedPayItemNumber && $scope.selectedPayItemNumber.trim() !== '';
+      var hasContractNumbers = $scope.selectedProposalNumbers && $scope.selectedProposalNumbers.length > 0;
+      
+      if (!$scope.showAdvancedFilters && !hasPayItem) {
+        alert('Please enter and select a valid Pay Item Number before searching.');
+        return;
+      }
+      
+      if ($scope.showAdvancedFilters && !hasContractNumbers && !hasPayItem) {
+        alert('Please enter and select a valid Pay Item Number before searching.');
         return;
       }
 
@@ -635,6 +657,12 @@
         alert('Please provide a Letting Date Range.');
         return;
       }
+      
+      // Determine if searching only by Contract Number (no Pay Item)
+      $scope.isSearchOnlyByContractNumber = 
+        ($scope.selectedProposalNumbers && $scope.selectedProposalNumbers.length > 0) &&
+        (!$scope.selectedPayItemNumber || $scope.selectedPayItemNumber.trim() === '');
+      
       $scope.customQuantityData.userQuantity = null;
       $scope.customQuantityPrediction = null;
       $scope.isCalculatingPrediction = false;
@@ -734,7 +762,10 @@
             maxRank: $scope.selectedMaxQuantity 
               ? parseFloat($scope.selectedMaxQuantity.toString().replace(/,/g, ''))
               : null,
-            projectNumber: $scope.searchProjectNumber || null,
+            projectNumbers: $scope.selectedProposalNumbers && $scope.selectedProposalNumbers.length > 0
+              ? $scope.selectedProposalNumbers.map(function (num) { return num.toUpperCase(); })
+              : null,
+            vendorNames: $scope.selectedBidders && $scope.selectedBidders.length > 0 ? $scope.selectedBidders : null,
             minBidAmount: $scope.selectedMinBidAmount
               ? parseFloat(
                   $scope.selectedMinBidAmount.toString().replace(/,/g, '')
@@ -891,9 +922,13 @@
           break;
         case 'ExecutedDate':
           if (item.ExecutedDate) {
-            value = new Date(
-              parseInt(item.ExecutedDate.replace(/\/Date\((\d+)\)\//, '$1'))
-            );
+            var execMatch = /\/Date\((-?\d+)\)\//.exec(String(item.ExecutedDate));
+            if (execMatch) {
+              var execTime = parseInt(execMatch[1], 10);
+              value = execTime === -62135578800000 ? new Date(0) : new Date(execTime);
+            } else {
+              value = new Date(0);
+            }
           } else {
             value = new Date(0);
           }
@@ -904,7 +939,11 @@
       return value;
     };
     $scope.getSortClass = function (column) { if ($scope.sortColumn === column) { return $scope.reverseSort ? 'fa-sort-down' : 'fa-sort-up'; } return ''; };
-    $scope.clearProjectNumberSearch = function () { $scope.searchProjectNumber = ''; };
+    $scope.clearProjectNumberSearch = function () { 
+      $scope.selectedProposalNumbers = [];
+      $scope.proposalTypeahead = null;
+      $scope.isSearchOnlyByContractNumber = false;
+    };
     $scope.onRegionTypeChange = function () {
       $scope.selectedRegions = [];
       $scope.relatedCounties = [];
@@ -1264,6 +1303,30 @@
       $scope.showSuggestions = false;
       $scope.selectedSuggestionIndex = -1;
     };
+    $scope.getBidders = function (val) {
+      var v = (val == null ? '' : String(val)).trim();
+      if (v.length < 3) return $q.when([]);
+      return $http.get('/UnitPriceSearch/GetBidderSuggestions', { params: { input: v } })
+        .then(function (r) { return r.data || []; }, function () { return []; });
+    };
+    $scope.addBidderFromTypeahead = function (item) {
+      var name = item;
+      if (!name || $scope.selectedBidders.indexOf(name) !== -1) return;
+      $scope.selectedBidders = $scope.selectedBidders.concat([name]);
+      $scope.selectedBidders.sort();
+      $scope.bidderTypeahead = null;
+      $timeout(function () {
+        $scope.bidderTypeahead = null;
+        var inp = document.getElementById('bidderFilterInput');
+        if (inp) { inp.value = ''; }
+      }, 0);
+    };
+    $scope.removeBidder = function (name) {
+      var idx = $scope.selectedBidders.indexOf(name);
+      if (idx !== -1) {
+        $scope.selectedBidders = $scope.selectedBidders.slice(0, idx).concat($scope.selectedBidders.slice(idx + 1));
+      }
+    };
     $scope.getLatestBidDate = function () {
       if (!$scope.bidHistoryData || $scope.bidHistoryData.length === 0) {
         return null;
@@ -1325,7 +1388,45 @@
       const date = new Date(parseInt(match[1]));
       return date.toLocaleDateString('en-US');
     }
-
+    $scope.getProposals = function (val) {
+        var v = (val == null ? '' : String(val)).trim();
+        if (v.length < 2) return $q.when([]);
+        return $http.get('./projectproposal/GetProposals', { params: { number: v } })
+            .then(function (response) {
+                var proposals = [];
+                angular.forEach(response.data, function (item) {
+                    item.displayName = item.number;
+                    if ((item.contractType[0] == 'M')) {
+                        item.displayName = '(M) ' + item.displayName;
+                    } else {
+                        item.displayName = '(C) ' + item.displayName;
+                    }
+                    proposals.push(item);
+                });
+                return proposals;
+            }, function () { return []; });
+    };
+    $scope.addProposalFromTypeahead = function (item) {
+        var number = item.number;
+        if (!number || $scope.selectedProposalNumbers.indexOf(number) !== -1) return;
+        if ($scope.selectedProposalNumbers.length >= 10) {
+            alert('Maximum 10 contract numbers allowed.');
+            return;
+        }
+        $scope.selectedProposalNumbers = $scope.selectedProposalNumbers.concat([number]);
+        $scope.proposalTypeahead = null;
+        $timeout(function () {
+          $scope.proposalTypeahead = null;
+          var inp = document.getElementById('proposalFilterInput');
+          if (inp) { inp.value = ''; }
+        }, 0);
+    };
+    $scope.removeProposal = function (number) {
+        var idx = $scope.selectedProposalNumbers.indexOf(number);
+        if (idx !== -1) {
+            $scope.selectedProposalNumbers = $scope.selectedProposalNumbers.slice(0, idx).concat($scope.selectedProposalNumbers.slice(idx + 1));
+        }
+    };
     //CSV Export
     $scope.exportClick = function () {
       if ($scope.isExporting) {
@@ -1354,6 +1455,7 @@
             'Primary County',
             'Bidder Name',
             'Bid Status',
+            'Confidential',
             'Bidder Rank',
             'Contract Type',
             'Work Type',
@@ -1408,6 +1510,7 @@
               `"${item.c}"`,
               `"${item.VendorName}"`,
               `"${item.BidStatus}"`,
+              `"${item.IsConfidential ? 'Yes' : 'No'}"`,
               `"${item.VendorRanking}"`,
               `"${
                 $scope.contractTypeMap[item.ContractType] || item.ContractType
@@ -1528,6 +1631,8 @@
               doc.text('Pay Item: ' + ($scope.searchText || 'All'), 40, y);
               y += 15;
               doc.text('Bid Status: ' + ($scope.bidStatusMap[$scope.selectedBidStatus] || 'All'), 40, y);
+              y += 15;
+              doc.text('Bidders: ' + ($scope.selectedBidders && $scope.selectedBidders.length ? $scope.selectedBidders.join(', ') : 'All'), 40, y);
               y += 15;
               doc.text('Index Adjustment: ' + ($scope.useIndexAdjustedPrices ? 'Enabled (FDOT CCI-based adjustment to ' + ($scope.latestNHCCIQuarter || '2025 Q3') + ' levels)' : 'Disabled (using raw prices)'), 40, y);
               y += 15;
@@ -1668,10 +1773,11 @@
     );
     var filterWatchList = [
       'searchText',
-      'searchProjectNumber',
+      'selectedProposalNumbers',
       'selectedContractTypes',
       'selectedWorkTypeCodes',
       'selectedBidStatus',
+      'selectedBidders',
       'startDate',
       'endDate',
       'regionType',
@@ -3816,10 +3922,25 @@ angular
   .filter('msDateToJS', function () {
     return function (input) {
       if (!input) return '';
-      var match = /\/Date\((\d+)\)\//.exec(input);
-      return match ? new Date(parseInt(match[1])) : input;
+      var match = /\/Date\((-?\d+)\)\//.exec(String(input));
+      return match ? new Date(parseInt(match[1], 10)) : input;
     };
   })
+  .filter('executedDateDisplay', [
+    '$filter',
+    function ($filter) {
+      return function (input) {
+        if (input == null || input === '') return '';
+        var str = String(input);
+        if (str.indexOf('-62135578800000') !== -1) return '';
+        var match = /\/Date\((-?\d+)\)\//.exec(str);
+        if (!match) return '';
+        var d = new Date(parseInt(match[1], 10));
+        if (isNaN(d.getTime()) || d.getFullYear() < 1900) return '';
+        return $filter('date')(d, 'MM/dd/yyyy');
+      };
+    },
+  ])
   .filter('smartCurrency', function () {
     return function (input) {
       if (input === null || input === undefined || isNaN(input)) {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Dqe.Domain.Model
 {
@@ -28,7 +28,7 @@ namespace Dqe.Domain.Model
         public string VendorName { get; set; }
         public string FullNameDescription { get; set; }
         public long Duration { get; set; }
-        public virtual DateTime ExecutedDate { get; set; }
+        public virtual DateTime? ExecutedDate { get; set; }
         public virtual DateTime ObsoleteDate { get; set; }
         public virtual string BidType { get; set; }
         public virtual int? VendorRanking { get; set; }
@@ -42,7 +42,8 @@ namespace Dqe.Domain.Model
         public decimal? InflationAdjustedPrice { get; set; }
         public decimal? InflationFactor { get; set; }  
         public decimal? InflationPercentIncrease { get; set; } 
-        public string NHCCIQuarter { get; set; } 
+        public string NHCCIQuarter { get; set; }
+        public string ProposalStatus { get; set; } 
     }
     public class PayItemDTO
     {

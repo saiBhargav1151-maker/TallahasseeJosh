@@ -55,9 +55,9 @@ namespace Dqe.Automation.PayItemProcessing
                 Console.WriteLine("Starting Step 3 - {0}", DateTime.Now);
                 Console.WriteLine("Querying Bid History");
                 var allHistory = ((IEnumerable<BidHistory>)wTservice.GetAllBidHistory(36)).ToList();
-
+       
                 //***** BEGIN add ls/db history to all history
-                var lsDbHistory = ((IEnumerable<BidHistory>)wTservice.GetLsDbEstimateHistory()).ToList();
+                var svLsDbHistory = ((IEnumerable<BidHistory>)wTservice.GetLsDbEstimateHistory()).ToList();
                 //get distinct proposals that have bid data
                 var distinctProposals = new Dictionary<string, DateTime>();
                 foreach (var bidHistory in allHistory)
@@ -68,22 +68,76 @@ namespace Dqe.Automation.PayItemProcessing
                         distinctProposals.Add(proposal.Proposal, proposal.Letting);
                     }
                 }
-                //identify matching estimate only data (ls and db non-bid proposals)
+
+                //This loop checks through to grab all of the special proposals history to add the relevant SV bid data to the regular proposal history list, 
+                //and if needed it will add a new pay item the end of that history list.MB.
+                foreach (var svItem in svLsDbHistory)
+                {
+                    var matchingMainItemHistory = allHistory.FirstOrDefault(s => s.ItemName == svItem.ItemName);       
+                    foreach (var svP in svItem.Proposals)
+                    {
+                        //ONLY SV proposals with bid data set, can set an additional filter here. MB.
+                        if (svP.Proposal.EndsWith("SV", StringComparison.Ordinal) && svP.Bids != null && svP.Bids.Count > 0)
+                        {
+                            //find corresponding proposal parent
+                            string parentProposalNumber = RemoveSvFromString(svP.Proposal);
+                            if (distinctProposals.ContainsKey(parentProposalNumber))
+                            {
+                                var parentLettingDate = distinctProposals[parentProposalNumber];
+                                svP.Letting = parentLettingDate;
+                                if(svP.Quantity != 0)
+                                {
+                                    svP.EstimateAmount = svP.ExtendedAmount / svP.Quantity;
+                                }
+                                
+                                //setting up the simulated bid data for sv's
+                                foreach (var b in svP.Bids)
+                                {
+                                    b.IsEstimate = false;
+                                    b.LettingDate = parentLettingDate;
+                                    b.Price = svP.EstimateAmount;
+                                    b.BidTotal = svP.EstimateAmount * svP.Quantity;
+                                }
+
+                                //if we dont already have a Item in the main history list with this itemNumber, then we create one
+                                if (matchingMainItemHistory == null)
+                                {
+                                    //add in new item
+                                    allHistory.Add(new ApplicationServices.BidHistory
+                                    {
+                                        ItemName = svItem.ItemName,
+                                        MaxBiddersProposal = svItem.MaxBiddersProposal
+                                    });
+                                    matchingMainItemHistory = allHistory.FirstOrDefault(s => s.ItemName == svItem.ItemName);
+                                }
+                                //added the sv proposal to the main history list
+                                matchingMainItemHistory.Proposals.Add(svP);
+
+                                //since we added the sv proposal to the main history list, we need to add it to the distinct proposal list
+                                if (!distinctProposals.ContainsKey(svP.Proposal))
+                                {
+                                    distinctProposals.Add(svP.Proposal, parentLettingDate);
+                                }
+                            }
+                        } 
+                    } 
+                } 
+
                 foreach (var bidHistory in allHistory)
                 {
-                    var h = lsDbHistory.FirstOrDefault(i => i.ItemName == bidHistory.ItemName);
+                    var h = svLsDbHistory.FirstOrDefault(i => i.ItemName == bidHistory.ItemName);
                     if (h == null) continue;
                     //ls/db history has the item
-                    foreach (var hp in h.Proposals)
+                    foreach (var hp in h.Proposals.Where(p => !p.Proposal.EndsWith("SV", StringComparison.Ordinal)))
                     {
                         var proposal = hp.Proposal;
                         var index = proposal.LastIndexOf("LS", StringComparison.Ordinal);
-                        var test = hp.Quantity;
+                        var test = hp.Quantity;             
                         if (index >= 0)
                         {
                             proposal = proposal.Remove(index, 2);
                         }
-                        else
+                        else 
                         {
                             index = proposal.LastIndexOf("DB", StringComparison.Ordinal);
                             if (index >= 0) proposal = proposal.Remove(index, 2);
@@ -114,6 +168,7 @@ namespace Dqe.Automation.PayItemProcessing
                     {
                         processed += 1;
                         var bidHistory = allHistory.FirstOrDefault(i => i.ItemName == item.RefItemName);
+                        var svlsBidHistItem = svLsDbHistory.FirstOrDefault(i => i.ItemName == item.RefItemName);
                         if (bidHistory == null) continue;
                         var deriveLsPrice = item.CalculatedUnit.ToUpper().StartsWith("LS") && !item.Unit.ToUpper().StartsWith("LS");
                         if (deriveLsPrice)
@@ -128,7 +183,8 @@ namespace Dqe.Automation.PayItemProcessing
                                 proposal.EstimateAmount = proposal.ExtendedAmount / proposal.Quantity;
 
                                 if (proposal.Proposal.LastIndexOf("LS", StringComparison.Ordinal) >= 0 ||
-                                    proposal.Proposal.LastIndexOf("DB", StringComparison.Ordinal) >= 0)
+                                    proposal.Proposal.LastIndexOf("DB", StringComparison.Ordinal) >= 0 ||
+                                    proposal.Proposal.LastIndexOf("SV", StringComparison.Ordinal) >= 0)
                                     // For the LS and DB duplicate jobs, it is already a unit price
                                     continue;
 
@@ -205,6 +261,21 @@ namespace Dqe.Automation.PayItemProcessing
                 Environment.Exit(1);
             }
         }
+
+        /// <summary>
+        /// Removes Sv from the end of string. This is used primarily to find the parent proposal number
+        /// </summary>
+        /// <param name="svChildSvNumber"></param>
+        /// <returns></returns>
+        private static string RemoveSvFromString(string svChildSvNumber)
+        {
+            if ( !string.IsNullOrEmpty(svChildSvNumber) && svChildSvNumber.EndsWith("SV"))
+            {
+                return svChildSvNumber.Remove(svChildSvNumber.Length - 2);
+            }
+            return null;
+        }
+
 
         private static void LrePriceSet(string specYear)
         {
